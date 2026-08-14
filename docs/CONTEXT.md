@@ -50,7 +50,19 @@ use the term below; don't drift to synonyms the glossary avoids.
   edge in any feature family or macro regime tested; nothing should be promoted
   to best.json until a genuinely generalizing signal is found and OOS-validated.
   Macro data provenance verified against known history (FF 5.33% peak 2023 →
-  3.62% mid-2026).
+  3.62% mid-2026). **Cross-asset test (2026-08-13,
+  `/tmp/opentrader/cross_asset_test.py`)** — long-horizon (60d trend / 60d
+  hold) timing across 13 liquid proxies (equity indices, TLT, GLD/SLV/USO/DBC,
+  currencies), with/without ff_falling and SPY>SMA gates, benchmarked against
+  SPY buy-and-hold net of costs: **buy-and-hold (+78.6% 5y) beats every
+  variant** (best: rank+ff_falling +5.3%, PF 1.18, fees 12%; worst −22.5%).
+  Also fixed a real engine bug: `_cross_sectional_rank` used
+  `dropna(axis=1)`, which dropped every symbol whenever ANY bar had NaN —
+  `rank_on` was silently dead (0 trades) until 2026-08-13 (commit 9b7301a).
+  **Cumulative honest verdict: nothing on this data beats passive SPY
+  buy-and-hold net of costs — not the 17-name contract, any feature family,
+  any macro regime, or long-horizon cross-asset timing. The system's edge is
+  not in daily-rule long-only allocation.**
 - **Rule config** — the incumbent "playbook" = ledger iter-74 config
   (w_mom −0.56, w_rev −0.54, w_rsi 0.90, buy_thresh 0.28, sell_thresh −0.2).
   Its risk contract: 15% per position, 6 concurrent positions, 95% exposure,
