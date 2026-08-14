@@ -82,6 +82,19 @@ use the term below; don't drift to synonyms the glossary avoids.
   + FRED_SERIES) but no single metric in it has demonstrated predictive
   power; treat any claim that "adding metric X unlocks the edge" as an
   hypothesis to screen, not a conclusion.
+  **Contrarian within-industry selection (2026-08-13, "the plus something")** —
+  the arsenal experiment the user asked for: 4 within-industry selection rules
+  (momentum-top, contrarian-bottom, blended, equal-weight) x macro-gate on/off,
+  57 liquid large-caps 2008→2026, no-lookahead, 0.35% fees. **Contrarian
+  (long the WORST-5 by 60d momentum) with NO macro gate beats buy-and-hold
+  3/4 folds (9.1% ann vs 6.8% BH; Calmar 0.165 vs 0.126)**; wins crisis/rotation
+  windows (2008-11 +13.3% vs −17.7%, 2019-24 +134%, 2024-26 +82.6%), loses the
+  smooth bull (2011-19 −14.9% vs +53.8%). Momentum-top is the bull tool (5.3%
+  ann); contrarian is the rotation tool. Adding a macro gate or stop-loss made
+  contrarian WORSE — confirming the user's point that the single-gate framing
+  (VIX/FF) was wrong and the combination matters. The arena's job is now
+  concrete: learn the regime SWITCH between momentum-top and contrarian, using
+  the metric library as switch inputs.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
