@@ -1012,7 +1012,7 @@ function setVal(id, text, flashKey){
 // ═══════════════════════════════════════════════════════════
 async function api(path){
   try{
-    var r = await fetch(path);
+    var r = await fetch(path, {cache:'no-store'});
     if(!r.ok) return null;
     return await r.json();
   }catch(e){ return null; }

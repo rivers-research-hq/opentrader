@@ -176,7 +176,11 @@ app = FastAPI(title="OpenTrader Dashboard", version="1.0")
 @app.get("/")
 async def root():
     """Redirect to dashboard HTML."""
-    return HTMLResponse(content=DASHBOARD_HTML, status_code=200)
+    return HTMLResponse(
+        content=DASHBOARD_HTML,
+        status_code=200,
+        headers={"Cache-Control": "no-store, max-age=0"},
+    )
 
 
 @app.get("/health")
