@@ -203,8 +203,17 @@ use the term below; don't drift to synonyms the glossary avoids.
   verified numbers but high transfer risk. Transferable MECHANISMS: skip the
   32-bar laggard catch-up before FOMC or in WB-weak-growth; boost gold in
   WB-high-inflation; scale momentum (never the laggard sleeve) in heavy
-  release-density. FOMC event-timing found NO robust edge (apparent winner was
+  release-density.   FOMC event-timing found NO robust edge (apparent winner was
   a one-bar macro-shock artifact, ablated).
+  **WEIGHT EVOLUTION (2026-08-13, committed)**: `strategies/evolve_weights.py`
+  — the arena's self-evolution layer now shifts weight off the phantom floor
+  using verified tournament evidence. Weights per (regime, expert) proportional
+  to OOS Calmar above the floor (0.174), floor keeps 0.20 prior, cap 0.5.
+  Track reconciled with weights (audit #3: both are views of the same verified
+  evidence). Result: router picks **laggard** in both regimes (highest verified
+  Calmar 1.666); live `RegimeRouter.step()` continues evolving from live
+  attribution (+0.1/window, cap 0.5). Status: ROUTING evidence evolution —
+  not live order flow.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
