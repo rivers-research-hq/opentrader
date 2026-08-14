@@ -1806,9 +1806,13 @@ function animateER(){
   var t = Date.now()/1000;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // camera: static default; user drag rotates; reduced-motion = fully static
-  erState.rotY += (erState.rotTarget - erState.rotY) * 0.08;
+  // ambient spin accumulates directly (no runaway target, no self-cancel)
   if(erState.ambientSpin && !reduce){
-    erState.rotTarget += 0.0008;  // extremely gentle ambient drift (pausable via drag)
+    erState.rotY += 0.0009;  // gentle, constant institutional drift (~0.05 deg/frame)
+  }
+  // only converge to a user-drag target when there IS one
+  if(Math.abs(erState.rotTarget) > 1e-9){
+    erState.rotY += (erState.rotTarget - erState.rotY) * 0.08;
   }
   erState.graph.rotation.y = erState.rotY;
   erState.graph.rotation.x = Math.sin(t*0.05)*(reduce?0:0.04);
