@@ -96,15 +96,21 @@ def _score_at(feat: dict, cfg: dict, rank: dict) -> dict:
 
 def _cross_sectional_rank(mom: dict, idx: pd.Index) -> dict:
     rank = {s: np.zeros(len(idx)) for s in mom}
-    frame = pd.DataFrame(mom).dropna(axis=1)
+    frame = pd.DataFrame(mom)
     if frame.shape[1] < 2:
         return rank
     for t in range(len(frame)):
-        row = frame.iloc[t]
-        vals = row.values
+        # rank only the symbols with a valid value THIS bar; symbols with
+        # NaN (e.g. warm-up bars, delisted names) get rank 0 and are not
+        # candidates. Column-wise dropna would kill the whole rank signal
+        # whenever any symbol has leading NaN.
+        valid = frame.iloc[t].dropna()
+        if len(valid) < 2:
+            continue
+        vals = valid.values
         order = vals.argsort().argsort()
         norm = (order / max(len(vals) - 1, 1)) * 2 - 1
-        for j, s in enumerate(frame.columns):
+        for j, s in enumerate(valid.index):
             rank[s][t] = norm[j]
     return rank
 
