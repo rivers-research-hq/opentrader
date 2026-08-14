@@ -62,7 +62,17 @@ use the term below; don't drift to synonyms the glossary avoids.
   **Cumulative honest verdict: nothing on this data beats passive SPY
   buy-and-hold net of costs — not the 17-name contract, any feature family,
   any macro regime, or long-horizon cross-asset timing. The system's edge is
-  not in daily-rule long-only allocation.**
+  not in daily-rule long-only allocation.** **International test (2026-08-13,
+  `/tmp/opentrader/international_test.py`)** — 10 international assets
+  (N225/FTSE/GDAXI/HSI, EEM/EFA, FX, gold/oil), no-lookahead, same gates:
+  no active variant beats buy-and-hold (best rank_vix +8.5% vs basket 10.0%),
+  BUT the equal-weight international basket has better risk-adjusted returns
+  than SPY (Calmar 0.733 vs 0.472, Sharpe 1.03 vs 0.75) — international
+  diversification reduces drawdown; US mega-cap concentration is the risk.
+  **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
+  the same close that generated the signal — decisions use master[t-1], fills
+  use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
+  conclusions re-verified unchanged.
 - **Rule config** — the incumbent "playbook" = ledger iter-74 config
   (w_mom −0.56, w_rev −0.54, w_rsi 0.90, buy_thresh 0.28, sell_thresh −0.2).
   Its risk contract: 15% per position, 6 concurrent positions, 95% exposure,
