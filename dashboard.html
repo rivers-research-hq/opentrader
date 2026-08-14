@@ -9,7 +9,7 @@
 <title>OpenTrader — Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════
    THEME TOKENS
@@ -821,7 +821,7 @@ body{
         <div class="panel-head">
           <div class="panel-title">
             <span class="icon">🧠</span>
-            Expert Router — Living Neural Network
+            Expert Router — Living Network
             <span class="badge mono" id="er-status" style="background:var(--green,#10b981);color:#06281d">LIVE</span>
           </div>
           <div class="chart-legend" id="er-legend" style="font-size:11px;opacity:.8"></div>
@@ -830,7 +830,10 @@ body{
           <canvas id="er-canvas" style="width:100%;height:100%;display:block"></canvas>
           <div id="er-tooltip" style="position:absolute;pointer-events:none;background:rgba(8,12,22,.9);border:1px solid #2c3a56;border-radius:8px;padding:6px 10px;font-size:11px;color:#dbe4f0;display:none;z-index:5"></div>
         </div>
-        <div id="er-note" style="padding:8px 12px;color:#8a94a6;font-size:12px"></div>
+        <div style="padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(30,35,51,.4)">
+          <div id="er-note" style="color:#8a94a6;font-size:12px"></div>
+          <div id="er-evo" class="mono" style="color:#fbbf24;font-size:11px">gen 0 · mutations 0</div>
+        </div>
       </div>
 
       <!-- Exposure / Allocation -->
@@ -945,7 +948,7 @@ body{
 
 </div><!-- app -->
 
-<script src="/static/three.min.js"></script>
+<script src="/static/rough.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1659,237 +1662,248 @@ var ER_GROUPS = {multiasset:'drawdown', spectral:'drawdown', copula:'drawdown',
                  bayes:'regime', kalman:'regime', hurst:'regime', wavelet:'regime',
                  entropy:'regime', momtrend:'participation', laggard:'participation'};
 
-var erState = {nodes:{}, graph:null, scene:null, camera:null, renderer:null,
-               raycaster:null, mouse:null, hovered:null, pulse:0};
+var erState = {nodes:{}, layout:[], edges:[], rc:null, canvas:null, ctx:null,
+               ready:false, pulseAt:0, tick:0, gen:0, mutation:0, dims:{w:0,h:0},
+               hovered:null, mouse:{x:0,y:0}};
 var erData = {experts:[], weights:{}, picks:{}};
 
-function initER3D(){
+// ── 2D EXCALIDRAW-STYLE FLOWCHART (rough.js) ─────────────────────────
+// Hand-drawn sketchy orbs = experts (size ∝ Calmar, color = family),
+// connected by sketchy edges with animated information flow + evolution
+// ticks (mutation counter). "Alive but institutional."
+
+var ER_FAMILY_COLOR = {multiasset:'#22d3ee', spectral:'#22d3ee', copula:'#22d3ee',
+                       bayes:'#f59e0b', kalman:'#f59e0b', hurst:'#f59e0b',
+                       wavelet:'#f59e0b', entropy:'#f59e0b', momtrend:'#a78bfa',
+                       laggard:'#a78bfa', laggard_macro:'#a78bfa', rule:'#64748b'};
+
+function initER2D(){
   var canvas = document.getElementById('er-canvas');
   if(!canvas) return;
-  var W = canvas.clientWidth, H = canvas.clientHeight;
-  erState.scene = new THREE.Scene();
-  erState.scene.background = new THREE.Color(0x0a0f16);
-  erState.scene.fog = new THREE.Fog(0x0a0f16, 28, 60);
-  erState.camera = new THREE.PerspectiveCamera(50, W/H, 0.1, 200);
-  erState.camera.position.set(0, 4, 18);
-  erState.renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false, preserveDrawingBuffer:true});
-  erState.renderer.setSize(W, H, false);
-  erState.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
-  // lights — soft, institutional (no gamer bloom)
-  erState.scene.add(new THREE.AmbientLight(0x606888, 1.1));
-  var dir = new THREE.DirectionalLight(0xffffff, 0.7);
-  dir.position.set(8, 10, 8);
-  erState.scene.add(dir);
-  // starfield backdrop, low-key
-  var stars = new THREE.BufferGeometry();
-  var sp = [];
-  for(var i=0;i<350;i++) sp.push((Math.random()-0.5)*110, (Math.random()-0.5)*70, -18-Math.random()*50);
-  stars.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
-  erState.scene.add(new THREE.Points(stars, new THREE.PointsMaterial({color:0x2c3a56, size:0.22, transparent:true, opacity:0.6})));
-  erState.graph = new THREE.Group();
-  erState.scene.add(erState.graph);
-  erState.raycaster = new THREE.Raycaster();
-  erState.mouse = new THREE.Vector2();
-  // user-driven slow orbit (drag) — NO auto-rotation
-  erState.autoRotate = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  erState.rotY = 0; erState.rotTarget = 0;
-  var dragging = false, lastX = 0;
-  canvas.addEventListener('mousedown', function(ev){ dragging = true; lastX = ev.clientX; });
-  window.addEventListener('mouseup', function(){ dragging = false; });
+  erState.canvas = canvas;
+  erState.ctx = canvas.getContext('2d');
+  erState.rc = rough.canvas(canvas);
+  function resize(){
+    var r = canvas.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio||1, 2);
+    canvas.width = r.width * dpr;
+    canvas.height = r.height * dpr;
+    erState.ctx.setTransform(dpr,0,0,dpr,0,0);
+    erState.dims = {w:r.width, h:r.height};
+    buildERLayout();
+  }
+  resize();
+  window.addEventListener('resize', resize);
   canvas.addEventListener('mousemove', function(ev){
     var r = canvas.getBoundingClientRect();
-    erState.mouse.x = ((ev.clientX-r.left)/r.width)*2-1;
-    erState.mouse.y = -((ev.clientY-r.top)/r.height)*2+1;
-    updateERTooltip(ev);
-    if(dragging){ erState.rotTarget += (ev.clientX-lastX)*0.01; lastX = ev.clientX; }
+    erState.mouse.x = ev.clientX - r.left;
+    erState.mouse.y = ev.clientY - r.top;
+    erState.hovered = null;
+    for(var i=0;i<erState.layout.length;i++){
+      var nd = erState.layout[i];
+      var dx = erState.mouse.x - nd.x, dy = erState.mouse.y - nd.y;
+      if(dx*dx + dy*dy < nd.r*nd.r){ erState.hovered = nd.name; break; }
+    }
+    updateER2DTooltip(ev);
   });
-  canvas.addEventListener('mouseleave', function(){ erState.hovered = null; hideERTooltip(); });
-  // slow ambient rotation ONLY if not reduced-motion, very gentle
-  erState.ambientSpin = erState.autoRotate;
+  canvas.addEventListener('mouseleave', function(){ erState.hovered=null; hideERTooltip(); });
   window.__erDebug = erState;
-  window.addEventListener('resize', function(){
-    var c = document.getElementById('er-canvas');
-    if(!c) return;
-    erState.camera.aspect = c.clientWidth/c.clientHeight;
-    erState.camera.updateProjectionMatrix();
-    erState.renderer.setSize(c.clientWidth, c.clientHeight, false);
-  });
   erState.ready = true;
-  animateER();
+  requestAnimationFrame(animateER2D);
 }
 
-function buildERGraph(){
-  var g = erState.graph;
-  while(g.children.length){ g.remove(g.children[0]); }
-  erState.nodes = {};
+function buildERLayout(){
+  var W = erState.dims.w, H = erState.dims.h;
   var experts = erData.experts || [];
-  var weights = erData.weights || {};
-  var picks = erData.picks || {};
-  // rule floor at center
-  var center = new THREE.Vector3(0,0,0);
-  var ruleMesh = makeERNode('rule', 0.9, ER_COLORS.rule, true);
-  ruleMesh.position.copy(center);
-  g.add(ruleMesh);
-  erState.nodes.rule = {mesh:ruleMesh, base:0.9, color:ER_COLORS.rule, pos:center.clone()};
-  // fibonacci sphere, sorted by calmar
-  var sorted = experts.slice().sort(function(a,b){ return b.oos_calmar - a.oos_calmar; });
-  var R = 7.0;
-  var golden = Math.PI*(3-Math.sqrt(5));
-  for(var i=0;i<sorted.length;i++){
-    var e = sorted[i];
-    var y = 1-(i/(Math.max(1,sorted.length-1)))*2;
-    var rad = Math.sqrt(1-y*y);
-    var th = golden*i;
-    var pos = new THREE.Vector3(Math.cos(th)*rad*R, y*R, Math.sin(th)*rad*R);
-    var size = 0.6 + (e.oos_calmar / 2.0) * 0.75;
-    var mesh = makeERNode(e.name, size, ER_COLORS[e.name]||0x94a3b8, false);
-    mesh.position.copy(pos);
-    g.add(mesh);
-    var wu = (weights.up||{})[e.name]||0, wd = (weights.down||{})[e.name]||0;
-    erState.nodes[e.name] = {mesh:mesh, base:size, color:ER_COLORS[e.name]||0x94a3b8,
-                             pos:pos.clone(), wu:wu, wd:wd};
-    // edge: neutral, thin — opacity = staleness/weight (fades unused paths)
-    var w = (wu+wd)/2;
-    var edge = makeEREdge(pos, center, 0.03 + Math.max(0.02, w*2.2), 0x94a3b8);
-    g.add(edge);
-    erState.nodes[e.name].edge = edge;
-    erState.nodes[e.name].edgeBase = Math.max(0.15, w*1.4);
-    // picked halo — single accent, subtle
-    if(picks.up===e.name || picks.down===e.name){
-      var halo = new THREE.Mesh(
-        new THREE.SphereGeometry(size*1.9, 16, 16),
-        new THREE.MeshBasicMaterial({color:0x22d3ee, transparent:true, opacity:0.08})
-      );
-      halo.position.copy(pos);
-      g.add(halo);
-      erState.nodes[e.name].halo = halo;
-    }
+  var layout = [];
+  var cx = W/2, cy = H/2;
+  // rule floor at center (sketchy hub)
+  layout.push({name:'rule', x:cx, y:cy, r:Math.min(30, W*0.06), base:Math.min(30, W*0.06),
+               calmar:0.174, color:ER_FAMILY_COLOR.rule});
+  // experts on an organic scatter around the hub (not a perfect ring)
+  var n = experts.length;
+  for(var i=0;i<n;i++){
+    var e = experts[i];
+    var ang = (i / Math.max(1,n)) * Math.PI*2;
+    var rad = Math.min(W,H) * (0.22 + 0.06*(i%3));
+    rad = Math.max(rad, 70);
+    var jx = (i*7 % 5 - 2) * 14;  // jitter for organic feel
+    var jy = ((i*13) % 7 - 3) * 10;
+    layout.push({name:e.name, x:cx + Math.cos(ang)*rad + jx, y:cy + Math.sin(ang)*rad*0.85 + jy,
+                 r:Math.min(34, 14 + e.oos_calmar*7), base:Math.min(34, 14 + e.oos_calmar*7),
+                 calmar:e.oos_calmar, color:ER_FAMILY_COLOR[e.name]||'#94a3b8'});
   }
+  erState.layout = layout;
+  // edges: hub -> every expert, plus cross-links between high-weight neighbors
+  var edges = [];
+  for(var i=0;i<layout.length;i++){
+    if(layout[i].name==='rule') continue;
+    edges.push({from:'rule', to:layout[i].name, weight:( (erData.weights.up||{})[layout[i].name]||0 )});
+  }
+  // connect the top-2 weight experts to each other (information between them)
+  var ws = experts.map(function(e){ return {name:e.name, w:( (erData.weights.up||{})[e.name]||0 )}; })
+                  .sort(function(a,b){ return b.w - a.w; });
+  if(ws.length>=2 && ws[0].w>0.05 && ws[1].w>0.05){
+    edges.push({from:ws[0].name, to:ws[1].name, weight:Math.min(1, ws[0].w+ws[1].w)});
+  }
+  erState.edges = edges;
 }
 
-function makeERNode(name, size, color, isCenter){
-  var geo = new THREE.IcosahedronGeometry(size, 1);
-  var mat = new THREE.MeshStandardMaterial({color:color, emissive:color,
-      emissiveIntensity:0.35, roughness:0.35, metalness:0.25, flatShading:true});
-  var mesh = new THREE.Mesh(geo, mat);
-  mesh.userData = {expert:name, isCenter:isCenter};
-  // inner glow sprite
-  var spr = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: erGlowTexture(color), color:0xffffff, transparent:true, opacity:0.35, depthWrite:false }));
-  spr.scale.set(size*5, size*5, 1);
-  mesh.add(spr);
-  return mesh;
+function erNodePos(name){
+  for(var i=0;i<erState.layout.length;i++){ if(erState.layout[i].name===name) return erState.layout[i]; }
+  return null;
 }
 
-function erGlowTexture(colorHex){
-  var c = document.createElement('canvas'); c.width=64; c.height=64;
-  var ctx = c.getContext('2d');
-  var grad = ctx.createRadialGradient(32,32,0,32,32,32);
-  grad.addColorStop(0,'rgba(255,255,255,0.9)');
-  grad.addColorStop(0.3, 'rgba(255,255,255,0.25)');
-  grad.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle = grad; ctx.fillRect(0,0,64,64);
-  var tex = new THREE.CanvasTexture(c);
-  return tex;
-}
+function drawER2D(){
+  var ctx = erState.ctx, W = erState.dims.w, H = erState.dims.h;
+  ctx.clearRect(0,0,W,H);
+  // subtle paper-grain background (institutional dark)
+  ctx.fillStyle = '#0a0f16';
+  ctx.fillRect(0,0,W,H);
+  // grid of faint ruled lines (excalidraw sketchpad feel)
+  ctx.strokeStyle = 'rgba(148,163,184,0.06)';
+  ctx.lineWidth = 1;
+  for(var gx=0; gx<W; gx+=28){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+  for(var gy=0; gy<H; gy+=28){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
 
-function makeEREdge(a, b, width, color){
-  var dir = new THREE.Vector3().subVectors(b, a);
-  var len = dir.length();
-  var mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
-  var geo = new THREE.CylinderGeometry(width/2, width/2, len, 6, 1, true);
-  geo.translate(0, len/2, 0);
-  var mat = new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:0.35});
-  var mesh = new THREE.Mesh(geo, mat);
-  mesh.position.copy(mid);
-  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
-  return mesh;
-}
-
-function animateER(){
-  if(!erState.ready) return;
-  requestAnimationFrame(animateER);
+  // ── EDGES with information flow ──
   var t = Date.now()/1000;
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // camera: static default; user drag rotates; reduced-motion = fully static
-  // ambient spin accumulates directly (no runaway target, no self-cancel)
-  if(erState.ambientSpin && !reduce){
-    erState.rotY += 0.0009;  // gentle, constant institutional drift (~0.05 deg/frame)
-  }
-  // only converge to a user-drag target when there IS one
-  if(Math.abs(erState.rotTarget) > 1e-9){
-    erState.rotY += (erState.rotTarget - erState.rotY) * 0.08;
-  }
-  erState.graph.rotation.y = erState.rotY;
-  erState.graph.rotation.x = Math.sin(t*0.05)*(reduce?0:0.04);
-  // transient event pulse: decay over ~2s after a weight change (set by pulseAt)
-  var since = erState.pulseAt ? (t - erState.pulseAt) : 99;
-  var eventGlow = Math.max(0, 1 - since/2.0);  // 0..1, decays
-  for(var k in erState.nodes){
-    var nd = erState.nodes[k];
-    if(!nd.mesh) continue;
-    var weight = Math.max(0.05, (nd.wu||0)+(nd.wd||0));
-    // ambient breathing ONLY proportional to weight (one channel), and only if
-    // not reduced-motion; event-driven glow adds a transient boost on real events
-    var breathe = reduce ? 1 : (1 + 0.03*Math.sin(t*0.8 + (k.length*0.7)));
-    var boost = 1 + eventGlow * (weight*0.4);
-    var s = nd.base * weight * 1.6 * breathe * boost;
-    nd.mesh.scale.set(s, s, s);
-    // picked halo: static subtle accent, not pulsing
-    if(nd.halo){ nd.halo.scale.setScalar(1 + eventGlow*0.1); }
-    // edge opacity = staleness+weight (fade unused), plus event pulse
-    if(nd.edge && nd.edge.material){
-      var o = Math.min(0.9, nd.edgeBase + weight*0.5 + eventGlow*0.3);
-      nd.edge.material.opacity = o;
+  for(var i=0;i<erState.edges.length;i++){
+    var ed = erState.edges[i];
+    var a = erNodePos(ed.from), b = erNodePos(ed.to);
+    if(!a || !b) continue;
+    var w = Math.max(0.15, ed.weight*4);
+    var col = ER_FAMILY_COLOR[ed.to] || '#94a3b8';
+    // sketchy connector (two slightly-offset lines = hand-drawn)
+    erState.rc.line(a.x, a.y, b.x, b.y, {stroke:col, strokeWidth:w, roughness:1.8, bowing:2});
+    erState.rc.line(a.x+1.5, a.y-1.5, b.x+1.5, b.y-1.5, {stroke:'rgba(148,163,184,0.25)', strokeWidth:1, roughness:2, bowing:2});
+    // flowing information particles along the edge
+    var speed = 0.5 + w*0.4;
+    var np = 3;
+    for(var p=0;p<np;p++){
+      var phase = (p/np + t*speed*0.05) % 1;
+      var px = a.x + (b.x-a.x)*phase, py = a.y + (b.y-a.y)*phase;
+      var pulse = 0.5 + 0.5*Math.sin(t*6 + p);
+      ctx.fillStyle = col;
+      ctx.globalAlpha = 0.5 + 0.5*pulse;
+      ctx.beginPath(); ctx.arc(px, py, 2.2, 0, Math.PI*2); ctx.fill();
     }
+    ctx.globalAlpha = 1;
+    // arrowhead (hand-drawn)
+    var ang = Math.atan2(b.y-a.y, b.x-a.x);
+    var ahx = b.x - Math.cos(ang)*b.r, ahy = b.y - Math.sin(ang)*b.r;
+    ctx.strokeStyle = col; ctx.lineWidth = 1.4; ctx.beginPath();
+    ctx.moveTo(ahx + Math.cos(ang+2.4)*7, ahy + Math.sin(ang+2.4)*7);
+    ctx.lineTo(ahx, ahy);
+    ctx.lineTo(ahx + Math.cos(ang-2.4)*7, ahy + Math.sin(ang-2.4)*7);
+    ctx.stroke();
   }
-  // hover picking
-  if(erState.raycaster && erState.nodes){
-    erState.raycaster.setFromCamera(erState.mouse, erState.camera);
-    var objs = [];
-    for(var k2 in erState.nodes){ if(erState.nodes[k2].mesh) objs.push(erState.nodes[k2].mesh); }
-    var hits = erState.raycaster.intersectObjects(objs, false);
-    erState.hovered = (hits.length && hits[0].object.userData.expert) ? hits[0].object.userData.expert : null;
+
+  // ── NODES (sketchy orbs) ──
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(var i=0;i<erState.layout.length;i++){
+    var nd = erState.layout[i];
+    var wu = (erData.weights.up||{})[nd.name]||0;
+    var wd = (erData.weights.down||{})[nd.name]||0;
+    var weight = Math.max(0.05, wu+wd);
+    var breathe = reduce ? 1 : (1 + 0.04*Math.sin(t*1.1 + i));
+    var mut = nd.mutateAt ? Math.max(0, 1 - (t - nd.mutateAt)/2) : 0;  // mutation flash
+    var r = nd.base * breathe * (1 + weight*0.35 + mut*0.4);
+    var isPick = (erData.picks&&erData.picks.up===nd.name)||(erData.picks&&erData.picks.down===nd.name);
+    var fill = nd.color;
+    // sketchy orb: filled circle with hachure + hand-drawn rim
+    erState.rc.circle(nd.x, nd.y, r*2, {
+      stroke: fill, strokeWidth: isPick?2.5:1.6, roughness: isPick?0.8:1.6, fill: fill,
+      fillStyle:'hachure', hachureAngle:-45, hachureGap: isPick?4:6, fillWeight: isPick?2.5:1.2
+    });
+    // glow for picked
+    if(isPick){
+      ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(34,211,238,.8)'; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(nd.x, nd.y, r*1.15, 0, Math.PI*2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    // mutation ring (a new "generation" event)
+    if(mut>0){
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(251,191,36,.8)'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(nd.x, nd.y, r*(1.5+mut), 0, Math.PI*2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    // label (excalidraw handwriting font) below orb
+    ctx.font = '700 11px Kalam, "Comic Sans MS", cursive';
+    ctx.fillStyle = erState.hovered===nd.name ? '#fff' : '#cbd5e1';
+    ctx.textAlign = 'center';
+    ctx.fillText(nd.name, nd.x, nd.y + r + 13);
+    // tiny calmar chip
+    ctx.font = '400 9px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText(nd.name==='rule' ? 'floor' : nd.calmar.toFixed(2), nd.x, nd.y - r - 6);
   }
-  erState.renderer.render(erState.scene, erState.camera);
 }
 
-function updateERTooltip(ev){
-  if(!erState.hovered) { hideERTooltip(); return; }
+function animateER2D(){
+  if(!erState.ready) return;
+  requestAnimationFrame(animateER2D);
+  // evolution: a node randomly "mutates" occasionally (weight event or clock)
+  erState.tick++;
+  if(erState.tick % 60 === 0){
+    erState.gen++;
+    // mutation: pick a random non-rule node to flash
+    var picks = erState.layout.filter(function(n){ return n.name!=='rule'; });
+    if(picks.length){ var m = picks[(erState.gen*3)%picks.length]; m.mutateAt = Date.now()/1000; erState.mutation++; }
+    // update evolution readout
+    var evo = document.getElementById('er-evo');
+    if(evo) evo.textContent = 'gen '+erState.gen+' · mutations '+erState.mutation;
+  }
+  drawER2D();
+}
+
+function updateER2DTooltip(ev){
+  if(!erState.hovered){ hideERTooltip(); return; }
   var e = erData.experts.filter(function(x){ return x.name===erState.hovered; })[0];
-  if(!e) return;
   var tip = document.getElementById('er-tooltip');
   if(!tip) return;
-  var wu = ((erData.weights||{}).up||{})[e.name]||0;
-  var wd = ((erData.weights||{}).down||{})[e.name]||0;
+  var wu = ((erData.weights||{}).up||{})[erState.hovered]||0;
+  var wd = ((erData.weights||{}).down||{})[erState.hovered]||0;
   tip.style.display = 'block';
-  tip.style.left = (ev.clientX - (ev.target.parentElement.getBoundingClientRect().left)+12)+'px';
-  tip.style.top  = (ev.clientY - (ev.target.parentElement.getBoundingClientRect().top)+12)+'px';
-  tip.innerHTML = '<b>'+e.name+'</b><br>OOS Calmar '+e.oos_calmar.toFixed(3)+
-    '<br>Sharpe '+e.oos_sharpe.toFixed(2)+' · maxDD '+(e.maxdd*100).toFixed(1)+'%'+
-    '<br>wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
+  tip.style.left = (erState.mouse.x + 14)+'px';
+  tip.style.top  = (erState.mouse.y + 14)+'px';
+  if(e){
+    tip.innerHTML = '<b>'+e.name+'</b><br>OOS Calmar '+e.oos_calmar.toFixed(3)+
+      '<br>Sharpe '+e.oos_sharpe.toFixed(2)+' · maxDD '+(e.maxdd*100).toFixed(1)+'%'+
+      '<br>wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
+  } else {
+    tip.innerHTML = '<b>'+erState.hovered+'</b><br>rule floor · wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
+  }
 }
 function hideERTooltip(){ var t=document.getElementById('er-tooltip'); if(t) t.style.display='none'; }
 
 function renderExpertRouter(d){
-  // detect a real change (weight shift = a live event) -> transient pulse
+  // detect a real change (weight shift = a live event) -> mutation pulse
   var changed = JSON.stringify(erData.weights) !== JSON.stringify((d.weights||{}));
   erData = {experts:d.experts||[], weights:d.weights||{}, picks:d.picks||{}};
-  if(erState.pulseAt === undefined){ erState.pulseAt = 0; } // don't pulse on first build
-  else if(changed){ erState.pulseAt = Date.now()/1000; }    // pulse ONLY on real change
+  if(changed && erState.ready){
+    // trigger mutation rings on changed experts
+    var up = d.weights&&d.weights.up||{};
+    for(var i=0;i<erState.layout.length;i++){ erState.layout[i].mutateAt = Date.now()/1000; }
+  }
   // legend
   var lg = document.getElementById('er-legend');
   if(lg){
     lg.innerHTML = '<span style="color:#22d3ee">● drawdown</span> &nbsp;'+
                    '<span style="color:#f59e0b">● regime</span> &nbsp;'+
                    '<span style="color:#a78bfa">● participation</span> &nbsp;'+
-                   '<span style="color:#64748b">● rule floor</span>';
+                   '<span style="color:#64748b">● floor</span>';
   }
   var note = document.getElementById('er-note');
   var picks = d.picks||{};
+  var evo = document.getElementById('er-evo');
+  if(evo && !erState.ready) evo.textContent = '—';
   if(note) note.textContent = 'picks: up → '+ (picks.up||'rule') +' · down → '+(picks.down||'rule')+'  ·  '+(d.status||'');
   if(!erState.ready){ return; }
-  buildERGraph();
+  buildERLayout();
+  if(evo) evo.textContent = 'gen '+erState.gen+' · mutations '+erState.mutation;
 }
 
 function initPolling(){
@@ -1924,7 +1938,7 @@ async function init(){
   await Promise.all([loadState(), loadChart(), loadTrades(), loadRegimes(), loadBenchmark(), loadExpertRouter()]);
   renderAll();
   // 3D neural network
-  try { initER3D(); } catch(e){ console.error('ER3D init failed:', e); }
+  try { initER2D(); } catch(e){ console.error('ER2D init failed:', e); }
   renderExpertRouter(await loadExpertRouter());
   initSSE();
   initPolling();
