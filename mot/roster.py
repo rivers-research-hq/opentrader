@@ -95,6 +95,76 @@ SPECIALIZATIONS: dict = {
         data_plan="yfinance 5y daily cached to data/setup_search/international_ohlcv_5y.pkl "
                   "(24h TTL); arena/candidates_international.py",
     ),
+    "momtrend": ExpertSpec(
+        id="momtrend",
+        name="Momentum + market-breadth gate (Tournament survivor)",
+        description="Deterministic rule allocator: long top-5 by 60d momentum, entries "
+                    "gated by market breadth (>60% of universe above 100d MA), no forced "
+                    "exits. Transferred OOS: Calmar 0.94 / maxDD -13% on intl 2021-26.",
+        status="prototype",
+        checkpoint=None,
+        universe="US registry (300 names) or intl tradables (10) — daily bars",
+        feature_plan="strategies/momtrend.run() — momentum + breadth regime gate",
+        data_plan="strategies/verify.py reproduces R1 (23.2%, Calmar 0.469) and OOS "
+                  "(Calmar 0.938). NOT wired to live harness yet (different universe).",
+    ),
+    "multiasset": ExpertSpec(
+        id="multiasset",
+        name="Momentum-filtered vol-scaled multi-asset (Tournament survivor)",
+        description="Deterministic multi-asset allocator: top-10 of 13 by 180d momentum, "
+                    "60% inverse-vol + 40% equal-weight, rebal 63 bars. Transferred OOS: "
+                    "Calmar 1.29 / maxDD -9% on intl 2021-26 — the drawdown-control tool.",
+        status="prototype",
+        checkpoint=None,
+        universe="13-asset basket (equities/bonds/gold/commodities/FX) — daily bars",
+        feature_plan="strategies/multiasset.backtest() — momentum + inverse-vol sizing",
+        data_plan="strategies/verify.py reproduces R1 (7.2%, Calmar 0.39, 4/4 folds) and "
+                  "OOS (Calmar 1.289, maxDD -9%). NOT wired to live harness yet.",
+    ),
+    "spectral": ExpertSpec(
+        id="spectral",
+        name="Spectral (FFT) regime gate + momentum (R1c winner)",
+        description="Momentum-top gated by FFT low-frequency-share ANDed with market "
+                    "breadth. Best verified Calmar so far: 1.071 (ann 34%, maxDD -31.7%).",
+        status="prototype",
+        checkpoint=None,
+        universe="US registry (300 names) — daily bars",
+        feature_plan="swarm agents/r1c_spectral.py — causal rolling FFT, low-freq share gate",
+        data_plan="swarm_data.pkl; verified re-run. NOT wired to live harness.",
+    ),
+    "copula": ExpertSpec(
+        id="copula",
+        name="Copula tail-dependence sleeve + momentum (R1c)",
+        description="Momentum book with lower-tail-dependence sleeve: rotate to lowest-"
+                    "lambda basket assets when SPY<200MA. Calmar 0.904, maxDD -32%.",
+        status="prototype",
+        checkpoint=None,
+        universe="US registry + 13-asset basket — daily bars",
+        feature_plan="swarm agents/r1c_copula.py — empirical lower-tail dependence λ",
+        data_plan="swarm_data.pkl; verified re-run. NOT wired to live harness.",
+    ),
+    "hurst": ExpertSpec(
+        id="hurst",
+        name="Hurst persistence gate + momentum (R1c)",
+        description="Momentum-top gated by market breadth AND Hurst>0.54 (persistence). "
+                    "Calmar 0.884, maxDD -36.9%.",
+        status="prototype",
+        checkpoint=None,
+        universe="US registry (300 names) — daily bars",
+        feature_plan="swarm agents/r1c_hurst.py — R/S Hurst (self-implemented, causal)",
+        data_plan="swarm_data.pkl; verified re-run. NOT wired to live harness.",
+    ),
+    "entropy": ExpertSpec(
+        id="entropy",
+        name="Entropy regime gate + momentum (R1c)",
+        description="Momentum-top gated by breadth AND HIGH market entropy (active regime). "
+                    "Calmar 0.832, maxDD -35.7%. Hypothesis reversed: high entropy, not low.",
+        status="prototype",
+        checkpoint=None,
+        universe="US registry (300 names) — daily bars",
+        feature_plan="swarm agents/r1c_entropy.py — Shannon entropy of market returns",
+        data_plan="swarm_data.pkl; verified. NOT wired to live harness.",
+    ),
 }
 
 

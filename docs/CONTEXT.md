@@ -123,6 +123,22 @@ use the term below; don't drift to synonyms the glossary avoids.
   Conclusion: the transferable edge is STRUCTURAL (breadth-regime + momentum;
   vol-scaled multi-asset), not symbol-specific. These two are the arena
   substrate.
+  **TOURNAMENT R1c — ABSTRACT MATHEMATICS SWARM (overnight, 12 agents, all
+  verified by re-run, 2026-08-13)**: the abstract frameworks decisively beat
+  the price-threshold gates. Leaders (US 2008-26, Calmar): **spectral (FFT
+  low-freq gate × breadth) 1.071** (ann 34%, maxDD −31.7%), **copula
+  (lower-tail-dependence sleeve) 0.904**, **hurst (persistence gate) 0.884**,
+  entropy 0.832 (hypothesis REVERSED: high entropy gates, low = quiet grind),
+  bayes/BOCPD 0.818, wavelet 0.766, hmm 0.666, kalman 0.603. Floors for
+  reference: momtrend 0.469, hedge 0.678. Universal lesson confirmed by every
+  agent independently: **gate-entries-only; forced exits / trailing stops /
+  soft de-risk always destroy returns.** Honest negatives: online ensemble
+  does NOT beat its best member (static 1/3 blend wins); long-only
+  cointegration edge < fees (needs shorts the harness doesn't price); per-name
+  Kelly too noisy. All agents reproduced their floor bit-for-bit before
+  modifying (integrity). Roster now has 6 prototype experts from R1/R1b/R1c:
+  momtrend, multiasset, spectral, copula, hurst, entropy — the arena's
+  starting substrate.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
