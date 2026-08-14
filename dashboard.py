@@ -8,11 +8,14 @@ and a lightweight dashboard page. Run: python3 dashboard.py --port 8097
 import argparse
 import asyncio
 import json
+import logging
 import math
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+logger = logging.getLogger("opentrader.dashboard")
 
 PROJECT = str(Path(__file__).resolve().parent)
 if PROJECT not in sys.path:
@@ -50,7 +53,8 @@ def _read_state() -> dict:
         raw = STATE_FILE.read_text()
         raw = _SANITIZE_RE.sub("null", raw)
         return _sanitize_nan(json.loads(raw))
-    except Exception:
+    except Exception as e:
+        logger.warning(f"state file unreadable ({STATE_FILE}): {e}")
         return {}
 
 
@@ -101,7 +105,7 @@ def _build_pva(num_points: int = 500) -> dict:
     if not files:
         return {"points": [], "count": 0}
 
-    files = files[-num_points:]  # keep most recent N (still newest-first)
+    files = files[:num_points]  # keep most recent N (still newest-first)
     files = list(reversed(files))  # chronological: oldest first
     sample_n = max(1, len(files) // num_points)
     points = []
@@ -155,8 +159,8 @@ def _build_pva(num_points: int = 500) -> dict:
                     pt[sym_short] = round((px / base_prices[sym_short] - 1) * 100, 2)
             if pt not in points:
                 points.append(pt)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"live-state PVA append failed: {e}")
 
     result = {"points": points, "count": len(points)}
     _PVA_CACHE["data"] = result
@@ -206,7 +210,7 @@ async def state_full():
 @app.get("/api/history-summary")
 async def history_summary():
     """Return recent summary rows for the dashboard table."""
-    files = _list_history_files()[-50:]  # last 50 snapshots
+    files = _list_history_files()[:50]  # newest 50 snapshots
     rows = []
     for fpath in files:
         try:
@@ -288,6 +292,62 @@ async def api_regimes():
 async def api_benchmark():
     s = _read_state()
     return s.get("hodl_benchmark", {})
+
+
+@app.get("/api/expert-router")
+async def api_expert_router():
+    """Arena self-evolution view: verified experts, weight schedule, current
+    picks, and live router state. Read-only monitoring of the MoT layer."""
+    import json as _json
+    from pathlib import Path as _Path
+
+    ROUTER_STATE = _Path(__file__).resolve().parent / "data" / "live_router_state.json"
+    router = {}
+    if ROUTER_STATE.exists():
+        try:
+            router = _json.loads(ROUTER_STATE.read_text())
+        except Exception:
+            router = {}
+
+    experts = []
+    try:
+        from strategies.experts import VERIFIED
+        for name, v in sorted(VERIFIED.items(),
+                              key=lambda kv: -kv[1].oos_calmar):
+            experts.append({
+                "name": name,
+                "oos_calmar": v.oos_calmar,
+                "oos_sharpe": v.oos_sharpe,
+                "maxdd": v.maxdd,
+                "description": v.description,
+            })
+    except Exception as e:
+        experts = [{"error": str(e)}]
+
+    # weight schedule + picks from the router state (regime keys up/down)
+    weights = router.get("weights", {})
+    track = router.get("track", {})
+
+    def _pick(regime: str) -> str:
+        t = track.get(regime, {})
+        best, best_imp = "rule", t.get("rule", {}).get("sum", 0.0)
+        for e, rec in t.items():
+            if e == "rule":
+                continue
+            n = rec.get("n", 0)
+            imp = rec.get("sum", 0.0) / n if n else 0.0
+            w = weights.get(regime, {}).get(e, 0.0)
+            if n >= 5 and w > 0 and imp > best_imp:
+                best, best_imp = e, imp
+        return best
+
+    return {
+        "experts": experts,
+        "weights": weights,
+        "picks": {"up": _pick("up"), "down": _pick("down")},
+        "note": router.get("note", ""),
+        "status": "MONITORING — not live order flow",
+    }
 
 
 @app.get("/stream")
