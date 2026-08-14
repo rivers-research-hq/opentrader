@@ -160,8 +160,17 @@ use the term below; don't drift to synonyms the glossary avoids.
   daily-bar universe allocators (300 US names / 13-asset basket / 10 intl),
   NOT validated on the harness's real-time 19-symbol universe — they are the
   arena's starting evidence, and live attribution updates them going forward,
-  but they are NOT live order-flow. Roster marks all prototype; wiring is
+  but they are NOT live order-flow.   Roster marks all prototype; wiring is
   ROUTING/MONITORING, not live trading.
+  **SHADOW/PAPER LANE (2026-08-13, committed)**: `strategies/shadow.py` is the
+  paper lane for the 8 verified experts — re-runs each on its native daily
+  archive, records per-regime evidence to `data/live_router_state_strategies.json`
+  (its OWN per-universe file, the shadow_mot.py convention — does NOT collide
+  with the harness's `live_router_state.json`). The SEED (in the harness file)
+  uses regime keys **'up'/'down'** to match the harness's attribution mapping
+  (harness.py:2636-2639 maps bull/bear→up/down); a first version used
+  'bull'/'bear' and would have been inert — caught and fixed. Router picks
+  multiasset per-regime from the seed. No live order flow.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all

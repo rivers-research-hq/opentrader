@@ -47,7 +47,10 @@ def seed(state_dir: str, emit: bool = True) -> dict:
 
     track = {}
     weights = {}
-    for regime in ("bull", "bear"):
+    # Regime keys MUST match the harness: harness._record_router_impact maps
+    # bull/bear -> 'up'/'down' (harness.py:2636-2639), and the shadow engine
+    # records under 'up'/'down'. Using 'bull'/'bear' would make the seed inert.
+    for regime in ("up", "down"):
         track[regime] = {}
         weights[regime] = {}
         # floor baseline (SPY US Calmar 0.174, scaled)
@@ -61,7 +64,8 @@ def seed(state_dir: str, emit: bool = True) -> dict:
         weights[regime] = {"rule": 0.5, best: 0.5}
 
     state = {"track": track, "weights": weights,
-             "note": "SEEDED from tournament OOS evidence (2026-08-13); "
+             "note": "SEEDED from tournament OOS evidence (2026-08-13); regime "
+                     "keys 'up'/'down' match the harness's attribution mapping; "
                      "live attribution updates these entries going forward."}
 
     if emit:
