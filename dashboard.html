@@ -874,6 +874,20 @@ body{
         </div>
       </div>
 
+      <!-- PAPER LANES (one avenue per expert) -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="icon">🛣️</span> Paper Lanes
+            <span class="badge mono" id="ln-status" style="background:var(--amber-soft,rgba(251,191,36,.15));color:var(--amber)">PAPER</span>
+          </div>
+        </div>
+        <div class="lanes-list" id="lanes-list" style="padding:10px 14px">
+          <div class="empty-state">Loading lanes…</div>
+        </div>
+        <div id="ln-note" style="padding:6px 12px;color:#8a94a6;font-size:11px"></div>
+      </div>
+
       <!-- Exposure / Allocation -->
       <div class="panel">
         <div class="panel-head">
@@ -1705,6 +1719,31 @@ function renderTradeStatus(d){
   if(fills) fills.textContent = (d.fills!=null ? d.fills : '0');
 }
 
+function loadLanes(){
+  return fetch('/api/lanes', {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {lanes:{}}; });
+}
+
+function renderLanes(d){
+  var list = document.getElementById('lanes-list');
+  if(!list) return;
+  var lanes = d.lanes || {};
+  var names = Object.keys(lanes);
+  if(!names.length){ list.innerHTML = '<div class="empty-state">No lanes yet — runs daily 18:30</div>'; return; }
+  var html = '';
+  names.forEach(function(n){
+    var ln = lanes[n];
+    var up = ln.regime === 'up';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(30,35,51,.4)">'+
+      '<div><div style="font-size:12px;font-weight:600;color:#e2e8f0">'+n+'</div>'+
+      '<div style="font-size:10px;color:#64748b">regime '+(up?'<span style="color:#34d399">▲ up</span>':'<span style="color:#fb7185">▼ down</span>')+' · asof '+ (ln.asof||'—') +'</div></div>'+
+      '<div style="text-align:right"><div class="mono" style="font-size:13px;font-weight:700;color:'+(up?'#34d399':'#fb7185')+'">$'+ (ln.equity!=null?ln.equity.toFixed?ln.equity.toFixed(2):ln.equity:'—') +'</div>'+
+      '<div class="mono" style="font-size:10px;color:#8a94a6">1d '+( (ln.latest_1d_ret!=null? (ln.latest_1d_ret*100).toFixed(2):'0') )+'%</div></div></div>';
+  });
+  list.innerHTML = html;
+  var note = document.getElementById('ln-note');
+  if(note) note.textContent = (d.note || '');
+}
+
 function loadExpertRouter(){
   return fetch('/api/expert-router', {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {experts:[],weights:{},picks:{}}; });
 }
@@ -1974,6 +2013,7 @@ function initPolling(){
   // Expert router (arena self-evolution) — 15s poll, rebuilds the 3D graph
   setInterval(function(){ loadExpertRouter().then(renderExpertRouter); }, 15000);
   setInterval(function(){ loadTradeStatus().then(renderTradeStatus); }, 8000);
+  setInterval(function(){ loadLanes().then(renderLanes); }, 15000);
   // Medium polls
   setInterval(function(){ loadChart().then(renderChart); }, 30000);
   setInterval(function(){ loadBenchmark().then(renderMetrics); }, 20000);

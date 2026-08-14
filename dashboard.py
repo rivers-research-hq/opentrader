@@ -370,6 +370,20 @@ async def api_trade_status():
     }
 
 
+@app.get("/api/lanes")
+async def api_lanes():
+    """Paper lane state — one avenue per verified expert."""
+    import json as _json
+    from pathlib import Path as _Path
+    p = _Path(__file__).resolve().parent / "data" / "lanes_state.json"
+    if not p.exists():
+        return {"lanes": {}, "note": "lanes not yet run"}
+    try:
+        return _json.loads(p.read_text())
+    except Exception:
+        return {"lanes": {}, "note": "lanes state unreadable"}
+
+
 @app.get("/api/expert-router")
 async def api_expert_router():
     """Arena self-evolution view: verified experts, weight schedule, current
