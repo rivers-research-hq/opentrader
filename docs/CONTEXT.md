@@ -146,9 +146,22 @@ use the term below; don't drift to synonyms the glossary avoids.
   threshold not scale-free across universes (gate shut ~98% of intl bars);
   copula — marginal (sharpe 0.72 vs 0.754 bar) because intl lacks a bond
   safe-haven (US TLT rose in stress; intl lowest-tail-dep = FX/gold, weaker
-  recovery); its book-only variant passed. Universal transfer pattern: win is
+  recovery); its book-only variant passed.   Universal transfer pattern: win is
   DRAWDOWN control (maxDD −10 to −14% vs basket deep dd), not raw return —
   every passing strategy trails equal-weight basket in the 2023-26 broad bull.
+  **ARENA HANDOFF — WIRING (2026-08-13, committed)**: the 8 OOS-verified
+  strategies are now in the MoT layer. `strategies/experts.py` = VerifiedExpert
+  registry (OOS Calmar/Sharpe as the track record) + StrategyRouter;
+  `strategies/handoff.py` = canonical eval → router state;
+  `strategies/seed_router.py` = seeds the harness's `data/live_router_state.json`
+  with the tournament evidence as the INITIAL track record (monitoring-only
+  schema the harness already reads). Router now picks multiasset per-regime
+  (OOS Calmar 1.289) instead of the phantom floor. HONEST BOUNDARY: these are
+  daily-bar universe allocators (300 US names / 13-asset basket / 10 intl),
+  NOT validated on the harness's real-time 19-symbol universe — they are the
+  arena's starting evidence, and live attribution updates them going forward,
+  but they are NOT live order-flow. Roster marks all prototype; wiring is
+  ROUTING/MONITORING, not live trading.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
