@@ -136,9 +136,19 @@ use the term below; don't drift to synonyms the glossary avoids.
   does NOT beat its best member (static 1/3 blend wins); long-only
   cointegration edge < fees (needs shorts the harness doesn't price); per-name
   Kelly too noisy. All agents reproduced their floor bit-for-bit before
-  modifying (integrity). Roster now has 6 prototype experts from R1/R1b/R1c:
+  modifying (integrity).   Roster now has 6 prototype experts from R1/R1b/R1c:
   momtrend, multiasset, spectral, copula, hurst, entropy — the arena's
   starting substrate.
+  **TOURNAMENT R2 OOS GAUNTLET — abstract winners on intl (2026-08-13,
+  verified)**: 6/8 transfer with fixed params. PASS: bayes 1.148, spectral
+  1.000, kalman 0.988, hurst 0.967, wavelet 0.803, entropy 0.667 (OOS Calmar;
+  bench intl basket 0.501). FAIL (honest diagnoses): hmm — posterior-prob
+  threshold not scale-free across universes (gate shut ~98% of intl bars);
+  copula — marginal (sharpe 0.72 vs 0.754 bar) because intl lacks a bond
+  safe-haven (US TLT rose in stress; intl lowest-tail-dep = FX/gold, weaker
+  recovery); its book-only variant passed. Universal transfer pattern: win is
+  DRAWDOWN control (maxDD −10 to −14% vs basket deep dd), not raw return —
+  every passing strategy trails equal-weight basket in the 2023-26 broad bull.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
