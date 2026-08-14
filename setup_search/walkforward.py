@@ -87,6 +87,24 @@ def main():
     except Exception:
         insample_best = None
 
+    # The validated contract as recorded in the ledger (max-score config).
+    # best.json alone is NOT enough as a reference: it was clobbered once
+    # (2026-08-10, agent run af1e6d83 seeded it from DEFAULT_CONFIG), which
+    # silently replaced the rule floor with the losing default. Reading the
+    # ledger best keeps the floor measurable even if best.json drifts.
+    contract = None
+    try:
+        ledger_best_score, contract = -999.0, None
+        for line in (OUT / "ledger.jsonl").read_text().splitlines():
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            if rec.get("score", -999) > ledger_best_score:
+                ledger_best_score = rec["score"]
+                contract = rec["config"]
+    except Exception:
+        contract = None
+
     folds = []
     t = MIN_TRAIN
     while t + TEST_HORIZON <= total:
@@ -123,7 +141,11 @@ def main():
             f"{summary_bundle(oos)}"
         )
 
-        for name, ref_cfg in (("default", DEFAULT_CONFIG), ("insample_best", insample_best)):
+        for name, ref_cfg in (
+            ("default", DEFAULT_CONFIG),
+            ("insample_best", insample_best),
+            ("contract", contract),
+        ):
             if ref_cfg is None:
                 continue
             r = _scalars(run_backtest(al_te, ref_cfg))
@@ -143,6 +165,21 @@ def main():
     print("\n[wf] POOLED OOS:")
     for k, v in report["pooled_oos"].items():
         print(f"   {k}: {v}")
+
+    # Full-archive appendix: fold windows cover only 750 of ~1255 bars, so a
+    # sparse regime-gated config may show 0 trades per fold yet be alive on
+    # the full span. Always report the full-archive run for each reference.
+    report["full_archive"] = {}
+    for name, ref_cfg in (
+        ("default", DEFAULT_CONFIG),
+        ("insample_best", insample_best),
+        ("contract", contract),
+    ):
+        if ref_cfg is None:
+            continue
+        r = _scalars(run_backtest(al, ref_cfg))
+        report["full_archive"][name] = r
+        print(f"[wf] full-archive {name}: {summary_bundle(r)}")
 
     with open(OUT / "walkforward_report.json", "w") as f:
         json.dump(report, f, indent=1, default=str)

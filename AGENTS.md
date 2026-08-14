@@ -21,3 +21,27 @@ Five canonical roles, labels equal to their names: `needs-triage`, `needs-info`,
 
 Single-context: `CONTEXT.md` (glossary) + `docs/adr/` at the repo root, with
 `ARCHITECTURE.md` as the canonical design doc. See `docs/agents/domain.md`.
+
+## Quantitative claims — verify before repeating (binding)
+
+No numeric claim about the rule floor, a config, a gate, or an "edge" is trusted
+from prose. Before repeating or acting on one, re-run it:
+
+- **Rule floor / any config on the full archive**: `PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 /tmp/opentrader/rule_floor_honest.py` (repo's own `run_backtest`, 5y, all configs side by side).
+- **Universe generalization**: `PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 /tmp/opentrader/universe_contract_test.py` — same contract on the 511-registry and the 7.3k-symbol fullcross archive (~25 min). The contract does NOT generalize beyond the 17 search names (−37.8% registry, −40.4% wide); treat any "edge" claim as universe-bound until proven otherwise.
+- **Signal-family probe**: `PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 /tmp/opentrader/signal_family_probe.py` — screens every feature family the engine already has (mom/rev/rsi/brk/z blends, rank, vol-scaling, filters) on the 5y-wide universe (~20 min). Result (2026-08-13): NO existing family generalizes under realistic fees; only new signal inputs (macro/sector-relative) are untested paths.
+- **Macro-regime probe**: `PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 /tmp/opentrader/macro_regime_probe.py` — FRED entry gates (`run_backtest(..., macro_gate=...)`, default off) across the promising families. ONE lead (2026-08-13): incumbent + `ff_falling` (long only while Fed Funds < 60d-ago level) flips 5y-wide from −41.8% → +6.2% (PF 1.07, 124 trd). CLASSIFIED AS LEAD NOT EDGE (PF 1.07 thin, no single year drives it). Verify before repeating as a claim of edge.
+- **Wide-gated search**: `setup_search/loop.py --wide-eval --wide-min 0.0 --wide-min-trades 8 --wide-max-fee-ratio 0.5` — standing promotion requirement (5y-wide net ≥ 0, ≥ 8 wide trades, fees ≤ 50% of account). No config may become best.json without passing it. Run from the sandbox; `data/setup_search/wide_aligned_1300b.pkl` is the cached wide set.
+- **Walkforward report**: `PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 -m setup_search.walkforward` — its `references` rows now include the ledger contract, and a `full_archive` section reports every reference over the whole span (fold-only views hide sparse regime-gated configs).
+- **best.json provenance**: the ledger (`data/setup_search/ledger.jsonl`, max-score config) is the source of truth for the rule floor; `best.json` was clobbered once (2026-08-10, agent run af1e6d83) and is restored from the ledger. If the two disagree, flag it — do not silently trust either.
+
+History: the 08-12 "rule floor falsified" report measured DEFAULT_CONFIG (5% risk, no regime), not the documented contract (15% risk, 96d regime, thresh 0.28). The contract measures +23.1% net / 5y. See `docs/CONTEXT.md` and `~/overnight-reports/opentrader-2026-08-12-session.md`.
+
+## Audit gate — binding, every session (no exceptions)
+
+1. **Verify before consuming.** Any ledger/state/DB file you read or write (paper_state.json, catalog.db, alt_data_cache.db, live_router_state_*): enumerate its writers, confirm atomicity and locking, identify the single source of truth. Never trust a state file's provenance unverified.
+2. **Audit before building.** No consumer of a ledger without first auditing that ledger's writer set. Never extend a system whose integrity you haven't checked.
+3. **Reconcile before reporting "done".** Confirm the ledgers you touched agree (exchange ledger vs risk account vs state file) — or document the drift explicitly.
+4. **No fabricated metrics.** Computed values must trace to real outcomes; heuristics must be labeled as heuristics.
+5. **Surface contradictions immediately.** If findings contradict a prior report, say so in the first message. Never bury it.
+6. **Resource discipline.** rcheck check_environment before heavy steps; run_sandboxed for anything risky; never disturb running services without cause.

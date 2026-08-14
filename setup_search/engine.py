@@ -109,7 +109,14 @@ def _cross_sectional_rank(mom: dict, idx: pd.Index) -> dict:
     return rank
 
 
-def run_backtest(data: tuple, cfg: dict) -> dict:
+def run_backtest(data: tuple, cfg: dict, macro_gate: "pd.Series|None" = None) -> dict:
+    """Backtest the rule config.
+
+    macro_gate: optional pandas Series (DatetimeIndex -> bool) — when given,
+    an entry is only allowed on dates where it is True. Used to test whether
+    macro-regime conditioning (Fed Funds / curve / yields) helps a signal
+    generalize. Default None = no macro conditioning (behavior unchanged).
+    """
     closes, highs, lows, vols = data
     cfg = clamp_config(cfg)
     syms = sorted(closes.keys())
@@ -149,45 +156,60 @@ def run_backtest(data: tuple, cfg: dict) -> dict:
 
     for t in range(start, len(master)):
         idx = master[t]
-        bar_feat = {s: feat[s].iloc[t] for s in syms}
-        scores = _score_at(bar_feat, cfg, {s: rank[s][t] if cfg["rank_on"] else 0.0 for s in syms})
-        close_t = {s: float(closes[s].iloc[t]) for s in syms}
+        # date-guard (same as rule_gate.screen): a symbol whose aligned
+        # series does not cover this bar (late IPO, delisted, gap) is
+        # inactive for the bar — not scored, not a candidate. The 17-sym
+        # curated universe always covers the master; wide universes don't.
+        bar_feat = {s: feat[s].loc[idx] for s in syms if idx in feat[s].index}
+        if not bar_feat:
+            continue
+        scores = _score_at(
+            bar_feat, cfg,
+            {s: rank[s][t] if cfg["rank_on"] else 0.0 for s in bar_feat},
+        )
+        close_t = {s: float(closes[s].loc[idx]) for s in bar_feat}
 
         for s in list(pos.keys()):
             p = pos[s]
             p["bars"] += 1
-            hi = float(highs[s].iloc[t])
-            lo = float(lows[s].iloc[t])
             entry = p["entry"]
             exit_price = None
             exit_reason = None
-            if hi >= entry * (1 + cfg["tp"]):
-                exit_price = entry * (1 + cfg["tp"])
-                exit_reason = "tp"
-            elif lo <= entry * (1 - cfg["sl"]):
-                exit_price = entry * (1 - cfg["sl"])
-                exit_reason = "sl"
-            elif cfg["trailing_pct"] > 0:
-                p["peak"] = max(p["peak"], hi)
-                trail = p["peak"] * (1 - cfg["trailing_pct"])
-                if lo <= trail:
-                    exit_price = trail
-                    exit_reason = "trail"
+            if idx not in highs[s].index:
+                # held symbol's data ended (delisted): force exit at its
+                # last close before it vanishes from the series.
+                exit_price = float(closes[s].iloc[-1])
+                exit_reason = "delist"
+            else:
+                hi = float(highs[s].loc[idx])
+                lo = float(lows[s].loc[idx])
+                if hi >= entry * (1 + cfg["tp"]):
+                    exit_price = entry * (1 + cfg["tp"])
+                    exit_reason = "tp"
+                elif lo <= entry * (1 - cfg["sl"]):
+                    exit_price = entry * (1 - cfg["sl"])
+                    exit_reason = "sl"
+                elif cfg["trailing_pct"] > 0:
+                    p["peak"] = max(p["peak"], hi)
+                    trail = p["peak"] * (1 - cfg["trailing_pct"])
+                    if lo <= trail:
+                        exit_price = trail
+                        exit_reason = "trail"
             if exit_price is None and p["bars"] >= cfg["max_hold"]:
-                exit_price = close_t[s]
+                exit_price = close_t.get(s, entry)
                 exit_reason = "max_hold"
             if (
                 exit_price is None
                 and cfg["sell_thresh"] is not None
                 and float(scores.get(s, 0.0)) < cfg["sell_thresh"]
             ):
-                exit_price = close_t[s]
+                exit_price = close_t.get(s, entry)
                 exit_reason = "signal"
             if exit_price is None and (
-                (cfg["rsi_exit_hi"] > 0 and float(bar_feat[s]["rsi"]) > cfg["rsi_exit_hi"])
-                or (cfg["rsi_exit_lo"] > 0 and float(bar_feat[s]["rsi"]) < cfg["rsi_exit_lo"])
+                (cfg["rsi_exit_hi"] > 0 and float(bar_feat.get(s, {}).get("rsi", 0.0)) > cfg["rsi_exit_hi"])
+                or (cfg["rsi_exit_lo"] > 0 and float(bar_feat.get(s, {}).get("rsi", 0.0)) < cfg["rsi_exit_lo"])
             ):
-                exit_price = close_t[s]
+                exit_price = close_t.get(s, entry)
                 exit_reason = "rsi_exit"
             if exit_price is not None:
                 fee = _fee_amt(cfg, p["qty"], exit_price)
@@ -220,7 +242,7 @@ def run_backtest(data: tuple, cfg: dict) -> dict:
         equity_curve.append((idx, equity))
 
         candidates = []
-        for s in syms:
+        for s in bar_feat:
             if s in pos:
                 continue
             sc = float(scores.get(s, -99))
@@ -228,6 +250,14 @@ def run_backtest(data: tuple, cfg: dict) -> dict:
                 continue
             if regime is not None and not bool(regime.iloc[t]):
                 continue
+            if macro_gate is not None:
+                _key = idx
+                if macro_gate.index.tz is not None and _key.tzinfo is None:
+                    _key = _key.tz_localize("UTC")
+                elif macro_gate.index.tz is None and _key.tzinfo is not None:
+                    _key = _key.tz_localize(None)
+                if not bool(macro_gate.get(_key, False)):
+                    continue
             if close_t[s] <= 0:
                 continue
             # Research-feature entry gates (disabled when their param is 0)

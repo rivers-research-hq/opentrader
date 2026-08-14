@@ -27,6 +27,7 @@ from setup_search.core import (
 from setup_search.data import REGIME_SYM, load_ohlcv, align, slice_aligned
 from setup_search.engine import run_backtest
 from setup_search.scientist import propose_configs
+from setup_search.wide import build_wide_aligned, wide_metrics
 
 PROJECT = Path(__file__).resolve().parent.parent
 OUT_DIR = PROJECT / "data" / "setup_search"
@@ -126,6 +127,21 @@ def main():
     ap.add_argument("--random-restart-every", type=int, default=25)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out-dir", default=str(OUT_DIR))
+    ap.add_argument("--wide-eval", action="store_true",
+                    help="gate promotions on the wide universe (511-registry "
+                         "generalization check, regime ON)")
+    ap.add_argument("--wide-min", type=float, default=0.0,
+                    help="minimum wide net_return (fraction) for promotion")
+    ap.add_argument("--wide-min-trades", type=int, default=8,
+                    help="minimum wide trade count for promotion (kills "
+                         "'stand down' configs that pass wide by not trading)")
+    ap.add_argument("--wide-max-fee-ratio", type=float, default=0.5,
+                    help="reject configs whose wide fees exceed this fraction "
+                         "of the account (churn degenerates like tiny trailing "
+                         "stops pass wide-net by capturing daily highs)")
+    ap.add_argument("--search-wide", action="store_true",
+                    help="run the main evaluation on the wide universe "
+                         "(implies --wide-eval); much slower per iter")
     args = ap.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -139,6 +155,21 @@ def main():
     n_sym = len(aligned[0])
     n_bars = len(next(iter(aligned[0].values())).index)
     print(f"[loop] data: {n_sym} tradable symbols, {n_bars} bars")
+
+    # Wide-universe generalization set (harness 511-registry ∩ archive,
+    # regime ON). Gate / main-search target when --wide-eval / --search-wide.
+    wide_aligned = None
+    if args.wide_eval or args.search_wide:
+        wide_aligned = build_wide_aligned()
+        print(f"[loop] wide set: {len(wide_aligned[0])} symbols "
+              f"({len(next(iter(wide_aligned[0].values())).index)} bars)")
+    if args.search_wide:
+        aligned = wide_aligned
+        syms = sorted(aligned[0].keys())
+        n_sym = len(aligned[0])
+        n_bars = len(next(iter(aligned[0].values())).index)
+        print(f"[loop] SEARCH-WIDE: main evaluation on {n_sym} symbols")
+
     val_start = int(n_bars * (1 - args.val_pct))
     val_aligned = slice_aligned(aligned, val_start, n_bars)
     print(f"[loop] validation window: last {args.val_pct:.0%} (bars {val_start}..{n_bars})")
@@ -211,24 +242,39 @@ def main():
     best_score = best["score"] if best else -999.0
     since_improve = 0
 
-    # Re-validate a checkpoint best against the recent-data gate.
+    # Re-validate a checkpoint best against the recent-data gate (and the
+    # wide generalization gate when --wide-eval).
     target = best_score
     if best:
         try:
             vb = run_backtest(val_aligned, best["config"])
             vb_met = {k: v for k, v in vb.items() if k != "equity"}
             best["val"] = summary_bundle(vb_met)
+            gate_failures = []
             if vb_met.get("net_return", 0) < 0:
+                gate_failures.append(f"recent-val {summary_bundle(vb_met)}")
+            if wide_aligned is not None:
+                wm = wide_metrics(wide_aligned, best["config"])
+                best["wide"] = summary_bundle(wm)
+                best["wide_net"] = round(wm.get("net_return", 0.0), 4)
+                if (wm.get("net_return", 0) < args.wide_min
+                        or int(wm.get("n_trades", 0)) < args.wide_min_trades
+                        or float(wm.get("fee_ratio", 0.0)) > args.wide_max_fee_ratio):
+                    gate_failures.append(f"wide {summary_bundle(wm)}")
+            if gate_failures:
                 target = 0.0
                 print(
-                    f"[loop] NOTE: checkpoint best fails the recent-validation "
-                    f"gate ({summary_bundle(vb_met)}) — target lowered so "
-                    f"validation-positive configs can replace it"
+                    f"[loop] NOTE: checkpoint best fails gate "
+                    f"({' | '.join(gate_failures)}) — target lowered so "
+                    f"gate-passing configs can replace it"
                 )
             else:
-                print(f"[loop] checkpoint best passes validation: {best['val']}")
-        except Exception:
-            pass
+                print(
+                    f"[loop] checkpoint best passes gates: "
+                    f"val={best.get('val')} wide={best.get('wide', '-')}"
+                )
+        except Exception as e:
+            print(f"[loop] checkpoint re-validation error: {e}")
 
     for it in range(iter0, args.iters + 1):
         if time.time() > deadline:
@@ -283,10 +329,38 @@ def main():
                 "val_net": round(val_net, 4),
                 "source": p.get("reasoning", "?")[:60],
             }
+            # Generalization gate: a config must clear the FAST gates first
+            # (active, score > target, recent-val >= 0) before the expensive
+            # wide check runs. Only then can it promote.
+            wide_net, wide_ok = None, True
+            if wide_aligned is not None and _is_active(metrics) and score > target and val_net >= 0:
+                try:
+                    wm = wide_metrics(wide_aligned, cfg)
+                    wide_net = wm.get("net_return", 0.0)
+                    wide_trades = int(wm.get("n_trades", 0))
+                    wide_fee_ratio = float(wm.get("fee_ratio", 0.0))
+                    rec["wide"] = summary_bundle(wm)
+                    rec["wide_net"] = round(wide_net, 4)
+                    wide_ok = (
+                        wide_net >= args.wide_min
+                        and wide_trades >= args.wide_min_trades
+                        and wide_fee_ratio <= args.wide_max_fee_ratio
+                    )
+                    if not wide_ok:
+                        print(
+                            f"[loop] iter {it}: score={score} val={val_net:+.2%} "
+                            f"BUT wide={wide_net:+.2%} ({wide_trades} trd, "
+                            f"fee%={wide_fee_ratio:.0%}) {rec['wide']} — "
+                            f"rejected by generalization gate"
+                        )
+                except Exception as e:
+                    print(f"[loop] iter {it}: wide eval error: {e}")
+                    wide_ok = False
+                    rec["wide"] = f"error:{e}"
             history.append(rec)
             with open(OUT_DIR / "ledger.jsonl", "a") as f:
                 f.write(json.dumps(rec) + "\n")
-            if _is_active(metrics) and score > target and val_net >= 0:
+            if _is_active(metrics) and score > target and val_net >= 0 and wide_ok:
                 target = score
                 best_score = score
                 since_improve = 0
@@ -297,6 +371,8 @@ def main():
                     "metrics": metrics,
                     "val": rec["val"],
                     "val_net": val_net,
+                    "wide": rec.get("wide"),
+                    "wide_net": rec.get("wide_net"),
                     "equity": [round(x, 2) for x in m["equity"].tolist()],
                     "iter": it,
                     "ts": _now(),
@@ -313,6 +389,11 @@ def main():
                     f"[loop] iter {it}: score={score} but val={val_net:+.2%} "
                     f"({rec['summary']}) — rejected by recent-validation gate"
                 )
+            elif _is_active(metrics) and score > target and not wide_ok:
+                # passed the fast gates but failed the wide generalization
+                # gate — counted toward the plateau so the search stops
+                # churning a neighborhood that cannot generalize.
+                since_improve += 1
             elif score > target:
                 print(
                     f"[loop] iter {it}: inactive config score={score} "

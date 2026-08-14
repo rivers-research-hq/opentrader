@@ -23,9 +23,26 @@ PROJECT = Path(__file__).resolve().parent.parent
 
 
 def load_rule_config() -> dict:
-    """The validated best config (the playbook)."""
-    cfg = json.loads((PROJECT / "data/setup_search/best.json").read_text())
-    return clamp_config(cfg.get("config", {}))
+    """The validated best config (the playbook).
+
+    Source of truth is the append-only search ledger (max-score config).
+    `best.json` is a derived convenience file that was clobbered once
+    (2026-08-10, agent run af1e6d83) and is only a fallback here — never
+    trusted over the ledger.
+    """
+    ledger = PROJECT / "data/setup_search/ledger.jsonl"
+    best_score, cfg = None, None
+    if ledger.exists():
+        for line in ledger.read_text().splitlines():
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            if best_score is None or rec.get("score", -999) > best_score:
+                best_score = rec["score"]
+                cfg = rec.get("config")
+    if cfg is None:  # fallback: derived file (clobberable — ledger is canonical)
+        cfg = json.loads((PROJECT / "data/setup_search/best.json").read_text()).get("config", {})
+    return clamp_config(cfg)
 
 
 def screen(closes: dict, highs: dict, lows: dict, vols: dict, sym: str, date, cfg: dict = None, regime_sym: str = None) -> tuple:
