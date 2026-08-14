@@ -178,6 +178,21 @@ SPECIALIZATIONS: dict = {
         feature_plan="swarm agents/r1d_laggard.py — momentum leaders + laggard catch-up book",
         data_plan="swarm intl_data.pkl; VERIFIED by re-run. NOT wired to live harness.",
     ),
+    "laggard_macro": ExpertSpec(
+        id="laggard_macro",
+        name="Laggard + World Bank / calendar overlays (R1e)",
+        description="Champion laggard + WB-inflation/EM-growth gate + calendar density "
+                    "overlay. OOS Calmar 1.799 (WB-inflation boost), 1.804 (density "
+                    "scale), 1.793 (EM>US gate) — VERIFIED. THIN: WB = annual/1yr-lag "
+                    "(5-6 values/5y), density edge in few windows. Overlay, not new "
+                    "strategy; transfer risk high.",
+        status="prototype",
+        checkpoint=None,
+        universe="intl tradables (10) — daily bars",
+        feature_plan="swarm agents/r1e_wbinflation.py, r1e_wbgrowth.py, r1e_density.py",
+        data_plan="data/world_bank.py + data/economic_calendar.py + strategies/macro_features.py; "
+                  "VERIFIED re-runs. NOT wired to live harness.",
+    ),
 }
 
 

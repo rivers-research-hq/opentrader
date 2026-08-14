@@ -189,6 +189,22 @@ use the term below; don't drift to synonyms the glossary avoids.
   (participation hypothesis falsified), exposure (continuous scaling CANNOT
   lift a book past its structural 53.6%). Roster now has 9 prototype experts
   incl. `laggard`.
+  **DATA-INTEGRATION (2026-08-13)**: two new data sources built + verified —
+  `data/world_bank.py` (World Bank Indicators API, 11 countries, annual GDP
+  growth/inflation/rates, honest label: annual + ~1yr lag = regime CONTEXT,
+  not a daily gate) and `data/economic_calendar.py` (in-house release calendar:
+  FOMC dates + monthly NFP/CPI/PMI + quarterly GDP, with proximity/density/
+  FOMC-window features). `strategies/macro_features.py` bridges both to per-bar
+  features. **TOURNAMENT R1e** (VERIFIED): WB/calendar overlays on the
+  `laggard` champion — wbinflation Calmar 1.799 (WB-inflation → boost GC),
+  wbgrowth 1.793 (EM>US gate on laggard book), density 1.804 (calendar-density
+  soft-scale of momentum only). HONEST: all are THIN overlays — WB changes the
+  book 5-6 times/5y, density edge in few windows, some change 0-2 trades;
+  verified numbers but high transfer risk. Transferable MECHANISMS: skip the
+  32-bar laggard catch-up before FOMC or in WB-weak-growth; boost gold in
+  WB-high-inflation; scale momentum (never the laggard sleeve) in heavy
+  release-density. FOMC event-timing found NO robust edge (apparent winner was
+  a one-bar macro-shock artifact, ablated).
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
