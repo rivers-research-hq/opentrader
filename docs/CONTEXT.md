@@ -42,10 +42,15 @@ use the term below; don't drift to synonyms the glossary avoids.
   as an entry condition in `run_backtest(macro_gate=...)` (default off;
   regression-verified). ONE positive result: **incumbent + "ff_falling"**
   (long only while Fed Funds < its 60d-ago level) flips the wide universe from
-  **−41.8% → +6.2%** (124 trades, PF 1.07, fees 18%). Classified as a LEAD, not
-  an edge: PF 1.07 is thin, and no single year drives it (2026 H1 = 0 trades).
-  Every other family×gate combination still fails wide. Macro data provenance
-  verified against known history (FF 5.33% peak 2023 → 3.62% mid-2026).
+  **−41.8% → +6.2%** (124 trades, PF 1.07, fees 18%). **OOS walkforward
+  (2026-08-13, `/tmp/opentrader/macro_lead_walkforward.py`) DISPROVES it as an
+  edge**: only 1/4 folds positive (−0.7%, +1.8%, −3.0%, −1.2%). The gate is a
+  loss-REDUCER, not an edge (ungated control is −17.1/−15.8/−3.9/−0.6% per
+  fold). Net honest conclusion: the rule floor has no validated wide-universe
+  edge in any feature family or macro regime tested; nothing should be promoted
+  to best.json until a genuinely generalizing signal is found and OOS-validated.
+  Macro data provenance verified against known history (FF 5.33% peak 2023 →
+  3.62% mid-2026).
 - **Rule config** — the incumbent "playbook" = ledger iter-74 config
   (w_mom −0.56, w_rev −0.54, w_rsi 0.90, buy_thresh 0.28, sell_thresh −0.2).
   Its risk contract: 15% per position, 6 concurrent positions, 95% exposure,
