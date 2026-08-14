@@ -23,6 +23,7 @@ if PROJECT not in sys.path:
 
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 # ── Paths ──────────────────────────────────────────────────────────────
@@ -171,6 +172,11 @@ def _build_pva(num_points: int = 500) -> dict:
 
 # ── FastAPI App ────────────────────────────────────────────────────────
 app = FastAPI(title="OpenTrader Dashboard", version="1.0")
+
+# Serve static assets (three.min.js for the 3D neural-network visualization)
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+_STATIC_DIR.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
 @app.get("/")

@@ -799,25 +799,21 @@ body{
         </div>
       </div>
 
-      <!-- EXPERT ROUTER / ARENA SELF-EVOLUTION -->
-      <div class="panel">
+      <!-- EXPERT ROUTER / ARENA SELF-EVOLUTION (3D neural network) -->
+      <div class="panel" style="overflow:hidden">
         <div class="panel-head">
           <div class="panel-title">
             <span class="icon">🧠</span>
-            Expert Router (Arena Self-Evolution)
-            <span class="badge mono" id="er-status">—</span>
+            Expert Router — Living Neural Network
+            <span class="badge mono" id="er-status" style="background:var(--green,#10b981);color:#06281d">LIVE</span>
           </div>
+          <div class="chart-legend" id="er-legend" style="font-size:11px;opacity:.8"></div>
         </div>
-        <div class="panel-body" style="padding:12px">
-          <div id="er-picks" style="margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap"></div>
-          <table class="data-table">
-            <thead>
-              <tr><th>Expert</th><th>OOS Calmar</th><th>Sharpe</th><th>maxDD</th><th>Wt (up)</th><th>Wt (down)</th></tr>
-            </thead>
-            <tbody id="tb-experts"></tbody>
-          </table>
-          <div id="er-note" style="margin-top:8px;color:var(--muted,#8a94a6);font-size:12px"></div>
+        <div style="position:relative;height:440px">
+          <canvas id="er-canvas" style="width:100%;height:100%;display:block"></canvas>
+          <div id="er-tooltip" style="position:absolute;pointer-events:none;background:rgba(8,12,22,.9);border:1px solid #2c3a56;border-radius:8px;padding:6px 10px;font-size:11px;color:#dbe4f0;display:none;z-index:5"></div>
         </div>
+        <div id="er-note" style="padding:8px 12px;color:#8a94a6;font-size:12px"></div>
       </div>
 
     </div><!-- main-left -->
@@ -937,6 +933,7 @@ body{
 
 </div><!-- app -->
 
+<script src="/static/three.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1636,39 +1633,243 @@ function loadExpertRouter(){
   return fetch('/api/expert-router', {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {experts:[],weights:{},picks:{}}; });
 }
 
+// ── 3D LIVING NEURAL NETWORK ─────────────────────────────────────────
+// Family colors: drawdown=cyan, regime=amber, participation=violet, floor=gray
+var ER_FAMILY = {multiasset:'#22d3ee', spectral:'#22d3ee', copula:'#22d3ee',
+                 bayes:'#f59e0b', kalman:'#f59e0b', hurst:'#f59e0b',
+                 wavelet:'#f59e0b', entropy:'#f59e0b', momtrend:'#a78bfa',
+                 laggard:'#a78bfa', rule:'#64748b'};
+var ER_COLORS = {multiasset:0x22d3ee, spectral:0x22d3ee, copula:0x22d3ee,
+                 bayes:0xf59e0b, kalman:0xf59e0b, hurst:0xf59e0b,
+                 wavelet:0xf59e0b, entropy:0xf59e0b, momtrend:0xa78bfa,
+                 laggard:0xa78bfa, rule:0x64748b};
+var ER_GROUPS = {multiasset:'drawdown', spectral:'drawdown', copula:'drawdown',
+                 bayes:'regime', kalman:'regime', hurst:'regime', wavelet:'regime',
+                 entropy:'regime', momtrend:'participation', laggard:'participation'};
+
+var erState = {nodes:{}, graph:null, scene:null, camera:null, renderer:null,
+               raycaster:null, mouse:null, hovered:null, pulse:0};
+var erData = {experts:[], weights:{}, picks:{}};
+
+function initER3D(){
+  var canvas = document.getElementById('er-canvas');
+  if(!canvas) return;
+  var W = canvas.clientWidth, H = canvas.clientHeight;
+  erState.scene = new THREE.Scene();
+  erState.scene.background = new THREE.Color(0x0a0f1c);
+  erState.scene.fog = new THREE.Fog(0x0a0f1c, 30, 70);
+  erState.camera = new THREE.PerspectiveCamera(50, W/H, 0.1, 200);
+  erState.camera.position.set(0, 6, 20);
+  erState.renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false, preserveDrawingBuffer:true});
+  erState.renderer.setSize(W, H, false);
+  erState.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  // lights
+  var amb = new THREE.AmbientLight(0x404060, 1.0);
+  erState.scene.add(amb);
+  var dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(8, 12, 6);
+  erState.scene.add(dir);
+  var point = new THREE.PointLight(0x22d3ee, 0.6, 40);
+  point.position.set(-6, 4, -4);
+  erState.scene.add(point);
+  // starfield backdrop
+  var stars = new THREE.BufferGeometry();
+  var sp = [];
+  for(var i=0;i<500;i++) sp.push((Math.random()-0.5)*120, (Math.random()-0.5)*80, -20-Math.random()*60);
+  stars.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+  var starMat = new THREE.PointsMaterial({color:0x2c3a56, size:0.25, transparent:true, opacity:0.7});
+  erState.scene.add(new THREE.Points(stars, starMat));
+  // container for all nodes+edges (damped drift)
+  erState.graph = new THREE.Group();
+  erState.scene.add(erState.graph);
+  erState.raycaster = new THREE.Raycaster();
+  erState.mouse = new THREE.Vector2();
+  // interaction
+  canvas.addEventListener('mousemove', function(ev){
+    var r = canvas.getBoundingClientRect();
+    erState.mouse.x = ((ev.clientX-r.left)/r.width)*2-1;
+    erState.mouse.y = -((ev.clientY-r.top)/r.height)*2+1;
+    updateERTooltip(ev);
+  });
+  canvas.addEventListener('mouseleave', function(){ erState.hovered = null; hideERTooltip(); });
+  window.__erDebug = erState;   // expose for verification
+  // resize
+  window.addEventListener('resize', function(){
+    var c = document.getElementById('er-canvas');
+    if(!c) return;
+    erState.camera.aspect = c.clientWidth/c.clientHeight;
+    erState.camera.updateProjectionMatrix();
+    erState.renderer.setSize(c.clientWidth, c.clientHeight, false);
+  });
+  erState.ready = true;
+  animateER();
+}
+
+function buildERGraph(){
+  var g = erState.graph;
+  while(g.children.length){ g.remove(g.children[0]); }
+  erState.nodes = {};
+  var experts = erData.experts || [];
+  var weights = erData.weights || {};
+  var picks = erData.picks || {};
+  var n = experts.length;
+  // rule floor at center
+  var center = new THREE.Vector3(0,0,0);
+  var ruleMesh = makeERNode('rule', 0.9, ER_COLORS.rule, true);
+  ruleMesh.position.copy(center);
+  g.add(ruleMesh);
+  erState.nodes.rule = {mesh:ruleMesh, base:0.9, color:ER_COLORS.rule, pos:center.clone()};
+  // place experts on a fibonacci sphere (even 3D spread), sorted by calmar
+  var sorted = experts.slice().sort(function(a,b){ return b.oos_calmar - a.oos_calmar; });
+  var R = 7.5;
+  var golden = Math.PI*(3-Math.sqrt(5));
+  for(var i=0;i<sorted.length;i++){
+    var e = sorted[i];
+    var y = 1-(i/(Math.max(1,sorted.length-1)))*2;
+    var rad = Math.sqrt(1-y*y);
+    var th = golden*i;
+    var pos = new THREE.Vector3(Math.cos(th)*rad*R, y*R, Math.sin(th)*rad*R);
+    var size = 0.7 + (e.oos_calmar / 2.0) * 0.9;   // node radius scales with Calmar
+    var mesh = makeERNode(e.name, size, ER_COLORS[e.name]||0x94a3b8, false);
+    mesh.position.copy(pos);
+    g.add(mesh);
+    var wu = (weights.up||{})[e.name]||0, wd = (weights.down||{})[e.name]||0;
+    erState.nodes[e.name] = {mesh:mesh, base:size, color:ER_COLORS[e.name]||0x94a3b8,
+                             pos:pos.clone(), wu:wu, wd:wd};
+    // edge to the rule hub (weight = average weight across regimes)
+    var w = (wu+wd)/2;
+    var edge = makeEREdge(pos, center, Math.max(0.02, w*3), ER_COLORS[e.name]||0x94a3b8);
+    g.add(edge);
+    erState.nodes[e.name].edge = edge;
+    // if picked, add a bright halo
+    if(picks.up===e.name || picks.down===e.name){
+      var halo = new THREE.Mesh(
+        new THREE.SphereGeometry(size*2.2, 16, 16),
+        new THREE.MeshBasicMaterial({color:ER_COLORS[e.name], transparent:true, opacity:0.15})
+      );
+      halo.position.copy(pos);
+      g.add(halo);
+      erState.nodes[e.name].halo = halo;
+    }
+  }
+}
+
+function makeERNode(name, size, color, isCenter){
+  var geo = new THREE.IcosahedronGeometry(size, 1);
+  var mat = new THREE.MeshStandardMaterial({color:color, emissive:color,
+      emissiveIntensity:0.35, roughness:0.35, metalness:0.25, flatShading:true});
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.userData = {expert:name, isCenter:isCenter};
+  // inner glow sprite
+  var spr = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: erGlowTexture(color), color:0xffffff, transparent:true, opacity:0.35, depthWrite:false }));
+  spr.scale.set(size*5, size*5, 1);
+  mesh.add(spr);
+  return mesh;
+}
+
+function erGlowTexture(colorHex){
+  var c = document.createElement('canvas'); c.width=64; c.height=64;
+  var ctx = c.getContext('2d');
+  var grad = ctx.createRadialGradient(32,32,0,32,32,32);
+  grad.addColorStop(0,'rgba(255,255,255,0.9)');
+  grad.addColorStop(0.3, 'rgba(255,255,255,0.25)');
+  grad.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,64,64);
+  var tex = new THREE.CanvasTexture(c);
+  return tex;
+}
+
+function makeEREdge(a, b, width, color){
+  var dir = new THREE.Vector3().subVectors(b, a);
+  var len = dir.length();
+  var mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
+  var geo = new THREE.CylinderGeometry(width/2, width/2, len, 6, 1, true);
+  geo.translate(0, len/2, 0);
+  var mat = new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:0.35});
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(mid);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+  return mesh;
+}
+
+function animateER(){
+  if(!erState.ready) return;
+  requestAnimationFrame(animateER);
+  var t = Date.now()/1000;
+  erState.pulse += 0.02;
+  // organic camera drift
+  erState.camera.position.x = Math.sin(t*0.12)*2.5;
+  erState.camera.position.y = 6 + Math.sin(t*0.07)*2;
+  erState.camera.position.z = 20 + Math.cos(t*0.09)*2;
+  erState.camera.lookAt(0,0,0);
+  // graph breathing rotation
+  erState.graph.rotation.y = Math.sin(t*0.05)*0.35;
+  erState.graph.rotation.x = Math.sin(t*0.03)*0.15;
+  // node pulse (weight-driven) + label sprite bob
+  for(var k in erState.nodes){
+    var nd = erState.nodes[k];
+    if(!nd.mesh) continue;
+    var live = Math.abs(Math.sin(erState.pulse*0.8 + (k.length*0.7)));
+    var weight = Math.max(0.05, (nd.wu||0)+(nd.wd||0));
+    var s = nd.base * (1 + weight*0.5) * (0.9 + 0.1*live);
+    nd.mesh.scale.set(s, s, s);
+    if(nd.halo){ nd.halo.scale.setScalar(1 + 0.08*Math.sin(t*2)); }
+    // edge energy
+    if(nd.edge && nd.edge.material){
+      nd.edge.material.opacity = 0.2 + weight*1.2 + 0.05*Math.sin(t*3+(k.length*1.3));
+    }
+  }
+  // hover picking
+  if(erState.raycaster && erState.nodes){
+    erState.raycaster.setFromCamera(erState.mouse, erState.camera);
+    var objs = [];
+    for(var k2 in erState.nodes){ if(erState.nodes[k2].mesh) objs.push(erState.nodes[k2].mesh); }
+    var hits = erState.raycaster.intersectObjects(objs, false);
+    erState.hovered = (hits.length && hits[0].object.userData.expert) ? hits[0].object.userData.expert : null;
+  }
+  erState.renderer.render(erState.scene, erState.camera);
+}
+
+function updateERTooltip(ev){
+  if(!erState.hovered) { hideERTooltip(); return; }
+  var e = erData.experts.filter(function(x){ return x.name===erState.hovered; })[0];
+  if(!e) return;
+  var tip = document.getElementById('er-tooltip');
+  if(!tip) return;
+  var wu = ((erData.weights||{}).up||{})[e.name]||0;
+  var wd = ((erData.weights||{}).down||{})[e.name]||0;
+  tip.style.display = 'block';
+  tip.style.left = (ev.clientX - (ev.target.parentElement.getBoundingClientRect().left)+12)+'px';
+  tip.style.top  = (ev.clientY - (ev.target.parentElement.getBoundingClientRect().top)+12)+'px';
+  tip.innerHTML = '<b>'+e.name+'</b><br>OOS Calmar '+e.oos_calmar.toFixed(3)+
+    '<br>Sharpe '+e.oos_sharpe.toFixed(2)+' · maxDD '+(e.maxdd*100).toFixed(1)+'%'+
+    '<br>wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
+}
+function hideERTooltip(){ var t=document.getElementById('er-tooltip'); if(t) t.style.display='none'; }
+
 function renderExpertRouter(d){
-  var picksEl = $('er-picks');
-  picksEl.innerHTML = '';
-  var picks = d.picks || {};
-  ['up','down'].forEach(function(regime){
-    var el = document.createElement('div');
-    el.className = 'pill' + (picks[regime] === 'rule' ? '' : ' live');
-    el.style.cssText = 'background:var(--surface2,#111827);border:1px solid var(--border,#263042);color:var(--text,#e5e7eb);padding:6px 12px;border-radius:8px';
-    el.innerHTML = '<span style="opacity:.7">' + regime + ':&nbsp;</span><b>' + (picks[regime] || 'rule') + '</b>';
-    picksEl.appendChild(el);
-  });
-  var tb = $('tb-experts');
-  tb.innerHTML = '';
-  var w = d.weights || {};
-  (d.experts || []).forEach(function(e){
-    var tr = document.createElement('tr');
-    var wu = (w.up||{})[e.name] || 0, wd = (w.down||{})[e.name] || 0;
-    tr.innerHTML = '<td>'+e.name+'</td><td class="mono">'+e.oos_calmar.toFixed(3)+'</td>'+
-      '<td class="mono">'+e.oos_sharpe.toFixed(2)+'</td><td class="mono">'+(e.maxdd*100).toFixed(1)+'%</td>'+
-      '<td class="mono">'+wu.toFixed(2)+'</td><td class="mono">'+wd.toFixed(2)+'</td>';
-    tb.appendChild(tr);
-  });
-  var st = $('er-status');
-  st.textContent = d.status || '—';
-  var note = $('er-note');
-  note.textContent = d.note || '';
+  erData = {experts:d.experts||[], weights:d.weights||{}, picks:d.picks||{}};
+  // legend
+  var lg = document.getElementById('er-legend');
+  if(lg){
+    lg.innerHTML = '<span style="color:#22d3ee">● drawdown</span> &nbsp;'+
+                   '<span style="color:#f59e0b">● regime</span> &nbsp;'+
+                   '<span style="color:#a78bfa">● participation</span> &nbsp;'+
+                   '<span style="color:#64748b">● rule floor</span>';
+  }
+  var note = document.getElementById('er-note');
+  var picks = d.picks||{};
+  if(note) note.textContent = 'picks: up → '+ (picks.up||'rule') +' · down → '+(picks.down||'rule')+'  ·  '+(d.status||'');
+  if(!erState.ready){ return; }
+  buildERGraph();
 }
 
 function initPolling(){
   // Fast polls
   setInterval(function(){ loadTrades().then(function(){ renderTrades(); renderFooter(); }); }, 8000);
   setInterval(function(){ loadRegimes().then(renderRegimes); }, 12000);
-  // Expert router (arena self-evolution) — 15s poll
+  // Expert router (arena self-evolution) — 15s poll, rebuilds the 3D graph
   setInterval(function(){ loadExpertRouter().then(renderExpertRouter); }, 15000);
   // Medium polls
   setInterval(function(){ loadChart().then(renderChart); }, 30000);
@@ -1695,6 +1896,8 @@ async function init(){
   initTabs();
   await Promise.all([loadState(), loadChart(), loadTrades(), loadRegimes(), loadBenchmark(), loadExpertRouter()]);
   renderAll();
+  // 3D neural network
+  try { initER3D(); } catch(e){ console.error('ER3D init failed:', e); }
   renderExpertRouter(await loadExpertRouter());
   initSSE();
   initPolling();
