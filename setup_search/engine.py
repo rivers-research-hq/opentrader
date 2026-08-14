@@ -148,8 +148,11 @@ def run_backtest(data: tuple, cfg: dict, macro_gate: "pd.Series|None" = None) ->
             cfg["z_period"],
         )
     )
-    if len(master) <= start + 5:
+    # start one bar later so the FIRST signal bar (master[t-1]) is fully
+    # warmed up (no same-bar lookahead even on the first trade).
+    if len(master) <= start + 6:
         return _empty_result()
+    start = start + 1
 
     cash = float(cfg.get("_start_equity", DEFAULT_START_EQUITY))
     pos = {}
@@ -162,18 +165,27 @@ def run_backtest(data: tuple, cfg: dict, macro_gate: "pd.Series|None" = None) ->
 
     for t in range(start, len(master)):
         idx = master[t]
+        # NO-LOOKAHEAD: decisions (score, regime, macro gate, exits) use the
+        # PREVIOUS bar's close (master[t-1]); fills execute at THIS bar's
+        # close (idx). Same-bar execution would let the strategy trade at the
+        # close whose data generated the signal — impossible in practice.
+        sig_idx = master[t - 1]
+        sig_t = t - 1
         # date-guard (same as rule_gate.screen): a symbol whose aligned
-        # series does not cover this bar (late IPO, delisted, gap) is
-        # inactive for the bar — not scored, not a candidate. The 17-sym
-        # curated universe always covers the master; wide universes don't.
-        bar_feat = {s: feat[s].loc[idx] for s in syms if idx in feat[s].index}
+        # series does not cover the signal bar is inactive for the bar —
+        # not scored, not a candidate. The 17-sym curated universe always
+        # covers the master; wide universes don't.
+        bar_feat = {s: feat[s].loc[sig_idx] for s in syms if sig_idx in feat[s].index}
         if not bar_feat:
             continue
         scores = _score_at(
             bar_feat, cfg,
-            {s: rank[s][t] if cfg["rank_on"] else 0.0 for s in bar_feat},
+            {s: rank[s][sig_t] if cfg["rank_on"] else 0.0 for s in bar_feat},
         )
-        close_t = {s: float(closes[s].loc[idx]) for s in bar_feat}
+        close_t = {s: float(closes[s].loc[idx]) for s in bar_feat if idx in closes[s].index}
+        if not close_t:
+            continue
+        regime_ok = regime is None or bool(regime.iloc[sig_t])
 
         for s in list(pos.keys()):
             p = pos[s]
@@ -254,10 +266,10 @@ def run_backtest(data: tuple, cfg: dict, macro_gate: "pd.Series|None" = None) ->
             sc = float(scores.get(s, -99))
             if sc < cfg["buy_thresh"]:
                 continue
-            if regime is not None and not bool(regime.iloc[t]):
+            if not regime_ok:
                 continue
             if macro_gate is not None:
-                _key = idx
+                _key = sig_idx
                 if macro_gate.index.tz is not None and _key.tzinfo is None:
                     _key = _key.tz_localize("UTC")
                 elif macro_gate.index.tz is None and _key.tzinfo is not None:
