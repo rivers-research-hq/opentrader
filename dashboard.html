@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>OpenTrader — Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -657,6 +660,9 @@ body{
       </div>
     </div>
     <div class="topbar-right">
+      <div class="pill" id="version-pill" title="Dashboard build" style="background:var(--accent-soft, rgba(34,211,238,.12));border-color:rgba(34,211,238,.4);color:var(--cyan)">
+        <span class="dot" style="background:var(--cyan);animation:none"></span><span id="version-text">v2 · NEURAL</span>
+      </div>
       <div class="pill live" id="status-pill">
         <span class="dot"></span>
         <span id="status-text">LIVE</span>
@@ -805,7 +811,12 @@ body{
         </div>
       </div>
 
-      <!-- EXPERT ROUTER / ARENA SELF-EVOLUTION (3D neural network) -->
+    </div><!-- main-left -->
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <div class="right-stack">
+
+      <!-- EXPERT ROUTER / ARENA SELF-EVOLUTION (3D neural network) — TOP OF RIGHT COLUMN -->
       <div class="panel" style="overflow:hidden">
         <div class="panel-head">
           <div class="panel-title">
@@ -815,17 +826,12 @@ body{
           </div>
           <div class="chart-legend" id="er-legend" style="font-size:11px;opacity:.8"></div>
         </div>
-        <div style="position:relative;height:440px">
+        <div style="position:relative;height:380px">
           <canvas id="er-canvas" style="width:100%;height:100%;display:block"></canvas>
           <div id="er-tooltip" style="position:absolute;pointer-events:none;background:rgba(8,12,22,.9);border:1px solid #2c3a56;border-radius:8px;padding:6px 10px;font-size:11px;color:#dbe4f0;display:none;z-index:5"></div>
         </div>
         <div id="er-note" style="padding:8px 12px;color:#8a94a6;font-size:12px"></div>
       </div>
-
-    </div><!-- main-left -->
-
-    <!-- ═══ RIGHT PANEL ═══ -->
-    <div class="right-stack">
 
       <!-- Exposure / Allocation -->
       <div class="panel">
