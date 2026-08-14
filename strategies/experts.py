@@ -59,6 +59,9 @@ VERIFIED: Dict[str, VerifiedExpert] = {
         "Momentum-top + breadth gate (R1/R2 survivor, intl OOS 0.938)"),
     "multiasset": VerifiedExpert("multiasset", 1.289, 1.32, -0.090,
         "Momentum-filtered vol-scaled multi-asset allocator (drawdown king)"),
+    "laggard": VerifiedExpert("laggard", 1.666, 1.35, -0.075,
+        "Momentum leaders + in-bull laggard catch-up; solves the broad-bull "
+        "participation gap (beats intl basket 2023-26 +71.8% vs +64.5%)"),
 }
 
 # Failed OOS (do not route to, documented why):

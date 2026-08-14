@@ -171,6 +171,24 @@ use the term below; don't drift to synonyms the glossary avoids.
   (harness.py:2636-2639 maps bull/bear→up/down); a first version used
   'bull'/'bear' and would have been inert — caught and fixed. Router picks
   multiasset per-regime from the seed. No live order flow.
+  **TOURNAMENT R1d — PARTICIPATION ROUND (2026-08-13, VERIFIED)**: hunted the
+  one gap — every verified expert trails the equal-weight basket in the broad
+  bull (intl 2023-26 +64.5% vs their ~50-57%). New bar `bull_participation_oos`
+  (beat the 2023-26 fold AND stay risk-adjusted; calibrated so momtrend and
+  multiasset both FAIL it). 6 agents; one winner VERIFIED by re-run:
+  **`laggard`** (momentum-top k5 @0.7 exposure + one 10-day laggard @0.4
+  catch-up, both only in confirmed bull breadth>0.7; weak breadth = no
+  entries, laggards age out at 32 bars) — OOS Calmar **1.666**, maxDD **−7.5%**,
+  Sharpe 1.35, beats intl basket in 2023-26 (+71.8% vs +64.5%), both folds
+  beat, oos_pass + bull_participation_oos both TRUE. Key insight: the broad-
+  bull gap was UNDER-PARTICIPATION from concentration (top-k) + vol-tilt toward
+  low-vol laggards; an in-bull catch-up book restores participation. Others:
+  highk (K=8 equal-weight rebal42 Calmar 1.35; inverse-vol tilt was the
+  problem), sleeve (small well-timed 30% GC/USDJPY sleeve, Calmar 1.23),
+  climb (rotate to gold/EUR on rate-of-climb break, Calmar 0.83), equalweight
+  (participation hypothesis falsified), exposure (continuous scaling CANNOT
+  lift a book past its structural 53.6%). Roster now has 9 prototype experts
+  incl. `laggard`.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all

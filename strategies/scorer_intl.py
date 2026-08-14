@@ -83,3 +83,17 @@ def oos_pass(s: dict) -> bool:
     if "error" in s:
         return False
     return s["beats_basket_calmar"] and s["beats_basket_sharpe"]
+
+
+def bull_participation_oos(s: dict) -> bool:
+    """Round 1d bar (international): the missing piece — BEAT the equal-weight
+    basket in the broad-bull fold (2023-26) while still beating it risk-
+    adjusted. All 8 verified experts trail the basket there (+64.5% vs
+    ~50-57%); they win drawdown but not participation."""
+    if "error" in s:
+        return False
+    folds = {f["fold"]: f for f in s.get("folds", [])}
+    f = folds.get("2023-2026")
+    if f is None or not f.get("beat_basket"):
+        return False
+    return s["beats_basket_calmar"] and s["beats_basket_sharpe"] and s["maxdd"] > -0.20

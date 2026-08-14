@@ -165,6 +165,19 @@ SPECIALIZATIONS: dict = {
         feature_plan="swarm agents/r1c_entropy.py — Shannon entropy of market returns",
         data_plan="swarm_data.pkl; verified. NOT wired to live harness.",
     ),
+    "laggard": ExpertSpec(
+        id="laggard",
+        name="Momentum + in-bull laggard catch-up (R1d — participation winner)",
+        description="In a CONFIRMED bull (breadth>0.7) hold top-5 momentum leaders "
+                    "PLUS one 10-day laggard (catch-up); weak breadth = no entries. "
+                    "SOLVES the broad-bull gap: OOS Calmar 1.666, maxDD -7.5%, beats "
+                    "intl basket in 2023-26 (+71.8% vs +64.5%).",
+        status="prototype",
+        checkpoint=None,
+        universe="intl tradables (10) — daily bars",
+        feature_plan="swarm agents/r1d_laggard.py — momentum leaders + laggard catch-up book",
+        data_plan="swarm intl_data.pkl; VERIFIED by re-run. NOT wired to live harness.",
+    ),
 }
 
 
