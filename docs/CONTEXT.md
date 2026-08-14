@@ -62,13 +62,26 @@ use the term below; don't drift to synonyms the glossary avoids.
   **Cumulative honest verdict: nothing on this data beats passive SPY
   buy-and-hold net of costs — not the 17-name contract, any feature family,
   any macro regime, or long-horizon cross-asset timing. The system's edge is
-  not in daily-rule long-only allocation.** **International test (2026-08-13,
+  not in daily-rule long-only allocation.**   **International test (2026-08-13,
   `/tmp/opentrader/international_test.py`)** — 10 international assets
   (N225/FTSE/GDAXI/HSI, EEM/EFA, FX, gold/oil), no-lookahead, same gates:
   no active variant beats buy-and-hold (best rank_vix +8.5% vs basket 10.0%),
   BUT the equal-weight international basket has better risk-adjusted returns
   than SPY (Calmar 0.733 vs 0.472, Sharpe 1.03 vs 0.75) — international
   diversification reduces drawdown; US mega-cap concentration is the risk.
+  **Metric screen (2026-08-13, `/tmp/opentrader/metric_screen.py`)** — tests
+  whether ANY regime metric (breadth50/200, cross-sectional momentum
+  dispersion, SPY/MA50/200, VIX, FEDFUNDS, DGS10, yield curve, CPI YoY)
+  separates good forward periods from bad (quintile spread of 20d/60d basket
+  forward returns, fold-consistent over 2008→2026). Result: **no metric
+  passes** — VIX and curve show the largest raw spreads but flip sign across
+  folds (one-window luck); a promising-looking dispersion lead was a
+  PENNY-STOCK ARTIFACT in the first-400-symbol alphabetical slice and
+  vanishes on a clean liquid universe (±0.4% noise). The infra for a rich
+  metric set exists (value_head_1m.collect(), data/economics.py FRED client
+  + FRED_SERIES) but no single metric in it has demonstrated predictive
+  power; treat any claim that "adding metric X unlocks the edge" as an
+  hypothesis to screen, not a conclusion.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
