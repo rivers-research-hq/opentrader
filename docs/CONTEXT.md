@@ -111,6 +111,18 @@ use the term below; don't drift to synonyms the glossary avoids.
   exits, trailing stops, RSI-oversold filters, vol-targeting overlays,
   dispersion tilt, sector-split without industry gate. This is the first
   reproducible, fold-consistent, benchmark-beating result of the project.
+  **TOURNAMENT R2 — OOS TRANSFER (2026-08-13)**: survivors re-run with FIXED
+  parameters on the international archive (2021-2026, symbols never seen in
+  selection), scored vs intl basket BH (Calmar 0.501). **TWO transfer
+  (verified): `r1_multiasset` OOS Calmar 1.289 / maxDD −9.0% (momentum top-8
+  of 10 + 60% inverse-vol, rebal 63 — the drawdown tool) and `r1_momtrend`
+  OOS Calmar 0.852 / maxDD −13.0% (momentum K=5 + market-breadth entry gate —
+  the regime tool).** Two FAIL with clear diagnosis: `shortrev` (US single-
+  stock 2d-bounce microstructure absent on indices/FX/commodities) and
+  `blend` (industry-relative reference group doesn't exist on 10 instruments).
+  Conclusion: the transferable edge is STRUCTURAL (breadth-regime + momentum;
+  vol-scaled multi-asset), not symbol-specific. These two are the arena
+  substrate.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
