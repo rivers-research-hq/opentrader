@@ -95,6 +95,22 @@ use the term below; don't drift to synonyms the glossary avoids.
   (VIX/FF) was wrong and the combination matters. The arena's job is now
   concrete: learn the regime SWITCH between momentum-top and contrarian, using
   the metric library as switch inputs.
+  **RESEARCH-SWARM TOURNAMENT R1 (2026-08-13, `/tmp/opentrader/swarm/`) — the
+  turning point.** 6 parallel research agents, shared scorer
+  (`swarm/scorer.py`, no-lookahead, 0.35%/side), escalating bars (R1 beat
+  basket BH ann+Calmar; R2 beat SPY Sharpe+Calmar+>2/4 folds; R3 positive in
+  2024-26 AND maxDD > −50%). **FOUR strategies passed ALL THREE bars and beat
+  both benchmarks on every risk-adjusted axis** (all verified by re-run):
+  `r1_momtrend` ann 27.5%/Calmar 0.682/maxDD −40% (momentum-top K=5 + market-
+  breadth entry gate, no forced exits); `r1_shortrev` ann 26.8%/Calmar 0.579
+  (extreme-short 2-3d look + 36-40d hold, top-7 worst); `r1_blend` ann 25.2%/
+  Calmar 0.507 (composite −z(mom60) − z(industry-relative), top-3/25 bars);
+  `r1_multiasset` ann 7.2%/Sharpe 0.81/maxDD −18.5% (momentum top-10 of 13
+  assets, vol-scaled — the drawdown tool). Convergence: "buy weakness" is the
+  common core; market breadth is the drawdown key. Failed & logged: forced
+  exits, trailing stops, RSI-oversold filters, vol-targeting overlays,
+  dispersion tilt, sector-split without industry gate. This is the first
+  reproducible, fold-consistent, benchmark-beating result of the project.
   **Engine integrity (commit 1718f33)**: `run_backtest` no longer executes at
   the same close that generated the signal — decisions use master[t-1], fills
   use bar t close; iter-74 honest number +23.1%→+18.6% (17-sym); all
