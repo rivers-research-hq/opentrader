@@ -304,6 +304,72 @@ async def api_benchmark():
     return s.get("hodl_benchmark", {})
 
 
+@app.get("/api/trade-status")
+async def api_trade_status():
+    """Why am I / am I not trading. Reads paper_state + live_router_state."""
+    import json as _json
+    from pathlib import Path as _Path
+
+    s = _read_state()
+    cash = s.get("cash", 0)
+    pv = s.get("portfolio_value", cash)
+    positions = len(s.get("positions", []))
+    cycle = s.get("cycle", 0)
+
+    # fills from metrics if present
+    m = s.get("metrics", {})
+    fills = m.get("fills_total", m.get("trades_total", 0))
+
+    # router pick
+    ROUTER_STATE = _Path(__file__).resolve().parent / "data" / "live_router_state.json"
+    router = {}
+    if ROUTER_STATE.exists():
+        try:
+            router = _json.loads(ROUTER_STATE.read_text())
+        except Exception:
+            router = {}
+    weights = router.get("weights", {})
+    track = router.get("track", {})
+    def _pick(regime):
+        t = track.get(regime, {})
+        best, best_imp = "rule", t.get("rule", {}).get("sum", 0.0)
+        for e, rec in t.items():
+            if e == "rule":
+                continue
+            n = rec.get("n", 0)
+            imp = rec.get("sum", 0.0) / n if n else 0.0
+            w = weights.get(regime, {}).get(e, 0.0)
+            if n >= 5 and w > 0 and imp > best_imp:
+                best, best_imp = e, imp
+        return best
+    pick_up = _pick("up")
+
+    # status classification
+    if fills > 0:
+        status, title = "trading", f"TRADING — {fills} fill(s) · cycle {cycle}"
+    elif positions > 0:
+        status, title = "trading", f"HOLDING {positions} position(s) · cycle {cycle}"
+    else:
+        status, title = "idle", f"IDLE — 0 fills · cycle {cycle}"
+
+    return {
+        "status": status,
+        "title": title,
+        "cash": cash,
+        "pv": pv,
+        "positions": positions,
+        "cycle": cycle,
+        "fills": fills,
+        "pick_up": pick_up,
+        "mode": "rule-primary",
+        "note": ("Router pick=" + str(pick_up) +
+                 " (verified expert) is NOT the live trader: harness runs "
+                 "rule-primary, which trades the iter-74 rule and bypasses the "
+                 "verified experts. 0 fills because no symbol's rule score "
+                 "clears buy_thresh in the current market."),
+    }
+
+
 @app.get("/api/expert-router")
 async def api_expert_router():
     """Arena self-evolution view: verified experts, weight schedule, current

@@ -138,8 +138,29 @@ body{
 /* ═══════════════════════════════════════════════════════════
    METRIC CARDS
    ═══════════════════════════════════════════════════════════ */
-.metrics{
-  display:grid;
+/* ── Trade status indicator ──────────────────────────────── */
+.trade-status{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:10px 16px;margin:10px 16px 0;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--border);
+}
+.trade-status.idle{border-color:rgba(251,191,36,.35);background:linear-gradient(90deg,rgba(251,191,36,.06),transparent)}
+.trade-status.trading{border-color:rgba(52,211,153,.4);background:linear-gradient(90deg,rgba(52,211,153,.07),transparent)}
+.trade-status.error{border-color:rgba(244,63,94,.45);background:linear-gradient(90deg,rgba(244,63,94,.07),transparent)}
+.ts-left{display:flex;align-items:center;gap:12px;min-width:0}
+.ts-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.trade-status.idle .ts-dot{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:tsPulse 2s infinite}
+.trade-status.trading .ts-dot{background:var(--green);box-shadow:0 0 8px var(--green);animation:tsPulse 1.4s infinite}
+.trade-status.error .ts-dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes tsPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ts-title{font-size:14px;font-weight:700;color:var(--text-bright)}
+.ts-sub{font-size:11px;color:var(--text-dim);margin-top:2px;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-right{display:flex;gap:18px;flex-shrink:0}
+.ts-cell{text-align:right}
+.ts-label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint)}
+.ts-cell b{font-size:13px;font-weight:600;color:var(--text-bright)}
+
+.metrics{  display:grid;
   grid-template-columns:repeat(6,1fr);
   gap:10px;
 }
@@ -726,6 +747,23 @@ body{
       <div class="label">vs HODL Benchmark</div>
       <div class="value mono" id="m-vs-hodl">—</div>
       <div class="sub">bot <span class="mini-val mono" id="m-bot-ret">—</span> / hodl <span class="mini-val mono" id="m-hodl">—</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ TRADE STATUS INDICATOR (why am I / am I not trading) ═══ -->
+  <div class="trade-status" id="trade-status">
+    <div class="ts-left">
+      <span class="ts-dot" id="ts-dot"></span>
+      <div>
+        <div class="ts-title" id="ts-title">Checking…</div>
+        <div class="ts-sub" id="ts-sub">—</div>
+      </div>
+    </div>
+    <div class="ts-right">
+      <div class="ts-cell"><span class="ts-label">ROUTER PICK</span><b class="mono" id="ts-pick">—</b></div>
+      <div class="ts-cell"><span class="ts-label">MODE</span><b class="mono" id="ts-mode">—</b></div>
+      <div class="ts-cell"><span class="ts-label">BEST SCORE / BUY AT</span><b class="mono" id="ts-score">—</b></div>
+      <div class="ts-cell"><span class="ts-label">FILLS</span><b class="mono" id="ts-fills">—</b></div>
     </div>
   </div>
 
@@ -1644,6 +1682,29 @@ function initSSE(){
 // ═══════════════════════════════════════════════════════════
 // POLLING
 // ═══════════════════════════════════════════════════════════
+function loadTradeStatus(){
+  return fetch('/api/trade-status', {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {status:'unknown'}; });
+}
+
+function renderTradeStatus(d){
+  var bar = document.getElementById('trade-status');
+  if(!bar) return;
+  bar.className = 'trade-status ' + (d.status||'idle');
+  var dot = document.getElementById('ts-dot');
+  var title = document.getElementById('ts-title');
+  var sub = document.getElementById('ts-sub');
+  var pick = document.getElementById('ts-pick');
+  var mode = document.getElementById('ts-mode');
+  var score = document.getElementById('ts-score');
+  var fills = document.getElementById('ts-fills');
+  if(title) title.textContent = d.title || '—';
+  if(sub) sub.textContent = d.note || '—';
+  if(pick) pick.textContent = d.pick_up || 'rule';
+  if(mode) mode.textContent = d.mode || '—';
+  if(score) score.textContent = (d.best_score!=null ? d.best_score : '0.00') + ' / 0.28';
+  if(fills) fills.textContent = (d.fills!=null ? d.fills : '0');
+}
+
 function loadExpertRouter(){
   return fetch('/api/expert-router', {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {experts:[],weights:{},picks:{}}; });
 }
@@ -1912,6 +1973,7 @@ function initPolling(){
   setInterval(function(){ loadRegimes().then(renderRegimes); }, 12000);
   // Expert router (arena self-evolution) — 15s poll, rebuilds the 3D graph
   setInterval(function(){ loadExpertRouter().then(renderExpertRouter); }, 15000);
+  setInterval(function(){ loadTradeStatus().then(renderTradeStatus); }, 8000);
   // Medium polls
   setInterval(function(){ loadChart().then(renderChart); }, 30000);
   setInterval(function(){ loadBenchmark().then(renderMetrics); }, 20000);
@@ -1935,8 +1997,9 @@ function initPolling(){
 // ═══════════════════════════════════════════════════════════
 async function init(){
   initTabs();
-  await Promise.all([loadState(), loadChart(), loadTrades(), loadRegimes(), loadBenchmark(), loadExpertRouter()]);
+  await Promise.all([loadState(), loadChart(), loadTrades(), loadRegimes(), loadBenchmark(), loadExpertRouter(), loadTradeStatus()]);
   renderAll();
+  renderTradeStatus(await loadTradeStatus());
   // 3D neural network
   try { initER2D(); } catch(e){ console.error('ER2D init failed:', e); }
   renderExpertRouter(await loadExpertRouter());
