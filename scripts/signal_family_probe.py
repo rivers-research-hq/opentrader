@@ -80,7 +80,8 @@ def main():
         n_pass += ok
         print(f"  {name:>5}: {'PASS' if ok else 'fail'}")
     print(f"\n{n_pass}/{len(rows)} families generalize. "
-          "Documented (2026-08-13): 0 — no existing family generalizes under "
+          "Documented (2026-08-13): 0. Re-verified 2026-08-23 (regenerated "
+          "archive): still 0/7 — no existing family generalizes under "
           "realistic fees; only new signal inputs (macro/sector-relative) are "
           "untested paths.")
 

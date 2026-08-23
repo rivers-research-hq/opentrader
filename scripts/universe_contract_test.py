@@ -4,10 +4,11 @@
 RECONSTRUCTED 2026-08-22 — the original /tmp/opentrader/universe_contract_test.py
 was lost to tmp cleanup. Faithful to the AGENTS.md spec (2026-08-13):
 
-    same contract on the 511-registry and the 7.3k-symbol fullcross archive
-    (~25 min). The contract does NOT generalize beyond the 17 search names
-    (−37.8% registry, −40.4% wide); treat any "edge" claim as universe-bound
-    until proven otherwise.
+    same contract on the 511-registry (466 ∩ archive) and the 7.3k-symbol
+    fullcross archive (~25 min). The contract does NOT generalize beyond the
+    17 search names (−45.95% registry, −41.07% wide — re-verified 2026-08-23
+    on the regenerated archive; was −37.8%/−40.4% on the 2026-08-13 archive);
+    treat any "edge" claim as universe-bound until proven otherwise.
 
 "Contract" = the best.json config (risk 0.15, regime_filter 1/96, buy_thresh
 0.28, 40 keys) — the documented rule floor. We run the repo's own run_backtest
@@ -89,8 +90,10 @@ def main():
     m_fc = run_backtest(fc, cfg)
     print(f"[fullcross {n_fc:>4} syms] {fmt(m_fc)}")
 
-    print("\nDocumented (2026-08-13): registry −37.8%, wide −40.4% — "
-          "the contract does NOT generalize beyond the 17 search names.")
+    print("\nDocumented (2026-08-13): registry −37.8%, wide −40.4%. "
+          "Re-verified 2026-08-23 (regenerated archive, 466 ∩ archive): "
+          "registry −45.95%, wide −41.07% — the contract does NOT generalize "
+          "beyond the 17 search names.")
 
 
 if __name__ == "__main__":
