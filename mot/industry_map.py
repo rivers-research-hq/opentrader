@@ -248,7 +248,6 @@ INDUSTRY_REGISTRY: Dict[str, List[str]] = {
         "PENN",
         "CHDN",
         "SRAD",
-        "BALY",
     ],
     "restaurants": [
         "MCD",
