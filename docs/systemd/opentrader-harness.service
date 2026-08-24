@@ -1,6 +1,6 @@
 # Systemd service for OpenTrader Trading Harness
-# Now connects to llama-swap on :8080 (managed qwythos-9b-mtp) instead of a
-# redundant direct llama-server on :5809. llama-swap handles model lifecycle.
+# Runs harness.py directly (finnhub, stage 3, rule-primary). The wrapper
+# run_harness.py was retired — see issue #118.
 [Unit]
 Description=OpenTrader Trading Harness
 After=network.target
@@ -10,11 +10,11 @@ Wants=llama-swap.service
 Type=simple
 User=mrc
 WorkingDirectory=/home/mrc/opentrader
-ExecStart=/home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/run_harness.py
-Restart=on-failure
+ExecStart=/home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/harness.py --exchange finnhub --no-synthetic --stage 3 --symbols "AAPL,MSFT,NVDA,AMD,AMZN,GOOGL,META,JPM,XOM,JNJ,PG,KO,DIS,CSCO,WMT,NFLX,BTC/USDT,ETH/USDT,SOL/USDT" --cash 500 --max-cycles 0 --max-daily-trades 30 --rule-primary --no-universe --pin-risk --interval 60 --llama-host http://127.0.0.1:5801 --vix-gate off
+Restart=always
 RestartSec=15
 StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
