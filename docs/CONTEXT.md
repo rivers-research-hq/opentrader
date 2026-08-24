@@ -13,7 +13,7 @@ use the term below; don't drift to synonyms the glossary avoids.
   The actual contract (ledger iter-74, restored to best.json) measures
   **+2.27%/trade, +23.1% net over the full 5y** (17-sym incl. SPY) on the repo's
   own run_backtest. **BUT it does not generalize** (2026-08-13, universe test
-  `/tmp/opentrader/universe_contract_test.py`): same contract on the 511-symbol
+  `scripts/universe_contract_test.py`): same contract on the 511-symbol
   harness registry = **−37.8% net (PF 0.71)**; on the 7.3k-symbol survivorship-
   honest fullcross archive = **−40.4% (PF 0.83)**; DEFAULT_CONFIG on the same
   wide archive = −60.6% (engine sanity). It is also window- and data-source
@@ -27,8 +27,8 @@ use the term below; don't drift to synonyms the glossary avoids.
   walkforward.py excludes SPY from the aligned set, so its contract rows
   (incl. the +40.12% full-archive) ran regime-OFF; the +23.1%/+16.9% figures
   above are the regime-ON, live-faithful ones. Reproduce:
-  `/tmp/opentrader/rule_floor_honest.py` and `/tmp/opentrader/universe_contract_test.py`.
-  **Signal-family probe (2026-08-13, `/tmp/opentrader/signal_family_probe.py`)**
+  `data/evidence/rule_floor_honest.py` and `scripts/universe_contract_test.py`.
+  **Signal-family probe (2026-08-13, `scripts/signal_family_probe.py`)**
   — no feature family in the engine's existing space generalizes on the 5y-wide
   universe under realistic fees: mom/rev/rsi/brk/z blends, cross-sectional rank
   (`rank_on`), vol-adaptive sizing, RSI/momentum/MA filters all lose (best of
@@ -37,21 +37,21 @@ use the term below; don't drift to synonyms the glossary avoids.
   the standing promotion requirement — nothing promotes without passing it.
   The remaining honest paths: new signal inputs (macro FRED/VIX — VIX series
   only spans 2y in macro_series.pkl; sector-relative via mot/industry_map.py).
-  **Macro-regime probe (2026-08-13, `/tmp/opentrader/macro_regime_probe.py`)** —
+  **Macro-regime probe (2026-08-13, `scripts/macro_regime_probe.py`)** —
   FRED state gates (FF level/falling, 10Y falling, curve non-inverted) added
   as an entry condition in `run_backtest(macro_gate=...)` (default off;
   regression-verified). ONE positive result: **incumbent + "ff_falling"**
   (long only while Fed Funds < its 60d-ago level) flips the wide universe from
   **−41.8% → +6.2%** (124 trades, PF 1.07, fees 18%). **OOS walkforward
-  (2026-08-13, `/tmp/opentrader/macro_lead_walkforward.py`) DISPROVES it as an
+  (2026-08-13; script LOST to /tmp cleanup 2026-08-23) DISPROVES it as an
   edge**: only 1/4 folds positive (−0.7%, +1.8%, −3.0%, −1.2%). The gate is a
   loss-REDUCER, not an edge (ungated control is −17.1/−15.8/−3.9/−0.6% per
   fold). Net honest conclusion: the rule floor has no validated wide-universe
   edge in any feature family or macro regime tested; nothing should be promoted
   to best.json until a genuinely generalizing signal is found and OOS-validated.
   Macro data provenance verified against known history (FF 5.33% peak 2023 →
-  3.62% mid-2026). **Cross-asset test (2026-08-13,
-  `/tmp/opentrader/cross_asset_test.py`)** — long-horizon (60d trend / 60d
+  3.62% mid-2026). **Cross-asset test (2026-08-13; script LOST to /tmp
+  cleanup 2026-08-23 — finding stands as recorded)** — long-horizon (60d trend / 60d
   hold) timing across 13 liquid proxies (equity indices, TLT, GLD/SLV/USO/DBC,
   currencies), with/without ff_falling and SPY>SMA gates, benchmarked against
   SPY buy-and-hold net of costs: **buy-and-hold (+78.6% 5y) beats every
@@ -62,14 +62,14 @@ use the term below; don't drift to synonyms the glossary avoids.
   **Cumulative honest verdict: nothing on this data beats passive SPY
   buy-and-hold net of costs — not the 17-name contract, any feature family,
   any macro regime, or long-horizon cross-asset timing. The system's edge is
-  not in daily-rule long-only allocation.**   **International test (2026-08-13,
-  `/tmp/opentrader/international_test.py`)** — 10 international assets
+  not in daily-rule long-only allocation.**   **International test (2026-08-13; script LOST to /tmp cleanup
+  2026-08-23 — finding stands as recorded)** — 10 international assets
   (N225/FTSE/GDAXI/HSI, EEM/EFA, FX, gold/oil), no-lookahead, same gates:
   no active variant beats buy-and-hold (best rank_vix +8.5% vs basket 10.0%),
   BUT the equal-weight international basket has better risk-adjusted returns
   than SPY (Calmar 0.733 vs 0.472, Sharpe 1.03 vs 0.75) — international
   diversification reduces drawdown; US mega-cap concentration is the risk.
-  **Metric screen (2026-08-13, `/tmp/opentrader/metric_screen.py`)** — tests
+  **Metric screen (2026-08-13; script LOST to /tmp cleanup 2026-08-23 — finding stands as recorded)** — tests
   whether ANY regime metric (breadth50/200, cross-sectional momentum
   dispersion, SPY/MA50/200, VIX, FEDFUNDS, DGS10, yield curve, CPI YoY)
   separates good forward periods from bad (quintile spread of 20d/60d basket
@@ -95,7 +95,8 @@ use the term below; don't drift to synonyms the glossary avoids.
   (VIX/FF) was wrong and the combination matters. The arena's job is now
   concrete: learn the regime SWITCH between momentum-top and contrarian, using
   the metric library as switch inputs.
-  **RESEARCH-SWARM TOURNAMENT R1 (2026-08-13, `/tmp/opentrader/swarm/`) — the
+  **RESEARCH-SWARM TOURNAMENT R1 (2026-08-13; swarm data + scripts LOST to
+  /tmp cleanup 2026-08-23 — findings stand as recorded) — the
   turning point.** 6 parallel research agents, shared scorer
   (`swarm/scorer.py`, no-lookahead, 0.35%/side), escalating bars (R1 beat
   basket BH ann+Calmar; R2 beat SPY Sharpe+Calmar+>2/4 folds; R3 positive in

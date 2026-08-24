@@ -1,0 +1,46 @@
+{
+  "manifest": "data/MANIFEST.json",
+  "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch — nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
+  "updated": "2026-08-23T23:00:00Z",
+  "paths": {
+    "data/evidence/": {
+      "tier": "evidence",
+      "writer": "wayfinder-agent (sole writer)",
+      "policy": "append-only; never edited in place, never deleted; new evidence files added, old ones kept",
+      "relocated_from": "/tmp/opentrader/ (2026-08-23, /tmp cleanup)",
+      "contents": {
+        "rule_floor_honest.py": "rule-floor contract probe (run_backtest, 5y archive, 17 syms); verified 2026-08-23 from this path: net=+18.57% trades=54 sharpe=0.920 maxdd=3.40% pf=2.15 win=59% (post-1718f33 contract)",
+        "probe_verify.log": "2026-08-23 verification run output from the relocated path",
+        "signal_family_probe.log": "2026-08-13 signal-family probe output (script: scripts/signal_family_probe.py)",
+        "universe_contract_test.log": "2026-08-23 universe contract test output (script: scripts/universe_contract_test.py)"
+      },
+      "lost_to_tmp_cleanup_2026_08_23": [
+        "swarm/ (swarm_data.pkl, intl_data.pkl, scorer.py, agent scripts) — findings stand as recorded in AGENTS.md/CONTEXT.md, not re-runnable",
+        "macro_lead_walkforward.py", "cross_asset_test.py", "international_test.py", "metric_screen.py"
+      ]
+    },
+    "data/wayfinder/ultimate_chapter.md": {
+      "tier": "agent-memory",
+      "writer": "wayfinder-agent (sole writer)",
+      "policy": "append-only checkpoint log; latest block supersedes; read latest block first on resume",
+      "note": "stays in live data/ per handoff §9 (supersedes the file's older relocation note)"
+    },
+    "data/MANIFEST.json": {
+      "tier": "runtime-state",
+      "writer": "wayfinder-agent (sole writer)",
+      "policy": "updated only when a durable path's writer or policy changes"
+    }
+  },
+  "known_defects": [
+    {
+      "path": "data/live_router_state.json",
+      "defect": "3 writers (seed_router.py, evolve_weights.py, harness attribution) — no single source of truth; regime keys also mixed (bull/bear vs up/down)",
+      "ticket": "#155 (plumbing)"
+    },
+    {
+      "path": "strategies/ (handoff.py, scorer.py, scorer_intl.py, macro_features.py, lanes.py)",
+      "defect": "reference lost /tmp/opentrader/swarm/*.pkl — currently unimportable (FileNotFoundError); committed ports are the durable artifacts but need the data dependency resolved",
+      "ticket": "#155 (plumbing)"
+    }
+  ]
+}
