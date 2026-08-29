@@ -41,7 +41,7 @@ class VerifiedExpert:
     evidence: dict = field(default_factory=dict)
 
 
-# The 8 OOS-verified experts (2026-08-13, from ROUND2_OOS_SUMMARY.md).
+# The 9 OOS-verified experts (2026-08-13; 8 from ROUND2_OOS_SUMMARY.md + laggard from R1d).
 VERIFIED: Dict[str, VerifiedExpert] = {
     "bayes": VerifiedExpert("bayes", 1.148, 1.24, -0.104,
         "Bayesian online change-point (BOCPD) x breadth gate + momentum-top; drawdown tool"),
@@ -70,10 +70,11 @@ VERIFIED: Dict[str, VerifiedExpert] = {
 
 
 def regime_of(spy_price, ma200) -> str:
-    """Bull/bear regime from SPY vs its 200-bar MA (matches RegimeRouter)."""
+    """Up/down regime from SPY vs its 200-bar MA (matches RegimeRouter;
+    regime keys MUST be 'up'/'down' — the harness's attribution naming)."""
     if spy_price is None or ma200 is None or ma200 == 0:
         return "unknown"
-    return "bull" if spy_price > ma200 else "bear"
+    return "up" if spy_price > ma200 else "down"
 
 
 class TournamentExpert:
@@ -137,5 +138,5 @@ class StrategyRouter:
             regime: {"expert": self._by_regime.get(regime),
                      "oos_calmar": VERIFIED[self._by_regime[regime]].oos_calmar
                      if regime in self._by_regime else None}
-            for regime in ("bull", "bear", "unknown")
+            for regime in ("up", "down", "unknown")
         }

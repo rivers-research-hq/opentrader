@@ -106,6 +106,11 @@ STAGES = {
 }
 MAX_STAGE = max(STAGES.keys())
 
+# Cycles a holding may sit without any usable price before it is quarantined
+# (frozen against all exits) instead of silently skipped forever. 60 cycles
+# ≈ 1 hour at the live --interval 60.
+UNPRICEABLE_QUARANTINE_CYCLES = 60
+
 # ── Minimum hold cycles: prevent flip-flop sells ──
 # Positions no longer subject to min-hold — ADIR adversarial debate provides
 # genuine signal quality that makes mechanical hold gates unnecessary.
@@ -143,12 +148,13 @@ class OpenTraderHarness:
         rule_gate: bool = False,  # gate BUY signals behind the validated rule screen
         mixture: bool = False,  # MoT experts: route decisions through the regime router (rule-floor prior)
         rule_primary: bool = False,  # the validated rule config is the PRIMARY signal source
+        vix_gate: str = "strict",  # VIX regime gate: "strict" (z>=0.5, falsified as edge),
+        # "soft" (z>=0.0), "off" (neutralized — informational only, fills never blocked)
         stage: int = 0,  # 0 = auto (from state/progression), >0 = force
         universe_mode: bool = True,  # agent picks symbols from 50+ universe vs hardcoded list
         universe_focus: int = 6,  # number of symbols to deep-debate per cycle
         mot_force: str = "auto",  # "auto"|"increase"|"reduce"|"maintain"
         max_daily_trades: int = 500,  # daily trade cap (resets at UTC midnight)
-        reset_portfolio: bool = False,  # wipe positions + SL/TP on startup
         sidecar: bool = False,  # offload exchange+risk to Rust sidecar
         sidecar_binary: str = None,  # path to exchange-engine binary
         stock_exchange: str = None,  # stock exchange for multi-asset mode (ibkr|finnhub|...+)
@@ -175,6 +181,7 @@ class OpenTraderHarness:
         self._rule_gate_cfg = None
         self.mixture = mixture
         self.rule_primary = rule_primary
+        self.vix_gate = vix_gate
         self._mot_router = None
         self._mot_experts = {}
         self._force_stage = stage  # 0 = use state/progression, >0 = override
@@ -226,8 +233,6 @@ class OpenTraderHarness:
                 f"Sidecar exchange-engine started"
                 + (f" ({sidecar_binary})" if sidecar_binary else "")
             )
-            if reset_portfolio:
-                self._sidecar_client.reset(float(initial_cash))
 
         # Use fast model for faster inference if specified
         effective_model = fast_model or model
@@ -452,14 +457,12 @@ class OpenTraderHarness:
         self._sl_tp_levels: Dict[
             str, dict
         ] = {}  # symbol -> {stop_loss, take_profit, entry_price, qty, highest_price, cycle_opened}
+        self._unpriceable_streak: Dict[str, int] = {}  # symbol -> consecutive cycles with no usable price
+        self._quarantined: Dict[str, str] = {}  # symbol -> quarantine reason (frozen, excluded from exits)
         self._fundamentals_coverage: Dict[str, str] = {}  # symbol -> ok|missing|no_cik
-        if reset_portfolio:
-            self.exchange.reset(initial_cash=float(self.initial_cash))
-            self._sl_tp_levels.clear()
-            self._fundamentals_coverage.clear()
-            logger.info(
-                "Portfolio reset: positions cleared, SL/TP levels wiped, cash restored"
-            )
+        # Fresh-start state (positions/SL-TP/cash) is NOT a startup flag anymore.
+        # To start clean, remove/rename data/paper_state.json — safe atomic
+        # tmp-file state handling lives in state/manager.py.
         self._news_cache = None
         self._arxiv_cache = []
         self._econ_cache = None
@@ -507,6 +510,7 @@ class OpenTraderHarness:
 
         # Fine-tune subprocess tracking
         self._finetune_process = None
+        self._finetune_lock_owner = False
         self._last_finetune_check = 0.0
         self.finetune_cooldown_cycles = 50  # min cycles between fine-tune checks
 
@@ -1395,7 +1399,31 @@ class OpenTraderHarness:
         for sym, levels in list(self._sl_tp_levels.items()):
             price = self.exchange.get_current_price(sym)
             if not price:
+                # Unpriceable holding: every exit below this line would fire on a
+                # garbage/absent price. Track the streak and quarantine rather
+                # than silently skipping forever (zombie-position bug, BALY 2026-08).
+                streak = self._unpriceable_streak.get(sym, 0) + 1
+                self._unpriceable_streak[sym] = streak
+                if streak == UNPRICEABLE_QUARANTINE_CYCLES:
+                    in_universe = sym in getattr(self, "symbols", [])
+                    reason = (
+                        f"no usable price for {streak} cycles"
+                        + ("" if in_universe else " AND off-universe")
+                    )
+                    self._quarantined[sym] = reason
+                    logger.critical(
+                        f"QUARANTINE {sym}: {reason}. Position frozen — no "
+                        f"SL/TP/timeout exit will fire on a priceless feed. "
+                        f"Resolve manually via scripts/retire_position.py in a "
+                        f"maintenance window."
+                    )
                 continue
+            if sym in self._quarantined:
+                logger.warning(
+                    f"{sym}: price restored (${price:.2f}) — lifting quarantine"
+                )
+                del self._quarantined[sym]
+            self._unpriceable_streak[sym] = 0
 
             entry_price = levels.get("entry_price", price)
             sl = levels.get("stop_loss")
@@ -2431,6 +2459,39 @@ class OpenTraderHarness:
         cfg = self._rule_gate_cfg
         import pandas as pd
 
+        # VIX day-regime gate (the exogenous layer, wayfinder #92). Mode:
+        #   strict (z>=0.5) — FALSIFIED as an edge 2026-08-15; in calm regimes
+        #     it holds the book flat and starves the meta-layer (0 fills).
+        #   soft (z>=0.0)   — open when VIX >= its 250d mean (~40% of days).
+        #   off (neutralized) — removed from the fill path; regime is logged
+        #     informationally only, never blocks entries. The rule floor's own
+        #     regime_filter + buy_thresh remain the entry gate.
+        # Any data-availability error degrades to allow (no gate), never block.
+        try:
+            from data.vix_gate import VixGate
+            _mode = getattr(self, "vix_gate", "strict")
+            _thr = {"strict": 0.5, "soft": 0.0, "off": 0.5}[_mode]
+            if getattr(self, "_vix_gate", None) is None:
+                self._vix_gate = VixGate(threshold=_thr)
+            vix_note = self._vix_gate.describe()
+            vix_allow = (True if _mode == "off"
+                         else self._vix_gate.allow_trading())
+            if _mode == "off":
+                vix_note = f"vixgate NEUTRALIZED (informational {vix_note})"
+        except Exception as _e:
+            vix_allow, vix_note = True, f"vixgate disabled ({_e})"
+
+        # Hive Mother Trader veto (#56 Phase 3): lazy init only; the actual
+        # decision runs after closes are built (below).
+        try:
+            from setup_search.mother_trader import MotherTrader
+            if getattr(self, "_mother_trader", None) is None:
+                self._mother_trader = MotherTrader()
+        except Exception:
+            self._mother_trader = None
+        mt_note = "mt disabled (no swarm)"
+        self._mt_decision = None
+
         syms = list(set(active_symbols) | {"SPY"})
         closes, highs, lows, vols = {}, {}, {}, {}
         for s in syms:
@@ -2443,6 +2504,23 @@ class OpenTraderHarness:
             lows[s] = pd.Series([b.low for b in bars], index=idx)
             vols[s] = pd.Series([b.volume for b in bars], index=idx)
         held = set(self.exchange.get_balance().positions.keys())
+
+        # Hive Mother Trader (#56 Phase 3): the swarm votes on the state. The
+        # result is MONITORING here — the veto applies ONLY to specialist-driven
+        # entries at the MoT router point, never to the rule floor (audit
+        # 2026-08-11: the old code gated ALL BUYs on the soft vote, so an
+        # unproven swarm froze the floor too — a silent hold).
+        try:
+            if (self._mother_trader is not None
+                    and len(self._mother_trader.registry.slots) > 0):
+                mt_decision = self._mother_trader.decide(
+                    _hive_feature_vector(closes, cfg), _hive_regime(closes))
+                self._mt_decision = mt_decision
+                mt_note = (f"mt soft={mt_decision['soft_vote']:.3f} "
+                           f"({mt_decision['reason']})")
+        except Exception as _e:
+            self._mt_decision = None
+            mt_note = f"mt disabled ({_e})"
         out = {}
         for sym in active_symbols:
             if sym not in closes or "SPY" not in closes:
@@ -2451,13 +2529,17 @@ class OpenTraderHarness:
             date = closes[sym].index[-1]
             ok, score = screen(closes, highs, lows, vols, sym, date, cfg)
             is_held = sym in held
-            if not is_held and ok:
+            if not is_held and ok and vix_allow:
                 sig = Signal(
                     action="BUY", symbol=sym,
                     confidence=min(1.0, max(0.0, (score + 1.0) / 2.0)),
                     position_pct=cfg["risk_pct"],
-                    reason=f"rule-primary score={score:.3f}",
+                    reason=f"rule-primary score={score:.3f} ({vix_note} {mt_note})",
                 )
+            elif not is_held and ok and not vix_allow:
+                # VIX gate holds the book flat on calm days (the validated edge)
+                sig = Signal(action="HOLD", symbol=sym,
+                             reason=f"vix-gate calm {vix_note}")
             elif is_held and score < cfg["sell_thresh"]:
                 sig = Signal(action="SELL", symbol=sym, confidence=0.6,
                              reason=f"rule-primary exit score={score:.3f}")
@@ -2602,34 +2684,60 @@ class OpenTraderHarness:
             impact = (exit_price - entry_price) / entry_price if entry_price > 0 else 0.0
             self._mot_router.record(regime, expert, float(impact))
             self._save_router_state()
+            # Hive evidence feed (#56 Phase 4): a closed trade accrues
+            # mean_impact to the slot whose specialist decided it. Floor
+            # ("rule") and ADIR ("adir") trades are NOT specialist evidence
+            # and are never recorded (audit 2026-08-11: the old feed
+            # hardcoded "equities__10", polluting that slot with floor and
+            # debate behavior).
+            try:
+                if getattr(self, "_mother_trader", None) is not None:
+                    slot = self._expert_to_hive_slot(expert)
+                    if slot is not None:
+                        self._mother_trader.record_impact(
+                            slot, "bull" if self._mot_regime(sym) == "bull" else "bear",
+                            float(impact))
+            except Exception:
+                pass
         except Exception:
             pass
 
-    def _save_router_state(self):
-        try:
-            import json
-            from pathlib import Path as _Path
+    def _expert_to_hive_slot(self, expert: str):
+        """Map a deciding expert id to a registered hive slot, or None.
 
-            p = _Path(self.state_dir) / "live_router_state.json"
-            p.write_text(
-                json.dumps(
-                    {"track": self._mot_router.track, "weights": self._mot_router.weights},
-                    indent=1,
-                )
+        Hive slots are the swarm registry keys (equities__10, crypto__21, ...).
+        Only exact matches count — "rule" and "adir" are never specialist
+        evidence."""
+        try:
+            slots = self._mother_trader.registry.slots
+            if expert in slots:
+                return expert
+        except Exception:
+            pass
+        return None
+
+    def _save_router_state(self):
+        # Single-writer contract (#155): all writes of live_router_state.json
+        # go through strategies/router_state.py (atomic, merge-preserving).
+        try:
+            from strategies.router_state import write_router_state
+
+            write_router_state(
+                {"track": self._mot_router.track,
+                 "weights": self._mot_router.weights},
+                state_dir=self.state_dir,
+                merge=True,
             )
         except Exception:
             pass
 
     def _load_router_state(self):
         try:
-            import json
-            from pathlib import Path as _Path
+            from strategies.router_state import read_router_state
 
-            p = _Path(self.state_dir) / "live_router_state.json"
-            if p.exists():
-                d = json.loads(p.read_text())
-                self._mot_router.track = d.get("track", {})
-                self._mot_router.weights = d.get("weights", {})
+            d = read_router_state(self.state_dir)
+            self._mot_router.track = d.get("track", {})
+            self._mot_router.weights = d.get("weights", {})
         except Exception:
             pass
 
@@ -2729,6 +2837,14 @@ class OpenTraderHarness:
             else:
                 # Training in progress — only check SL/TP, no new trades
                 self._check_sl_tp()
+                # HOLD ack: signal the trainer that the harness has seen the
+                # lock and will not issue LLM calls this cycle. Fresh each
+                # HOLD cycle so a dead harness's stale ack expires.
+                try:
+                    _ack = _Path(self.state_dir) / "training_hold_ack"
+                    _ack.touch()
+                except OSError:
+                    pass
                 logger.debug(
                     f"Cycle {self.cycle}: training lock active — HOLD only, {len(self.symbols)} symbols"
                 )
@@ -3243,6 +3359,20 @@ class OpenTraderHarness:
                     self._mot_router = RegimeRouter(rule_floor="rule", min_evidence=5)
                 regime = self._mot_regime(sym)
                 expert = self._mot_router.pick(regime)
+                # Swarm veto (#56 Phase 3): gates SPECIALIST entries only —
+                # never the rule floor ("rule") or the ADIR debate ("adir"),
+                # which are not hive slots (audit 2026-08-11: the old veto sat
+                # upstream of this path and froze the floor whenever an
+                # unproven swarm existed). Until the router is wired to hive
+                # slots, this branch never blocks.
+                if expert not in ("rule", "adir"):
+                    mt_d = getattr(self, "_mt_decision", None)
+                    if mt_d is None or mt_d["action"] != "ALLOW":
+                        effective_action = "HOLD"
+                        effective_position_pct = min(effective_position_pct, 0.0)
+                        logger.info(
+                            f"  {sym}: MoT->{expert} ({regime}) blocked by swarm veto"
+                        )
                 if expert != "adir":
                     if not self._rule_gate_ok(sym):
                         effective_action = "HOLD"
@@ -3942,8 +4072,12 @@ class OpenTraderHarness:
                 return  # still running
             self._finetune_process = None  # finished
             training_lock = Path(self.state_dir) / "training.lock"
-            if training_lock.exists():
+            # Only unlink OUR OWN lock: if the scheduler holds it (age recent
+            # and we never created it), leave it alone — racing would kill the
+            # scheduler's retrain cycle (#47/#114).
+            if training_lock.exists() and self._finetune_lock_owner:
                 training_lock.unlink(missing_ok=True)
+            self._finetune_lock_owner = False
 
         # Rate limit
         if self.cycle % self.finetune_cooldown_cycles != 0:
@@ -3968,6 +4102,13 @@ class OpenTraderHarness:
         if status.get("status") == "training":
             return
 
+        # The GPU scheduler owns training: if it holds training.lock (retrain
+        # in progress), yield — never race the scheduler's cycle (#47/#114).
+        training_lock = Path(self.state_dir) / "training.lock"
+        if training_lock.exists():
+            logger.info("Auto fine-tune deferred: scheduler holds training.lock")
+            return
+
         # Get reflection stats — require >=500 resolved for real signal
         from training.data_builder import reflection_stats
 
@@ -3982,6 +4123,7 @@ class OpenTraderHarness:
         training_lock = Path(self.state_dir) / "training.lock"
         try:
             training_lock.touch()
+            self._finetune_lock_owner = True
             gpu_python = _find_gpu_python()
             proc = subprocess.Popen(
                 [
@@ -4144,7 +4286,7 @@ class OpenTraderHarness:
                 self._save_agent_state()
                 if self._consecutive_crashes >= 10:
                     logger.error(
-                        "10 consecutive in-process crashes — exiting so run_harness watchdog can act."
+                        "10 consecutive in-process crashes — exiting; systemd Restart=always will relaunch."
                     )
                     break
                 time.sleep(5)
@@ -4177,6 +4319,42 @@ class OpenTraderHarness:
         )
         print(f"  Max DD:       {final_dd:.2f}%")
         print("=" * 60)
+
+
+def _hive_feature_vector(closes, cfg):
+    """Feature vector for the Mother Trader vote, computed with the SAME
+    engine features the rule screen uses (full config, real OHLCV)."""
+    try:
+        import numpy as np
+        from setup_search.engine import _features
+        if not closes:
+            return np.zeros(9, dtype=np.float32)
+        feat = _features(closes, closes, closes, closes, cfg)
+        syms = [s for s in closes if s != "SPY"]
+        if not syms:
+            return np.zeros(9, dtype=np.float32)
+        f = feat[syms[0]]
+        row = f.iloc[-1]  # the latest bar's features — the vote's state
+        return np.array([row[c] for c in
+                         ["mom", "rev", "rsi", "brk", "z", "ma_dist",
+                          "vol_spike", "vol_level", "momfilt"]],
+                        dtype=np.float32)
+    except Exception:
+        return np.zeros(9, dtype=np.float32)
+
+
+def _hive_regime(closes):
+    """The regime clock the router uses (SPY vs its 96d MA, matching the rule)."""
+    try:
+        spy = closes.get("SPY")
+        if spy is None or len(spy) < 96:
+            return "unknown"
+        ma = spy.rolling(96, min_periods=60).mean().iloc[-1]
+        return "bull" if spy.iloc[-1] > ma else "bear"
+    except Exception:
+        return "unknown"
+
+
 
 
 def main():
@@ -4320,11 +4498,6 @@ def main():
         help="Path to exchange-engine binary (auto-detected if not set)",
     )
     parser.add_argument(
-        "--reset-portfolio",
-        action="store_true",
-        help="Wipe positions and SL/TP levels on startup",
-    )
-    parser.add_argument(
         "--stage", type=int, default=0, help="Force progression stage (0=auto, 1-3)"
     )
     parser.add_argument(
@@ -4360,6 +4533,16 @@ def main():
         "re-optimization blocks (100-cycle and 50-cycle) that silently rewrite "
         "SL/TP/sizing from crypto params — they invalidate 'live impact ~= "
         "backtest' comparisons. Default: off.",
+    )
+    parser.add_argument(
+        "--vix-gate",
+        default="strict",
+        choices=["strict", "soft", "off"],
+        help="VIX day-regime gate on the rule-primary fill path. strict: "
+        "trade only when VIX z>=0.5 (FALSIFIED as an edge — blocks fills in "
+        "calm markets). soft: z>=0.0. off: neutralized — regime logged only, "
+        "never blocks entries (recommended until a generalizable gate exists). "
+        "Default: strict (preserves legacy behavior).",
     )
     args = parser.parse_args()
 
@@ -4435,7 +4618,6 @@ def main():
         backtest=args.backtest,
         backtest_bars=args.backtest_bars,
         backtest_symbol=args.symbol,
-        reset_portfolio=args.reset_portfolio,
         stage=args.stage,
         mot_force=args.mot_force,
         max_daily_trades=args.max_daily_trades,
@@ -4450,6 +4632,7 @@ def main():
         rule_gate=args.rule_gate,
         mixture=args.mixture,
         rule_primary=args.rule_primary,
+        vix_gate=args.vix_gate,
     )
 
     if _onchain_wallet:

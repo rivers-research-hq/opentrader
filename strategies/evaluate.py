@@ -11,13 +11,32 @@ This is the canonical bridge between the arena roster and the honest scorer:
   - prints score_equity stats and pass/fail against the round bars
 """
 
+import os
 import pickle
 import sys
 
 import pandas as pd
 
-US = pickle.load(open("/tmp/opentrader/swarm/swarm_data.pkl", "rb"))
-INTL = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
+_LOST_MSG = ("tournament data (swarm_data.pkl / intl_data.pkl) was LOST to "
+             "/tmp cleanup on 2026-08-23 — findings stand as recorded in "
+             "AGENTS.md / docs/CONTEXT.md; this runner is not re-runnable "
+             "(see data/MANIFEST.json)")
+
+
+def _load_tournament():
+    # Durable location per data/MANIFEST.json (evidence tier). The original
+    # /tmp copies were lost to cleanup on 2026-08-23; if the evidence tier
+    # ever holds restored copies, they live HERE — never in /tmp.
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    us_p = os.path.join(root, "data", "evidence", "swarm", "swarm_data.pkl")
+    intl_p = os.path.join(root, "data", "evidence", "swarm", "intl_data.pkl")
+    if not (os.path.exists(us_p) and os.path.exists(intl_p)):
+        raise FileNotFoundError(_LOST_MSG)
+    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
+
+
+US = None
+INTL = None
 
 from strategies.momtrend import run as momtrend  # noqa: E402
 from strategies.multiasset import backtest as multiasset  # noqa: E402
@@ -68,6 +87,7 @@ def evaluate(expert_id: str, verbose: bool = True) -> dict:
 
 
 if __name__ == "__main__":
+    US, INTL = _load_tournament()
     which = sys.argv[1] if len(sys.argv) > 1 else "--all"
     if which == "--all":
         for e in CONFIGS:

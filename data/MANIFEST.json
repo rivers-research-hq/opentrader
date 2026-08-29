@@ -1,7 +1,7 @@
 {
   "manifest": "data/MANIFEST.json",
-  "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch — nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
-  "updated": "2026-08-23T23:00:00Z",
+  "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch \u2014 nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
+  "updated": "2026-08-29T00:00:00Z",
   "paths": {
     "data/evidence/": {
       "tier": "evidence",
@@ -15,32 +15,51 @@
         "universe_contract_test.log": "2026-08-23 universe contract test output (script: scripts/universe_contract_test.py)"
       },
       "lost_to_tmp_cleanup_2026_08_23": [
-        "swarm/ (swarm_data.pkl, intl_data.pkl, scorer.py, agent scripts) — findings stand as recorded in AGENTS.md/CONTEXT.md, not re-runnable",
-        "macro_lead_walkforward.py", "cross_asset_test.py", "international_test.py", "metric_screen.py"
+        "swarm/ (swarm_data.pkl, intl_data.pkl, scorer.py, agent scripts) \u2014 findings stand as recorded in AGENTS.md/CONTEXT.md, not re-runnable",
+        "macro_lead_walkforward.py",
+        "cross_asset_test.py",
+        "international_test.py",
+        "metric_screen.py"
       ]
     },
     "data/wayfinder/ultimate_chapter.md": {
       "tier": "agent-memory",
       "writer": "wayfinder-agent (sole writer)",
       "policy": "append-only checkpoint log; latest block supersedes; read latest block first on resume",
-      "note": "stays in live data/ per handoff §9 (supersedes the file's older relocation note)"
+      "note": "stays in live data/ per handoff \u00a79 (supersedes the file's older relocation note)"
     },
     "data/MANIFEST.json": {
       "tier": "runtime-state",
       "writer": "wayfinder-agent (sole writer)",
       "policy": "updated only when a durable path's writer or policy changes"
+    },
+    "data/live_router_state.json": {
+      "tier": "runtime-state",
+      "writer": "strategies/router_state.py (sole writer API \u2014 write_router_state; atomic unique-tmp + os.replace; merge-preserving)",
+      "policy": "regime keys 'up'/'down' only (harness maps bull/bear->up/down at attribution); schema header live_router_state/2",
+      "related": {
+        "data/live_router_state_seed.json": "seed artifact written by seed_router.py \u2014 applied to the live file manually by the operator, never programmatically",
+        "data/live_router_state_strategies.json": "separate paper-shadow ledger, writer strategies/shadow.py"
+      },
+      "callers": "harness.py (_save_router_state), strategies/evolve_weights.py, strategies/lanes.py (_accrue_router) \u2014 all via the module, never open()"
+    },
+    "data/evidence/swarm/": {
+      "tier": "evidence",
+      "writer": "wayfinder-agent (sole writer)",
+      "policy": "declared RESTORATION TARGET for the lost tournament pkls; evaluate.py probes here. Currently absent (data lost 2026-08-23) \u2014 code degrades with explicit lost-data messages."
     }
   },
-  "known_defects": [
+  "known_defects": [],
+  "resolved_2026_08_29": [
     {
       "path": "data/live_router_state.json",
-      "defect": "3 writers (seed_router.py, evolve_weights.py, harness attribution) — no single source of truth; regime keys also mixed (bull/bear vs up/down)",
-      "ticket": "#155 (plumbing)"
+      "was": "3 writers, no single source of truth, mixed regime keys",
+      "now": "single writer module strategies/router_state.py; keys unified up/down (#155)"
     },
     {
-      "path": "strategies/ (handoff.py, scorer.py, scorer_intl.py, macro_features.py, lanes.py)",
-      "defect": "reference lost /tmp/opentrader/swarm/*.pkl — currently unimportable (FileNotFoundError); committed ports are the durable artifacts but need the data dependency resolved",
-      "ticket": "#155 (plumbing)"
+      "path": "strategies/ (evaluate, macro_features, scorer, shadow_current_alloc, lanes)",
+      "was": "durable /tmp/opentrader/swarm dependencies \u2014 unimportable/hard-failing",
+      "now": "all executable /tmp references removed; graceful lost-data degradation per MANIFEST (#155)"
     }
   ]
 }

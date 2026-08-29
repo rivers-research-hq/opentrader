@@ -80,8 +80,10 @@ def summary(features: pd.DataFrame) -> str:
 
 
 if __name__ == "__main__":
-    import pickle
-    INT = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
-    f = build_features(INT["master"])
+    # intl_data.pkl was LOST to /tmp cleanup (2026-08-23, see data/MANIFEST.json)
+    raise SystemExit(
+        "intl_data.pkl lost to /tmp cleanup 2026-08-23 — build_features() "
+        "itself takes a master DataFrame; supply data another way "
+        "(see data/MANIFEST.json)")
     print(f"features: {len(f.columns)} cols x {len(f)} bars")
     print(summary(f))

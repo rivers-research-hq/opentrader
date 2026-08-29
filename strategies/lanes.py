@@ -107,11 +107,19 @@ def _load_basket(force: bool = False) -> pd.DataFrame:
         BASKET_CACHE.write_text(json.dumps(out))
         return closes
     except Exception as e:
-        print(f"[lanes] basket yfinance failed ({e}); using tournament data")
-        import sys
-        sys.path.insert(0, "/tmp/opentrader/swarm")
-        from scorer import DATA
-        return DATA["basket"]
+        # Tournament basket data was LOST to /tmp cleanup (2026-08-23, see
+        # data/MANIFEST.json). Fall back to the last cached basket if we
+        # have one; otherwise fail honestly — never a silent /tmp dependency.
+        if BASKET_CACHE.exists():
+            print(f"[lanes] basket yfinance failed ({e}); using stale cache {BASKET_CACHE}")
+            raw = json.loads(BASKET_CACHE.read_text())
+            dates = pd.to_datetime(raw["_dates"])
+            return pd.DataFrame({k: pd.Series(v, index=dates)
+                                 for k, v in raw.items()
+                                 if k not in ("_ts", "_dates")}).astype(float)
+        raise RuntimeError(
+            f"basket fetch failed ({e}) and no durable fallback exists "
+            "(tournament data lost 2026-08-23, see data/MANIFEST.json)")
 
 
 def lane_multiasset(closes: pd.DataFrame) -> pd.Series:
@@ -125,6 +133,53 @@ def lane_momtrend(closes: pd.DataFrame) -> pd.Series:
     from strategies.momtrend import run
     return run(closes, universe=list(closes.columns), mom_lb=60, k=5, rebal=20,
                breadth_thr=0.6, breadth_win=100, force_exit=False)
+
+
+def lane_laggard(closes: pd.DataFrame) -> pd.Series:
+    """laggard: momentum leaders + in-bull laggard catch-up (R1d FINAL_CFG)."""
+    from strategies.laggard import run
+    return run(closes, universe=list(closes.columns), breadth_thr=0.7,
+               rebal=20, mom_lb=60, k_mom=5, mom_expo=0.7, con_lb=10,
+               k_con=1, con_expo=0.4, max_hold=32)
+
+
+def lane_spectral(closes: pd.DataFrame) -> pd.Series:
+    from strategies.spectral import run
+    return run(closes, universe=list(closes.columns), mom_lb=60, k=7, rebal=20,
+               win=336, min_period=60, thr=0.025, breadth_thr=0.6,
+               breadth_win=100)
+
+
+def lane_hurst(closes: pd.DataFrame) -> pd.Series:
+    from strategies.hurst import run
+    return run(closes, universe=list(closes.columns), k=7, mom_lb=120,
+               rebal=20, breadth_thr=0.6, breadth_win=100, hurst_win=250,
+               hurst_thr=0.54)
+
+
+def lane_bayes(closes: pd.DataFrame) -> pd.Series:
+    from strategies.bayes import run
+    return run(closes, universe=list(closes.columns), mom_lb=60, k=6, rebal=30,
+               hazard_lam=500.0, cp_thr=0.05, min_run=80.0, cp_win=5,
+               breadth_thr=0.6, breadth_win=100)
+
+
+def lane_kalman(closes: pd.DataFrame) -> pd.Series:
+    from strategies.kalman import run
+    return run(closes, universe=list(closes.columns), mom_lb=60, k=5, rebal=20,
+               breadth_thr=0.6, breadth_win=100)
+
+
+def lane_wavelet(closes: pd.DataFrame) -> pd.Series:
+    from strategies.wavelet import run
+    return run(closes, universe=list(closes.columns), mom_lb=90, k=6, rebal=20,
+               wl_levels=4, wl_slope=1)
+
+
+def lane_entropy(closes: pd.DataFrame) -> pd.Series:
+    from strategies.entropy import run
+    return run(closes, universe=list(closes.columns), k=7, mom_lb=60, rebal=20,
+               breadth_thr=0.6, breadth_win=100, ent_win=60, ent_thr=2.53)
 
 
 def _allocation(equity: pd.Series, n: int) -> float:
@@ -166,9 +221,15 @@ def main():
     print(f"[lanes] intl closes: {intl.shape[0]} bars, last {asof}")
 
     lanes = {
-        "laggard": lambda c: lane_momtrend(c),   # momtrend logic = laggard core
-        "momtrend": lambda c: lane_momtrend(c),
-        "multiasset": lambda c: lane_multiasset(c),
+        "laggard": lane_laggard,       # intl universe
+        "momtrend": lane_momtrend,     # intl universe
+        "bayes": lane_bayes,           # intl universe
+        "spectral": lane_spectral,     # intl universe
+        "kalman": lane_kalman,         # intl universe
+        "hurst": lane_hurst,           # intl universe
+        "wavelet": lane_wavelet,       # intl universe
+        "entropy": lane_entropy,       # intl universe
+        "multiasset": lane_multiasset, # 13-asset basket
     }
 
     results = {}
@@ -205,14 +266,10 @@ def _accrue_router(results: dict) -> None:
     """Write each lane's latest 1-day return into live_router_state.json as
     per-(regime, expert) impact, so the router's track grows from forward
     paper evidence (in the same schema the harness reads)."""
-    import json as _json
-    router_p = STATE_DIR / "live_router_state.json"
-    state = {}
-    if router_p.exists():
-        try:
-            state = _json.loads(router_p.read_text())
-        except Exception:
-            state = {}
+    # Single-writer contract (#155): reads/writes of the live router state
+    # go through strategies/router_state.py — never open() the path here.
+    from strategies.router_state import read_router_state, write_router_state
+    state = read_router_state(str(STATE_DIR))
     track = state.setdefault("track", {})
     for name, r in results.items():
         regime = r["regime"]
@@ -223,7 +280,7 @@ def _accrue_router(results: dict) -> None:
     state["note"] = ("PAPER LANES forward attribution (2026-08-14+): per-lane "
                      "1d returns accrued into the router track for weight "
                      "evolution. NOT live order flow.")
-    router_p.write_text(_json.dumps(state, indent=1))
+    write_router_state(state, state_dir=str(STATE_DIR))
     print("[lanes] router track updated with forward lane evidence")
 
 

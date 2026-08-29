@@ -16,7 +16,9 @@ import pickle
 import pandas as pd
 
 _DATA_PATHS = [
-    "/tmp/opentrader/swarm/swarm_data.pkl",          # tournament data (authoritative)
+    # /tmp/opentrader/swarm/swarm_data.pkl (the authoritative copy) was LOST
+    # to /tmp cleanup on 2026-08-23 — see data/MANIFEST.json. If the fallback
+    # is absent too, scorer raises FileNotFoundError: honest, not silent.
     os.path.expanduser("~/opentrader-sandbox/data/setup_search/swarm_data.pkl"),
 ]
 _loaded = False
@@ -38,11 +40,16 @@ def _load():
     _loaded = True
 
 
-if not _loaded:
-    _load()
+def _ensure():
+    # Lazy load (#155): `import strategies` must not require swarm_data.pkl
+    # (lost 2026-08-23, see data/MANIFEST.json). Scoring raises honestly;
+    # importing never does.
+    if not _loaded:
+        _load()
 
 
 def score_equity(eq: pd.Series) -> dict:
+    _ensure()
     eq = eq.reindex(MASTER).ffill().dropna()
     if len(eq) < 200:
         return {"error": "equity too short"}
@@ -118,3 +125,18 @@ def round3_pass(s: dict) -> bool:
     if "error" in s:
         return False
     return s["recent_2024_26_net"] is not None and s["recent_2024_26_net"] > 0.0 and s["maxdd"] > -0.50
+
+
+def bull_participation_pass(s: dict) -> bool:
+    """Round 1d bar: the missing piece — beat the equal-weight basket in the
+    BROAD-BULL fold (2024-26) while still passing the drawdown bar. The
+    8 verified experts all trail the basket there (+64.5% basket vs ~50-57%
+    their concentrated books). A strategy passes only if it participates in
+    the broad rally AND protects capital."""
+    if "error" in s:
+        return False
+    folds = {f["fold"]: f for f in s.get("folds", [])}
+    f = folds.get("2024-2026")
+    if f is None or not f.get("beat_basket"):
+        return False
+    return s["maxdd"] > -0.50 and s["calmar"] > s["bench_basket"]["calmar"]

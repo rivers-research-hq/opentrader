@@ -8,7 +8,12 @@ import pickle
 
 import pandas as pd
 
-_DATA_PATHS = ["/tmp/opentrader/swarm/intl_data.pkl"]
+_DATA_PATHS = [
+    # intl_data.pkl (authoritative /tmp copy) was LOST to cleanup 2026-08-23;
+    # durable restoration target per data/MANIFEST.json is the evidence tier.
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                 "data", "evidence", "swarm", "intl_data.pkl"),
+]
 
 
 def _load():
@@ -19,14 +24,30 @@ def _load():
     raise FileNotFoundError("intl_data.pkl not found in " + " | ".join(_DATA_PATHS))
 
 
-DATA = _load()
-MASTER = DATA["master"]
-BENCH_BASKET = DATA["bench_basket_bh"]
-BENCH_SPY = DATA["bench_spy_bh"]
-FOLDS = DATA["FOLDS"]
+# Lazy (#155): import must not require the lost pkl; score_equity loads on
+# first use and raises FileNotFoundError with the honest lost-data message.
+DATA = None
+MASTER = None
+BENCH_BASKET = None
+BENCH_SPY = None
+FOLDS = None
+_loaded = False
+
+
+def _ensure():
+    global DATA, MASTER, BENCH_BASKET, BENCH_SPY, FOLDS, _loaded
+    if _loaded:
+        return
+    DATA = _load()
+    MASTER = DATA["master"]
+    BENCH_BASKET = DATA["bench_basket_bh"]
+    BENCH_SPY = DATA["bench_spy_bh"]
+    FOLDS = DATA["FOLDS"]
+    _loaded = True
 
 
 def score_equity(eq: pd.Series) -> dict:
+    _ensure()
     eq = eq.reindex(MASTER).ffill().dropna()
     if len(eq) < 100:
         return {"error": "equity too short"}

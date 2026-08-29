@@ -66,14 +66,11 @@ def _evolve_schedule() -> dict:
 def evolve(state_dir: str, dry: bool = False) -> dict:
     schedule = _evolve_schedule()
 
-    # load existing track (the seeded evidence) so we preserve it
-    p = os.path.join(state_dir, "live_router_state.json")
-    state = {}
-    if os.path.exists(p):
-        try:
-            state = json.loads(open(p).read())
-        except Exception:
-            state = {}
+    # load existing track (the seeded evidence) so we preserve it.
+    # Single-writer contract (#155): all reads/writes of the live router
+    # state go through strategies/router_state.py.
+    from strategies.router_state import read_router_state, write_router_state
+    state = read_router_state(state_dir)
     state["weights"] = schedule
 
     # RECONCILE the track with the verified evidence: every verified expert
@@ -97,10 +94,8 @@ def evolve(state_dir: str, dry: bool = False) -> dict:
                      "step() can continue evolving from live attribution.")
 
     if not dry:
-        os.makedirs(state_dir, exist_ok=True)
-        with open(p, "w") as f:
-            json.dump(state, f, indent=1)
-        print(f"[evolve] wrote {p}")
+        write_router_state(state, state_dir=state_dir)
+        print(f"[evolve] wrote {os.path.join(state_dir, 'live_router_state.json')}")
     else:
         print("[evolve] dry run — no write")
 

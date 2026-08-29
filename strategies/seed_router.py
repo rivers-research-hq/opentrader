@@ -22,6 +22,11 @@ begins from validated evidence, and live attribution then updates these
 entries going forward. Status: SEED only — the harness continues to treat
 the router as monitoring (no gate change).
 
+Single-writer contract (#155): the HARNESS owns live_router_state.json (the
+live runtime ledger). This seeder writes its seed to
+live_router_state_seed.json — an artifact a human (or the harness operator)
+applies to the live file; it never writes the live file itself.
+
 Usage: python -m strategies.seed_router [--state-dir /home/mrc/opentrader/data]
 """
 
@@ -42,8 +47,8 @@ SCALE = 10.0  # Calmar -> impact-sum proxy units
 def seed(state_dir: str, emit: bool = True) -> dict:
     router = StrategyRouter(rule_floor_calmar=0.174)
     best = max(OOS_CALMAR, key=OOS_CALMAR.get)
-    router.register_regime("bull", best)
-    router.register_regime("bear", best)
+    router.register_regime("up", best)
+    router.register_regime("down", best)
 
     track = {}
     weights = {}
@@ -70,10 +75,13 @@ def seed(state_dir: str, emit: bool = True) -> dict:
 
     if emit:
         os.makedirs(state_dir, exist_ok=True)
-        p = os.path.join(state_dir, "live_router_state.json")
+        # Single-writer contract (#155): the harness owns live_router_state.json;
+        # the seed is an artifact for a human to apply, not a direct write.
+        p = os.path.join(state_dir, "live_router_state_seed.json")
         with open(p, "w") as f:
             json.dump(state, f, indent=1)
         print(f"seeded {p}")
+        print("  NOTE: apply to live_router_state.json manually (harness owns the live file)")
         print(f"  best-per-regime: {best} (OOS Calmar {OOS_CALMAR[best]})")
         print(f"  verified experts seeded: {[n for n,c in OOS_CALMAR.items() if c>0.174]}")
     return state

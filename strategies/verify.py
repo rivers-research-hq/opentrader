@@ -15,8 +15,24 @@ sys.path.insert(0, "/home/mrc/opentrader")
 from strategies.momtrend import run as momtrend
 from strategies.multiasset import backtest as multiasset
 
-US = pickle.load(open("/tmp/opentrader/swarm/swarm_data.pkl", "rb"))
-INTL = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
+# Tournament pkls were LOST to /tmp cleanup 2026-08-23 (see data/MANIFEST.json).
+# Durable restoration target is the evidence tier; load lazily so importing
+# this module never hard-fails.
+import os as _os
+_EVID = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+                      "data", "evidence", "swarm")
+US = None
+INTL = None
+
+
+def _load_tournament():
+    us_p = _os.path.join(_EVID, "swarm_data.pkl")
+    intl_p = _os.path.join(_EVID, "intl_data.pkl")
+    if not (_os.path.exists(us_p) and _os.path.exists(intl_p)):
+        raise FileNotFoundError(
+            "tournament pkls lost to /tmp cleanup 2026-08-23 — findings stand "
+            "as recorded (AGENTS.md / docs/CONTEXT.md); see data/MANIFEST.json")
+    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
 
 
 def fmt(s):
@@ -28,6 +44,8 @@ def fmt(s):
 
 
 def main():
+    global US, INTL
+    US, INTL = _load_tournament()
     print("=== R1 (US registry, 2008-2026) — expect momtrend calmar ~0.469, multiasset ~0.39 ===")
     import strategies.scorer as sc
     eq_mt = momtrend(US["closes"], mom_lb=60, k=5, rebal=20,
