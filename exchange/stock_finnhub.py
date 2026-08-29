@@ -86,6 +86,11 @@ class FinnhubExchange(ExchangeBase):
         self._last_api_call: float = 0.0
         self._rate_limit: float = float(config.get("rate_limit", DEFAULT_RATE_LIMIT))
 
+        # Delisting filter: symbols that return no data anywhere get marked
+        # dead for 24h so the scanner stops burning API calls on them.
+        self._dead_symbols: Dict[str, float] = {}
+        self._dead_ttl: float = 24 * 3600.0
+
         # Realtime WebSocket feed (optional — free-tier friendly)
         self._use_realtime: bool = bool(config.get("use_realtime", False))
         self._watchlist: List[str] = config.get("watchlist", []) or []
@@ -236,7 +241,6 @@ class FinnhubExchange(ExchangeBase):
         except Exception as e:
             logger.debug(f"Alpaca latest quote failed for {symbol}: {e}")
             return None
-        self._last_api_call = time.time()
 
     def _start_realtime(self) -> None:
         """Launch the WebSocket realtime feed (non-blocking)."""
@@ -255,6 +259,19 @@ class FinnhubExchange(ExchangeBase):
         except Exception as exc:
             logger.warning("FinnhubExchange: realtime feed failed to start: %s", exc)
             self._use_realtime = False
+
+    def _is_dead(self, symbol: str) -> bool:
+        """True while `symbol` is within its delisting skip window."""
+        marked = self._dead_symbols.get(symbol, 0.0)
+        if marked and (time.time() - marked) < self._dead_ttl:
+            return True
+        if marked:
+            self._dead_symbols.pop(symbol, None)  # window expired — retry
+        return False
+
+    def _mark_dead(self, symbol: str) -> None:
+        self._dead_symbols[symbol] = time.time()
+        logger.info(f"delisting filter: {symbol} gave no data — skipping 24h")
 
     def _api_get(self, path: str, params: dict = None) -> dict:
         """Call Finnhub REST API with rate limiting."""
@@ -318,6 +335,8 @@ class FinnhubExchange(ExchangeBase):
         self, symbol: str = "AAPL", timeframe: str = "1h", limit: int = 100
     ) -> List[OHLCV]:
         cache_key = f"{symbol}:{timeframe}:{limit}"
+        if self._is_dead(symbol):
+            return self._bar_cache.get(cache_key, [])
         now_ts = time.time()
         if cache_key in self._bar_cache:
             if now_ts - self._last_fetch.get(cache_key, 0) < self._cache_ttl:
@@ -366,6 +385,8 @@ class FinnhubExchange(ExchangeBase):
             self._bar_cache[cache_key] = bars
             self._last_fetch[cache_key] = now_ts
             self._price_cache[symbol] = bars[-1].close
+        else:
+            self._mark_dead(symbol)
 
         logger.debug(f"Stock bars {symbol} ({timeframe}): {len(bars)} bars")
         return bars or self._bar_cache.get(cache_key, [])
@@ -437,6 +458,8 @@ class FinnhubExchange(ExchangeBase):
         return bars
 
     def get_current_price(self, symbol: str) -> Optional[float]:
+        if self._is_dead(symbol):
+            return self._price_cache.get(symbol)
         # 1. WebSocket realtime (freshest; subscribe on first call)
         if self._realtime:
             self._realtime.subscribe([symbol])
@@ -470,7 +493,7 @@ class FinnhubExchange(ExchangeBase):
 
     def get_prices_batch(self, symbols: list) -> dict:
         result = {}
-        remaining = list(symbols)
+        remaining = [s for s in symbols if not self._is_dead(s)]
 
         for sym in list(remaining):
             if sym in self._price_cache:
@@ -533,16 +556,22 @@ class FinnhubExchange(ExchangeBase):
         # Don't burn minutes+429s pricing hundreds of yfinance misses — the
         # radar needs representative prices, not every ticker.
         fallback_attempts = 0
+        tried_and_failed = []
         for sym in remaining:
             if fallback_attempts >= 40:
                 break
             try:
                 price = self.get_current_price(sym)
-                if price:
-                    result[sym] = price
-                    fallback_attempts += 1
             except Exception:
-                pass
+                price = None
+            if price:
+                result[sym] = price
+                fallback_attempts += 1
+            else:
+                tried_and_failed.append(sym)
+
+        for sym in tried_and_failed:
+            self._mark_dead(sym)
 
         return result
 

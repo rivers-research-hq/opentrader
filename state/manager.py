@@ -8,6 +8,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -150,11 +151,23 @@ class StateManager:
         }
         return state
 
+    def _unique_tmp(self, target: Path) -> Path:
+        """Per-writer temp file — two harnesses writing the same state must
+        never share a .tmp name (one would clobber the other mid-write)."""
+        return target.with_name(f"{target.name}.{os.getpid()}.{time.time_ns()}.tmp")
+
     def _write_state(self, state: dict):
-        tmp_path = self.state_path.with_suffix(".tmp")
-        with open(tmp_path, "w") as f:
-            json.dump(state, f, indent=2, default=str)
-        os.replace(tmp_path, self.state_path)
+        tmp_path = self._unique_tmp(self.state_path)
+        try:
+            with open(tmp_path, "w") as f:
+                json.dump(state, f, indent=2, default=str)
+            os.replace(tmp_path, self.state_path)
+        finally:
+            if tmp_path.exists():
+                try:
+                    tmp_path.unlink()
+                except OSError:
+                    pass
 
     def _write_cycle(self, cycle: int, state: dict):
         history_dir = self.state_dir / "history"
@@ -244,10 +257,17 @@ class StateManager:
             "models": models or {},
             "portfolio": portfolio or {},
         }
-        tmp_path = self.high_level_path.with_suffix(".tmp")
-        with open(tmp_path, "w") as f:
-            json.dump(state, f, indent=2, default=str)
-        os.replace(tmp_path, self.high_level_path)
+        tmp_path = self._unique_tmp(self.high_level_path)
+        try:
+            with open(tmp_path, "w") as f:
+                json.dump(state, f, indent=2, default=str)
+            os.replace(tmp_path, self.high_level_path)
+        finally:
+            if tmp_path.exists():
+                try:
+                    tmp_path.unlink()
+                except OSError:
+                    pass
         return state
 
     @staticmethod

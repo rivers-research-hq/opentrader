@@ -376,11 +376,43 @@ class RiskManager:
             return RiskResult(approved=False, reason=f"no price for {signal.symbol}")
 
         # ── Fee-aware minimum position check ────────────────────
-        notional = signal.position_pct * total_value
+        # Fee source: state/context.py FEE_TABLES — "stock" route =
+        # FeeSchedule(fixed_per_trade=0.35, min_fee=0.35) (IBKR-style fixed
+        # stock fee); "crypto" = taker_pct 0.0018. The $0.35 in rejection
+        # messages comes from that table, not a magic constant.
+        # Notional is per-side: BUY uses the (defaulted) sizing %, SELL uses
+        # the actual position value (qty * price) — exit signals often carry
+        # position_pct=0, which previously zeroed the notional and made every
+        # SELL look like a 99900% fee.
+        if signal.action.upper() == "SELL":
+            _pos = positions.get(signal.symbol, 0)
+            _qty = (
+                float(_pos.get("quantity", 0))
+                if isinstance(_pos, dict)
+                else float(_pos or 0)
+            )
+            notional = _qty * price
+        else:
+            _size0 = signal.position_pct if signal.position_pct > 0 else 0.05
+            notional = _size0 * total_value
         try:
             from state.context import AccountContext, FEE_TABLES, FeeSchedule
 
-            fees = FEE_TABLES.get(getattr(self.config, "_exchange", "paper"), {})
+            exchange = getattr(self.config, "_exchange", "paper")
+            table = FEE_TABLES.get(exchange)
+            # Fail-closed on unknown exchanges: an unrecognized exchange name
+            # (e.g. a config typo "papr") has no fee schedule, so we cannot
+            # price the guard. Log it loudly and reject the trade rather than
+            # silently passing every trade through with fees=None.
+            if table is None:
+                logger.warning(
+                    f"unknown exchange '{exchange}': no fee table — refusing trade"
+                )
+                return RiskResult(
+                    approved=False,
+                    reason=f"unknown exchange '{exchange}': no fee table — refusing",
+                )
+            fees = table
             # Route-aware: crypto -> %-based, stocks -> fixed. The multi
             # router exposes the per-symbol route; fall back to the table's
             # "default" when the exchange isn't a router or route is unknown.
@@ -395,9 +427,9 @@ class RiskManager:
             elif not isinstance(fees, FeeSchedule):
                 fees = None
 
-            if fees:
+            if fees and notional > 0:
                 round_trip = fees.round_trip_cost(notional)
-                fee_pct = round_trip / notional if notional > 0 else 999
+                fee_pct = round_trip / notional
                 if fee_pct > 0.20:
                     return RiskResult(
                         approved=False,
@@ -411,8 +443,10 @@ class RiskManager:
                         approved=False,
                         reason=f"position too small: ${notional:.2f} < ${min_floor:.2f} min notional (fee-aware)",
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                f"fee-aware check unavailable ({e}); sizing proceeds without fee guard"
+            )
 
         # ── Daily fee-drag ceiling (small-account guard) ───────
         # On a $50–300 account, one day of fees must not meaningfully dent
@@ -432,8 +466,8 @@ class RiskManager:
                         approved=False,
                         reason=f"daily fee drag ${_total_drag:.2f} exceeds 5% of account (${total_value:.2f})",
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"fee-drag check unavailable ({e}); skipped")
 
         # ── Daily trade count ─────────────────────────────────
         if self._daily_trades >= self.config.max_daily_trades:
@@ -543,8 +577,8 @@ class RiskManager:
                     self._daily_fee_drag = getattr(self, "_daily_fee_drag", 0.0) + (
                         _f.round_trip_cost(notional)
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"fee-drag accumulation failed ({e}); skipped")
         logger.info(
             f"  RiskDBG[{signal.symbol}]: FINAL adj_size={size_pct:.4f} "
             f"sig_in={signal.position_pct:.4f} "

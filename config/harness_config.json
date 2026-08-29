@@ -1,7 +1,7 @@
 {
   "debate_model": "qwythos-9b-mtp",
-  "fast_model": "qwen2.5-7b-instruct",
-  "risk_model": "qwen2.5-7b-instruct",
+  "fast_model": "deepseek-v4-pro-qwen3.5-9b",
+  "risk_model": "deepseek-v4-pro-qwen3.5-9b",
   "llama_host": "http://127.0.0.1:5801",
   "gpu0_host": "http://127.0.0.1:5801",
   "mcp_url": "http://127.0.0.1:8092",

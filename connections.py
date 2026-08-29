@@ -110,7 +110,7 @@ DEFAULT_CONNECTIONS: Dict[str, Dict[str, Any]] = {
     "harness": {
         "label": "Trading Harness",
         "type": "server",
-        "description": "Main trading loop (harness.py via run_harness.py)",
+        "description": "Main trading loop (harness.py, direct)",
         "api_key": "",
         "base_url": "http://127.0.0.1:8098",
         "enabled": True,
