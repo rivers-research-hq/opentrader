@@ -28,7 +28,7 @@ RUNWAY_START = "2026-08-05T18:22:00+00:00"
 
 PATTERNS = {
     "crash_loop": re.compile(r"Cycle (\d+) crashed \((\d+) consecutive\)"),
-    "watchdog_exit": re.compile(r"exiting so run_harness watchdog can act"),
+    "watchdog_exit": re.compile(r"exiting; systemd Restart=always will relaunch"),
     "cycle_done": re.compile(r"Cycle (\d+) done in ([\d.]+)s"),
 }
 

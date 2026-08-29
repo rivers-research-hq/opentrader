@@ -57,18 +57,22 @@ class MarketScenarioGenerator:
         base_spec: Optional[ScenarioSpec] = None,
         events: Optional[List[str]] = None,
         seeds: Optional[List[int]] = None,
+        with_resources: bool = False,
     ) -> List[World]:
         """Generate ``n_worlds`` market realities.
 
         - Without ``events``: everyday multiverse (neural if trained, else parametric).
         - With ``events``: base worlds with the named crises injected on top.
+        - With ``with_resources``: merge scarce/renewable resource assets
+          (scenarios.resources) into every world — tradable symbols whose
+          dynamics the 17-symbol equity universe cannot express.
         """
         base_spec = base_spec or ScenarioSpec()
         seeds = seeds or [None] * n_worlds
         worlds: List[World] = []
         for i in range(n_worlds):
             spec = ScenarioSpec(**{**base_spec.__dict__, "seed": seeds[i]})
-            if self._neural is not None and not spec.event:
+            if self._neural is not None and not spec.event and not with_resources:
                 try:
                     data = self._neural.generate_world(spec)
                     worlds.append(World(spec=spec, data=data, generated_by="neural"))
@@ -76,7 +80,10 @@ class MarketScenarioGenerator:
                 except Exception:
                     pass
             data = _param_generate(spec)
-            worlds.append(World(spec=spec, data=data, generated_by="parametric"))
+            if with_resources:
+                data = _add_resources(data, spec)
+            worlds.append(World(spec=spec, data=data,
+                                generated_by="neural" if self._neural is not None else "parametric"))
 
         for eid in (events or []):
             ev = EVENTS.get(eid)
@@ -85,6 +92,8 @@ class MarketScenarioGenerator:
             for w in worlds:
                 spec = ScenarioSpec(**{**w.spec.__dict__, "event": eid})
                 data = _param_generate_event(spec, ev) if not w.spec.event else _inject(w.data, ev, w.spec.seed)
+                if with_resources and not w.spec.event:
+                    data = _add_resources(data, spec)
                 w.data = data
                 w.spec.event = eid
         return worlds
@@ -96,6 +105,24 @@ class MarketScenarioGenerator:
 def _inject(data, event: TailEvent, seed: Optional[int]) -> Dict:
     from scenarios.parametric import inject_event
     return inject_event(data, event, seed=seed)
+
+
+def _add_resources(data: Dict, spec) -> Dict:
+    """Merge scarce/renewable resource assets into a generated world."""
+    from scenarios.resources import generate_resource_assets
+    import pandas as pd
+    resources = generate_resource_assets(spec, index=next(iter(data.values())).index)
+    merged = dict(data)
+    for sym, df in resources.items():
+        if sym not in merged:
+            merged[sym] = df
+    return merged
+
+
+def resource_universe() -> list:
+    """The resource asset symbols (for spec construction)."""
+    from scenarios.resources import RESOURCE_KEYS
+    return list(RESOURCE_KEYS)
 
 
 # Convenience: one crisis-heavy world set covering the user's named tails.

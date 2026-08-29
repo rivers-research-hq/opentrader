@@ -138,7 +138,17 @@ class BackendPool:
 
         if was_healthy != bs.healthy:
             state = "HEALTHY" if bs.healthy else "UNHEALTHY"
-            logger.info(f"GPU state change: {bs.name} ({bs.url}) → {state}")
+            if bs.healthy:
+                logger.info(f"GPU state change: {bs.name} ({bs.url}) → {state}")
+            else:
+                # Exclusion alert: after 3 consecutive failures this backend
+                # stops receiving routed requests until it recovers.
+                logger.warning(
+                    f"GPU state change: {bs.name} ({bs.url}) → {state} "
+                    f"(after {bs.consecutive_failures} failures) — EXCLUDED "
+                    f"from routing until health recovers. ACTION REQUIRED if "
+                    f"this persists: check llama-server process on that port."
+                )
 
     async def _get_fallback(
         self, skip: Optional[BackendStats] = None
@@ -368,8 +378,9 @@ def parse_args():
     p.add_argument("--port", type=int, default=5801, help="Listen port (default: 5801)")
     p.add_argument(
         "--backends",
-        default="5802,5803",
-        help="Comma-separated ports or full URLs for GPU backends (default: 5802,5803)",
+        default="5802",
+        help="Comma-separated ports or full URLs for GPU backends (default: 5802 — "
+        "5803/qwen2.5-7b is retired; the live unit pins this explicitly)",
     )
     p.add_argument(
         "--health-interval",

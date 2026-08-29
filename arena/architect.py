@@ -7,6 +7,7 @@ checks. The Architect model itself is a locally-trained qwen-2.5-7b QLoRA
 """
 
 import json
+import re
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
@@ -59,17 +60,6 @@ SEED_SKILLS = [
         "rationale": "Episodic outcomes must be positive.",
     },
     {
-        "id": "s04-unseen-bear-half",
-        "name": "Unseen bear half",
-        "tier": 1,
-        "prerequisites": [],
-        "scenario": {"window": "250-500", "regime": "down", "field": "full"},
-        "objective": "discrimination",
-        "pass_bar": {"window": "250-500", "min_margin": 0.01},
-        "metric_source": "recompute discrim 250-500",
-        "rationale": "The never-trained half of the 2022 bear.",
-    },
-    {
         "id": "s05-window-2026",
         "name": "Window 2026",
         "tier": 1,
@@ -77,7 +67,7 @@ SEED_SKILLS = [
         "scenario": {"window": "1000-1250", "regime": "mixed", "field": "full"},
         "objective": "discrimination",
         "pass_bar": {"window": "1000-1250", "min_margin": 0.01},
-        "metric_source": "gate.results[1].margin",
+        "metric_source": "gate.results[0].margin",
         "rationale": "The fully unseen window.",
     },
     {
@@ -147,25 +137,27 @@ SEED_SKILLS = [
         "rationale": "Beat all three persona houses in the war.",
     },
     {
-        "id": "s12-bull-bear-balance",
-        "name": "Bull+bear balance",
+        "id": "s12-future-autonomy",
+        "name": "Future autonomy",
         "tier": 4,
-        "prerequisites": ["s04-unseen-bear-half", "s05-window-2026"],
-        "scenario": {"window": "mixed", "regime": "mixed", "field": "full"},
+        "prerequisites": ["s05-window-2026"],
+        "scenario": {"window": "1000-1250", "regime": "mixed", "field": "full"},
         "objective": "gate_margins",
         "pass_bar": {
-            "windows": ["0-500", "1000-1250"],
+            "windows": ["1000-1250"],
             "min_margin": 0.01,
             "consecutive": 3,
         },
         "metric_source": "gate.results[*].margin",
-        "rationale": "Both regimes hold the autonomy bar for 3 consecutive iterations.",
+        "rationale": "The unseen future holds the autonomy bar for 3 consecutive "
+        "iterations. (audit 2026-08-11: the old 0-500 bear window was dropped — "
+        "not discriminable at +1% even in-sample, see #68.)",
     },
     {
         "id": "s13-gate-locked",
         "name": "Gate locked",
         "tier": 4,
-        "prerequisites": ["s12-bull-bear-balance"],
+        "prerequisites": ["s12-future-autonomy"],
         "scenario": {"window": "mixed", "regime": "mixed", "field": "full"},
         "objective": "gate_pass",
         "pass_bar": {"consecutive_passes": 2},
@@ -220,21 +212,29 @@ def render_weakness_report(state, tech=None):
         f"arena_z={a.get('arena_score', 0):+.3f}"
     )
     field = sorted((n, s.get("arena_score", 0)) for n, s in st.items() if n != "agent")
+    # trim zero-activity opponents (always-skip +0.000) — token budget on 8GB
+    field = [(n, z) for n, z in field if abs(z) > 0.0005 or n in ("citron", "ahl", "rule-config")]
     lines.append("BATTLE field " + " | ".join(f"{n}={z:+.3f}" for n, z in field))
     h2h = b.get("h2h", {})
+    # audit 2026-08-11: trim zero-activity opponents (always-skip 0W/0L etc.)
+    # so the report stays inside the 512-token training ceiling on the 8GB card
+    active_h2h = {n: h for n, h in sorted(h2h.items())
+                  if h.get("wins", 0) + h.get("losses", 0) > 0}
     lines.append(
         "H2H "
         + " | ".join(
             f"vs {n} {h.get('wins', 0)}W/{h.get('losses', 0)}L"
-            for n, h in sorted(h2h.items())
+            for n, h in active_h2h.items()
         )
     )
     w = state.get("war", {})
+    active_war = {n: v for n, v in sorted(w.items())
+                  if v.get("n_trades", 0) > 0}
     lines.append(
         "WAR "
         + " | ".join(
             f"{n} {v.get('net_return', 0):+.2%} ({v.get('n_trades', 0)}t)"
-            for n, v in sorted(w.items())
+            for n, v in active_war.items()
         )
     )
     reg = state.get("war_regime", {})
@@ -275,12 +275,10 @@ def load_state():
 ARCHITECT_ADAPTER = PROJECT / "data/gpu_scheduler/adapters/architect"
 
 PRELUDE = (
-    "You are the Curriculum Architect for the Momentum trading agent. Read the "
-    "weakness report and propose the single next skill that sharpens the agent's "
-    "trading ability. Output ONLY a JSON object matching this schema: "
-    "{id, name, tier, prerequisites, scenario{window,regime,field}, objective, "
-    "pass_bar, metric_source, rationale} with numeric pass bars. If no new skill "
-    'is warranted, output {"noop": true, "rationale": "..."}.\n\n'
+    "You are the Curriculum Architect. From the weakness report propose ONE next "
+    "skill as JSON: {id, name, tier, prerequisites, scenario{window,regime,field}, "
+    "objective, pass_bar, metric_source, rationale}, numeric pass bars. "
+    'Or {"noop": true, "rationale": "..."}.\n\n'
 )
 
 FEW_SHOT = (
@@ -310,10 +308,14 @@ def load_architect(adapter=ARCHITECT_ADAPTER):
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.float16,
     )
+    # device_map={"": 0} pins every tensor to GPU 0 at load time (audit
+    # 2026-08-11: "auto" parks embeddings on CPU on repeat in-process loads ->
+    # the SECOND arch_review in a loop crashes with a device mismatch. Verified:
+    # two in-process reviews complete with the explicit map.)
     model = AutoModelForCausalLM.from_pretrained(
         "Qwen/Qwen2.5-7B-Instruct",
         quantization_config=bnb,
-        device_map="auto",
+        device_map={"": 0},
         attn_implementation="eager",
     )
     model = PeftModel.from_pretrained(model, adapter)
@@ -345,10 +347,17 @@ def extract_json(text):
         elif ch == "}":
             depth -= 1
             if depth == 0:
+                raw = text[start : i + 1]
                 try:
-                    return json.loads(text[start : i + 1])
+                    return json.loads(raw)
                 except json.JSONDecodeError:
-                    return None
+                    # tolerate small LLM JSON artifacts: doubled/trailing commas
+                    cleaned = re.sub(r",\s*,", ",", raw)
+                    cleaned = re.sub(r",\s*}", "}", cleaned)
+                    try:
+                        return json.loads(cleaned)
+                    except json.JSONDecodeError:
+                        return None
     return None
 
 
@@ -357,14 +366,15 @@ def propose(model, tok, report_text, known_ids=None):
 
     constraint = ""
     if known_ids:
+        # audit 2026-08-11: keep this compact — the full id list (~115 tokens)
+        # pushed prompts past the 512-token training ceiling on the 8GB card
         constraint = (
-            f"\nThe prerequisites field MUST use only existing skill ids from this list: "
-            f"{', '.join(sorted(known_ids))}. Never invent new prerequisite ids.\n"
+            "\nPrerequisites MUST be ids from the existing skill list"
+            f" (e.g. {', '.join(sorted(known_ids)[:6])}, ...). Never invent ids.\n"
         )
     prompt = (
         PRELUDE
         + constraint
-        + FEW_SHOT
         + report_text
         + "\n\nNext skill proposal (JSON):"
     )
@@ -372,7 +382,7 @@ def propose(model, tok, report_text, known_ids=None):
     text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
     inp = tok(text, return_tensors="pt").to("cuda")
     with torch.no_grad():
-        out = model.generate(**inp, max_new_tokens=256, do_sample=False)
+        out = model.generate(**inp, max_new_tokens=768, do_sample=False, repetition_penalty=1.15)  # audit: 256 truncated the JSON proposal
     reply = tok.decode(out[0][inp["input_ids"].shape[1] :], skip_special_tokens=True)
     return extract_json(reply), reply
 

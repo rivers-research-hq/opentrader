@@ -1,9 +1,10 @@
-"""Build the Architect training dataset.
+"""Build the Architect training dataset (retrain 2026-08-11).
 
-For each seed skill: several rendered weakness reports (varied, realistic) in
-which that skill is the natural next unlock, paired with the skill proposal
-as the target, plus noop examples. Matches render_weakness_report's format so
-the model sees the same shape at inference.
+Matches the CURRENT runtime render_weakness_report format exactly:
+  - single-window forward-only gate: "gate margins 1000-1250=+x.xx%"
+  - the known_ids constraint block (same text as arch_review builds)
+  - WAR lines carry trade counts "(Nt)"
+  - current SEED_SKILLS ids (s12-future-autonomy, no s04)
 
 Output: data/arena/architect_dataset.jsonl — {prompt, decision}
 """
@@ -12,20 +13,16 @@ import json
 import random
 from pathlib import Path
 
-from arena.architect import SEED_SKILLS
+from arena.architect import SEED_SKILLS, PRELUDE, SKILL_SCHEMA_KEYS
 
 PROJECT = Path(__file__).resolve().parent.parent
 OUT = PROJECT / "data" / "arena"
 
 SKILL_BY_ID = {s["id"]: s for s in SEED_SKILLS}
 
-PRELUDE = (
-    "You are the Curriculum Architect for the Momentum trading agent. Read the "
-    "weakness report and propose the single next skill that sharpens the agent's "
-    "trading ability. Output ONLY a JSON object matching this schema: "
-    "{id, name, tier, prerequisites, scenario{window,regime,field}, objective, "
-    "pass_bar, metric_source, rationale} with numeric pass bars. If no new skill "
-    'is warranted, output {"noop": true, "rationale": "..."}.\n\n'
+CONSTRAINT = (
+    "\nPrerequisites MUST be ids from the existing skill list"
+    " (e.g. {ids6}, ...). Never invent ids.\n"
 )
 
 
@@ -33,7 +30,7 @@ def _weak_metrics(skill):
     pb = skill.get("pass_bar", {})
     objective = skill.get("objective")
     if objective == "discrimination":
-        return {"gate0": pb.get("min_margin", 0.01) - 0.006, "gate1": 0.0155}
+        return {"gate0": pb.get("min_margin", 0.01) - 0.006}
     if objective == "arena_z":
         return {
             "z": 0.08,
@@ -56,9 +53,9 @@ def _weak_metrics(skill):
     if objective == "war_vs_multi":
         return {"war": {"agent": 0.03, "citadel": 0.04, "ahl": 0.09, "citron": 0.05}}
     if objective == "gate_margins":
-        return {"gate0": 0.0103, "gate1": 0.0155}
+        return {}  # gate line shows the failing margin via healthy=False
     if objective == "gate_pass":
-        return {"gate0": 0.0101, "gate1": 0.0155}
+        return {}  # gate line shows the failing margin via healthy=False
     if objective == "adapter":
         return {"adapter": False}
     if objective == "deployment":
@@ -66,10 +63,15 @@ def _weak_metrics(skill):
     return {}
 
 
-def _report(skill, weak, tech_lit, rng):
+def _report(skill, weak, tech_lit, rng, healthy=False):
     j = lambda v, f: round(rng.uniform(v * (1 - f), v * (1 + f)), 5) if v else v
-    margin0 = weak.get("gate0", j(0.0103, 0.3))
-    margin1 = weak.get("gate1", j(0.0155, 0.2))
+    # audit 2026-08-11: the gate margin MUST be consistent with the decision —
+    # skill reports show a failing gate (weakness), noop reports a passing one
+    if healthy:
+        margin0 = j(0.0125, 0.15)   # comfortably above the +1% bar
+    else:
+        margin0 = j(0.0045, 0.4)    # clearly below the +1% bar
+    margin0 = weak.get("gate0", margin0)
     z = weak.get("z", j(0.66, 0.1))
     field = weak.get(
         "field",
@@ -78,12 +80,16 @@ def _report(skill, weak, tech_lit, rng):
             "ahl": j(-0.113, 0.3),
             "citadel": j(0.161, 0.2),
             "citron": j(-0.411, 0.15),
-            "always-take": 0.0,
             "random": j(0.004, 0.8),
         },
     )
     h2h = weak.get(
-        "h2h", {"citron": {"wins": int(j(128, 0.2)), "losses": int(j(41, 0.2))}}
+        "h2h",
+        {
+            "citron": {"wins": int(j(128, 0.2)), "losses": int(j(41, 0.2))},
+            "ahl": {"wins": int(j(60, 0.3)), "losses": int(j(80, 0.2))},
+            "rule-config": {"wins": int(j(90, 0.2)), "losses": int(j(120, 0.2))},
+        },
     )
     war = weak.get(
         "war",
@@ -95,25 +101,32 @@ def _report(skill, weak, tech_lit, rng):
             "citron": 0.0,
         },
     )
+    # compact report: matches the trimmed runtime render (audit 2026-08-11)
+    # so train/serve formats align and everything fits the 512-token ceiling
     lines = [
-        f"ITERATION {rng.randint(22, 30)} | gate margins 0-500={margin0:+.2%} 1000-1250={margin1:+.2%} | pass={margin0 >= 0.01 and margin1 >= 0.01}",
-        f"TECH TREE {rng.randint(10, 14)}/17 lit | missing: {', '.join(n for n in ['beats-rule', 'top-field', 'war-beats-rule', 'mot-weight'] if n not in tech_lit)}",
+        f"ITERATION {rng.randint(22, 30)} | gate margins 1000-1250={margin0:+.2%} | pass={margin0 >= 0.01}",
+        f"TECH TREE {rng.randint(10, 14)}/{len(SEED_SKILLS)} lit | missing: {', '.join(n for n in ['beats-rule', 'top-field', 'war-beats-rule', 'mot-weight'] if n not in tech_lit)}",
         f"BATTLE agent takes={rng.randint(4000, 9000)} take_mean=+{j(1.9, 0.2):.2f}% arena_z={z:+.3f}",
         "BATTLE field " + " | ".join(f"{n}={v:+.3f}" for n, v in sorted(field.items())),
         "H2H "
         + " | ".join(
             f"vs {n} {h['wins']}W/{h['losses']}L" for n, h in sorted(h2h.items())
         ),
-        "WAR " + " | ".join(f"{n} {v:+.2%}" for n, v in sorted(war.items())),
+        "WAR "
+        + " | ".join(
+            f"{n} {v:+.2%} ({rng.randint(5, 400)}t)" for n, v in sorted(war.items())
+        ),
         f"REGIME agent up +{j(2.7, 0.3):.2f}% ({rng.randint(40, 90)}) down +0.00% (0)",
         f"BEAR RELABELS trained={rng.randint(30, 60)}",
     ]
     return "\n".join(lines)
 
 
-def build(seed=11, variants=5, n_noop=12):
+def build(seed=11, variants=12, n_noop=16):
     rng = random.Random(seed)
     rows = []
+    known_ids = sorted(SKILL_BY_ID.keys())
+    constraint = CONSTRAINT.format(ids6=", ".join(known_ids[:6]))
     for skill in SEED_SKILLS:
         tech_lit = [
             s["id"] for s in SEED_SKILLS if s["id"] in skill.get("prerequisites", [])
@@ -122,27 +135,38 @@ def build(seed=11, variants=5, n_noop=12):
             "takes",
             "beats-field",
             "war-book-profit",
-            "gate-bear",
-            "gate-bull",
+            "gate-future",
         ]
         target = json.dumps({k: skill[k] for k in skill})
         for _ in range(variants):
-            report = _report(skill, _weak_metrics(skill), tech_lit, rng)
+            report = _report(skill, _weak_metrics(skill), tech_lit, rng, healthy=False)
             rows.append(
                 {
-                    "prompt": PRELUDE + report + "\n\nNext skill proposal (JSON):",
+                    "prompt": PRELUDE
+                    + constraint
+                    + report
+                    + "\n\nNext skill proposal (JSON):",
                     "decision": target,
                 }
             )
     for _ in range(n_noop):
-        report = _report({}, {}, list(SKILL_BY_ID), rng)
+        report = _report({}, {}, list(SKILL_BY_ID), rng, healthy=True)
         rows.append(
             {
-                "prompt": PRELUDE + report + "\n\nNext skill proposal (JSON):",
+                "prompt": PRELUDE
+                + constraint
+                + report
+                + "\n\nNext skill proposal (JSON):",
                 "decision": json.dumps(
                     {
                         "noop": True,
-                        "rationale": "All measured objectives are above their pass bars.",
+                        "rationale": rng.choice(
+                            [
+                                "All measured objectives are above their pass bars.",
+                                "The gate holds and the war book is profitable; no new skill is warranted.",
+                                "Current skills cover every lit tech node; proposing more would overfit.",
+                            ]
+                        ),
                     }
                 ),
             }

@@ -29,8 +29,8 @@ PROJECT = Path(__file__).resolve().parent.parent
 URL = "http://127.0.0.1:5802/v1/chat/completions"
 MODEL = "qwythos-9b-mtp"
 FORWARD = 10
-TRAIN = (500, 1000)
-TESTS = [(0, 500), (1000, 1250)]
+TRAIN = (0, 1000)             # forward-only (audit 2026-08-11), matches value_head/arena
+TESTS = [(1000, 1250)]        # gate only the unseen future (w0 bear era not discriminable — #68)
 SEED = 23
 SYSTEM = (
     "You are an apprentice trader. A validated rule system produced these entry "

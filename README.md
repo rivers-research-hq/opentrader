@@ -65,7 +65,7 @@ Every paper trade is evidence. The system doesn't just trade — it learns from 
 
 ```
 pip install -r requirements.txt
-python run_harness.py --help
+python harness.py --help
 ```
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, ports, and integration seams, and [`docs/CONTEXT.md`](docs/CONTEXT.md) for the project's shared vocabulary.

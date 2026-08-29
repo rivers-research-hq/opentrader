@@ -24,17 +24,18 @@
    "cooldown_until": 1785699022.23414
   },
   {
-   "name": "value-head-push",
-   "cmd": "/home/mrc/rocm_venv/bin/python3 -m setup_search.task_value_push",
-   "gpu": "cpu",
+   "name": "hive-breed",
+   "cmd": "/home/mrc/rocm_venv/bin/python3 -m setup_search.task_hive_breed",
+   "gpu": "gpu0",
    "priority": 2,
    "timeout": 3600,
-   "status": "done",
-   "note": "re-run the best value-head through the holdout gate",
-   "last_run": "2026-08-02T19:57:47Z",
-   "cooldown_sec": 1800,
+   "status": "pending",
+   "note": "RE-ENABLED 2026-08-11 after gate audit: promotes only on honest HOLDOUT gate passes (min_kept 30); per-slot artifacts",
+   "last_run": "2026-08-11T20:44:17Z",
+   "cooldown_sec": 3600,
    "retries": 0,
-   "cooldown_until": 1785699082.235308
+   "cooldown_until": 1786484657.011706,
+   "recurring": true
   },
   {
    "name": "ptolemy-retrain",
@@ -44,8 +45,8 @@
    "timeout": 14400,
    "status": "done",
    "note": "successor retrain (GPU1, idle-gated coexistence)",
-   "last_run": "2026-08-02T19:56:02Z",
-   "retries": 0
+   "retries": 0,
+   "last_run": "2026-08-11T08:31:20Z"
   }
  ]
 }

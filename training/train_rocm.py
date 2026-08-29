@@ -28,6 +28,8 @@ from transformers import (
 )
 from trl import SFTConfig
 
+from training.model_config import BASE_MODEL
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("train_rocm")
 
@@ -70,7 +72,7 @@ def load_dataset(data_path: str) -> Dataset:
 def train(
     data_path: str,
     output_dir: str,
-    base_model: str = "Qwen/Qwen2.5-7B-Instruct",
+    base_model: str = BASE_MODEL,
     use_4bit: bool = True,
     epochs: int = 2,
     batch_size: int = 1,
@@ -227,7 +229,7 @@ def train(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base", default="Qwen/Qwen2.5-7B-Instruct", help="Base HF model name")
+    parser.add_argument("--base", default=BASE_MODEL, help="Base HF model name")
     parser.add_argument("--data", default="data/training/training_data_legacy.jsonl")
     parser.add_argument("--output", default="models/finetune/Ptolemy-S0")
     parser.add_argument("--epochs", type=int, default=2)

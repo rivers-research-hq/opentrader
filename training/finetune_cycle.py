@@ -39,9 +39,9 @@ from typing import Dict, List, Optional
 
 logger = logging.getLogger("opentrader.finetune_cycle")
 
-# Default model — Qwen2.5-7B, same architecture as Qwythos-9B (our inference model)
-# Qwythos outperformed Gemma-4 in trading — training on same architecture family
-DEFAULT_BASE_MODEL = os.environ.get("OPENTRADER_BASE_MODEL", "Qwen/Qwen2.5-7B-Instruct")
+# Trainable base model — single source of truth in training/model_config.py
+# (reads config/models.json; OPENTRADER_BASE_MODEL env overrides it).
+from training.model_config import BASE_MODEL as DEFAULT_BASE_MODEL
 FINETUNE_OUTPUT_DIR = "models/finetune"
 STATUS_FILE = "finetune_status.json"
 

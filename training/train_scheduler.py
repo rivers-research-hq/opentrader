@@ -24,13 +24,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
 
+from setup_search import gpu_activity
+
 logger = logging.getLogger("opentrader.scheduler")
 
 STATE_DIR = Path(__file__).resolve().parent.parent / "data"
 SCHEDULER_STATE = STATE_DIR / "train_schedule.json"
 TRAINING_LOCK = STATE_DIR / "training.lock"
-LLAMA_SERVER_PATTERN = "llama-server.*qwythos"
-HARNESS_PATTERN = "harness.py"
+HOLD_ACK = STATE_DIR / "training_hold_ack"
+# Serving server is managed by systemd (opentrader-llama-gpu1.service) — the
+# single source of truth for its model/alias/port/ctx. Stop/start via systemctl
+# only; never pkill llama-server (AGENTS.md), and never relaunch by hand.
+LLAMA_SERVER_UNIT = "opentrader-llama-gpu1.service"
 
 # Optimal windows (UTC hours with lowest crypto volatility)
 WINDOW_1_START, WINDOW_1_END = 0, 6    # Midnight-6AM UTC
@@ -209,23 +214,65 @@ def execute_training(force: bool = False) -> Dict:
     logger.info("Training scheduled — pausing trading...")
     TRAINING_LOCK.touch()  # signal harness to HOLD mode
 
-    # Wait for harness to acknowledge (it checks the lock file each cycle)
-    time.sleep(30)
+    # Wait for the harness to acknowledge (it writes training_hold_ack when
+    # it enters HOLD, up to one cycle later — harness cycles are >=60s).
+    ack_deadline = time.time() + 240
+    while not HOLD_ACK.exists() and time.time() < ack_deadline:
+        time.sleep(5)
+    if HOLD_ACK.exists():
+        logger.info("Harness acknowledged HOLD (training_hold_ack present)")
+        HOLD_ACK.unlink(missing_ok=True)
+    else:
+        logger.warning("No HOLD ack from harness within 240s — proceeding anyway")
+        # The scheduler gate (server_quiet on :5802) is the real safety net;
+        # the harness reads training.lock itself and will HOLD on its next cycle.
 
-    # Stop llama-server to free VRAM
+    # ── Drain: wait for in-flight inference to finish ──
+    logger.info("Draining in-flight requests on :5802...")
+    drain_deadline = time.time() + 120
+    while time.time() < drain_deadline:
+        if not gpu_activity.server_busy(gpu_activity.GPU1_PORT):
+            break
+        time.sleep(5)
+    if gpu_activity.server_busy(gpu_activity.GPU1_PORT):
+        logger.warning("Requests still in flight after 120s drain — proceeding anyway")
+    else:
+        logger.info("GPU1 quiet — drain complete")
+
+    # ── Stop the serving llama-server (systemd) to free VRAM ──
     t0 = time.time()
     try:
-        subprocess.run(["pkill", "-TERM", "-f", LLAMA_SERVER_PATTERN], timeout=10)
+        subprocess.run(["systemctl", "--user", "stop", LLAMA_SERVER_UNIT], timeout=30, check=True)
         time.sleep(5)
-        logger.info("llama-server stopped")
+        logger.info("llama-server (:5802) stopped via systemd")
     except Exception as e:
         logger.warning(f"llama-server stop failed: {e}")
+
+    # ── VRAM preflight BEFORE loading the model: with the serving server
+    #    stopped, the card must still have room for the QLoRA base. ──
+    free_gb = gpu_activity.vram_free_gb("gpu1")
+    if free_gb < gpu_activity.MIN_GPU1_FREE_GB:
+        logger.error(
+            f"VRAM preflight FAILED: {free_gb:.1f}GiB free on GPU1 "
+            f"(need >= {gpu_activity.MIN_GPU1_FREE_GB}GiB) — aborting training"
+        )
+        result["status"] = "no_vram"
+        result["error"] = f"only {free_gb:.1f}GiB free on GPU1"
+        _restore_gpu1_server()
+        if TRAINING_LOCK.exists():
+            TRAINING_LOCK.unlink()
+        result["duration_s"] = round(time.time() - t0, 1)
+        return result
+    logger.info(f"VRAM preflight OK: {free_gb:.1f}GiB free on GPU1")
 
     # ── Run fine-tune ──
     try:
         from training.finetune_cycle import run_finetune
         logger.info("Starting fine-tune...")
-        ft_result = run_finetune()
+        ft_result = run_finetune(
+            state_dir=str(STATE_DIR),
+            data_path=os.environ.get("OPENTRADER_TRAIN_DATA") or None,
+        )
         result["ft_result"] = ft_result
         if ft_result.get("status") == "completed":
             result["status"] = "trained"
@@ -237,20 +284,9 @@ def execute_training(force: bool = False) -> Dict:
         result["error"] = str(e)
         logger.error(f"Fine-tune failed: {e}")
 
-    # ── Restart llama-server ──
+    # ── Restart llama-server on the SAME port + alias it had before ──
     try:
-        subprocess.Popen([
-            "/home/mrc/src/modelai-llama.cpp/build-wmma/bin/llama-server",
-            "--model", "/home/mrc/models/qwythos-9b-mtp/Qwythos-9B-Claude-Mythos-5-1M-MTP-Q4_K_M.gguf",
-            "--alias", "qwen2.5-7b-instruct", "--host", "127.0.0.1", "--port", "5813",
-            "--ctx-size", "16384", "--cache-type-k", "q8_0", "--cache-type-v", "q8_0",
-            "--jinja", "--parallel", "4", "--cont-batching",
-            "--threads", "8", "--batch-size", "4096", "--ubatch-size", "1024",
-            "--repeat-penalty", "1.0", "--n-predict", "2048", "--n-gpu-layers", "99",
-            "--reasoning", "off", "--spec-type", "none",
-        ])
-        time.sleep(15)  # wait for model to load
-        logger.info("llama-server restarted")
+        _restore_gpu1_server()
     except Exception as e:
         logger.error(f"llama-server restart failed: {e}")
         result["error"] = (result["error"] or "") + f"; server restart: {e}"
@@ -262,6 +298,19 @@ def execute_training(force: bool = False) -> Dict:
 
     result["duration_s"] = round(time.time() - t0, 1)
     return result
+
+
+def _restore_gpu1_server() -> None:
+    """Restore the GPU1 serving server on :5802 via systemd.
+
+    The unit opentrader-llama-gpu1.service already carries the serving
+    model/alias/ctx (DeepSeek-V4-Pro-Qwen3.5-9B-MTP, ctx 16384, --kv-unified).
+    Never launch llama-server by hand — a stray process would fight systemd
+    for :5802 and break gpu-sync routing.
+    """
+    subprocess.run(["systemctl", "--user", "start", LLAMA_SERVER_UNIT], timeout=30, check=False)
+    time.sleep(15)  # wait for model to load
+    logger.info("llama-server restarted on :5802 via systemd")
 
 
 # ── CLI ──

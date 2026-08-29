@@ -31,7 +31,7 @@ nohup /home/mrc/src/modelai-llama.cpp/build-wmma/bin/llama-server \
 # Restart harness (after llama-server is up)
 cd /home/mrc/opentrader
 pkill -f harness.py; sleep 2
-setsid python3 run_harness.py --live --exchange kraken --stage 2 \
+setsid python3 harness.py --live --exchange kraken --stage 2 \
   --llama-host http://127.0.0.1:5802 --parallel-debate \
   </dev/null >>/tmp/harness_watch.log 2>&1 &
 disown
@@ -43,7 +43,7 @@ disown
 ```
 
 ## PRIORITY BUGS (fix in order)
-1. `run_harness.py` default --llama-host should be :5802 not :8080
+1. `harness.py` default --llama-host should be :5802 not :8080
 2. `training/train_scheduler.py` — separate guards for arxiv vs training
 3. `report_risk.py` — positions can be list or dict, handle both
 

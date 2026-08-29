@@ -33,6 +33,7 @@ class ScenarioSpec:
     name: str = "default"
     regime: str = REGIME_RANGE
     event: Optional[str] = None          # tail-event id from tail_library, if any
+    regime_break: Optional[tuple] = None  # (bar_frac, regime) mid-world flip, if any
     n_bars: int = 500
     drift: float = 0.0003                # per-bar expected return (annual-ish scale)
     vol_mult: float = 1.0                # volatility multiplier vs baseline

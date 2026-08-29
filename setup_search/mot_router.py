@@ -27,8 +27,8 @@ from setup_search.engine import _features, _score_at
 
 PROJECT = Path(__file__).resolve().parent.parent
 FORWARD = 10
-TRAIN = (500, 1000)
-TESTS = [(0, 500), (1000, 1250)]
+TRAIN = (0, 1000)             # forward-only (audit 2026-08-11), matches value_head/arena
+TESTS = [(1000, 1250)]        # gate only the unseen future (w0 bear era not discriminable — #68)
 GEN_SCORE_MIN = -0.5
 SEED = 31
 FEAT_COLS = ["mom", "rev", "rsi", "brk", "z", "ma_dist", "vol_spike", "vol_level", "momfilt"]

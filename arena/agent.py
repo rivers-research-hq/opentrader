@@ -17,11 +17,18 @@ import torch.nn as nn
 
 from setup_search.value_head import THETA_BAR
 
+GATE_MIN_KEPT = 30  # a gate window needs >= this many kept rows to count
+# (audit 2026-08-11: the arena gate reported kept counts but did not
+# enforce them, so a model keeping a handful of lucky rows could clear
+# the bar; matches the breeder MIN_KEPT discipline — #68 protocol)
+
 PROJECT = Path(__file__).resolve().parent.parent
 OUT = PROJECT / "data" / "arena"
 SEED = 23
-TRAIN = (500, 1000)
-TESTS = [(0, 500), (1000, 1250)]
+TRAIN = (0, 1000)              # forward-only (audit 2026-08-11): train the past
+TESTS = [(1000, 1250)]         # gate ONLY the unseen future — w0 (2021-23 bear)
+                               # is not discriminable at +1% even in-sample,
+                               # so gating it made the bar unreachable (see #68)
 VAL_FRAC = 0.15
 
 
@@ -60,11 +67,18 @@ def fit(
     hidden=(64, 32),
     extra_rows=None,
     extra_targets=None,
+    seed=SEED,
 ):
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     device = _device()
     print(f"[arena] fit on {device}" if device == "cuda" else "", flush=True)
+    # ORDER MATTERS: the val slice (last VAL_FRAC of train) is the theta
+    # calibration tail and must be the RECENT era. collect() returns rows in
+    # symbol-major order; without sorting, the "val tail" is the last
+    # symbols' rows across all eras (audit 2026-08-11: theta calibrated on a
+    # random era mix, silently destroying gate margins in run_iteration).
+    rows = sorted(rows, key=lambda r: r["bar"])
     train_w, test_ws = _adaptive_windows(rows)
     train = [r for r in rows if train_w[0] <= r["bar"] < train_w[1]]
     if len(train) < 8:
@@ -144,6 +158,8 @@ def fit(
     best_theta, best_d = 0.0, -1e9
     for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
         kept = [r["fwd"] for r, p in zip(val, vp) if p >= q]
+        if len(kept) < GATE_MIN_KEPT:
+            continue
         allm = statistics.mean(r["fwd"] for r in val)
         km = statistics.mean(kept) if kept else 0.0
         d = km - allm
@@ -171,7 +187,8 @@ def fit(
                 "margin": kept_m - all_m,
             }
         )
-    passed = [r for r in results if r["margin"] >= THETA_BAR]
+    passed = [r for r in results
+              if r["margin"] >= THETA_BAR and r["kept"] >= GATE_MIN_KEPT]
     pass_gate = len(passed) == len(results)
     report = {
         "train_window": list(train_w),
@@ -260,7 +277,7 @@ def _adaptive_windows(rows):
     runs on any archive length (1y ~250 bars through 5y ~1250), not just the
     hardcoded 5y split. Feature warmup means rows may start well after bar 0
     (e.g. 1y rows span 110-240), so windows are placed inside the real range.
-    Preserves the both-windows (bear + unseen) bar semantics on the 5y scale."""
+    Forward-only (audit 2026-08-11): train the past, gate the unseen future."""
     bars = [r["bar"] for r in rows]
     if not bars:
         return TRAIN, TESTS
@@ -268,14 +285,13 @@ def _adaptive_windows(rows):
     if hi - lo >= 1000:
         return TRAIN, TESTS
     seg = hi - lo
-    b = lo + int(0.4 * seg)
     c = lo + int(0.8 * seg)
-    train = (b, c)
-    tests = [(lo, b), (c, hi)]
+    train = (lo, c)
+    tests = [(c, hi)]
     tests = [(x, y) for x, y in tests if y > x]
-    if len(tests) < 2:
+    if not tests:
         mid = lo + seg // 2
-        tests = [(lo, max(lo + 1, mid)), (max(lo + 1, mid), hi)]
+        train, tests = (lo, mid), [(mid, hi)]
     return train, tests
 
 
@@ -306,7 +322,8 @@ def recompute_gate(art, rows):
                 "margin": kept_m - all_m,
             }
         )
-    passed = [r for r in results if r["margin"] >= THETA_BAR]
+    passed = [r for r in results
+              if r["margin"] >= THETA_BAR and r["kept"] >= GATE_MIN_KEPT]
     art["report"]["results"] = results
     art["report"]["pass"] = len(passed) == len(results)
     return art

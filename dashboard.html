@@ -80,6 +80,7 @@ body{
    ═══════════════════════════════════════════════════════════ */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px 16px;
   padding:10px 18px;
   background:linear-gradient(135deg,var(--surface),var(--surface-2));
   border:1px solid var(--border);
@@ -104,7 +105,7 @@ body{
   font-size:10px;color:var(--text-dim);
   letter-spacing:2px;text-transform:uppercase;
 }
-.topbar-right{display:flex;align-items:center;gap:20px}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
 .pill{
   display:flex;align-items:center;gap:6px;
   padding:5px 12px;border-radius:20px;
@@ -148,6 +149,7 @@ body{
 .trade-status.trading{border-color:rgba(52,211,153,.4);background:linear-gradient(90deg,rgba(52,211,153,.07),transparent)}
 .trade-status.error{border-color:rgba(244,63,94,.45);background:linear-gradient(90deg,rgba(244,63,94,.07),transparent)}
 .ts-left{display:flex;align-items:center;gap:12px;min-width:0}
+.ts-left>div{min-width:0;overflow:hidden}
 .ts-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .trade-status.idle .ts-dot{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:tsPulse 2s infinite}
 .trade-status.trading .ts-dot{background:var(--green);box-shadow:0 0 8px var(--green);animation:tsPulse 1.4s infinite}
@@ -230,10 +232,11 @@ body{
    ═══════════════════════════════════════════════════════════ */
 .main-grid{
   display:grid;
-  grid-template-columns:1fr 320px;
+  grid-template-columns:minmax(0,1fr) 320px;
   gap:12px;
 }
-.main-left{display:flex;flex-direction:column;gap:12px}
+.main-left{display:flex;flex-direction:column;gap:12px;min-width:0}
+.right-stack{min-width:0}
 
 /* ═══════════════════════════════════════════════════════════
    CHART PANEL
@@ -246,6 +249,7 @@ body{
 }
 .panel-head{
   display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:6px 10px;
   padding:12px 16px 8px;
 }
 .panel-title{
@@ -260,12 +264,12 @@ body{
   color:var(--text);font-weight:600;
 }
 .chart-legend{
-  display:flex;gap:6px;
+  display:flex;flex-wrap:wrap;gap:4px 6px;min-width:0;
 }
 .legend-btn{
   display:flex;align-items:center;gap:5px;
   padding:4px 10px;border-radius:var(--r-sm);
-  font-size:10px;font-weight:600;
+  font-size:10px;font-weight:600;white-space:nowrap;
   background:var(--surface-hi);border:1px solid var(--border);
   color:var(--text-dim);cursor:pointer;
   transition:all var(--t-fast) var(--ease);
@@ -502,6 +506,8 @@ body{
    ═══════════════════════════════════════════════════════════ */
 @keyframes flash-green{0%{background:var(--green-glow)}100%{background:transparent}}
 @keyframes flash-red{0%{background:var(--red-glow)}100%{background:transparent}}
+@keyframes erFlash{0%{background:rgba(52,211,153,.14)}100%{background:transparent}}
+.er-flash{animation:erFlash .9s ease}
 .flash-up{animation:flash-green .6s ease}
 .flash-dn{animation:flash-red .6s ease}
 
@@ -554,6 +560,11 @@ body{
 /* ── Phone (≤640px) ── */
 @media(max-width:640px){
   .app{padding:6px 8px 12px;gap:8px}
+
+  /* Trade-status bar: title row, then stat cells wrap below */
+  .trade-status{flex-wrap:wrap;gap:8px}
+  .ts-left{flex:1 1 100%}
+  .ts-right{flex:1 1 100%;justify-content:space-between;flex-wrap:wrap;gap:8px 10px}
 
   /* Top bar: stack into 2 rows */
   .topbar{
@@ -839,7 +850,7 @@ body{
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Symbol</th><th>Action</th><th>Confidence</th>
+                  <th>Symbol</th><th>Action</th><th>Confidence / Score</th>
                   <th>Position %</th><th>Fundamentals</th><th>Reason</th><th>Time</th>
                 </tr>
               </thead>
@@ -864,10 +875,12 @@ body{
           </div>
           <div class="chart-legend" id="er-legend" style="font-size:11px;opacity:.8"></div>
         </div>
-        <div style="position:relative;height:380px">
+        <div id="er-canvas-wrap" style="position:relative;height:380px">
           <canvas id="er-canvas" style="width:100%;height:100%;display:block"></canvas>
           <div id="er-tooltip" style="position:absolute;pointer-events:none;background:rgba(8,12,22,.9);border:1px solid #2c3a56;border-radius:8px;padding:6px 10px;font-size:11px;color:#dbe4f0;display:none;z-index:5"></div>
         </div>
+        <!-- ER prototype variants (?er=flow|constellation|ladder) render here -->
+        <div id="er-alt" style="display:none;height:380px;padding:10px 12px;overflow:hidden"></div>
         <div style="padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(30,35,51,.4)">
           <div id="er-note" style="color:#8a94a6;font-size:12px"></div>
           <div id="er-evo" class="mono" style="color:#fbbf24;font-size:11px">gen 0 · mutations 0</div>
@@ -1470,6 +1483,16 @@ function renderSignals(){
     var aColor = action==='BUY'?'pos':(action==='SELL'?'neg':'neutral');
     var confColor = conf>=60?'pos':(conf>=30?'':'neutral');
     var reason = (s.reason||'').substring(0,60);
+    // HOLD signals carry no confidence — the Signal dataclass default 0.0 is
+    // unpopulated, not "0% confident". Show the rule score instead: it is the
+    // number that actually varies cycle to cycle (entry bar = 0.28).
+    var _sm = (s.reason||'').match(/score=(-?\d+\.?\d*)/);
+    var _score = _sm ? parseFloat(_sm[1]) : null;
+    var confCell = (action==='HOLD')
+      ? (_score!=null
+          ? '<td class="num neutral" title="rule score (entry bar 0.28)">'+_score.toFixed(3)+'</td>'
+          : '<td class="num neutral">—</td>')
+      : '<td class="num '+confColor+'">'+conf.toFixed(0)+'%</td>';
     var time = String(s.timestamp||'').substring(11,19);
     var fc = (FULL.fundamentals_coverage||{})[s.symbol];
     var fundBadge = fc==='ok'
@@ -1480,7 +1503,7 @@ function renderSignals(){
     return '<tr>'+
       '<td><div class="sym">'+(s.symbol||'?')+'</div></td>'+
       '<td class="num '+aColor+'" style="font-weight:700">'+action+'</td>'+
-      '<td class="num '+confColor+'">'+conf.toFixed(0)+'%</td>'+
+      confCell+
       '<td class="num neutral">'+posPct.toFixed(1)+'%</td>'+
       fundBadge+
       '<td style="font-size:10px;color:var(--text-dim);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+reason+'</td>'+
@@ -1814,7 +1837,16 @@ function initER2D(){
 
 function buildERLayout(){
   var W = erState.dims.w, H = erState.dims.h;
-  var experts = erData.experts || [];
+  var experts = (erData.experts||[]).filter(function(e){
+    return e && e.name && typeof e.oos_calmar === 'number';
+  });
+  if(!experts.length){
+    // Expert registry unavailable (strategies import failed): build placeholder
+    // nodes from the live router weights so the graph stays truthful — Calmar unknown.
+    var wk = Object.keys(erData.weights.up||{});
+    experts = wk.filter(function(n){ return n!=='rule'; })
+                .map(function(n){ return {name:n, oos_calmar:null}; });
+  }
   var layout = [];
   var cx = W/2, cy = H/2;
   // rule floor at center (sketchy hub)
@@ -1829,8 +1861,9 @@ function buildERLayout(){
     rad = Math.max(rad, 70);
     var jx = (i*7 % 5 - 2) * 14;  // jitter for organic feel
     var jy = ((i*13) % 7 - 3) * 10;
+    var er = (typeof e.oos_calmar === 'number') ? Math.min(34, 14 + e.oos_calmar*7) : 22;
     layout.push({name:e.name, x:cx + Math.cos(ang)*rad + jx, y:cy + Math.sin(ang)*rad*0.85 + jy,
-                 r:Math.min(34, 14 + e.oos_calmar*7), base:Math.min(34, 14 + e.oos_calmar*7),
+                 r:er, base:er,
                  calmar:e.oos_calmar, color:ER_FAMILY_COLOR[e.name]||'#94a3b8'});
   }
   erState.layout = layout;
@@ -1938,13 +1971,16 @@ function drawER2D(){
     // tiny calmar chip
     ctx.font = '400 9px "JetBrains Mono", monospace';
     ctx.fillStyle = '#64748b';
-    ctx.fillText(nd.name==='rule' ? 'floor' : nd.calmar.toFixed(2), nd.x, nd.y - r - 6);
+    var chip = nd.name==='rule' ? 'floor'
+             : (typeof nd.calmar==='number' ? nd.calmar.toFixed(2) : '—');
+    ctx.fillText(chip, nd.x, nd.y - r - 6);
   }
 }
 
 function animateER2D(){
   if(!erState.ready) return;
   requestAnimationFrame(animateER2D);
+  if(erVariant() !== 'sketch') return;  // a ?er= prototype variant is active — skip sketch draw
   // evolution: a node randomly "mutates" occasionally (weight event or clock)
   erState.tick++;
   if(erState.tick % 60 === 0){
@@ -1969,12 +2005,14 @@ function updateER2DTooltip(ev){
   tip.style.display = 'block';
   tip.style.left = (erState.mouse.x + 14)+'px';
   tip.style.top  = (erState.mouse.y + 14)+'px';
-  if(e){
+  if(e && typeof e.oos_calmar === 'number'){
     tip.innerHTML = '<b>'+e.name+'</b><br>OOS Calmar '+e.oos_calmar.toFixed(3)+
       '<br>Sharpe '+e.oos_sharpe.toFixed(2)+' · maxDD '+(e.maxdd*100).toFixed(1)+'%'+
       '<br>wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
   } else {
-    tip.innerHTML = '<b>'+erState.hovered+'</b><br>rule floor · wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
+    tip.innerHTML = '<b>'+erState.hovered+'</b><br>'+
+      (erState.hovered==='rule' ? 'rule floor' : 'registry unavailable — Calmar unknown')+
+      '<br>wt up '+wu.toFixed(2)+' · down '+wd.toFixed(2);
   }
 }
 function hideERTooltip(){ var t=document.getElementById('er-tooltip'); if(t) t.style.display='none'; }
@@ -2000,10 +2038,217 @@ function renderExpertRouter(d){
   var picks = d.picks||{};
   var evo = document.getElementById('er-evo');
   if(evo && !erState.ready) evo.textContent = '—';
-  if(note) note.textContent = 'picks: up → '+ (picks.up||'rule') +' · down → '+(picks.down||'rule')+'  ·  '+(d.status||'');
+  if(note) note.textContent = 'picks: up → '+ (picks.up||'rule') +' · down → '+(picks.down||'rule')+'  ·  '+(d.status||'')+(d.experts_error ? '  ·  expert registry unavailable' : '');
+  if(erVariant() !== 'sketch'){ renderERVariant(changed); return; }
   if(!erState.ready){ return; }
   buildERLayout();
   if(evo) evo.textContent = 'gen '+erState.gen+' · mutations '+erState.mutation;
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// ER PROTOTYPE — throwaway design variants, switchable via ?er= URL
+// param + floating bar (sketch / flow / constellation / ladder).
+// Production default (no param) = the existing sketch canvas, untouched.
+// Question: "what should the Expert Router panel look like?"
+// ═════════════════════════════════════════════════════════════════════
+var ER_VARIANT_KEYS = ['sketch','flow','constellation','ladder'];
+var ER_VARIANT_NAMES = {sketch:'sketch (current)', flow:'A — Router Flow',
+                        constellation:'B — Constellation', ladder:'C — Allocation Ladder'};
+
+function erVariant(){
+  var v = new URLSearchParams(location.search).get('er');
+  return ER_VARIANT_KEYS.indexOf(v) >= 0 ? v : 'sketch';
+}
+function erW(name, regime){ return ((erData.weights||{})[regime]||{})[name]||0; }
+function erNames(){
+  var w = erData.weights.up||{};
+  return Object.keys(w).filter(function(n){ return n!=='rule'; })
+    .sort(function(a,b){ return (w[b]||0)-(w[a]||0); });
+}
+function erCalmarOf(name){
+  for(var i=0;i<(erData.experts||[]).length;i++){
+    if(erData.experts[i].name===name) return erData.experts[i].oos_calmar;
+  }
+  return null;
+}
+function erCal(name){ var c = erCalmarOf(name); return (typeof c==='number')? c.toFixed(2) : '—'; }
+function erIsPick(name){ var p = erData.picks||{}; return p.up===name || p.down===name; }
+
+function renderERVariant(changed){
+  var alt = document.getElementById('er-alt'); if(!alt) return;
+  var v = erVariant();
+  if(v==='flow') renderERFlow(alt);
+  else if(v==='constellation') renderERConstellation(alt, changed);
+  else if(v==='ladder') renderERLadder(alt, changed);
+}
+
+// ── Variant A: Router Flow (sankey) ──────────────────────────────────
+function renderERFlow(host){
+  var names = erNames();
+  var picks = erData.picks || {};
+  var W=300, H=352;
+  if(!names.length){ host.innerHTML = '<div class="empty-state">awaiting router state…</div>'; return; }
+  var top=12, bottom=H-8;
+  var rowH = Math.min(34, (bottom-top)/names.length);
+  var routerX=120, routerY=H*0.5, routerW=46, srcX=66, outX=186, nameX=191;
+  var upY = top + rowH*0.9, dnY = bottom - rowH*0.9;
+  function box(x,y,w,h,col,label){
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" fill="rgba(148,163,184,.06)" stroke="'+col+'" stroke-opacity=".55"/>'+
+      '<text x="'+(x+w/2)+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+col+'">'+label+'</text>';
+  }
+  function w2(n){ return erW(n,'up').toFixed(2).replace('0.','.').replace('1.00','1'); }
+  var s = ['<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">',
+           '<style>text{font-family:Inter,sans-serif}</style>'];
+  s.push(box(srcX-58, upY-15, 58, 30, '#34d399', '▲ UP'));
+  s.push(box(srcX-58, dnY-15, 58, 30, '#fb7185', '▼ DOWN'));
+  s.push('<path d="M'+srcX+' '+upY+' C '+(srcX+26)+' '+upY+', '+(routerX-26)+' '+routerY+', '+routerX+' '+routerY+'" fill="none" stroke="#334155" stroke-width="7" stroke-linecap="round"/>');
+  s.push('<path d="M'+srcX+' '+dnY+' C '+(srcX+26)+' '+dnY+', '+(routerX-26)+' '+routerY+', '+routerX+' '+routerY+'" fill="none" stroke="#334155" stroke-width="7" stroke-linecap="round"/>');
+  s.push('<rect x="'+routerX+'" y="'+(routerY-24)+'" width="'+routerW+'" height="48" rx="8" fill="#0f172a" stroke="#475569"/>');
+  s.push('<text x="'+(routerX+routerW/2)+'" y="'+(routerY-4)+'" text-anchor="middle" font-size="9" fill="#94a3b8" letter-spacing="1">MoT</text>');
+  s.push('<text x="'+(routerX+routerW/2)+'" y="'+(routerY+9)+'" text-anchor="middle" font-size="9" fill="#94a3b8" letter-spacing="1">ROUTER</text>');
+  for(var i=0;i<names.length;i++){
+    var n = names[i];
+    var y = top + i*rowH + rowH/2;
+    var wMax = Math.max(erW(n,'up'), erW(n,'down'));
+    var col = ER_FAMILY_COLOR[n] || '#94a3b8';
+    var pickUp = picks.up === n, pickDn = picks.down === n;
+    s.push('<path d="M'+(routerX+routerW)+' '+routerY+' C '+(routerX+routerW+26)+' '+routerY+', '+(outX-18)+' '+y+', '+outX+' '+y+'" fill="none" stroke="'+col+'" stroke-width="'+(1 + wMax*22).toFixed(1)+'" stroke-opacity="'+((pickUp||pickDn)?'.95':'.55')+'" stroke-linecap="round"/>');
+    s.push('<text x="'+nameX+'" y="'+(y-1)+'" font-size="10.5" font-weight="600" fill="'+((pickUp||pickDn)?'#f0f2f7':'#cbd5e1')+'">'+n+((pickUp||pickDn)?' ◂':'')+'</text>');
+    s.push('<text x="'+nameX+'" y="'+(y+10)+'" font-size="8.5" font-family="JetBrains Mono,monospace" fill="#64748b">cal '+erCal(n)+' · '+w2(n)+'/.'+erW(n,'down').toFixed(2).replace('0.','')+'</text>');
+  }
+  s.push('</svg>');
+  host.innerHTML = s.join('');
+}
+
+// ── Variant B: Constellation (clean radial network) ──────────────────
+function renderERConstellation(host, changed){
+  var names = erNames();
+  var picks = erData.picks || {};
+  var W=300, H=352;
+  if(!names.length){ host.innerHTML = '<div class="empty-state">awaiting router state…</div>'; return; }
+  var cx=150, cy=196, R=Math.min(112, 40+names.length*7);
+  var C = 2*Math.PI*13;
+  var s = ['<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">',
+           '<style>text{font-family:Inter,sans-serif}</style>'];
+  s.push('<text x="10" y="14" font-size="9.5" fill="#64748b">pick ▲ <tspan fill="#34d399" font-weight="700">'+(picks.up||'rule')+'</tspan>  ▼ <tspan fill="#fb7185" font-weight="700">'+(picks.down||'rule')+'</tspan></text>');
+  function pos(i){ var a = -Math.PI/2 + i*(2*Math.PI/names.length);
+                   return [cx+Math.cos(a)*R, cy+Math.sin(a)*R*0.92]; }
+  // edges (under everything)
+  for(var i=0;i<names.length;i++){
+    var p = pos(i);
+    var w = Math.max(erW(names[i],'up'), erW(names[i],'down'));
+    s.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#334155" stroke-opacity="'+(0.15+0.6*w).toFixed(2)+'"/>');
+  }
+  // rule floor hub
+  s.push('<circle cx="'+cx+'" cy="'+cy+'" r="17" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>');
+  s.push('<text x="'+cx+'" y="'+(cy+3)+'" text-anchor="middle" font-size="8.5" fill="#94a3b8">rule</text>');
+  s.push('<text x="'+cx+'" y="'+(cy+31)+'" text-anchor="middle" font-size="9" fill="#64748b">floor .17</text>');
+  // expert nodes
+  for(i=0;i<names.length;i++){
+    var n = names[i]; var q = pos(i);
+    var x=q[0], y=q[1];
+    var wu=erW(n,'up'), wd=erW(n,'down');
+    var col = ER_FAMILY_COLOR[n] || '#94a3b8';
+    var pick = erIsPick(n);
+    var fu = Math.min(1, wu/0.25), fd = Math.min(1, wd/0.25);
+    s.push('<circle cx="'+x+'" cy="'+y+'" r="13" fill="#0f172a"/>');
+    s.push('<circle cx="'+x+'" cy="'+y+'" r="13" fill="none" stroke="#1e293b" stroke-width="5"/>');
+    s.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="13" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="'+(C*fu).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 '+x.toFixed(1)+' '+y.toFixed(1)+')"/>');
+    s.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="13" fill="none" stroke="#fb7185" stroke-width="5" stroke-dasharray="'+(C*fd).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate('+(-90+360*fu).toFixed(1)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" stroke-opacity=".85"/>');
+    s.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="17.5" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-opacity=".85"/>');
+    if(pick) s.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="21" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3"/>');
+    if(changed) s.push('<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="24" fill="none" stroke="'+col+'" stroke-width="1"><animate attributeName="r" from="24" to="30" dur="1s" fill="freeze"/><animate attributeName="opacity" from="0.8" to="0" dur="1s" fill="freeze"/></circle>');
+    s.push('<text x="'+x.toFixed(1)+'" y="'+(y+30).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="600" fill="'+(pick?'#f0f2f7':'#cbd5e1')+'">'+n+'</text>');
+    s.push('<text x="'+x.toFixed(1)+'" y="'+(y+40).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-family="JetBrains Mono,monospace" fill="#64748b">cal '+erCal(n)+'</text>');
+  }
+  s.push('</svg>');
+  host.innerHTML = s.join('');
+}
+
+// ── Variant C: Allocation Ladder (ranked dual-bar list) ──────────────
+function renderERLadder(host, changed){
+  var names = erNames();
+  var picks = erData.picks || {};
+  if(!names.length){ host.innerHTML = '<div class="empty-state">awaiting router state…</div>'; return; }
+  var maxW = 0.2;
+  names.forEach(function(n){ maxW = Math.max(maxW, erW(n,'up'), erW(n,'down')); });
+  function chip(txt, col){
+    return '<span style="font-size:10px;font-weight:600;padding:2px 9px;border-radius:10px;border:1px solid '+col+'55;color:'+col+'">'+txt+'</span>';
+  }
+  function row(name, col, wu, wd, pick, isFloor){
+    var pct = function(w){ return Math.max(2, Math.round(w/maxW*100)); };
+    var tick = Math.round(0.2/maxW*100);
+    var cal = isFloor ? '0.17' : (typeof erCalmarOf(name)==='number' ? erCalmarOf(name).toFixed(2) : '—');
+    return '<div class="er-row'+(changed?' er-flash':'')+'" style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid rgba(30,41,59,.6)">'+
+      '<span style="width:68px;font-size:11px;font-weight:600;color:'+(pick?'#f0f2f7':'#cbd5e1')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+
+        (col?'<span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:'+col+';margin-right:5px"></span>':'')+name+(pick?' ▸':'')+'</span>'+
+      '<div style="flex:1;position:relative;display:flex;flex-direction:column;gap:2px">'+
+        '<div style="height:4px;border-radius:2px;background:#1e293b;overflow:hidden"><div style="height:100%;width:'+pct(wu)+'%;background:rgba(52,211,153,.85)"></div></div>'+
+        '<div style="height:4px;border-radius:2px;background:#1e293b;overflow:hidden"><div style="height:100%;width:'+pct(wd)+'%;background:rgba(251,113,133,.75)"></div></div>'+
+        '<span style="position:absolute;left:'+tick+'%;top:-3px;bottom:-3px;width:1px;background:#475569"></span>'+
+      '</div>'+
+      '<span class="mono" style="width:30px;text-align:right;font-size:11px;color:#e2e8f0">'+wu.toFixed(2)+'</span>'+
+      '<span class="mono" style="width:32px;text-align:right;font-size:10px;color:#64748b">'+cal+'</span>'+
+    '</div>';
+  }
+  var h = '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">'+
+    chip('▲ up → '+(picks.up||'rule'), '#34d399') + chip('▼ down → '+(picks.down||'rule'), '#fb7185') + '</div>';
+  h += '<div style="display:flex;font-size:8.5px;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:0 2px 4px;gap:8px">'+
+    '<span style="width:68px">expert</span><span style="flex:1">weight ▲/▼ · | = floor .20</span>'+
+    '<span style="width:30px;text-align:right">wt</span><span style="width:32px;text-align:right">cal</span></div>';
+  h += row('rule floor', null, 0.2, 0.2, false, true);
+  names.forEach(function(n){ h += row(n, ER_FAMILY_COLOR[n]||'#94a3b8', erW(n,'up'), erW(n,'down'), erIsPick(n), false); });
+  host.innerHTML = h;
+}
+
+// ── Variant switching (floating bar + keyboard + URL param) ──────────
+function erApplyVariant(){
+  var v = erVariant();
+  var wrap = document.getElementById('er-canvas-wrap');
+  var alt = document.getElementById('er-alt');
+  if(!wrap || !alt) return;
+  if(v === 'sketch'){ alt.style.display = 'none'; wrap.style.display = ''; }
+  else { wrap.style.display = 'none'; alt.style.display = ''; renderERVariant(false); }
+  // the gen/mutations counter is decorative — hide it outside the sketch variant
+  var evo = document.getElementById('er-evo');
+  if(evo) evo.style.display = (v === 'sketch') ? '' : 'none';
+  var bar = document.getElementById('er-proto-bar');
+  var lbl = document.getElementById('er-proto-label');
+  if(bar && lbl){
+    bar.style.display = (location.search.indexOf('er=') >= 0) ? 'flex' : 'none';
+    lbl.textContent = ER_VARIANT_NAMES[v];
+  }
+}
+function erCycle(dir){
+  var i = ER_VARIANT_KEYS.indexOf(erVariant());
+  var v = ER_VARIANT_KEYS[(i + dir + ER_VARIANT_KEYS.length) % ER_VARIANT_KEYS.length];
+  var u = new URL(location.href);
+  if(v === 'sketch') u.searchParams.delete('er'); else u.searchParams.set('er', v);
+  history.replaceState(null, '', u);
+  erApplyVariant();
+}
+function erInitPrototype(){
+  var bar = document.getElementById('er-proto-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'er-proto-bar';
+    bar.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:99;display:none;align-items:center;gap:12px;background:#0f172a;border:1px solid #334155;border-radius:22px;padding:7px 14px;box-shadow:0 4px 24px rgba(0,0,0,.55);font-size:12px;color:#cbd5e1;user-select:none';
+    bar.innerHTML = '<span id="er-proto-prev" style="cursor:pointer;padding:2px 10px;font-size:15px;color:#22d3ee">‹</span>'+
+      '<span id="er-proto-label" style="min-width:170px;text-align:center;font-weight:600"></span>'+
+      '<span id="er-proto-next" style="cursor:pointer;padding:2px 10px;font-size:15px;color:#22d3ee">›</span>';
+    document.body.appendChild(bar);
+  }
+  var prev = document.getElementById('er-proto-prev'), next = document.getElementById('er-proto-next');
+  if(prev) prev.onclick = function(){ erCycle(-1); };
+  if(next) next.onclick = function(){ erCycle(1); };
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var t = e.target;
+    if(t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA' || t.isContentEditable)) return;
+    if(location.search.indexOf('er=') < 0) return;
+    erCycle(e.key === 'ArrowLeft' ? -1 : 1);
+  });
+  erApplyVariant();
 }
 
 function initPolling(){
@@ -2037,6 +2282,7 @@ function initPolling(){
 // ═══════════════════════════════════════════════════════════
 async function init(){
   initTabs();
+  erInitPrototype();
   await Promise.all([loadState(), loadChart(), loadTrades(), loadRegimes(), loadBenchmark(), loadExpertRouter(), loadTradeStatus()]);
   renderAll();
   renderTradeStatus(await loadTradeStatus());

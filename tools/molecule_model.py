@@ -43,7 +43,7 @@ BONDS = [(1, 0), (0, 2), (2, 3), (3, 4), (0, 7), (2, 5), (2, 6)]  # 0-indexed
 FOLDED = {
     "data": ["data", "connections.py", "data_mgmt.py"],
     "state": ["state"],
-    "harness.py": ["harness.py", "mcp_server.py", "run_harness.py", "gpu_sync.py"],
+    "harness.py": ["harness.py", "mcp_server.py", "gpu_sync.py"],
     "mot": ["mot", "agent"],
     "training": ["training", "coordinator.py", "model_manager.py"],
     "exchange": ["exchange", "onchain.py"],

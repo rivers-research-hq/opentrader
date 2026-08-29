@@ -112,7 +112,7 @@ echo ""
 if [ "${1:-}" = "--with-harness" ]; then
     echo "Starting harness on AMD model..."
     cd /home/mrc/opentrader
-    setsid python3 run_harness.py --live --exchange alpaca-paper --stage 3 \
+    setsid python3 harness.py --live --exchange alpaca-paper --stage 3 \
       --cash 100 --llama-host http://127.0.0.1:5802 --max-cycles 0 \
       --debate-mode adir --parallel-debate --interval 10 \
       </dev/null >>/tmp/harness.log 2>&1 &

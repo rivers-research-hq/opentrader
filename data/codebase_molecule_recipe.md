@@ -9,7 +9,7 @@ dependency. Geometry uses the kit's natural bond angles.
 |---|-----------|---------------|-----------------|
 | 1 | C (core) | data | connections.py, data_mgmt.py |
 | 2 | C (core) | state |  |
-| 3 | N (hub) | harness.py | mcp_server.py, run_harness.py, gpu_sync.py |
+| 3 | N (hub) | harness.py | mcp_server.py, gpu_sync.py |
 | 4 | O (agents) | mot | agent |
 | 5 | O (training) | training | coordinator.py, model_manager.py |
 | 6 | S (data-io) | exchange | onchain.py |

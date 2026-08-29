@@ -31,7 +31,7 @@ You are the autonomous operator of OpenTrader, a live trading fund prototype run
 - **Model on :5809**: Qwen2.5-7B-Instruct + Ptolemy-S3 LoRA (`data/models/finetune/Ptolemy-S3/`)
 - **Available on Ollama**: `gag0/qwen35-opus-distil:27b` (16GB, Q4_K_M)
 - **Disk**: 76 GB free
-- **Harness**: Running via `run_harness.py` (auto-restart on .py changes)
+- **Harness**: Running via `harness.py` (auto-restart on .py changes)
 
 ### Critical Risk Rules (from `risk/manager.py`)
 ```python
@@ -61,7 +61,7 @@ nohup /home/mrc/src/modelai-llama.cpp/build-wmma/bin/llama-server \
 
 # Wait 15s, then start harness
 cd /home/mrc/opentrader
-setsid python3 run_harness.py --live --exchange kraken --stage 2 \
+setsid python3 harness.py --live --exchange kraken --stage 2 \
   --mot-force increase --max-daily-trades 500 --parallel-debate \
   --llama-host http://127.0.0.1:5809 </dev/null >>/tmp/harness_watch.log 2>&1 &
 disown
@@ -142,10 +142,10 @@ watch -n 1 rocm-smi
 
 ### PLAYBOOK: CRITICAL BUG FIXES (From `data/project.yaml`)
 
-#### BUG 1: `run_harness.py` defaults to :8080 (llama-swap) — CRITICAL
-**Location**: `run_harness.py` line with `--llama-host`
+#### BUG 1: `harness.py` defaults to :8080 (llama-swap) — CRITICAL
+**Location**: `harness.py` line with `--llama-host`
 **Fix**: Change default from `http://127.0.0.1:8080` to `http://127.0.0.1:5809`
-**Verify**: `grep llama-host run_harness.py` shows :5809
+**Verify**: `grep llama-host harness.py` shows :5809
 
 #### BUG 2: Training scheduler never runs — CRITICAL
 **Location**: `training/train_scheduler.py` — `_last_arxiv_extract` guard shared with arXiv extraction
@@ -227,7 +227,7 @@ curl -s http://127.0.0.1:5809/health
 1. Identify failing service (logs, health checks)
 2. Restart that service only
 3. Verify health
-4. If harness: `touch harness.py` triggers auto-reload via `run_harness.py`
+4. If harness: restart `harness.py`
 5. If dashboard: restart via Service Commands (NO --reload)
 
 ---
@@ -366,7 +366,7 @@ curl -s http://127.0.0.1:5809/health
 ### Triggered Mode (Recommended — via cron or file watch)
 ```bash
 # Crontab: */5 * * * * /home/mrc/.opencode/bin/opencode run builder
-# Or: run_harness.py triggers builder on file changes
+# Or: harness.py triggers builder on file changes
 ```
 
 ### Each Invocation:
@@ -390,7 +390,7 @@ curl -s http://127.0.0.1:5809/health
 Based on verified state (Cycle 6824, STUCK, 4 critical bugs):
 
 **IMMEDIATE (Next 3 Invocations):**
-1. Fix BUG 1: `run_harness.py` default port → :5809
+1. Fix BUG 1: `harness.py` default port → :5809
 2. Fix BUG 2: Training scheduler guard separation
 3. Fix BUG 3: `report_risk.py` positions type handling
 

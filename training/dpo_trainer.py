@@ -15,7 +15,7 @@ from typing import Dict, Optional
 
 logger = logging.getLogger("opentrader.dpo_trainer")
 
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+from training.model_config import BASE_MODEL as DEFAULT_BASE_MODEL
 DPO_OUTPUT_DIR = "models/finetune"
 STATUS_FILE = "dpo_status.json"
 MIN_PAIRS = 10

@@ -276,7 +276,7 @@ def run_backtest(data: tuple, cfg: dict, macro_gate: "pd.Series|None" = None) ->
                     _key = _key.tz_localize(None)
                 if not bool(macro_gate.get(_key, False)):
                     continue
-            if close_t[s] <= 0:
+            if close_t.get(s, 0) <= 0:
                 continue
             # Research-feature entry gates (disabled when their param is 0)
             if cfg["ma_reject_n"] > 0 and float(bar_feat[s]["ma_dist"]) > cfg["ma_reject_pct"]:

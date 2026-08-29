@@ -140,7 +140,7 @@ if [ "${1:-}" = "--with-harness" ] || [ "${2:-}" = "--with-harness" ]; then
     echo ""
     echo "[4] Starting harness on Ternary Bonsai..."
     cd "$PROJECT_DIR"
-    setsid python3 run_harness.py --live --exchange kraken --stage 2 \
+    setsid python3 harness.py --live --exchange kraken --stage 2 \
       --cash 100 --max-daily-trades 500 --parallel-debate \
       --llama-host http://127.0.0.1:$AMD_PORT \
       </dev/null >>/tmp/harness.log 2>&1 &

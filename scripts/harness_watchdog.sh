@@ -32,7 +32,6 @@ HARNESS_ARGS=(
     --rule-primary
     --pin-risk
     --interval 60
-    --reset-portfolio
     "${@}"
 )
 

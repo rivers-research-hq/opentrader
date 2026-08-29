@@ -82,8 +82,19 @@ def generate(spec: ScenarioSpec) -> Dict[str, pd.DataFrame]:
         syms = ["SPY"] + syms
     rp = _regime_params(spec)
 
-    # Market factor path (regime marker / SPY proxy).
+    # Market factor path (regime marker / SPY proxy). A mid-world structural
+    # break flips the regime params at bar_frac — the world's factor, drift
+    # and vol all switch, so downstream gates see a real regime shift.
+    break_bar = None
+    if spec.regime_break:
+        frac, new_regime = spec.regime_break
+        break_bar = int(n * float(frac))
+        rp_break = dict(_REGIME_PARAMS.get(new_regime, _REGIME_PARAMS["range"]))
+        rp_break["vol"] *= spec.vol_mult
     factor_ret = rng.normal(rp["drift"], rp["vol"], n)
+    if break_bar is not None:
+        factor_ret[break_bar:] = rng.normal(rp_break["drift"], rp_break["vol"],
+                                            n - break_bar)
     jumps = rng.uniform(size=n) < spec.jump_p
     jump_amp = rng.normal(0, 3.0, n)
     factor_ret[jumps] += jump_amp[jumps] * rp["vol"]

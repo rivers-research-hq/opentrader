@@ -87,25 +87,6 @@ def _save(state):
     (OUT / "curriculum.json").write_text(json.dumps(state, indent=1, default=str))
 
 
-def _discrim_window(lo, hi):
-    from arena import agent as agent_mod
-    from arena.candidates import collect
-    import statistics
-
-    rows, cfg = collect("5y")
-    art = agent_mod.load()
-    if art is None:
-        return 0.0
-    vals = agent_mod.predict_batch(art, [r["x"] for r in rows])
-    win = [(r, v) for r, v in zip(rows, vals) if lo <= r["bar"] < hi]
-    if not win:
-        return 0.0
-    kept = [r["fwd"] for r, v in win if v >= art["theta"]]
-    allm = statistics.mean(r["fwd"] for r, v in win)
-    km = statistics.mean(kept) if kept else 0.0
-    return km - allm
-
-
 def _metric_for(skill, report):
     obj = skill.get("objective")
     pb = skill.get("pass_bar", {})
@@ -140,7 +121,7 @@ def _metric_for(skill, report):
         return all(w_agent > w_of.get(n, 0.0) for n in pb.get("beats", []))
     if obj == "discrimination":
         w = pb.get("window", "")
-        m = _discrim_window(250, 500) if w == "250-500" else margins.get(w, 0.0)
+        m = margins.get(w, 0.0)
         return m >= pb.get("min_margin", 0.01)
     if obj == "gate_margins":
         wins = pb.get("windows", [])

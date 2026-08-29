@@ -55,7 +55,7 @@ def _load_history(state_dir: str) -> list:
     return history
 
 
-def _run_harness(args) -> str:
+def _invoke_harness(args) -> str:
     """Run harness for N cycles and return the log output."""
     cmd = [
         sys.executable,
@@ -194,7 +194,7 @@ def main():
 
     # ── Run Baseline Test ──────────────────────────────────────────
     print("[1/3] Running BASELINE prompt test (current ADIR prompt)...")
-    baseline_log = _run_harness(args)
+    baseline_log = _invoke_harness(args)
     baseline_signals = _parse_signals(baseline_log)
     baseline_metrics = _compute_metrics(baseline_signals)
     print(json.dumps(baseline_metrics, indent=2))

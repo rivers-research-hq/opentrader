@@ -400,6 +400,7 @@ async def api_expert_router():
             router = {}
 
     experts = []
+    experts_error = ""
     try:
         from strategies.experts import VERIFIED
         for name, v in sorted(VERIFIED.items(),
@@ -412,7 +413,10 @@ async def api_expert_router():
                 "description": v.description,
             })
     except Exception as e:
-        experts = [{"error": str(e)}]
+        # Registry unavailable (e.g. swarm data missing): return an EMPTY list,
+        # never an error-dict entry — the dashboard graph renders nodes from
+        # router weights instead and flags the registry in er-note.
+        experts_error = str(e)
 
     # weight schedule + picks from the router state (regime keys up/down)
     weights = router.get("weights", {})
@@ -433,6 +437,7 @@ async def api_expert_router():
 
     return {
         "experts": experts,
+        "experts_error": experts_error,
         "weights": weights,
         "picks": {"up": _pick("up"), "down": _pick("down")},
         "note": router.get("note", ""),

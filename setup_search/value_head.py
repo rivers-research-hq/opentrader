@@ -25,12 +25,21 @@ from setup_search.engine import _features, _score_at
 PROJECT = Path(__file__).resolve().parent.parent
 OUT = PROJECT / "data" / "research_gate"
 FORWARD = 10
-TRAIN = (500, 1000)          # 2024-25 bull
-TESTS = [(0, 500), (1000, 1250)]  # 2022 bear + 2026 unseen
+TRAIN = (0, 1000)          # forward-only (audit 2026-08-11): train the past
+TESTS = [(1000, 1250)]     # gate ONLY the unseen future — w0 (2021-23 bear)
+                           # is not discriminable at +1% even in-sample (#68)
 VAL_FRAC = 0.15              # early-stop slice from TRAIN's tail
 SEED = 23
 FEAT_COLS = ["mom", "rev", "rsi", "brk", "z", "ma_dist", "vol_spike", "vol_level", "momfilt"]
 THETA_BAR = 0.01             # autonomy bar: >= +1% discrimination per window
+
+
+def _device():
+    """Prefer GPU0 (NVIDIA) for the fit; fall back to CPU. (#47: GPU0 must
+    be a genuine parallel compute stream, not an idle card.)"""
+    if torch.cuda.is_available():
+        return "cuda:0"
+    return "cpu"
 
 
 def collect(closes, highs, lows, vols, cfg, gen_score_min=-0.5, require_regime=False):
@@ -126,11 +135,15 @@ def main():
     Xz = (X - mean) / (std + 1e-8)
 
     model = ValueMLP(X.shape[1])
+    device = _device()
+    model.to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
     lossf = nn.MSELoss()
-    Xt, yt = torch.tensor(Xz), torch.tensor(y)
-    Xv = torch.tensor((np.stack([r["x"] for r in val]) - mean) / (std + 1e-8))
-    yv = torch.tensor(np.array([r["fwd"] for r in val], dtype=np.float32))
+    Xt, yt = torch.tensor(Xz, device=device), torch.tensor(y, device=device)
+    Xv = torch.tensor((np.stack([r["x"] for r in val]) - mean) / (std + 1e-8),
+                      device=device)
+    yv = torch.tensor(np.array([r["fwd"] for r in val], dtype=np.float32),
+                      device=device)
     best_val_loss, best_state, patience = 1e9, None, 0
     for epoch in range(200):
         model.train()
@@ -156,7 +169,7 @@ def main():
         for r in rows:
             z = (r["x"] - mean) / (std + 1e-8)
             with torch.no_grad():
-                out.append(float(model(torch.tensor(z).unsqueeze(0)).item()))
+                out.append(float(model(torch.tensor(z, device=device).unsqueeze(0)).item()))
         return out
 
     vp = np.array(preds(val))

@@ -50,6 +50,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from training.model_config import BASE_MODEL
+
 logger = logging.getLogger("opentrader.rl_trainer")
 
 
@@ -86,7 +88,7 @@ class RLTrainingConfig:
     rocm_python: str = "/home/mrc/rocm_venv/bin/python3"
 
     # Model
-    base_model: str = "Qwen/Qwen2.5-7B-Instruct"
+    base_model: str = BASE_MODEL
 
     # Adapter naming
     version_prefix: str = "RL"

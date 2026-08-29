@@ -36,9 +36,11 @@ def run_iteration(
     expert_id="momentum",
     augment_worlds=3,
     augment_fullcross=20000,
+    worlds_dir="",
+    fit_seed=23,
 ):
     rows, cfg = _collect_for(expert_id, period)
-    extra_rows = _multiverse_augment(expert_id, cfg, augment_worlds) if augment_worlds > 0 else []
+    extra_rows = _multiverse_augment(expert_id, cfg, augment_worlds, worlds_dir) if augment_worlds > 0 else []
     extra_rows += _fullcross_augment(expert_id, cfg, augment_fullcross) if augment_fullcross > 0 else []
     field = opp_mod.default_field(cfg, seed=field_seed)
     macro_ctx = _build_macro_ctx(war_period) if expert_id == "macro" else None
@@ -50,7 +52,7 @@ def run_iteration(
         if art is None:
             prev_report = agent_mod.load_report(agent_path)
             iteration = int(prev_report.get("iteration", 0)) + 1
-            art = agent_mod.fit(rows, None, epochs=epochs, extra_rows=extra_rows or None)
+            art = agent_mod.fit(rows, None, epochs=epochs, extra_rows=extra_rows or None, seed=fit_seed)
             print(
                 f"[arena] checkpoint incompatible — refit fresh for iteration {iteration}",
                 flush=True,
@@ -58,7 +60,7 @@ def run_iteration(
         else:
             iteration = int(art["report"].get("iteration", 0)) + 1
     else:
-        art = agent_mod.fit(rows, None, epochs=epochs, extra_rows=extra_rows or None)
+        art = agent_mod.fit(rows, None, epochs=epochs, extra_rows=extra_rows or None, seed=fit_seed)
         art["report"]["iteration"] = 0
         iteration = 1
     print(
@@ -121,13 +123,14 @@ def run_iteration(
 
     art = agent_mod.fit(
         rows,
-        z_targets,
+        None,
         epochs=epochs,
         extra_rows=extra_rows,
         extra_targets=extra_targets,
+        seed=fit_seed,
     )
     print(
-        f"[arena]   value head fit done (arena-relative + {len(extra_rows)} bear relabels)",
+        f"[arena]   value head fit done (raw fwd + {len(extra_rows)} bear relabels)",
         flush=True,
     )
     art["report"]["iteration"] = iteration
@@ -282,7 +285,7 @@ def _fullcross_augment(expert_id, cfg, n_candidates):
         return []
 
 
-def _multiverse_augment(expert_id, cfg, n_worlds):
+def _multiverse_augment(expert_id, cfg, n_worlds, worlds_dir=""):
     """MULTI-DATASET TRAINING: generate n_worlds market realities (neural
     generator if trained, else parametric) and build arena candidate rows
     from them, appended to the REAL training set via fit(extra_rows=...).
@@ -299,6 +302,24 @@ def _multiverse_augment(expert_id, cfg, n_worlds):
         from arena.candidates import collect_from_data
         from scenarios import MarketScenarioGenerator
         from scenarios.spec import ScenarioSpec
+
+        if worlds_dir:
+            # Battery fast path: pre-extracted row caches (scale_run --extract).
+            from pathlib import Path as _Path
+            import numpy as _np
+            wdir = _Path(worlds_dir)
+            row_files = sorted(wdir.glob("rows_*.jsonl"))
+            if row_files:
+                import json as _json
+                extra = []
+                for rf in row_files[:n_worlds]:
+                    for line in rf.read_text().splitlines():
+                        d = _json.loads(line)
+                        extra.append({"x": _np.array(d["x"], dtype=_np.float32),
+                                      "fwd": d["fwd"], "bar": d["bar"]})
+                print(f"[arena]   multiverse augmentation (battery): +{len(extra)} "
+                      f"synthetic candidates ({len(row_files[:n_worlds])} worlds)", flush=True)
+                return extra
 
         gen = MarketScenarioGenerator()
         extra = []
@@ -484,6 +505,12 @@ if __name__ == "__main__":
                     help="Multi-dataset training: N generated worlds appended to the real candidates")
     ap.add_argument("--augment-fullcross", type=int, default=20000,
                     help="Multi-dataset training: sample N candidates from the 35M-row HF stock dataset")
+    ap.add_argument("--fit-seed", type=int, default=23,
+                    help="fit RNG seed (protocol: one seed per run)")
+    ap.add_argument("--worlds-dir", type=str, default="",
+                    help="multiverse battery dir (data/multiverse/worlds_TAG): "
+                         "use its extracted row caches as augmentation instead "
+                         "of on-the-fly generation (audit 2026-08-11 re-port)")
     args = ap.parse_args()
     for i in range(args.iterations):
         rep = run_iteration(
@@ -494,6 +521,8 @@ if __name__ == "__main__":
             grpo_steps=args.grpo_steps,
             augment_worlds=args.augment_worlds,
             augment_fullcross=args.augment_fullcross,
+            worlds_dir=args.worlds_dir,
+            fit_seed=args.fit_seed,
         )
         print(
             f"iteration {rep['iteration']}: gate pass={rep['gate']['pass']} "

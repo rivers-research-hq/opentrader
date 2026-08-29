@@ -10,7 +10,7 @@
 | 4 | DeepSeek-R1-Distill-Qwen-7B | 7B | Qwen2.5 | 2025 | ~4.5 GB | Yes (R1 CoT) | HF: bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF |
 | 5 | DeepSeek-R1-Distill-Llama-8B | 8B | Llama 3.1 | 2025 | ~5.0 GB | Yes (R1 CoT) | HF: unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF |
 | 6 | Qwen2.5-7B-Instruct | 7B | Qwen2.5 | 2024 | ~4.4 GB | No | HF/LOCAL: models/qwen2.5-7b-instruct/ |
-| 7 | Qwythos-9B (fine-tune) | 7B→9B | Qwen2.5+LoRA | 2025 | ~5.5 GB | No | LOCAL: models/qwythos-9b-mtp/ |
+| 7 | Qwythos-9B (fine-tune) | 7B→9B | Qwen2.5+LoRA | 2025 | ~5.5 GB | No | RETIRED 2026-08-13 — replaced by DeepSeek-V4-Pro-Qwen3.5-9B (live AMD model) |
 | 8 | Hermes-3-Llama-3.1-8B | 8B | Llama 3.1 | 2024 | ~4.6 GB | No | LOCAL: models/hermes-3-llama-3.1-8b/ |
 | 9 | Command R7B (12-2024) | 7B | Command R | 2024 | ~4.5 GB | No | HF: bartowski/c4ai-command-r7b-12-2024-GGUF |
 | 10 | Command A Reasoning (08-2025) | 7B | Command A | 2025 | ~4.5 GB | Yes (reasoning) | HF: bartowski/CohereLabs_command-a-reasoning-08-2025-GGUF |
@@ -30,6 +30,8 @@
 | 24 | Mistral-Small-Instruct-2409 | 22B | Mistral | 2024 | ~13 GB | No | HF: bartowski/Mistral-Small-Instruct-2409-GGUF |
 
 ## Supervisor Model Candidates (AMD iGPU, 16GB VRAM — target <13GB at Q4_K_M)
+
+**LIVE (2026-08-13):** DeepSeek-V4-Pro-Qwen3.5-9B-MTP Q8_0 (~9.8 GB) — 9B, Qwen3.5 family, 2026. Served on :5802 via `opentrader-llama-gpu1.service`, alias `deepseek-v4-pro-qwen3.5-9b` (legacy alias `qwythos-9b-mtp`). `models/deepseek-v4-pro-qwen3.5-9b/`.
 
 | # | Model | Params | Family | Year | Q4_K_M Est. Size | Context | Source |
 |---|-------|--------|--------|------|-------------------|---------|--------|

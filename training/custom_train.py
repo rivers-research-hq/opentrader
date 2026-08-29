@@ -7,9 +7,12 @@ Uses transformers + bitsandbytes + PEFT directly with 4-bit quantization.
 Usage:
     ~/rocm_venv/bin/python3 training/custom_train.py \
         --version Ptolemy-S1 \
-        --base Qwen/Qwen2.5-1.5B-Instruct \
+        --base Qwen/Qwen2.5-7B-Instruct \
         --data data/training/training_data_combined.jsonl \
         --epochs 3 --batch-size 1 --grad-accum 8 --lora-r 8
+
+The --base default is the single source of truth (config/models.json, via
+training/model_config.py); passing --base overrides it.
 """
 import argparse
 import json
@@ -35,6 +38,9 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import TrainerCallback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+from training.model_config import BASE_MODEL
 
 
 def load_dataset(path: str) -> list:
@@ -244,7 +250,7 @@ def _write_status(path, status, base_model, version, step, message,
 def main():
     parser = argparse.ArgumentParser(description="Custom QLoRA training (no Unsloth)")
     parser.add_argument("--version", default="Ptolemy-S1", help="Adapter version name")
-    parser.add_argument("--base", default=os.environ.get("OPENTRADER_BASE_MODEL", "Qwen/Qwen2.5-1.5B-Instruct"))
+    parser.add_argument("--base", default=BASE_MODEL, help="Base HF model name")
     parser.add_argument("--data", default="data/training/training_data_combined.jsonl")
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=1)

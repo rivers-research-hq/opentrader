@@ -1,11 +1,19 @@
 #!/bin/bash
+# DEPRECATED (2026-08-13) — DO NOT RUN.
+# This script `pkill`s llama-server and the harness, relaunches a Qwen2.5-7B
+# GGUF as the serving model (wrong — live serving model is
+# DeepSeek-V4-Pro-Qwen3.5-9B-MTP on :5802 via opentrader-llama-gpu1.service),
+# and `nohup`s harness.py with `--live --exchange kraken --debate-mode adir`
+# (wrong — pinned live config is finnhub/paper/rule-primary under systemd).
+# Training model identity now lives in config/models.json; serving is managed
+# by systemd. Use training/run_training.py + systemctl --user instead.
 # Cartographer Pipeline — automated adapter training, conversion, registration, deployment
 # Usage: ./cartographer_pipeline.sh --version <VERSION> [--alias <ALIAS>] [--base <BASE_MODEL>] [--data <DATA_FILE>]
 set -e
 
 VERSION=""
 ALIAS=""
-BASE_MODEL="Qwen/Qwen2.5-7B-Instruct"
+BASE_MODEL="$(PYTHONPATH=/home/mrc/opentrader /home/mrc/rocm_venv/bin/python3 -c 'from training.model_config import BASE_MODEL; print(BASE_MODEL)' 2>/dev/null || echo Qwen/Qwen2.5-7B-Instruct)"
 DATA="/home/mrc/opentrader/data/training_data_adir.jsonl"
 
 while [[ $# -gt 0 ]]; do

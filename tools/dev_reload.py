@@ -8,7 +8,7 @@ Watches opentrader source files for changes. On any .py change:
   4. Catches startup crashes and retries after next file change
 
 Usage:
-    python3 tools/dev_reload.py -- python3 run_harness.py --live --stage 2 ...
+    python3 tools/dev_reload.py -- python3 harness.py --live --stage 2 ...
 """
 
 import argparse
@@ -198,7 +198,7 @@ def watch_and_reload(cmd: list[str]):
 def main():
     parser = argparse.ArgumentParser(description="Dev-mode auto-reloader")
     parser.add_argument("command", nargs=argparse.REMAINDER,
-                        help="Command to run (e.g.: python3 run_harness.py --live)")
+                        help="Command to run (e.g.: python3 harness.py --live)")
     args = parser.parse_args()
 
     if not args.command:
