@@ -1,0 +1,13 @@
+{
+  "endpoint": "http://127.0.0.1:5804/v1",
+  "model": "qwen38",
+  "apiKey": "",
+  "ctxCap": 60000,
+  "defaultAllowance": 12000,
+  "warnAt": 0.7,
+  "maxRawTokens": 24000,
+  "timeoutMs": 300000,
+  "maxCompletion": 2048,
+  "promptCalibration": 1,
+  "disableThinking": true
+}

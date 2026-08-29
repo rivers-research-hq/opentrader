@@ -1,0 +1,995 @@
+--- a/strategies/experts.py
++++ b/strategies/experts.py
+@@ -41,7 +41,7 @@
+     evidence: dict = field(default_factory=dict)
+ 
+ 
+-# The 8 OOS-verified experts (2026-08-13, from ROUND2_OOS_SUMMARY.md).
++# The 9 OOS-verified experts (2026-08-13; 8 from ROUND2_OOS_SUMMARY.md + laggard from R1d).
+ VERIFIED: Dict[str, VerifiedExpert] = {
+     "bayes": VerifiedExpert("bayes", 1.148, 1.24, -0.104,
+         "Bayesian online change-point (BOCPD) x breadth gate + momentum-top; drawdown tool"),
+@@ -70,10 +70,11 @@
+ 
+ 
+ def regime_of(spy_price, ma200) -> str:
+-    """Bull/bear regime from SPY vs its 200-bar MA (matches RegimeRouter)."""
++    """Up/down regime from SPY vs its 200-bar MA (matches RegimeRouter;
++    regime keys MUST be 'up'/'down' — the harness's attribution naming)."""
+     if spy_price is None or ma200 is None or ma200 == 0:
+         return "unknown"
+-    return "bull" if spy_price > ma200 else "bear"
++    return "up" if spy_price > ma200 else "down"
+ 
+ 
+ class TournamentExpert:
+@@ -137,5 +138,5 @@
+             regime: {"expert": self._by_regime.get(regime),
+                      "oos_calmar": VERIFIED[self._by_regime[regime]].oos_calmar
+                      if regime in self._by_regime else None}
+-            for regime in ("bull", "bear", "unknown")
++            for regime in ("up", "down", "unknown")
+         }
+--- a/strategies/seed_router.py
++++ b/strategies/seed_router.py
+@@ -22,6 +22,11 @@
+ entries going forward. Status: SEED only — the harness continues to treat
+ the router as monitoring (no gate change).
+ 
++Single-writer contract (#155): the HARNESS owns live_router_state.json (the
++live runtime ledger). This seeder writes its seed to
++live_router_state_seed.json — an artifact a human (or the harness operator)
++applies to the live file; it never writes the live file itself.
++
+ Usage: python -m strategies.seed_router [--state-dir /home/mrc/opentrader/data]
+ """
+ 
+@@ -42,8 +47,8 @@
+ def seed(state_dir: str, emit: bool = True) -> dict:
+     router = StrategyRouter(rule_floor_calmar=0.174)
+     best = max(OOS_CALMAR, key=OOS_CALMAR.get)
+-    router.register_regime("bull", best)
+-    router.register_regime("bear", best)
++    router.register_regime("up", best)
++    router.register_regime("down", best)
+ 
+     track = {}
+     weights = {}
+@@ -70,10 +75,13 @@
+ 
+     if emit:
+         os.makedirs(state_dir, exist_ok=True)
+-        p = os.path.join(state_dir, "live_router_state.json")
++        # Single-writer contract (#155): the harness owns live_router_state.json;
++        # the seed is an artifact for a human to apply, not a direct write.
++        p = os.path.join(state_dir, "live_router_state_seed.json")
+         with open(p, "w") as f:
+             json.dump(state, f, indent=1)
+         print(f"seeded {p}")
++        print("  NOTE: apply to live_router_state.json manually (harness owns the live file)")
+         print(f"  best-per-regime: {best} (OOS Calmar {OOS_CALMAR[best]})")
+         print(f"  verified experts seeded: {[n for n,c in OOS_CALMAR.items() if c>0.174]}")
+     return state
+--- a/strategies/handoff.py
++++ b/strategies/handoff.py
+@@ -4,7 +4,7 @@
+ This is the canonical bridge from tournament evidence to the MoT layer:
+   - runs each verified strategy on the US tournament data (R1) and the intl
+     OOS data (R2) through the honest scorers
+-  - computes the per-regime (bull/bear) verified Calmar and emits a
++  - computes the per-regime (up/down) verified Calmar and emits a
+     `StrategyRouter` assignment
+   - writes router state JSON for the MoT coordinator to consume
+ 
+@@ -12,28 +12,56 @@
+ waiting. This is the arena's starting point; the coordinator then evolves
+ weights from here (not from a phantom floor).
+ 
++Swarm evidence lives in the durable evidence tier: <repo>/data/evidence/swarm/
++(swarm_data.pkl, intl_data.pkl, results/*.json). The raw .pkl data was LOST to
++/tmp cleanup on 2026-08-23 — when it is absent, the inline runners
++(--verify-only) are skipped with a clear message and the static VERIFIED
++evidence in strategies/experts.py is used instead (the findings stand as
++recorded in AGENTS.md / docs/CONTEXT.md).
++
+ Usage:
+   python -m strategies.handoff              # full run + emit router state
+   python -m strategies.handoff --verify-only
+ """
+ 
+ import json
+-import pickle
++import os
+ import sys
+ 
+-import pandas as pd
+-
+-US = pickle.load(open("/tmp/opentrader/swarm/swarm_data.pkl", "rb"))
+-INTL = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
+-
+-from strategies.momtrend import run as momtrend  # noqa: E402
+-from strategies.multiasset import backtest as multiasset  # noqa: E402
+-from strategies import scorer, scorer_intl  # noqa: E402
+-from strategies.experts import VERIFIED, StrategyRouter  # noqa: E402
++from strategies.experts import VERIFIED, StrategyRouter
+ 
++# Durable swarm evidence location (evidence tier; see data/MANIFEST.json).
++_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++SWARM_DIR = os.path.join(_REPO_ROOT, "data", "evidence", "swarm")
++US_PKL = os.path.join(SWARM_DIR, "swarm_data.pkl")
++INTL_PKL = os.path.join(SWARM_DIR, "intl_data.pkl")
++RESULTS_DIR = os.path.join(SWARM_DIR, "results")
++OUT_PATH = os.path.join(SWARM_DIR, "arena_router_state.json")
++
++_LOST_MSG = (
++    "swarm data not found in %s (the /tmp originals were lost to cleanup "
++    "2026-08-23); inline verification skipped — static VERIFIED evidence used"
++)
++
++
++def _load_us():
++    if not os.path.exists(US_PKL):
++        raise FileNotFoundError(_LOST_MSG)
++    import pickle
++    return pickle.load(open(US_PKL, "rb"))
++
++
++def _expert_eq(name: str) -> "pd.Series":
++    """Return the expert's US equity curve (the R1 evidence used for routing).
++
++    Imports are lazy: the scorer modules load the swarm .pkl at import time,
++    so importing them eagerly would make this module unimportable whenever the
++    (lost) data is absent."""
++    import pandas as pd  # noqa: F811
++    from strategies.momtrend import run as momtrend
++    from strategies.multiasset import backtest as multiasset
+ 
+-def _expert_eq(name: str) -> pd.Series:
+-    """Return the expert's US equity curve (the R1 evidence used for routing)."""
++    US = _load_us()
+     if name == "momtrend":
+         return momtrend(US["closes"], mom_lb=60, k=5, rebal=20,
+                         breadth_thr=0.6, breadth_win=100, force_exit=False)
+@@ -47,8 +75,6 @@
+ 
+ def load_verified_scores() -> dict:
+     """Load the verified OOS Calmar/Sharpe from the swarm result JSONs."""
+-    import os
+-    base = "/tmp/opentrader/swarm/results"
+     oos_files = {
+         "bayes": "r2_bayes_intl.json", "spectral": "r2_spectral_intl.json",
+         "kalman": "r2_kalman_intl.json", "hurst": "r2_hurst_intl.json",
+@@ -57,9 +83,9 @@
+     }
+     out = {}
+     for name, f in oos_files.items():
+-        p = os.path.join(base, f)
++        p = os.path.join(RESULTS_DIR, f)
+         if not os.path.exists(p):
+-            out[name] = VERIFIED[name].evidence  # fallback to static
++            out[name] = _static_score(name)  # fallback to static
+             continue
+         d = json.load(open(p))
+         s = d.get("score") or d.get("summary") or d.get("best") or d
+@@ -67,10 +93,17 @@
+             out[name] = {"oos_calmar": s["calmar"], "oos_sharpe": s["sharpe"],
+                          "maxdd": s["maxdd"]}
+         else:
+-            out[name] = VERIFIED[name].evidence
++            out[name] = _static_score(name)
+     return out
+ 
+ 
++def _static_score(name: str) -> dict:
++    """The static VERIFIED evidence (experts.py) as a score dict."""
++    v = VERIFIED[name]
++    return {"oos_calmar": v.oos_calmar, "oos_sharpe": v.oos_sharpe,
++            "maxdd": v.maxdd}
++
++
+ def build_router_state() -> dict:
+     scores = load_verified_scores()
+     router = StrategyRouter(rule_floor_calmar=0.174)
+@@ -78,9 +111,9 @@
+     best_bull = max(scores, key=lambda n: scores[n]["oos_calmar"])
+     best_bear = max(scores, key=lambda n: scores[n]["oos_calmar"])
+     if scores[best_bull]["oos_calmar"] > 0.174:
+-        router.register_regime("bull", best_bull)
++        router.register_regime("up", best_bull)
+     if scores[best_bear]["oos_calmar"] > 0.174:
+-        router.register_regime("bear", best_bear)
++        router.register_regime("down", best_bear)
+ 
+     state = {
+         "source": "tournament R1/R1c/R2 OOS (2026-08-13)",
+@@ -106,21 +139,26 @@
+     print(json.dumps(state["per_regime_pick"], indent=1))
+     print(f"\nstatus: {state['status']}")
+ 
+-    with open("/tmp/opentrader/swarm/arena_router_state.json", "w") as f:
++    os.makedirs(SWARM_DIR, exist_ok=True)
++    with open(OUT_PATH, "w") as f:
+         json.dump(state, f, indent=1)
+-    print("\nwrote /tmp/opentrader/swarm/arena_router_state.json")
++    print(f"\nwrote {OUT_PATH}")
+ 
+ 
+ if __name__ == "__main__":
+     if "--verify-only" in sys.argv:
+         # verify momtrend/multiasset still reproduce (inline runners exist)
+-        eq = _expert_eq("momtrend")
+-        s = scorer.score_equity(eq)
+-        print("momtrend R1:", "ann %.1f%% calmar %.3f folds %d" % (
+-            s["ann"] * 100, s["calmar"], s["folds_beat_basket"]))
+-        eq2 = _expert_eq("multiasset")
+-        s2 = scorer.score_equity(eq2)
+-        print("multiasset R1:", "ann %.1f%% calmar %.3f folds %d" % (
+-            s2["ann"] * 100, s2["calmar"], s2["folds_beat_basket"]))
++        try:
++            from strategies import scorer
++            eq = _expert_eq("momtrend")
++            s = scorer.score_equity(eq)
++            print("momtrend R1:", "ann %.1f%% calmar %.3f folds %d" % (
++                s["ann"] * 100, s["calmar"], s["folds_beat_basket"]))
++            eq2 = _expert_eq("multiasset")
++            s2 = scorer.score_equity(eq2)
++            print("multiasset R1:", "ann %.1f%% calmar %.3f folds %d" % (
++                s2["ann"] * 100, s2["calmar"], s2["folds_beat_basket"]))
++        except FileNotFoundError as e:
++            print(f"[handoff] {e}")
+     else:
+         main()
+--- a/strategies/evolve_weights.py
++++ b/strategies/evolve_weights.py
+@@ -66,14 +66,11 @@
+ def evolve(state_dir: str, dry: bool = False) -> dict:
+     schedule = _evolve_schedule()
+ 
+-    # load existing track (the seeded evidence) so we preserve it
+-    p = os.path.join(state_dir, "live_router_state.json")
+-    state = {}
+-    if os.path.exists(p):
+-        try:
+-            state = json.loads(open(p).read())
+-        except Exception:
+-            state = {}
++    # load existing track (the seeded evidence) so we preserve it.
++    # Single-writer contract (#155): all reads/writes of the live router
++    # state go through strategies/router_state.py.
++    from strategies.router_state import read_router_state, write_router_state
++    state = read_router_state(state_dir)
+     state["weights"] = schedule
+ 
+     # RECONCILE the track with the verified evidence: every verified expert
+@@ -97,10 +94,8 @@
+                      "step() can continue evolving from live attribution.")
+ 
+     if not dry:
+-        os.makedirs(state_dir, exist_ok=True)
+-        with open(p, "w") as f:
+-            json.dump(state, f, indent=1)
+-        print(f"[evolve] wrote {p}")
++        write_router_state(state, state_dir=state_dir)
++        print(f"[evolve] wrote {os.path.join(state_dir, 'live_router_state.json')}")
+     else:
+         print("[evolve] dry run — no write")
+ 
+--- a/strategies/lanes.py
++++ b/strategies/lanes.py
+@@ -107,11 +107,19 @@
+         BASKET_CACHE.write_text(json.dumps(out))
+         return closes
+     except Exception as e:
+-        print(f"[lanes] basket yfinance failed ({e}); using tournament data")
+-        import sys
+-        sys.path.insert(0, "/tmp/opentrader/swarm")
+-        from scorer import DATA
+-        return DATA["basket"]
++        # Tournament basket data was LOST to /tmp cleanup (2026-08-23, see
++        # data/MANIFEST.json). Fall back to the last cached basket if we
++        # have one; otherwise fail honestly — never a silent /tmp dependency.
++        if BASKET_CACHE.exists():
++            print(f"[lanes] basket yfinance failed ({e}); using stale cache {BASKET_CACHE}")
++            raw = json.loads(BASKET_CACHE.read_text())
++            dates = pd.to_datetime(raw["_dates"])
++            return pd.DataFrame({k: pd.Series(v, index=dates)
++                                 for k, v in raw.items()
++                                 if k not in ("_ts", "_dates")}).astype(float)
++        raise RuntimeError(
++            f"basket fetch failed ({e}) and no durable fallback exists "
++            "(tournament data lost 2026-08-23, see data/MANIFEST.json)")
+ 
+ 
+ def lane_multiasset(closes: pd.DataFrame) -> pd.Series:
+@@ -258,14 +266,10 @@
+     """Write each lane's latest 1-day return into live_router_state.json as
+     per-(regime, expert) impact, so the router's track grows from forward
+     paper evidence (in the same schema the harness reads)."""
+-    import json as _json
+-    router_p = STATE_DIR / "live_router_state.json"
+-    state = {}
+-    if router_p.exists():
+-        try:
+-            state = _json.loads(router_p.read_text())
+-        except Exception:
+-            state = {}
++    # Single-writer contract (#155): reads/writes of the live router state
++    # go through strategies/router_state.py — never open() the path here.
++    from strategies.router_state import read_router_state, write_router_state
++    state = read_router_state(str(STATE_DIR))
+     track = state.setdefault("track", {})
+     for name, r in results.items():
+         regime = r["regime"]
+@@ -276,7 +280,7 @@
+     state["note"] = ("PAPER LANES forward attribution (2026-08-14+): per-lane "
+                      "1d returns accrued into the router track for weight "
+                      "evolution. NOT live order flow.")
+-    router_p.write_text(_json.dumps(state, indent=1))
++    write_router_state(state, state_dir=str(STATE_DIR))
+     print("[lanes] router track updated with forward lane evidence")
+ 
+ 
+--- a/strategies/scorer.py
++++ b/strategies/scorer.py
+@@ -16,7 +16,9 @@
+ import pandas as pd
+ 
+ _DATA_PATHS = [
+-    "/tmp/opentrader/swarm/swarm_data.pkl",          # tournament data (authoritative)
++    # /tmp/opentrader/swarm/swarm_data.pkl (the authoritative copy) was LOST
++    # to /tmp cleanup on 2026-08-23 — see data/MANIFEST.json. If the fallback
++    # is absent too, scorer raises FileNotFoundError: honest, not silent.
+     os.path.expanduser("~/opentrader-sandbox/data/setup_search/swarm_data.pkl"),
+ ]
+ _loaded = False
+@@ -38,11 +40,16 @@
+     _loaded = True
+ 
+ 
+-if not _loaded:
+-    _load()
++def _ensure():
++    # Lazy load (#155): `import strategies` must not require swarm_data.pkl
++    # (lost 2026-08-23, see data/MANIFEST.json). Scoring raises honestly;
++    # importing never does.
++    if not _loaded:
++        _load()
+ 
+ 
+ def score_equity(eq: pd.Series) -> dict:
++    _ensure()
+     eq = eq.reindex(MASTER).ffill().dropna()
+     if len(eq) < 200:
+         return {"error": "equity too short"}
+--- a/strategies/scorer_intl.py
++++ b/strategies/scorer_intl.py
+@@ -8,7 +8,12 @@
+ 
+ import pandas as pd
+ 
+-_DATA_PATHS = ["/tmp/opentrader/swarm/intl_data.pkl"]
++_DATA_PATHS = [
++    # intl_data.pkl (authoritative /tmp copy) was LOST to cleanup 2026-08-23;
++    # durable restoration target per data/MANIFEST.json is the evidence tier.
++    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
++                 "data", "evidence", "swarm", "intl_data.pkl"),
++]
+ 
+ 
+ def _load():
+@@ -19,14 +24,30 @@
+     raise FileNotFoundError("intl_data.pkl not found in " + " | ".join(_DATA_PATHS))
+ 
+ 
+-DATA = _load()
+-MASTER = DATA["master"]
+-BENCH_BASKET = DATA["bench_basket_bh"]
+-BENCH_SPY = DATA["bench_spy_bh"]
+-FOLDS = DATA["FOLDS"]
++# Lazy (#155): import must not require the lost pkl; score_equity loads on
++# first use and raises FileNotFoundError with the honest lost-data message.
++DATA = None
++MASTER = None
++BENCH_BASKET = None
++BENCH_SPY = None
++FOLDS = None
++_loaded = False
++
++
++def _ensure():
++    global DATA, MASTER, BENCH_BASKET, BENCH_SPY, FOLDS, _loaded
++    if _loaded:
++        return
++    DATA = _load()
++    MASTER = DATA["master"]
++    BENCH_BASKET = DATA["bench_basket_bh"]
++    BENCH_SPY = DATA["bench_spy_bh"]
++    FOLDS = DATA["FOLDS"]
++    _loaded = True
+ 
+ 
+ def score_equity(eq: pd.Series) -> dict:
++    _ensure()
+     eq = eq.reindex(MASTER).ffill().dropna()
+     if len(eq) < 100:
+         return {"error": "equity too short"}
+--- a/strategies/evaluate.py
++++ b/strategies/evaluate.py
+@@ -11,13 +11,32 @@
+   - prints score_equity stats and pass/fail against the round bars
+ """
+ 
++import os
+ import pickle
+ import sys
+ 
+ import pandas as pd
+ 
+-US = pickle.load(open("/tmp/opentrader/swarm/swarm_data.pkl", "rb"))
+-INTL = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
++_LOST_MSG = ("tournament data (swarm_data.pkl / intl_data.pkl) was LOST to "
++             "/tmp cleanup on 2026-08-23 — findings stand as recorded in "
++             "AGENTS.md / docs/CONTEXT.md; this runner is not re-runnable "
++             "(see data/MANIFEST.json)")
++
++
++def _load_tournament():
++    # Durable location per data/MANIFEST.json (evidence tier). The original
++    # /tmp copies were lost to cleanup on 2026-08-23; if the evidence tier
++    # ever holds restored copies, they live HERE — never in /tmp.
++    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++    us_p = os.path.join(root, "data", "evidence", "swarm", "swarm_data.pkl")
++    intl_p = os.path.join(root, "data", "evidence", "swarm", "intl_data.pkl")
++    if not (os.path.exists(us_p) and os.path.exists(intl_p)):
++        raise FileNotFoundError(_LOST_MSG)
++    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
++
++
++US = None
++INTL = None
+ 
+ from strategies.momtrend import run as momtrend  # noqa: E402
+ from strategies.multiasset import backtest as multiasset  # noqa: E402
+@@ -68,6 +87,7 @@
+ 
+ 
+ if __name__ == "__main__":
++    US, INTL = _load_tournament()
+     which = sys.argv[1] if len(sys.argv) > 1 else "--all"
+     if which == "--all":
+         for e in CONFIGS:
+--- a/strategies/macro_features.py
++++ b/strategies/macro_features.py
+@@ -80,8 +80,10 @@
+ 
+ 
+ if __name__ == "__main__":
+-    import pickle
+-    INT = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
+-    f = build_features(INT["master"])
++    # intl_data.pkl was LOST to /tmp cleanup (2026-08-23, see data/MANIFEST.json)
++    raise SystemExit(
++        "intl_data.pkl lost to /tmp cleanup 2026-08-23 — build_features() "
++        "itself takes a master DataFrame; supply data another way "
++        "(see data/MANIFEST.json)")
+     print(f"features: {len(f.columns)} cols x {len(f)} bars")
+     print(summary(f))
+--- a/strategies/verify.py
++++ b/strategies/verify.py
+@@ -15,8 +15,24 @@
+ from strategies.momtrend import run as momtrend
+ from strategies.multiasset import backtest as multiasset
+ 
+-US = pickle.load(open("/tmp/opentrader/swarm/swarm_data.pkl", "rb"))
+-INTL = pickle.load(open("/tmp/opentrader/swarm/intl_data.pkl", "rb"))
++# Tournament pkls were LOST to /tmp cleanup 2026-08-23 (see data/MANIFEST.json).
++# Durable restoration target is the evidence tier; load lazily so importing
++# this module never hard-fails.
++import os as _os
++_EVID = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
++                      "data", "evidence", "swarm")
++US = None
++INTL = None
++
++
++def _load_tournament():
++    us_p = _os.path.join(_EVID, "swarm_data.pkl")
++    intl_p = _os.path.join(_EVID, "intl_data.pkl")
++    if not (_os.path.exists(us_p) and _os.path.exists(intl_p)):
++        raise FileNotFoundError(
++            "tournament pkls lost to /tmp cleanup 2026-08-23 — findings stand "
++            "as recorded (AGENTS.md / docs/CONTEXT.md); see data/MANIFEST.json")
++    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
+ 
+ 
+ def fmt(s):
+@@ -28,6 +44,8 @@
+ 
+ 
+ def main():
++    global US, INTL
++    US, INTL = _load_tournament()
+     print("=== R1 (US registry, 2008-2026) — expect momtrend calmar ~0.469, multiasset ~0.39 ===")
+     import strategies.scorer as sc
+     eq_mt = momtrend(US["closes"], mom_lb=60, k=5, rebal=20,
+--- a/harness.py
++++ b/harness.py
+@@ -106,6 +106,11 @@
+ }
+ MAX_STAGE = max(STAGES.keys())
+ 
++# Cycles a holding may sit without any usable price before it is quarantined
++# (frozen against all exits) instead of silently skipped forever. 60 cycles
++# ≈ 1 hour at the live --interval 60.
++UNPRICEABLE_QUARANTINE_CYCLES = 60
++
+ # ── Minimum hold cycles: prevent flip-flop sells ──
+ # Positions no longer subject to min-hold — ADIR adversarial debate provides
+ # genuine signal quality that makes mechanical hold gates unnecessary.
+@@ -452,6 +457,8 @@
+         self._sl_tp_levels: Dict[
+             str, dict
+         ] = {}  # symbol -> {stop_loss, take_profit, entry_price, qty, highest_price, cycle_opened}
++        self._unpriceable_streak: Dict[str, int] = {}  # symbol -> consecutive cycles with no usable price
++        self._quarantined: Dict[str, str] = {}  # symbol -> quarantine reason (frozen, excluded from exits)
+         self._fundamentals_coverage: Dict[str, str] = {}  # symbol -> ok|missing|no_cik
+         # Fresh-start state (positions/SL-TP/cash) is NOT a startup flag anymore.
+         # To start clean, remove/rename data/paper_state.json — safe atomic
+@@ -1392,7 +1399,31 @@
+         for sym, levels in list(self._sl_tp_levels.items()):
+             price = self.exchange.get_current_price(sym)
+             if not price:
++                # Unpriceable holding: every exit below this line would fire on a
++                # garbage/absent price. Track the streak and quarantine rather
++                # than silently skipping forever (zombie-position bug, BALY 2026-08).
++                streak = self._unpriceable_streak.get(sym, 0) + 1
++                self._unpriceable_streak[sym] = streak
++                if streak == UNPRICEABLE_QUARANTINE_CYCLES:
++                    in_universe = sym in getattr(self, "symbols", [])
++                    reason = (
++                        f"no usable price for {streak} cycles"
++                        + ("" if in_universe else " AND off-universe")
++                    )
++                    self._quarantined[sym] = reason
++                    logger.critical(
++                        f"QUARANTINE {sym}: {reason}. Position frozen — no "
++                        f"SL/TP/timeout exit will fire on a priceless feed. "
++                        f"Resolve manually via scripts/retire_position.py in a "
++                        f"maintenance window."
++                    )
+                 continue
++            if sym in self._quarantined:
++                logger.warning(
++                    f"{sym}: price restored (${price:.2f}) — lifting quarantine"
++                )
++                del self._quarantined[sym]
++            self._unpriceable_streak[sym] = 0
+ 
+             entry_price = levels.get("entry_price", price)
+             sl = levels.get("stop_loss")
+@@ -2686,30 +2717,27 @@
+         return None
+ 
+     def _save_router_state(self):
++        # Single-writer contract (#155): all writes of live_router_state.json
++        # go through strategies/router_state.py (atomic, merge-preserving).
+         try:
+-            import json
+-            from pathlib import Path as _Path
++            from strategies.router_state import write_router_state
+ 
+-            p = _Path(self.state_dir) / "live_router_state.json"
+-            p.write_text(
+-                json.dumps(
+-                    {"track": self._mot_router.track, "weights": self._mot_router.weights},
+-                    indent=1,
+-                )
++            write_router_state(
++                {"track": self._mot_router.track,
++                 "weights": self._mot_router.weights},
++                state_dir=self.state_dir,
++                merge=True,
+             )
+         except Exception:
+             pass
+ 
+     def _load_router_state(self):
+         try:
+-            import json
+-            from pathlib import Path as _Path
++            from strategies.router_state import read_router_state
+ 
+-            p = _Path(self.state_dir) / "live_router_state.json"
+-            if p.exists():
+-                d = json.loads(p.read_text())
+-                self._mot_router.track = d.get("track", {})
+-                self._mot_router.weights = d.get("weights", {})
++            d = read_router_state(self.state_dir)
++            self._mot_router.track = d.get("track", {})
++            self._mot_router.weights = d.get("weights", {})
+         except Exception:
+             pass
+ 
+--- a/data/MANIFEST.json
++++ b/data/MANIFEST.json
+@@ -1,7 +1,7 @@
+ {
+   "manifest": "data/MANIFEST.json",
+-  "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch — nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
+-  "updated": "2026-08-23T23:00:00Z",
++  "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch \u2014 nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
++  "updated": "2026-08-29T00:00:00Z",
+   "paths": {
+     "data/evidence/": {
+       "tier": "evidence",
+@@ -15,32 +15,51 @@
+         "universe_contract_test.log": "2026-08-23 universe contract test output (script: scripts/universe_contract_test.py)"
+       },
+       "lost_to_tmp_cleanup_2026_08_23": [
+-        "swarm/ (swarm_data.pkl, intl_data.pkl, scorer.py, agent scripts) — findings stand as recorded in AGENTS.md/CONTEXT.md, not re-runnable",
+-        "macro_lead_walkforward.py", "cross_asset_test.py", "international_test.py", "metric_screen.py"
++        "swarm/ (swarm_data.pkl, intl_data.pkl, scorer.py, agent scripts) \u2014 findings stand as recorded in AGENTS.md/CONTEXT.md, not re-runnable",
++        "macro_lead_walkforward.py",
++        "cross_asset_test.py",
++        "international_test.py",
++        "metric_screen.py"
+       ]
+     },
+     "data/wayfinder/ultimate_chapter.md": {
+       "tier": "agent-memory",
+       "writer": "wayfinder-agent (sole writer)",
+       "policy": "append-only checkpoint log; latest block supersedes; read latest block first on resume",
+-      "note": "stays in live data/ per handoff §9 (supersedes the file's older relocation note)"
++      "note": "stays in live data/ per handoff \u00a79 (supersedes the file's older relocation note)"
+     },
+     "data/MANIFEST.json": {
+       "tier": "runtime-state",
+       "writer": "wayfinder-agent (sole writer)",
+       "policy": "updated only when a durable path's writer or policy changes"
++    },
++    "data/live_router_state.json": {
++      "tier": "runtime-state",
++      "writer": "strategies/router_state.py (sole writer API \u2014 write_router_state; atomic unique-tmp + os.replace; merge-preserving)",
++      "policy": "regime keys 'up'/'down' only (harness maps bull/bear->up/down at attribution); schema header live_router_state/2",
++      "related": {
++        "data/live_router_state_seed.json": "seed artifact written by seed_router.py \u2014 applied to the live file manually by the operator, never programmatically",
++        "data/live_router_state_strategies.json": "separate paper-shadow ledger, writer strategies/shadow.py"
++      },
++      "callers": "harness.py (_save_router_state), strategies/evolve_weights.py, strategies/lanes.py (_accrue_router) \u2014 all via the module, never open()"
++    },
++    "data/evidence/swarm/": {
++      "tier": "evidence",
++      "writer": "wayfinder-agent (sole writer)",
++      "policy": "declared RESTORATION TARGET for the lost tournament pkls; evaluate.py probes here. Currently absent (data lost 2026-08-23) \u2014 code degrades with explicit lost-data messages."
+     }
+   },
+-  "known_defects": [
++  "known_defects": [],
++  "resolved_2026_08_29": [
+     {
+       "path": "data/live_router_state.json",
+-      "defect": "3 writers (seed_router.py, evolve_weights.py, harness attribution) — no single source of truth; regime keys also mixed (bull/bear vs up/down)",
+-      "ticket": "#155 (plumbing)"
++      "was": "3 writers, no single source of truth, mixed regime keys",
++      "now": "single writer module strategies/router_state.py; keys unified up/down (#155)"
+     },
+     {
+-      "path": "strategies/ (handoff.py, scorer.py, scorer_intl.py, macro_features.py, lanes.py)",
+-      "defect": "reference lost /tmp/opentrader/swarm/*.pkl — currently unimportable (FileNotFoundError); committed ports are the durable artifacts but need the data dependency resolved",
+-      "ticket": "#155 (plumbing)"
++      "path": "strategies/ (evaluate, macro_features, scorer, shadow_current_alloc, lanes)",
++      "was": "durable /tmp/opentrader/swarm dependencies \u2014 unimportable/hard-failing",
++      "now": "all executable /tmp references removed; graceful lost-data degradation per MANIFEST (#155)"
+     }
+   ]
+-}
++}
+\ No newline at end of file
+--- /dev/null
++++ b/strategies/shadow_current_alloc.py
+@@ -0,0 +1,223 @@
++#!/usr/bin/env python3
++"""Shadow prototype (option D): the verified experts' CURRENT target allocations.
++
++This is a PAPER/SHADOW demonstration — no live orders. It computes, as of the
++latest available daily bar, what the two strongest verified experts would hold
++if the harness routed live order flow to them (the rule floor demoted to a
++risk gate only):
++
++  - multiasset on its 13-US-ETF basket (finnhub-feasible today)
++  - laggard   on its 12-instrument intl universe (indices/FX/commodities)
++
++The allocation math is a faithful extraction of the same logic the backtests
++run at their rebalance step (prior-close signal, current-close fill, no
++lookahead). It does NOT re-run the backtests and does NOT claim an edge — it
++only answers "what would the expert hold today".
++
++Usage:
++  PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 \
++      -m strategies.shadow_current_alloc [--asof auto] [--no-fetch]
++"""
++
++import argparse
++import json
++import math
++import os
++import pickle
++import sys
++
++import numpy as np
++import pandas as pd
++
++US_ETF = ["SPY", "QQQ", "IWM", "DIA", "TLT", "GLD", "SLV",
++          "USO", "DBC", "DBA", "UUP", "FXY", "FXE"]
++INTL_TRADABLES = ["^N225", "^FTSE", "^GDAXI", "^HSI", "EEM", "EFA",
++                  "EURUSD=X", "USDJPY=X", "GC=F", "CL=F"]
++
++# Verified configs from /tmp/opentrader/swarm/results/*.json (2026-08-13).
++# multiasset R1 (13 US ETF, Calmar 0.39): mom_gate=False, topk=10.
++# multiasset OOS (10 intl, Calmar 1.289): mom_gate=False, topk=8.
++#   NB: verify.py:52 and lanes.py:121 run mom_gate=False; the previous
++#   "mom_gate=True (default)" here was wrong and silently reproduced the
++#   wrong config (Calmar ~0.66, not 1.289).
++MULTIASSET_R1_ETF = dict(rebal=63, vol_lb=120, mom_lb=180, mode="blend",
++                         mom_gate=False, topk=10, eq_frac=0.4)
++MULTIASSET_OOS_INTL = dict(rebal=63, vol_lb=120, mom_lb=180, mode="blend",
++                           mom_gate=False, topk=8, eq_frac=0.4)
++LAGGARD_CFG = dict(breadth_thr=0.7, mom_lb=60, k_mom=5, mom_expo=0.7,
++                   con_lb=10, k_con=1, con_expo=0.4, breadth_win=100)
++
++
++def _fetch(symbols, period="6y"):
++    import yfinance as yf
++    df = yf.download(symbols, period=period, interval="1d",
++                     progress=False, auto_adjust=True, threads=True)
++    if df is None or df.empty:
++        return None
++    if isinstance(df.columns, pd.MultiIndex):
++        closes = df["Close"].ffill()
++    else:
++        closes = df.ffill()
++    return closes[symbols]
++
++
++def _intl_from_cache():
++    # intl_data.pkl was LOST to /tmp cleanup (2026-08-23, see data/MANIFEST.json)
++    return None
++
++
++def _etf_from_cache():
++    # swarm_data.pkl was LOST to /tmp cleanup (2026-08-23, see data/MANIFEST.json)
++    return None
++
++
++def multiasset_target(closes: pd.DataFrame, cfg: dict) -> dict:
++    """Current target weights: momentum-positive top-k, blend inv-vol + eq-weight."""
++    names = list(closes.columns)
++    P = closes[names].values.astype(float)
++    n, k = P.shape
++    mom = P[n - 2] / P[n - 2 - cfg["mom_lb"]] - 1.0
++    logp = np.log(P)
++    seg = logp[max(0, n - 2 - cfg["vol_lb"]):n - 1]
++    vol = np.nanstd(seg[1:] - seg[:-1], axis=0) if len(seg) > 3 else np.full(k, np.nan)
++    valid = np.isfinite(mom) & np.isfinite(vol) & (vol > 0)
++    sel = valid & ((mom > 0) if cfg.get("mom_gate", True) else True)
++    topk = cfg["topk"]
++    if topk is not None and sel.sum() > topk:
++        idx = np.where(sel)[0]
++        keep = idx[np.argsort(-mom[idx])[:topk]]
++        sel = np.zeros(k, dtype=bool)
++        sel[keep] = True
++    inv = np.zeros(k)
++    inv[sel] = 1.0 / vol[sel]
++    eq_frac = cfg["eq_frac"]
++    tw = np.zeros(k)
++    if inv.sum() > 0:
++        rpw = inv / inv.sum()
++        eqw = np.zeros(k)
++        eqw[sel] = 1.0 / sel.sum()
++        tw = (1.0 - eq_frac) * rpw + eq_frac * eqw
++    out = {names[i]: float(tw[i]) for i in range(k) if tw[i] > 1e-6}
++    return {"weights": out, "mom": {names[i]: float(mom[i]) for i in range(k)},
++            "vol": {names[i]: (float(vol[i]) if math.isfinite(vol[i]) else None)
++                    for i in range(k)}, "n_pos": int(sel.sum())}
++
++
++def laggard_target(closes: pd.DataFrame) -> dict:
++    """Current laggard book: momentum top-k_mom + worst-k_con catch-up, breadth-gated."""
++    cfg = LAGGARD_CFG
++    names = list(closes.columns)
++    breadth = (closes[names] > closes[names].rolling(cfg["breadth_win"]).mean()).mean(axis=1)
++    bull = bool(breadth.iloc[-2] > cfg["breadth_thr"])
++    mom = {s: float(closes[s].iloc[-2] / closes[s].iloc[-2 - cfg["mom_lb"]] - 1.0)
++           for s in names}
++    sel = sorted(mom, key=mom.get, reverse=True)[:cfg["k_mom"]]
++    con_mom = {s: float(closes[s].iloc[-2] / closes[s].iloc[-2 - cfg["con_lb"]] - 1.0)
++               for s in names}
++    lag = sorted(con_mom, key=con_mom.get)[:cfg["k_con"]]
++    lag = [s for s in lag if s not in sel]
++    out = {
++        "breadth": float(breadth.iloc[-1]),
++        "breadth_thr": cfg["breadth_thr"],
++        "bull": bull,
++        "momentum_book": [{s: round(mom[s], 4)} for s in sel],
++        "laggard_book": [{s: round(con_mom[s], 4)} for s in lag],
++        "exposure": {"momentum": cfg["mom_expo"], "laggard": cfg["con_expo"]},
++    }
++    if bull:
++        out["target"] = (
++            {s: round(cfg["mom_expo"] / len(sel), 4) for s in sel}
++            | {s: round(cfg["con_expo"] / len(lag), 4) for s in lag}
++        )
++    else:
++        out["target"] = {}
++    return out
++
++
++def _fmt_w(weights):
++    if not weights:
++        return "  (flat)"
++    return "  " + "\n  ".join(f"{s:12s} {w*100:6.2f}%" for s, w in
++                              sorted(weights.items(), key=lambda x: -x[1]))
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--no-fetch", action="store_true")
++    args = ap.parse_args()
++
++    etf = intl = None
++    if not args.no_fetch:
++        try:
++            etf = _fetch(US_ETF)
++        except Exception as e:
++            print(f"[fetch] US ETF fetch failed: {e}")
++        try:
++            intl = _fetch(INTL_TRADABLES)
++        except Exception as e:
++            print(f"[fetch] intl fetch failed: {e}")
++    if etf is None:
++        etf = _etf_from_cache()
++        print("[fetch] US ETF from cache (swarm_data.pkl basket)")
++    if intl is None:
++        intl = _intl_from_cache()
++        print("[fetch] intl from cache (intl_data.pkl)")
++
++    report = {"asof": None, "multiasset_r1_etf": None,
++              "multiasset_oos_intl": None, "laggard_intl": None}
++
++    print("=" * 64)
++    print("SHADOW — verified experts' CURRENT target allocation (paper only)")
++    print("=" * 64)
++
++    if etf is not None and etf.shape[1] >= 6:
++        m = multiasset_target(etf, MULTIASSET_R1_ETF)
++        report["asof"] = str(etf.index[-1].date())
++        report["multiasset_r1_etf"] = m
++        print(f"\n[multiasset R1] 13-US-ETF basket  asof {etf.index[-1].date()}"
++              f"  (verified Calmar 0.39)")
++        print(f"  n_pos={m['n_pos']}  (mom_gate=False, topk=10, "
++              f"mom {MULTIASSET_R1_ETF['mom_lb']}d, vol {MULTIASSET_R1_ETF['vol_lb']}d)")
++        print("  TARGET weights:")
++        print(_fmt_w(m["weights"]))
++    else:
++        print("\n[multiasset R1] ETF data unavailable")
++
++    if intl is not None and intl.shape[1] >= 6:
++        mo = multiasset_target(intl, MULTIASSET_OOS_INTL)
++        report["asof"] = report["asof"] or str(intl.index[-1].date())
++        report["multiasset_oos_intl"] = mo
++        print(f"\n[multiasset OOS] 10-intl universe  asof {intl.index[-1].date()}"
++              f"  (verified Calmar 1.289)")
++        print(f"  n_pos={mo['n_pos']}  (mom_gate=False, topk=8)")
++        print("  TARGET weights:")
++        print(_fmt_w(mo["weights"]))
++
++        l = laggard_target(intl)
++        report["laggard_intl"] = l
++        print(f"\n[laggard] 10-intl universe  asof {intl.index[-1].date()}"
++              f"  (verified Calmar 1.666)")
++        print(f"  breadth={l['breadth']:.3f} thr={l['breadth_thr']} bull={l['bull']}")
++        if l["bull"]:
++            print("  TARGET weights (mom book + laggard book):")
++            print(_fmt_w(l["target"]))
++            print(f"  mom book top-{LAGGARD_CFG['k_mom']}:",
++                  ", ".join(list(d)[0] for d in l["momentum_book"]))
++            print(f"  laggard book worst-{LAGGARD_CFG['k_con']}:",
++                  ", ".join(list(d)[0] for d in l["laggard_book"]))
++        else:
++            print("  flat — breadth below threshold (no entries, validated gate)")
++    else:
++        print("\n[multiasset OOS / laggard] intl data unavailable")
++
++    out = os.path.join(os.path.dirname(__file__), "..", "data",
++                       "shadow_current_alloc.json")
++    out = os.path.abspath(out)
++    os.makedirs(os.path.dirname(out), exist_ok=True)
++    with open(out, "w") as f:
++        json.dump(report, f, indent=1)
++    print(f"\nwrote {out}")
++
++
++if __name__ == "__main__":
++    main()
+--- /dev/null
++++ b/strategies/router_state.py
+@@ -0,0 +1,79 @@
++"""Single-writer module for the harness-monitored router state (#155).
++
++data/live_router_state.json is read by the harness every cycle (attribution,
++RegimeRouter monitoring). Before #155 it had three direct writers
++(seed_router.py, evolve_weights.py, lanes.py) with no locking and mixed
++regime keys. As of 2026-08-29:
++
++- THIS MODULE is the sole writer API. Callers never open() the path for
++  writing; they call write_router_state(), which merges, stamps a schema
++  header, and writes atomically (unique tmp name + os.replace — the same
++  pattern as state/manager.py::_write_state, so concurrent harness reads
++  never see a torn file).
++- seed_router.py deliberately does NOT write the live file: it emits
++  live_router_state_seed.json, an artifact the operator applies manually.
++- Regime keys are 'up'/'down' only (harness maps bull/bear -> up/down at
++  attribution; any other key is invisible to the router).
++
++Declared in data/MANIFEST.json (runtime-state tier).
++"""
++
++import json
++import os
++import time
++from datetime import datetime, timezone
++from pathlib import Path
++
++PROJECT = Path(__file__).resolve().parent.parent
++DEFAULT_PATH = PROJECT / "data" / "live_router_state.json"
++
++SCHEMA = "live_router_state/2"
++
++
++def _resolve(state_dir=None) -> Path:
++    if state_dir is None:
++        return DEFAULT_PATH
++    return Path(state_dir) / "live_router_state.json"
++
++
++def read_router_state(state_dir=None) -> dict:
++    """Read the router state; {} if missing or corrupt (never raises)."""
++    p = _resolve(state_dir)
++    try:
++        return json.loads(p.read_text())
++    except Exception:
++        return {}
++
++
++def _atomic_write_json(path: Path, obj: dict) -> None:
++    """Per-writer temp file + atomic replace (state/manager.py pattern)."""
++    tmp = path.with_name(f"{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
++    try:
++        path.parent.mkdir(parents=True, exist_ok=True)
++        with open(tmp, "w") as f:
++            json.dump(obj, f, indent=1)
++        os.replace(tmp, path)
++    finally:
++        if tmp.exists():
++            try:
++                tmp.unlink()
++            except OSError:
++                pass
++
++
++def write_router_state(state: dict, state_dir=None, merge: bool = False) -> dict:
++    """Write the router state. Returns the written state.
++
++    merge=True: shallow-merge the given keys over the existing state (the
++    accrual pattern — lanes adds track evidence without clobbering weights).
++    merge=False: `state` IS the full document (the evolve_weights pattern,
++    which has already read+reconciled).
++    """
++    p = _resolve(state_dir)
++    out = dict(state)
++    if merge:
++        out = {**read_router_state(state_dir), **state}
++    out["schema"] = SCHEMA
++    out["updated"] = datetime.now(timezone.utc).isoformat()
++    _atomic_write_json(p, out)
++    return out

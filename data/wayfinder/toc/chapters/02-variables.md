@@ -1,0 +1,30 @@
+# Variables — epistemic ledger
+
+> Rendered from `ledger.json`. Status rules are enforced by the governor:
+> - **known** — answer from the ledger, do not search or speculate.
+> - **computable** — computation/inference allowed; state assumptions explicitly.
+> - **unknowable** — DO NOT answer. Reply `unknown (<id>)` and move on.
+> - **explore** — unverified ideas only, prefix `[EXPLORE-UNVERIFIED]`.
+
+| id | status | description | bounds |
+|----|--------|-------------|--------|
+| V01 | known | Rule floor contract (ledger iter-74) on 17-symbol search universe: +23.1% net 5y pre-1718f33, +18.6% after engine fix (metrics pre-fix optimistic ~4-5pp) | data/setup_search/ledger.jsonl; data/setup_search/best.json |
+| V02 | known | Universe contract does NOT generalize: -45.95% on 511-registry, -41.07% on 7.3k fullcross (re-verified 2026-08-23). Treat every edge claim as universe-bound | scripts/universe_contract_test.py (~25 min) |
+| V03 | known | Signal-family probe: NO existing feature family (mom/rev/rsi/brk/z, rank, vol-scaling, filters) generalizes wide under realistic fees (2026-08-13); only new signal inputs untested | scripts/signal_family_probe.py (~20 min) |
+| V04 | known | ff_falling macro gate is a loss-reducer, NOT a validatable edge (OOS walkforward 1/4 folds positive); dedicated script lost to /tmp cleanup 2026-08-23, DISPROVED verdict stands | AGENTS.md quantitative-claims section |
+| V05 | known | Contrarian rotation: long worst-5 by 60d momentum in liquid large-caps beats B&H 3/4 folds 2008-26 (9.1% vs 6.8% ann); a crisis-rotation tool, not a standalone edge; script lost 2026-08-23 | AGENTS.md quantitative-claims section |
+| V06 | known | 9 prototype experts OOS-verified; laggard is champion (OOS Calmar 1.666, maxDD -7.5%). ROUTING/MONITORING only, never live order flow. Swarm pkl data lost; committed ports in strategies/ are the durable artifacts | strategies/experts.py; data/live_router_state.json |
+| V07 | known | Epoch engine verdict: no-promotion. Both epochs FAIL (+0.945%/+0.533% vs +1% gate; epoch2 erosion 1.006% > 0.5%). ADR-0006 phase-2 PASS narrative is UNVERIFIED - never repeat it | data/arena/epoch_report.json |
+| V08 | known | Transfer findings: drawdown control passes 6/8 of R2 intl gauntlet; intl basket BH beats SPY BH risk-adjusted (Calmar 0.73 vs 0.47); THE benchmark is SPY buy-and-hold net of costs. Scripts lost 2026-08-23, findings stand as recorded | AGENTS.md quantitative-claims section |
+| V09 | known | VIX gate edge FALSIFIED (1/3 eras OOS). Live harness runs --vix-gate off (commit 7ed8271); code default remains strict fail-closed - a footgun for future runs | data/vix_gate.py docstring; commit 7ed8271 |
+| V10 | known | Arena gate FAILING (-0.57%/+0.20% vs +1% bar, 2026-08-23 audit); improvement loop seeded once from static OOS evidence, does not close (#155-157 open) | docs/agents/research/self-improvement-loop-audit.md |
+| V11 | computable | Deployability status vs ADR-0002 three clauses - MUST be recomputed from real ledgers at session end, never quoted from prose | docs/adr/0002-deployability-criterion.md; paper_state.json + shadow reconciliation |
+| V12 | computable | FTMO Phase-1 cadence ~939 days / 44 trades at current trade frequency (ADR-0005 sandbox sim); re-run only if the config changes | setup_search/prop_challenge_sim.py |
+| V13 | computable | Live harness universe is the 511-registry industry radar curated to 6 focus symbols (fallback ~66 names); the 19-symbol-universe phrasing in CONTEXT.md/AGENTS.md/experts.py is stale boilerplate | mot/industry_map.py; docs/agents/research/universe-bridge-matrix.md |
+| V14 | unknowable | Mechanism of WHY the contract fails wide (regime fragmentation vs fee structure vs selection effect) - parked as the ADR-0007 research track, do not burn tokens guessing | docs/adr/0007-reground-victory-path.md decision 3 |
+| V15 | explore | Macro-relative / sector-relative signal inputs generalize wide - untested hypothesis, speculation only until probed | ADR-0007 decision 3; scripts/signal_family_probe.py conclusion |
+| V16 | known | FTUK One-Step rules (official FAQ, spot-checked 2026-08-29): 10% target / 4% daily DD / 8% RELATIVE max DD / min 4 days / no time limit / 80% split / on-demand payout $250 min. Relative != trailing (friendlier). Newer Flex variant differs (4% target, 5% daily DD) - re-verify before quoting | faq.ftuk.com one-step rules; docs/research/small-capital-profitability-plan.md 1.2 |
+| V17 | known | E8 Signature 25K (spot-checked 2026-08-29): fee ~$110 FUTURES / ~$138 CFD (plan conflated variants); EOD dynamic DD 4% on 25K/50K; ~6% target; 35% best-day payout rule; payout buffer = DD size; fixed 80% split on Signature; CFD requires activity every 60 days (a clock) | e8markets.com compare-simfi; help.e8markets.com payout-on-demand; plan 1.2 |
+| V18 | known | TradeLocker venue class satisfies the no-inactivity-clock constraint that drove ADR-0005 to FTMO: FTUK/FunderPro/E8 have no time limits with static/relative DD. FunderPro carries a trust caution (Trustpilot Jan 2026, payout-denial complaints) | docs/research/small-capital-profitability-plan.md 1; fundedtrading.com best-tradelocker-prop-firms |
+| V19 | computable | Plan pass-probabilities and income figures (15-25% pass, $425-1068/mo) are HEURISTIC - decision inputs only. Recompute by extending setup_search/prop_challenge_sim.py to venue-specific rules before any purchase decision | setup_search/prop_challenge_sim.py; plan 4 |
+| V20 | known | ADR-0008 (2026-08-29): multi-venue posture - FTMO stays sim-validated primary, TradeLocker firm class added. TradeLocker ExchangeBase adapter is sanctioned bridge work, sequenced AFTER #155-157, sandbox-first, demo-paper-validated. Challenge-mode risk reconfig requires its own ADR (ADR-0001) | docs/adr/0008-multi-venue-prop-bridge.md |
