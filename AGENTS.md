@@ -6,6 +6,31 @@ value-head experts) trained by an adversarial arena. Read `ARCHITECTURE.md` and
 language. All changes are proven in the sandbox (`opentrader-sandbox`) first; the
 live tree and the GPU stay untouched until validated.
 
+## Role division — binding (2026-08-29)
+
+**Economics:** subscription-tier tokens are this project's scarce resource;
+the local Qwen3.8-27B is free, always-on, and measured-clean (eval 35/35,
+needle 10/10 — `docs/agents/research/qwen38-serving-ab-2026-08-29.md`).
+Default: work goes to the local model. Every task a subscription agent does
+instead is a budget transfer from a free lane to a paid one.
+
+1. **Local model (Qwen3.8-27B) implements and operates** — tickets, probes,
+   verification runs, recurring operator jobs (e.g. the V11 deployability
+   recompute). Assignment is via a job card (`docs/agents/job-*.md`) pasted
+   as the first message of a fresh session.
+2. **Cloud/subscription agents architect and review ON REQUEST ONLY** —
+   specs, job cards, patch review, failure analysis. Implementation and
+   live-system mutations are OUT OF SCOPE unless the human explicitly assigns
+   them in that session. Speed or convenience is never grounds to take the
+   local model's work; that is the recorded failure mode (2026-08-29: a
+   subscription agent hand-stamped the live router state to skip a wait —
+   second role-drift warning; the section exists because of it).
+3. **Escalation cloud-ward needs human approval in-session**, granted when
+   the local model has failed the task (transcript as evidence) or the task
+   provably requires capabilities it lacks.
+4. **The human decides and gates** — ledger promotions, ADRs, strategy
+   commits, live-tree landings. Unchanged.
+
 ## Agent skills
 
 ### Issue tracker
