@@ -1,8 +1,15 @@
 # OpenTrader Evolution Thesis
 
 **Status:** Living document — revised per milestone, not per cycle.
-**Latest revision:** R1 · 2026-08-01
+**Latest revision:** R2 · 2026-08-28 (governing ADR: `docs/adr/0007-reground-victory-path.md`)
 **Companion map:** [Small-capital launch](https://github.com/darylerivers/opentrader/issues/8)
+
+**R2 preamble:** R1's edge claim ("+~5%/yr OOS, 3/3 unseen years") was measured
+on the pre-`1718f33` engine (optimistic by ~4–5pp) against the 17-symbol search
+universe, which the 2026-08-13/23 probes proved does **not** generalize
+(−45.95% registry / −41.07% wide). R1 predates every major falsification and is
+retained below only where the 2026-08-28 measurements still support it. When
+this doc and ADR-0007 disagree, ADR-0007 wins.
 
 This is the discussion, not the number. It charts how the system should evolve —
 risk, model structure, data, hardware, and instrument access — as the account
@@ -14,12 +21,21 @@ calendar-committed (dates on a fast-moving GPU/market are guesswork).
 
 ## 1. North star
 
-- Paper-validate the strategy at $100–300 scale with **honest fees** (done:
-  $300 is the minimum-viable deposit; $50/$100 cannot clear the fee-aware
-  min-notional floor).
-- The validated rule-based setup (+~5%/yr OOS, 3/3 unseen years) and the
-  Genesis-debate system run as a **shadow A/B**; the thesis tracks which edge
-  survives as scale and costs change.
+- **The victory condition is ADR-0002's deployability criterion, evaluated on
+  the pinned live universe** (511-registry radar → 6-symbol focus), with edge
+  evidence accruing in the shadow engine. Three clauses: plumbing fidelity
+  (≥3 closed paper trades, two exit paths, zero fatal defects), shadow edge
+  persistence, ≥10 weeks continuous paper. Returns are not part of it.
+- **The edge thesis is structural regime-switching** — the only structure that
+  verified OOS: `laggard` momentum-participation in confirmed bull (OOS
+  Calmar 1.666), contrarian worst-5 rotation in crisis, drawdown control as
+  the transferable skill. The rule floor holds all weight until an expert
+  earns it.
+- **Generalization is a separate research track** (macro/sector-relative
+  inputs; bar: `universe_contract_test.py` passing on the 7.3k archive). The
+  deployment track does not wait on it.
+- **Revenue vehicle: FTMO 2-Step (ADR-0005)**, planning baseline = the sim's
+  ~939-day cadence; the FTMO-facing universe bridge is its own work item.
 - Every capability unlock below is written as: **trigger → action → cost → decision point.**
 
 ## 2. Risk assessment
@@ -47,10 +63,15 @@ first live trade.
   Genesis-generated + live trade data). The thesis is the **integration
   point**: it references the separate lifecycle effort, it does not own its
   internals or timeline.
+  **R2 status check:** Ptolemy-1 exists as a 12-example / 1-epoch / 30-second
+  smoke adapter (`data/models/finetune/Ptolemy-1/`); the S-series directories
+  are empty shells. `config/models.json` also notes adapters cannot be
+  promoted until the LoRA train base is re-pointed at the serving
+  architecture. No Ptolemy claim is supportable today.
 - **Promotion rule:** a model/strategy is promoted to "primary" when its
   walk-forward OOS edge beats the incumbent by a margin **and** survives a
-  fresh-parameter perturbation (≥70% positive neighbors — the bar the current
-  rule setup meets).
+  fresh-parameter perturbation (≥70% positive neighbors — re-verify against
+  the post-`1718f33` engine before quoting the rule setup as meeting it).
 - **Hybrid hypothesis:** the durable end-state is likely **rule-based regime
   gating + LLM edge** — the LLM proposes where the rules can't see; the rules
   gate what the LLM can spend. Test this explicitly once both lines have ~1
@@ -81,9 +102,13 @@ first live trade.
 
 ## 5. Hardware bottlenecks (condition-triggered)
 
-**Current baseline (2026-08-01):** GPU1 RX 7900 GRE 16GB (qwythos 9B Q4,
-~8.5GB RSS under load), GPU0 RTX 3070 8GB (qwen 7B), 31GB RAM (~19GB used,
-11GB available), cycle ~24–58s.
+**Current baseline (re-observed 2026-08-28):** GPU1 RX 7900 GRE 16GB runs
+Qwen3.8-27B UD-Q3_K_XL via llama.cpp HIP on :5804 (the agent/implementer
+model); GPU0 RTX 3070 8GB serves DeepSeek-V4-Pro-Qwen3.5-9B behind
+`gpu_sync` :5801 (the trading-debate model, per `config/models.json`) plus
+Qwen3-Embedding-0.6B and a Qwen3.8-4B research helper; `headroom` proxies
+:8787 → :5804. Live loop: harness (paper, 19 staged symbols off the 511
+radar) + dashboard + MCP server.
 
 | Trigger (condition, not date) | Action | Cost |
 |---|---|---|
@@ -113,3 +138,10 @@ capital threshold **and** a walk-forward-validated strategy for that instrument.
 - **R1 · 2026-08-01** — Initial thesis: $300 min deposit confirmed; rule-based
   edge validated (+5%/yr OOS); engine at 24–58s cycles; funding/depth/FRED
   context live; hardware condition-triggers defined; instrument gates set.
+- **R2 · 2026-08-28** — Re-grounded on post-falsification evidence per
+  ADR-0007: north star re-pinned to ADR-0002 deployability on the pinned
+  universe; edge thesis re-anchored to structural regime-switching (the only
+  OOS-verified structure); generalization demoted to a separate research
+  track; FTMO retained with the ~939-day cadence baseline; R1's "+5%/yr"
+  claim retired as pre-`1718f33` and universe-bound; Ptolemy status
+  corrected to smoke-test only; hardware baseline re-observed.
