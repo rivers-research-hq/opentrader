@@ -21,6 +21,20 @@ cd /home/mrc/opentrader/data/wayfinder/toc && toc phase start v11-recompute --al
 ```
 Ledger V11 defines this job. Never contradict a [known] variable.
 
+## STEP 0.5 — Reset-boundary check (added 2026-08-29, after the first run)
+
+Harness restarts have RESET the paper portfolio before (2026-08-29:
+initial_cash back to 500, fills history wiped, positions re-opened at a new
+cycle). Before computing clauses 1 and 3:
+
+1. Detect a reset boundary: `initial_cash` != 500.0-with-history, fills
+   log starting later than `data/history/` mtimes imply, or a cycle-counter
+   discontinuity vs `data/history/cycle_*.json`.
+2. If found (or previously found — once true, always annotate): emit
+   `"reset_boundary": {"detected_at": "<ts or last-known>", "evidence_pre_boundary": "lost_to_reset"}`
+   in the output JSON, and state in clause 1/3 notes that pre-boundary trade
+   evidence is LOST, not zero. Never count lost evidence as absence.
+
 ## THE WORK — three clauses of ADR-0002, from real ledgers only
 
 Write ONE deliverable file: `/home/mrc/opentrader/data/wayfinder/deployability_status.json`
@@ -78,6 +92,7 @@ shadow engine's up-regime rule-floor impact history lives in
 {
   "generated": "<iso timestamp>",
   "generated_by": "qwen3.8-27b operator run v11",
+  "reset_boundary": {"detected_at": "...", "evidence_pre_boundary": "lost_to_reset"},
   "clause1_plumbing": {"closed_trades": N, "exit_paths_seen": [...],
     "fatal_defects": {"silent_hold": N, "state_corruption": N, "order_rejection": N},
     "defect_quotes": ["...verbatim..."], "reconciliation_ok": null,
@@ -90,6 +105,11 @@ shadow engine's up-regime rule-floor impact history lives in
   "tool_calls_used": N
 }
 ```
+
+Recurrence note: this run repeats weekly (Friday reminder). Clause 3's
+70-day clock only becomes meaningful once the fills-continuity ticket lands
+(resets currently zero it); until then the run is monitoring, not gate
+evidence.
 
 ## RULES
 
