@@ -91,24 +91,35 @@ C1 ✓ C2 ✓ C3 ✓ with zero fatal defects in the window:
    instrument unlock at this scale; stocks need ~$1k+ for the $0.35 fixed fee
    to amortize. Default: **crypto spot, faithful config, 1% size.**
 
-## Phase 3 — Real money at 1% (the actual going live)
+## Phase 3 — Real money at 1% (DUAL-TRACK — amended 2026-08-30, human decision)
 
-- Venue: Kraken spot (0.16/0.26% fees, thesis §6) — smallest honest loop.
-- The harness runs the same validated config; the only change is settlement
-  venue and size. Any deviation = its own ADR (ADR-0001).
-- **Ladder: 1% → 10%** on continued fidelity + shadow persistence (ADR-0002
-  consequences; ADR-0007 pinned the ceiling at 10%).
-- Start the data pipeline (trades/context/fills → parquet) at first deposit —
-  model retrains must not starve later (thesis §4).
+Both books accrue ADR-0002 evidence in parallel; first real money goes to
+whichever book passes its gates first. Rationale (human decision 2026-08-30):
+forex is the prop instrument class (ADR-0008) — practicing it on real money
+transfers directly to the challenge — and its entry bar is lowest. Crypto was
+sequenced first only because its plumbing predates this plan.
+
+- **Track A — crypto spot (head start).** Kraken spot, plumbing + fills
+  evidence already accruing. Faithful config, 1% size, kill switch.
+- **Track B — FX (strategic priority).** Build the venue adapter as the next
+  implementation job after the continuity follow-up: TradeLocker
+  (`job-157`-unblocked, card pattern proven) or OANDA v20 REST (FTMO US path,
+  ADR-0005). Then paper-accrue the same three clauses on the FX book. The
+  verified expert set (laggard, multiasset, bayes, kalman…) already maps to
+  this instrument class per ADR-0008.
+- Same gates for both books: ADR-0002's three clauses through *that book's*
+  real plumbing — no instrument goes live on borrowed evidence.
+- **Ladder: 1% → 10%** per book on continued fidelity + shadow persistence.
+- Start the data pipeline (trades/context/fills → parquet) at first deposit.
 - What "going live" does NOT include yet: prop challenge purchase (Phase 4),
-  size above 10% (needs its own gate), US stocks (fee drag at this capital),
-  anything from the ADR-0007 §7 park list.
+  size above 10%, US stocks (fee drag at this capital), ADR-0007 §7 park list.
 
 ## Phase 4 — Prop / multi-venue (parallel, slow lane)
 
-- TradeLocker adapter (ADR-0008): now unblocked (#155/#157 landed) — qwen job
-  card can be written when you choose. Sandbox → demo paper-validation before
-  any challenge purchase.
+- ~~TradeLocker adapter~~ **promoted to Phase 3 Track B** (2026-08-30 human
+  decision): the FX adapter is now on the critical path, sequenced after the
+  continuity follow-up. Sandbox → demo paper-validation before any challenge
+  purchase.
 - FTMO bridge: OANDA-universe expert variants per `universe-bridge-matrix.md`.
 - A challenge purchase requires: verified current firm rules (they change),
   venue-specific sim (`prop_challenge_sim.py` extension), trust check, and the
