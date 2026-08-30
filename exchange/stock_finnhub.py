@@ -705,6 +705,17 @@ class FinnhubExchange(ExchangeBase):
         self._connected = False
         logger.info("FinnhubExchange: disconnected")
 
+    def restore_ledger(
+        self, cash: float, positions: Dict[str, float],
+        cost_basis: Dict[str, float] = None, fills: list = None,
+    ) -> None:
+        """Restore the paper ledger from persisted state (always a paper book)."""
+        self._cash = float(cash)
+        self._positions = dict(positions)
+        self._cost_basis = dict(cost_basis or {})
+        if fills is not None:
+            self._fills = list(fills)
+
     def reset(self, initial_cash: float = 100_000) -> None:
         self._cash = initial_cash
         self._positions.clear()

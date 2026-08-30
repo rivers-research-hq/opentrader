@@ -1,7 +1,7 @@
 {
   "manifest": "data/MANIFEST.json",
   "purpose": "STEP ZERO (2026-08-23) filesystem provenance: writer-per-path for durable data/ paths. /tmp is scratch \u2014 nothing durable may reference it. Five tiers: Source (git) / Runtime state (data/, one writer per file) / Evidence (durable, append-only) / Scratch (/tmp) / Agent memory (chapter file + handoff prompt).",
-  "updated": "2026-08-29T00:00:00Z",
+  "updated": "2026-08-30T00:00:00Z",
   "paths": {
     "data/evidence/": {
       "tier": "evidence",
@@ -47,6 +47,12 @@
       "tier": "evidence",
       "writer": "wayfinder-agent (sole writer)",
       "policy": "declared RESTORATION TARGET for the lost tournament pkls; evaluate.py probes here. Currently absent (data lost 2026-08-23) \u2014 code degrades with explicit lost-data messages."
+    },
+    "data/fills_ledger.jsonl": {
+      "tier": "runtime-state",
+      "writer": "harness.py (sole writer — _append_fills_to_ledger, append-only + fsync)",
+      "policy": "append-only JSONL; one fill per line; never edited in place; rebuilt from this ledger on startup if paper_state.json fills list is shorter (truncated to last 50). Wiped only by explicit --reset-portfolio flag.",
+      "added": "2026-08-30 (continuity fix — fills history survives restarts)"
     }
   },
   "known_defects": [],

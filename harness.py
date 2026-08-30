@@ -159,6 +159,7 @@ class OpenTraderHarness:
         sidecar_binary: str = None,  # path to exchange-engine binary
         stock_exchange: str = None,  # stock exchange for multi-asset mode (ibkr|finnhub|...+)
         crypto_exchange: str = None,  # crypto exchange for multi-asset mode (kraken|coinbase|...)
+        reset_portfolio: bool = False,  # explicit opt-in: wipe paper_state.json + fills ledger on startup
     ):
         # Load centralized config — CLI args override config, config overrides code defaults
         cfg = self._load_config()
@@ -214,6 +215,20 @@ class OpenTraderHarness:
             state_dir = str(Path(PROJECT) / "data")
         self.state_dir = state_dir
         os.makedirs(state_dir, exist_ok=True)
+        self._fills_ledger_path = os.path.join(state_dir, "fills_ledger.jsonl")
+
+        # Explicit portfolio reset (opt-in via --reset-portfolio)
+        if reset_portfolio:
+            logger.warning(
+                "RESET-PORTFOLIO: wiping paper_state.json and fills_ledger.jsonl — "
+                "starting fresh portfolio"
+            )
+            for _p in (
+                os.path.join(state_dir, "paper_state.json"),
+                self._fills_ledger_path,
+            ):
+                if os.path.exists(_p):
+                    os.remove(_p)
 
         # Multi-asset exchange routing overrides
         self._stock_exchange = stock_exchange
@@ -829,6 +844,57 @@ class OpenTraderHarness:
     def _agent_state_path(self) -> str:
         return os.path.join(self.state_dir, "agent_state.json")
 
+    def _append_fills_to_ledger(self, fills: list) -> None:
+        """Append fills not yet in the append-only ledger (fsync'd)."""
+        if not fills:
+            return
+        try:
+            # Read existing ledger to find the last order_id we've recorded
+            existing_ids = set()
+            if os.path.exists(self._fills_ledger_path):
+                with open(self._fills_ledger_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                existing_ids.add(json.loads(line).get("order_id", ""))
+                            except (json.JSONDecodeError, AttributeError):
+                                pass
+            new_fills = [f for f in fills if f.get("order_id") not in existing_ids]
+            if not new_fills:
+                return
+            with open(self._fills_ledger_path, "a") as f:
+                for fill in new_fills:
+                    f.write(json.dumps(fill, default=str) + "\n")
+                f.flush()
+                os.fsync(f.fileno())
+        except Exception as e:
+            logger.warning(f"Could not append fills to ledger: {e}")
+
+    def _rebuild_fills_from_ledger(self, current_fills: list) -> list:
+        """Rebuild fills history from the append-only ledger if it's longer."""
+        if not os.path.exists(self._fills_ledger_path):
+            return current_fills
+        try:
+            ledger_fills = []
+            with open(self._fills_ledger_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            ledger_fills.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            pass
+            if len(ledger_fills) > len(current_fills):
+                logger.info(
+                    f"Fills ledger has {len(ledger_fills)} fills vs "
+                    f"{len(current_fills)} in paper_state — rebuilding from ledger"
+                )
+                return ledger_fills
+        except Exception as e:
+            logger.warning(f"Could not read fills ledger: {e}")
+        return current_fills
+
     def _save_agent_state(self) -> None:
         """Persist agent state to disk."""
         try:
@@ -863,6 +929,9 @@ class OpenTraderHarness:
         """Restore agent state from disk."""
         path = self._agent_state_path()
         if not os.path.exists(path):
+            # agent_state.json absent — still restore the portfolio ledger so
+            # cash/positions/fills survive restarts (root-cause fix 2026-08-30).
+            self._restore_portfolio_state()
             return
         try:
             with open(path) as f:
@@ -962,6 +1031,10 @@ class OpenTraderHarness:
 
             if saved_cash is None:
                 return
+
+            # Rebuild fills history from the append-only ledger if it's longer
+            # than the truncated list in paper_state.json (last 50).
+            saved_fills = self._rebuild_fills_from_ledger(saved_fills)
 
             # Capital-rescale guard: if the CLI --cash differs significantly
             # from the saved ledger's initial_cash, the account was hardcoded
@@ -1659,6 +1732,9 @@ class OpenTraderHarness:
         fills = []
         if hasattr(self.exchange, "get_fills"):
             fills = self.exchange.get_fills()
+
+        # Append new fills to the append-only ledger (crash-safe, fsync'd)
+        self._append_fills_to_ledger(fills)
 
         # (Signal history is recorded per-symbol in Phase 1.5 of run_cycle)
 
@@ -4544,6 +4620,13 @@ def main():
         "never blocks entries (recommended until a generalizable gate exists). "
         "Default: strict (preserves legacy behavior).",
     )
+    parser.add_argument(
+        "--reset-portfolio",
+        action="store_true",
+        help="Explicitly wipe paper_state.json and fills_ledger.jsonl before "
+        "starting. Without this flag, an existing paper_state.json is resumed "
+        "(cash, positions, fills history are restored).",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -4633,6 +4716,7 @@ def main():
         mixture=args.mixture,
         rule_primary=args.rule_primary,
         vix_gate=args.vix_gate,
+        reset_portfolio=args.reset_portfolio,
     )
 
     if _onchain_wallet:

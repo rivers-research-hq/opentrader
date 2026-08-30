@@ -160,21 +160,36 @@ class MultiExchangeRouter(ExchangeBase):
         """Restore both child ledgers from the persisted aggregate.
 
         Positions + cost basis are routed by symbol convention ("/" → crypto);
-        the aggregate cash is split 50/50 (matching init) so get_balance()'s
-        aggregate total matches the saved book.
+        the aggregate cash is distributed in proportion to each child's share
+        of the pre-restore aggregate (50/50 fallback if the aggregate is 0)
+        so get_balance()'s total matches the saved book.
         """
         cost_basis = cost_basis or {}
         crypto_pos = {s: q for s, q in positions.items() if self._is_crypto(s)}
         stock_pos = {s: q for s, q in positions.items() if self._is_stock(s)}
         crypto_cb = {s: v for s, v in cost_basis.items() if self._is_crypto(s)}
         stock_cb = {s: v for s, v in cost_basis.items() if self._is_stock(s)}
-        half = float(cash) / 2.0
-        for ex, pos, cb in (
-            (self._crypto, crypto_pos, crypto_cb),
-            (self._stock, stock_pos, stock_cb),
+
+        def _child_cash(ex):
+            try:
+                return float(ex.get_balance().cash)
+            except Exception:
+                return 0.0
+
+        pre_crypto = _child_cash(self._crypto)
+        pre_stock = _child_cash(self._stock)
+        pre_total = pre_crypto + pre_stock
+        if pre_total > 0:
+            crypto_cash = float(cash) * (pre_crypto / pre_total)
+            stock_cash = float(cash) - crypto_cash
+        else:
+            crypto_cash = stock_cash = float(cash) / 2.0
+        for ex, pos, cb, c in (
+            (self._crypto, crypto_pos, crypto_cb, crypto_cash),
+            (self._stock, stock_pos, stock_cb, stock_cash),
         ):
             if ex is not None and hasattr(ex, "restore_ledger"):
-                ex.restore_ledger(half, pos, cb, fills)
+                ex.restore_ledger(c, pos, cb, fills)
 
     def get_balance(self) -> Balance:
         """Aggregate balances from both exchanges."""
