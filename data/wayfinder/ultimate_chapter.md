@@ -70,3 +70,7 @@ v11 heartbeat 10 did:recomputed ADR-0002 clauses from ledgers (0 closed trades, 
 157 heartbeat 1 did:implemented shadow_driver.py (200 lines, dry-run default, --once cron mode, floor guard) + proved dry-run + once-run in sandbox (schema/2, weights evolved, track preserved) + patch 157.patch next:human reviews report + proposed crontab
 
 157 closeout heartbeat: patch regenerated, dry-run verified, ready for HITL review
+continuity heartbeat 1 item:1 did:root cause confirmed — _load_agent_state() early-return skips _restore_portfolio_state() when agent_state.json absent next:fix
+continuity heartbeat 2 item:2 did:implemented append-only fills ledger + resume fix + --reset-portfolio flag + MANIFEST entry next:prove
+continuity heartbeat 3 item:3 did:test_continuity.py PASSED (restart survival + forced reset) + patch 396 lines next:report
+continuity2 heartbeat 1 did:proportional restore_ledger in multi_router + FinnhubExchange.restore_ledger + LiveExchange.restore_ledger; test_continuity.py ALL PASSED (354.00 aggregate, ±$1 proportions, clean reset); 3 patches in data/wayfinder/patches/

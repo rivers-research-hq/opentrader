@@ -1,0 +1,20 @@
+--- /home/mrc/opentrader/exchange/live.py	2026-08-01 18:00:31.059160322 -0500
++++ /home/mrc/opentrader-sandbox/exchange/live.py	2026-08-30 15:12:14.863747007 -0500
+@@ -428,6 +428,17 @@
+         self._connected = False
+         logger.info(f"Disconnected from {self._ccxt_exchange_id}")
+ 
++    def restore_ledger(
++        self, cash: float, positions: Dict[str, float],
++        cost_basis: Dict[str, float] = None, fills: list = None,
++    ) -> None:
++        """Restore the paper ledger from persisted state (always a paper book)."""
++        self._cash = float(cash)
++        self._positions = dict(positions)
++        self._cost_basis = dict(cost_basis or {})
++        if fills is not None:
++            self._fills = list(fills)
++
+     def reset(self, initial_cash: float = 100_000) -> None:
+         """Reset paper ledger (keeps exchange connection)."""
+         self._cash = initial_cash
