@@ -2,7 +2,7 @@
   "version": 1,
   "task": "OpenTrader frontier under ADR-0007",
   "createdAt": "2026-08-29T04:40:00.031Z",
-  "currentPhase": "155",
+  "currentPhase": "157",
   "phases": [
     {
       "name": "155",
@@ -10,13 +10,45 @@
       "spent": 0,
       "checkpoints": 0,
       "startedAt": "2026-08-29T05:23:43.949Z",
+      "endedAt": "2026-08-29T19:38:21.361Z"
+    },
+    {
+      "name": "v11-recompute",
+      "allowance": 20000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-29T19:38:21.362Z",
+      "endedAt": "2026-08-29T21:22:45.679Z"
+    },
+    {
+      "name": "156-memo",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-29T21:22:45.680Z",
+      "endedAt": "2026-08-30T02:52:39.884Z"
+    },
+    {
+      "name": "157",
+      "allowance": 30000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-30T02:52:39.887Z",
+      "endedAt": "2026-08-30T02:53:29.370Z"
+    },
+    {
+      "name": "157",
+      "allowance": 30000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-30T02:53:29.370Z",
       "endedAt": null
     }
   ],
   "totals": {
-    "spent": 0,
-    "checkpointed": 0,
-    "compactionTokens": 0
+    "spent": 36326,
+    "checkpointed": 36326,
+    "compactionTokens": 36326
   },
   "variables": [
     {
@@ -145,16 +177,83 @@
       "id": "Q01",
       "text": "Human decision pending: C2 transmit daemon (7 attempts, all HTTP 404, latest 2026-08-28) - suspend the service (ADR-0007 default) or fix the endpoint?",
       "createdAt": "2026-08-29T04:41:35.084Z",
-      "status": "open"
+      "status": "closed"
     },
     {
       "id": "Q02",
       "text": "Human decision queued: challenge-mode risk contract (per small-capital plan 1.3) — requires its own ADR + sandbox walkforward per ADR-0008 s4 before any E8/FTUK purchase. Proposed params (0.04 breaker / 0.02 stop / 0.04 target / 0.10 pos / 0.25 kelly) are HEURISTIC, unvalidated",
       "createdAt": "2026-08-29T05:17:34.990Z",
       "status": "open"
+    },
+    {
+      "id": "Q03",
+      "text": "Q03 (from V11 run, added by orchestrator 2026-08-29 — operator wrote it in deployability_status.json but did not execute toc open add): paper harness has 0 closed round trips since 2026-08-01 (3 open BUY positions only) — clause 1 cannot pass on trade evidence; is the harness expected to close positions at this stage, or is the 70-day calendar clock the binding constraint (clause 3, currently 0 continuous days due to gaps)?",
+      "createdAt": "2026-08-29T20:43:02.601Z",
+      "status": "open"
     }
   ],
-  "history": [],
-  "lastCheckpoint": null,
+  "history": [
+    {
+      "ts": "2026-08-29T20:08:16.410Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 2964,
+      "completionTokens": 1416,
+      "totalTokens": 4380,
+      "promptEstimate": 2497,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T20:10:15.996Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 3703,
+      "completionTokens": 701,
+      "totalTokens": 4404,
+      "promptEstimate": 3059,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T21:44:22.205Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 1932,
+      "totalTokens": 5018,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T21:45:29.210Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8283,
+      "completionTokens": 814,
+      "totalTokens": 9097,
+      "promptEstimate": 6749,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-30T04:51:27.863Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 1193,
+      "totalTokens": 4279,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-30T04:53:44.392Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8295,
+      "completionTokens": 853,
+      "totalTokens": 9148,
+      "promptEstimate": 6816,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    }
+  ],
+  "lastCheckpoint": "checkpoints/ckpt-03.md",
   "_defaultAllowance": 12000
 }

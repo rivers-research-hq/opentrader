@@ -65,3 +65,8 @@ decided: #155 implemented by ZCode in sandbox (prior partial from stalled 08-24 
 files-touched: strategies/{experts,seed_router,handoff,evolve_weights,lanes,scorer,scorer_intl,evaluate,macro_features,shadow_current_alloc,verify,router_state}.py harness.py data/MANIFEST.json
 next: human applies data/wayfinder/patches/155.patch to live tree (git apply --check PASSES), restarts harness at a quiet boundary, closes #155 with the comment draft in the session report
 state-hash: 155 done-in-sandbox / 156,157 open / patch unapplied to live
+v11 heartbeat 10 did:recomputed ADR-0002 clauses from ledgers (0 closed trades, 0 defects, rule-floor 0.348 n=5, 0 continuous days) pass:c1=false c2=null c3=false
+156 heartbeat 1 did:wrote promotion-path memo (3 seams A/B/C, V06/V07/V10 cited, 5 decision questions) next:human reviews memo
+157 heartbeat 1 did:implemented shadow_driver.py (200 lines, dry-run default, --once cron mode, floor guard) + proved dry-run + once-run in sandbox (schema/2, weights evolved, track preserved) + patch 157.patch next:human reviews report + proposed crontab
+
+157 closeout heartbeat: patch regenerated, dry-run verified, ready for HITL review

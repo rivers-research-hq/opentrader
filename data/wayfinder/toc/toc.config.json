@@ -6,7 +6,7 @@
   "defaultAllowance": 12000,
   "warnAt": 0.7,
   "maxRawTokens": 24000,
-  "timeoutMs": 300000,
+  "timeoutMs": 900000,
   "maxCompletion": 2048,
   "promptCalibration": 1,
   "disableThinking": true
