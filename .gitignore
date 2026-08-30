@@ -2,6 +2,7 @@
 
 # Secrets & credentials
 config/alt_data_keys.json
+config/oanda_keys.json
 *.pem
 *.key
 .env
