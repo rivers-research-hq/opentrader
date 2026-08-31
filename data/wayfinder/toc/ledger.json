@@ -194,6 +194,12 @@
       "status": "known",
       "desc": "ADR-0008 (2026-08-29): multi-venue posture - FTMO stays sim-validated primary, TradeLocker firm class added. TradeLocker ExchangeBase adapter is sanctioned bridge work, sequenced AFTER #155-157, sandbox-first, demo-paper-validated. Challenge-mode risk reconfig requires its own ADR (ADR-0001)",
       "bounds": "docs/adr/0008-multi-venue-prop-bridge.md"
+    },
+    {
+      "id": "V21",
+      "status": "known",
+      "desc": "#156 RESOLVED (ADR-0009, 2026-08-31): promotion seam = separate epoch-expert registry, shadow-first, compete-not-displace. Seed = gate_margin x SCALE, n=5, marked seed:gate_margin, replaced on forward accrual. Auto-promote into shadow registry with artifact log; human signoff only at shadow-to-live-order-flow boundary. Zero-fwd regimes hold rule floor. Gate bar unchanged (ADR-0006) — no candidate has cleared it",
+      "bounds": "docs/adr/0009-expert-promotion-seam.md; data/wayfinder/promotion-path-memo.md"
     }
   ],
   "openQuestions": [
