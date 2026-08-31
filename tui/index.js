@@ -116,6 +116,11 @@ function buildLines(state) {
   }
 
   // deployability
+  // Display semantics (2026-08-31): FAIL = actively violated. Insufficient
+  // elapsed time/data is ACCRUING, not failure. Derivation:
+  //   C1 fail iff fatal defects > 0        C2 fail iff measured AND decayed
+  //   C3 fail iff a gap exists post-clock-start (continuity fix, Aug 31)
+  //   otherwise the clause is ACCRUING toward its bar.
   L.push({ text: "" });
   header("DEPLOYABILITY — ADR-0002" + (deploy ? ` · computed ${String(deploy.generated || "").slice(0, 10)}` : " · no data"));
   if (!deploy) {
@@ -124,13 +129,15 @@ function buildLines(state) {
     const c1 = deploy.clause1_plumbing || {}, c2 = deploy.clause2_edge || {}, c3 = deploy.clause3_calendar || {};
     const fd = c1.fatal_defects || {};
     const fatal = (fd.silent_hold || 0) + (fd.state_corruption || 0) + (fd.order_rejection || 0);
-    const cell = (pass) => (pass === true ? ["✓ PASS", "green"] : pass === false ? ["✗ FAIL", "red"] : ["◌ PENDING", "yellow"]);
-    const [t1, k1] = cell(c1.pass);
-    L.push({ text: `  C1 plumbing   closed ${String(c1.closed_trades ?? "?").padStart(3)} · exits ${(c1.exit_paths_seen || []).length} · fatal ${fatal}`.padEnd(60) + t1, color: k1 });
-    const [t2, k2] = cell(c2.pass);
-    L.push({ text: `  C2 edge       fwd_mean ${String(c2.rule_floor_impact_mean ?? "?").padStart(6)} (n=${c2.n ?? "?"})`.padEnd(60) + t2, color: k2 });
-    const [t3, k3] = cell(c3.pass);
-    L.push({ text: `  C3 calendar   ${String(c3.continuous_days ?? "?").padStart(3)} / 70 days continuous`.padEnd(60) + t3, color: k3 });
+    const gaps = c3.gaps || [];
+    const CLOCK_START = "2026-08-31"; // continuity fix — restarts safe from here
+    const postFixGap = gaps.some((g) => String(g).slice(0, 10) >= CLOCK_START);
+    const c1State = fatal > 0 ? ["✗ FAIL — fatal defect", "red"] : [`${c1.closed_trades ?? 0}/3 closed · ${(c1.exit_paths_seen || []).length}/2 exits — accruing`, "yellow"];
+    const c2State = c2.pass === true ? ["✓ PASS", "green"] : c2.pass === false ? ["✗ FAIL — decayed", "red"] : [`fwd_mean ${c2.rule_floor_impact_mean ?? "?"} (n=${c2.n ?? "?"}) — accruing (measurable at fwd 5/5)`, "yellow"];
+    const c3State = postFixGap ? ["✗ FAIL — continuity broken", "red"] : [`${c3.continuous_days ?? 0}/70 days — accruing`, "yellow"];
+    L.push({ text: `  C1 plumbing   closed ${String(c1.closed_trades ?? "?").padStart(3)} · exits ${(c1.exit_paths_seen || []).length} · fatal ${fatal}`.padEnd(62) + c1State[0], color: c1State[1] });
+    L.push({ text: `  C2 edge       fwd_mean ${String(c2.rule_floor_impact_mean ?? "?").padStart(6)} (n=${c2.n ?? "?"})`.padEnd(62) + c2State[0], color: c2State[1] });
+    L.push({ text: `  C3 calendar   ${String(c3.continuous_days ?? "?").padStart(3)} / 70 days continuous`.padEnd(62) + c3State[0], color: c3State[1] });
   }
 
   // router
