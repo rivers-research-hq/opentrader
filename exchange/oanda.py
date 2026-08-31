@@ -262,10 +262,14 @@ class OandaExchange(ExchangeBase):
         quantity: float,
         order_type: str = "market",
         price: Optional[float] = None,
+        stop_loss: Optional[float] = None,
+        take_profit: Optional[float] = None,
     ) -> OrderResult:
         """Place an order. OANDA is netted: BUY adds units, SELL subtracts.
 
         order_type: "market" (FOK), "limit" (GTC), "mit" (market-if-touched, GTC).
+        stop_loss / take_profit: attach SL/TP on fill (server-side exits —
+        they survive restarts because they live on OANDA, not on this box).
         """
         is_buy = side.upper() == "BUY"
         units = int(round(quantity)) if is_buy else -int(round(quantity))
@@ -278,15 +282,18 @@ class OandaExchange(ExchangeBase):
             )
 
         if order_type == "market":
-            body = {
-                "order": {
-                    "type": "MARKET",
-                    "instrument": symbol,
-                    "units": str(units),
-                    "timeInForce": "FOK",
-                    "positionFill": "DEFAULT",
-                }
+            order = {
+                "type": "MARKET",
+                "instrument": symbol,
+                "units": str(units),
+                "timeInForce": "FOK",
+                "positionFill": "DEFAULT",
             }
+            if stop_loss:
+                order["stopLossOnFill"] = {"price": f"{stop_loss:.5f}", "timeInForce": "GTC"}
+            if take_profit:
+                order["takeProfitOnFill"] = {"price": f"{take_profit:.5f}", "timeInForce": "GTC"}
+            body = {"order": order}
         elif order_type == "limit":
             if not price:
                 return OrderResult(
