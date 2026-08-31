@@ -1,0 +1,13 @@
+baseline report:
+signal gym — 7 majors, 499 D1 dates, IS 1727211600..1763503200, OOS 1763589600..1787864400
+uniform risk: $10000/pos, 1.5/2.5 ATR stop/target, 14d hold, 0.0001/side
+
+  mom_k5_pos                       IS[n=106 WR 40.6% PF 0.91 P/L $  -599]  OOS[n= 75 WR 44.0% PF 1.12 P/L $  +442]  dead
+  mom_k10_pos                      IS[n= 86 WR 43.0% PF 1.01 P/L $   +69]  OOS[n= 64 WR 45.3% PF 1.21 P/L $  +646]  dead
+  mom_k20_pos                      IS[n= 83 WR 43.4% PF 0.92 P/L $  -398]  OOS[n= 61 WR 49.2% PF 1.28 P/L $  +720]  dead
+  mr_fade_ma20                     IS[n= 40 WR 45.0% PF 1.18 P/L $  +488]  OOS[n= 28 WR 53.6% PF 2.27 P/L $+1,269]  dead
+  breakout_20                      IS[n= 53 WR 28.3% PF 0.44 P/L $-2,412]  OOS[n= 48 WR 50.0% PF 1.26 P/L $  +514]  dead
+  regime_mom_k10                   IS[n= 84 WR 39.3% PF 0.89 P/L $  -545]  OOS[n= 65 WR 47.7% PF 1.11 P/L $  +310]  dead
+  ma_pullback                      IS[n= 86 WR 44.2% PF 1.08 P/L $  +391]  OOS[n= 65 WR 43.1% PF 0.99 P/L $   -28]  dead
+
+result: 0 survivor(s) of 7 candidates (survival bar: IS n>=10 PF>=1.2, OOS n>=5 PF>=1.0)
