@@ -132,8 +132,8 @@ function buildLines(state) {
     const gaps = c3.gaps || [];
     const CLOCK_START = "2026-08-31"; // continuity fix — restarts safe from here
     const postFixGap = gaps.some((g) => String(g).slice(0, 10) >= CLOCK_START);
-    const c1State = fatal > 0 ? ["✗ FAIL — fatal defect", "red"] : [`${c1.closed_trades ?? 0}/3 closed · ${(c1.exit_paths_seen || []).length}/2 exits — accruing`, "yellow"];
-    const c2State = c2.pass === true ? ["✓ PASS", "green"] : c2.pass === false ? ["✗ FAIL — decayed", "red"] : [`fwd_mean ${c2.rule_floor_impact_mean ?? "?"} (n=${c2.n ?? "?"}) — accruing (measurable at fwd 5/5)`, "yellow"];
+    const c1State = fatal > 0 ? ["✗ FAIL — fatal defect", "red"] : ["accruing", "yellow"];
+    const c2State = c2.pass === true ? ["✓ PASS", "green"] : c2.pass === false ? ["✗ FAIL — decayed", "red"] : ["accruing — measurable at fwd 5/5", "yellow"];
     const c3State = postFixGap ? ["✗ FAIL — continuity broken", "red"] : [`${c3.continuous_days ?? 0}/70 days — accruing`, "yellow"];
     L.push({ text: `  C1 plumbing   closed ${String(c1.closed_trades ?? "?").padStart(3)} · exits ${(c1.exit_paths_seen || []).length} · fatal ${fatal}`.padEnd(62) + c1State[0], color: c1State[1] });
     L.push({ text: `  C2 edge       fwd_mean ${String(c2.rule_floor_impact_mean ?? "?").padStart(6)} (n=${c2.n ?? "?"})`.padEnd(62) + c2State[0], color: c2State[1] });

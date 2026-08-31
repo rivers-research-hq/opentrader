@@ -93,14 +93,14 @@ shadow engine's up-regime rule-floor impact history lives in
   "generated": "<iso timestamp>",
   "generated_by": "qwen3.8-27b operator run v11",
   "reset_boundary": {"detected_at": "...", "evidence_pre_boundary": "lost_to_reset"},
-  "clause1_plumbing": {"closed_trades": N, "exit_paths_seen": [...],
+  "clause1_plumbing": {"status": "pass"|"accruing"|"fail", "closed_trades": N,
+    "exit_paths_seen": [...],
     "fatal_defects": {"silent_hold": N, "state_corruption": N, "order_rejection": N},
-    "defect_quotes": ["...verbatim..."], "reconciliation_ok": null,
-    "pass": true|false|null},
-  "clause2_edge": {"rule_floor_impact_mean": X, "n": N, "window_note": "...",
-    "pass": null},
-  "clause3_calendar": {"first_paper_ts": "...", "continuous_days": N,
-    "gaps": [...], "pass": true|false},
+    "defect_quotes": ["...verbatim..."], "reconciliation_ok": null, "pass": bool},
+  "clause2_edge": {"status": "pass"|"accruing"|"fail", "rule_floor_impact_mean": X,
+    "n": N, "window_note": "...", "pass": null},
+  "clause3_calendar": {"status": "pass"|"accruing"|"fail", "first_paper_ts": "...",
+    "continuous_days": N, "gaps": [...], "pass": bool},
   "open_questions_added": ["Qxx ..."],
   "tool_calls_used": N
 }
@@ -110,6 +110,18 @@ Recurrence note: this run repeats weekly (Friday reminder). Clause 3's
 70-day clock only becomes meaningful once the fills-continuity ticket lands
 (resets currently zero it); until then the run is monitoring, not gate
 evidence.
+
+## STATUS SEMANTICS (added 2026-08-31 — the TUI renders these verbatim)
+
+Each clause carries `status`, not just `pass`. Derivation rules:
+- `"fail"` = actively violated: C1 fatal_defects > 0; C2 measured AND below
+  bar with n >= 5 forward windows; C3 a gap > 24h dated after the clock start
+  (continuity fix, 2026-08-31).
+- `"accruing"` = insufficient elapsed time/data, no violation. This is the
+  normal state for the first weeks. Never report accruing clauses as "fail" —
+  the deployability display renders FAIL only for active violations.
+- `"pass"` = criterion met (C1: >=3 closed trades AND >=2 exit paths AND
+  fatal 0; C3: >=70 continuous days).
 
 ## RULES
 
