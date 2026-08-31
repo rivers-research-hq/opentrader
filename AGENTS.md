@@ -6,28 +6,27 @@ value-head experts) trained by an adversarial arena. Read `ARCHITECTURE.md` and
 language. All changes are proven in the sandbox (`opentrader-sandbox`) first; the
 live tree and the GPU stay untouched until validated.
 
-## Role division — binding (2026-08-29)
+## Role division — binding (2026-08-29; amended 2026-08-31 per measured evidence)
 
 **Economics:** subscription-tier tokens are this project's scarce resource;
 the local Qwen3.8-27B is free, always-on, and measured-clean (eval 35/35,
-needle 10/10 — `docs/agents/research/qwen38-serving-ab-2026-08-29.md`).
-Default: work goes to the local model. Every task a subscription agent does
-instead is a budget transfer from a free lane to a paid one.
+needle 10/10 — `docs/agents/research/qwen38-serving-ab-2026-08-29.md`) — but
+only inside its envelope: fresh session, one bounded task, ≤~25 tool calls.
+Multi-day interactive implementer sessions are **outside that envelope**
+(3 collapses, 2026-08-28..30) and no tooling extends it.
 
-1. **Local model (Qwen3.8-27B) implements and operates** — tickets, probes,
-   verification runs, recurring operator jobs (e.g. the V11 deployability
-   recompute). Assignment is via a job card (`docs/agents/job-*.md`) pasted
-   as the first message of a fresh session.
-2. **Cloud/subscription agents architect and review ON REQUEST ONLY** —
-   specs, job cards, patch review, failure analysis. Implementation and
-   live-system mutations are OUT OF SCOPE unless the human explicitly assigns
-   them in that session. Speed or convenience is never grounds to take the
-   local model's work; that is the recorded failure mode (2026-08-29: a
-   subscription agent hand-stamped the live router state to skip a wait —
-   second role-drift warning; the section exists because of it).
-3. **Escalation cloud-ward needs human approval in-session**, granted when
-   the local model has failed the task (transcript as evidence) or the task
-   provably requires capabilities it lacks.
+1. **Subscription agents implement the critical path directly** — code fixes,
+   adapters, landings — one session each, no card loop. This became the
+   default on 2026-08-31: the card→review→revise cycle for the same work
+   cost more paid tokens than doing it directly, measured across #155/#157/
+   continuity.
+2. **The local model operates the bounded lanes via `opentask <card>`**
+   (fresh session per run, structurally enforced): V11 deployability
+   recompute, transcription/verification runs, research briefs, memos.
+   Job cards in `docs/agents/job-*.md`.
+3. **Escalation is no longer the mechanism** — paid implementation IS the
+   default for the critical path. The local model is the default only for
+   the bounded lanes in (2). Any task outside both lanes: human decides.
 4. **The human decides and gates** — ledger promotions, ADRs, strategy
    commits, live-tree landings. Unchanged.
 
