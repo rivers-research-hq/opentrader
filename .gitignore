@@ -135,3 +135,4 @@ data/scheduler_state.json
 data/social_cache.json
 data/loop_state.json
 data/model_schedule.json
+tui/node_modules/
