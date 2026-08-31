@@ -2,7 +2,7 @@
   "version": 1,
   "task": "OpenTrader frontier under ADR-0007",
   "createdAt": "2026-08-29T04:40:00.031Z",
-  "currentPhase": "continuity",
+  "currentPhase": "oanda",
   "phases": [
     {
       "name": "155",
@@ -50,13 +50,29 @@
       "spent": 0,
       "checkpoints": 0,
       "startedAt": "2026-08-30T08:20:31.222Z",
+      "endedAt": "2026-08-31T12:32:28.881Z"
+    },
+    {
+      "name": "oanda",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-31T12:32:28.881Z",
+      "endedAt": "2026-08-31T14:00:33.404Z"
+    },
+    {
+      "name": "oanda",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-31T14:00:33.407Z",
       "endedAt": null
     }
   ],
   "totals": {
-    "spent": 36326,
-    "checkpointed": 36326,
-    "compactionTokens": 36326
+    "spent": 51218,
+    "checkpointed": 51218,
+    "compactionTokens": 51218
   },
   "variables": [
     {
@@ -260,8 +276,28 @@
       "promptEstimate": 6816,
       "requestedMax": 6000,
       "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-31T14:19:26.090Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 2222,
+      "totalTokens": 5308,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-31T14:20:28.549Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8624,
+      "completionTokens": 960,
+      "totalTokens": 9584,
+      "promptEstimate": 7061,
+      "requestedMax": 6000,
+      "finishReason": "stop"
     }
   ],
-  "lastCheckpoint": "checkpoints/ckpt-03.md",
+  "lastCheckpoint": "checkpoints/ckpt-04.md",
   "_defaultAllowance": 12000
 }

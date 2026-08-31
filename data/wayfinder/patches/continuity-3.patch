@@ -1,0 +1,90 @@
+--- /home/mrc/opentrader/harness.py	2026-08-30 14:34:07.112552477 -0500
++++ /home/mrc/opentrader-sandbox/harness.py	2026-08-30 15:58:03.661145157 -0500
+@@ -844,23 +844,38 @@
+     def _agent_state_path(self) -> str:
+         return os.path.join(self.state_dir, "agent_state.json")
+ 
++    @staticmethod
++    def _fill_key(fill: dict) -> tuple:
++        """Composite identity for a fill — order_id is optional and may be
++        absent, so dedup on (timestamp, symbol, side, quantity, price)."""
++        return (
++            fill.get("timestamp", ""),
++            fill.get("symbol", ""),
++            (fill.get("side") or "").lower(),
++            fill.get("quantity", 0),
++            fill.get("price", 0),
++        )
++
+     def _append_fills_to_ledger(self, fills: list) -> None:
+-        """Append fills not yet in the append-only ledger (fsync'd)."""
++        """Append fills not yet in the append-only ledger (fsync'd).
++
++        Dedup is by composite key (timestamp, symbol, side, quantity, price) —
++        real fills carry no order_id, so the old order_id check was a no-op.
++        """
+         if not fills:
+             return
+         try:
+-            # Read existing ledger to find the last order_id we've recorded
+-            existing_ids = set()
++            existing_keys = set()
+             if os.path.exists(self._fills_ledger_path):
+                 with open(self._fills_ledger_path) as f:
+                     for line in f:
+                         line = line.strip()
+                         if line:
+                             try:
+-                                existing_ids.add(json.loads(line).get("order_id", ""))
++                                existing_keys.add(self._fill_key(json.loads(line)))
+                             except (json.JSONDecodeError, AttributeError):
+                                 pass
+-            new_fills = [f for f in fills if f.get("order_id") not in existing_ids]
++            new_fills = [f for f in fills if self._fill_key(f) not in existing_keys]
+             if not new_fills:
+                 return
+             with open(self._fills_ledger_path, "a") as f:
+@@ -872,7 +887,12 @@
+             logger.warning(f"Could not append fills to ledger: {e}")
+ 
+     def _rebuild_fills_from_ledger(self, current_fills: list) -> list:
+-        """Rebuild fills history from the append-only ledger if it's longer."""
++        """Return the fills list to restore.
++
++        The append-only ledger is the authoritative fills source; paper_state
++        fills are a derived (truncated) view. Whenever the ledger exists and
++        is non-empty, replace — not merge — with the ledger content.
++        """
+         if not os.path.exists(self._fills_ledger_path):
+             return current_fills
+         try:
+@@ -885,11 +905,12 @@
+                             ledger_fills.append(json.loads(line))
+                         except json.JSONDecodeError:
+                             pass
+-            if len(ledger_fills) > len(current_fills):
+-                logger.info(
+-                    f"Fills ledger has {len(ledger_fills)} fills vs "
+-                    f"{len(current_fills)} in paper_state — rebuilding from ledger"
+-                )
++            if ledger_fills:
++                if len(ledger_fills) > len(current_fills):
++                    logger.info(
++                        f"Fills ledger has {len(ledger_fills)} fills vs "
++                        f"{len(current_fills)} in paper_state — rebuilding from ledger"
++                    )
+                 return ledger_fills
+         except Exception as e:
+             logger.warning(f"Could not read fills ledger: {e}")
+@@ -1032,8 +1053,9 @@
+             if saved_cash is None:
+                 return
+ 
+-            # Rebuild fills history from the append-only ledger if it's longer
+-            # than the truncated list in paper_state.json (last 50).
++            # The append-only ledger is the authoritative fills source;
++            # paper_state fills are a derived (truncated) view. Replace, not
++            # merge — merging is what doubled fills on every restart.
+             saved_fills = self._rebuild_fills_from_ledger(saved_fills)
+ 
+             # Capital-rescale guard: if the CLI --cash differs significantly

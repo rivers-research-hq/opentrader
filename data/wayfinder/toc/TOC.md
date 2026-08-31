@@ -6,16 +6,16 @@
 
 | phase | allowance | spent | remaining | used |
 |---|--:|--:|--:|--:|
-| continuity | 25000 | 0 | 25000 | 0% |
-| _lifetime_ | — | 36326 | — | — |
+| oanda | 25000 | 0 | 25000 | 0% |
+| _lifetime_ | — | 51218 | — | — |
 
 ## Chapters (context cost)
 
 | chapter | est. tokens | size | staleness | status |
 |---|--:|--:|--:|---|
-| 01-scope.md | 699 | 2.8 KB | 1d ago | hand-written |
-| 02-variables.md | 1456 | 5.7 KB | 1d ago | rendered from ledger |
-| 03-plan.md | 58 | 0.2 KB | 1d ago | hand-written |
+| 01-scope.md | 699 | 2.8 KB | 2d ago | hand-written |
+| 02-variables.md | 1456 | 5.7 KB | 2d ago | rendered from ledger |
+| 03-plan.md | 58 | 0.2 KB | 2d ago | hand-written |
 
 ## Raw findings log (append-only, never compacted away)
 
@@ -24,7 +24,7 @@
 
 ## Checkpoints
 
-last: `checkpoints/ckpt-03.md` (verified)
+last: `checkpoints/ckpt-04.md` (verified)
 
 ## Open questions
 
@@ -33,5 +33,5 @@ last: `checkpoints/ckpt-03.md` (verified)
 
 ---
 
-_generated 2026-08-30T08:20:31.226Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
+_generated 2026-08-31T14:20:28.555Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
 
