@@ -23,12 +23,14 @@ import json
 import os
 import statistics
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
 PROJECT = Path("/home/mrc/opentrader")
 GYM = PROJECT / "data" / "signal_gym"
 CAND_DIR = GYM / "candidates"
 CACHE = GYM / "candles.json"
+EXOG = PROJECT / "data" / "exog_cache.json"
 SPREAD = 0.0001
 TOP_N = 2
 CASH0 = 100_000.0
@@ -57,12 +59,25 @@ def load_candles():
 class Ctx:
     """Read-only market context handed to candidate functions."""
 
-    def __init__(self, series, dates, i, symbols):
+    def __init__(self, series, dates, i, symbols, exog_series=None):
         self.series = series
         self.dates = dates
         self.i = i
         self.symbols = symbols
         self.date = dates[i]
+        self.exog_series = exog_series or {}
+
+    def exog(self, key):
+        """Point-in-time exogenous value: latest cached observation whose
+        publication date is usable at the bar's date. COT reports carry
+        Tuesday positions and go public Friday -> 3-day publication lag."""
+        series = self.exog_series.get(key)
+        if not series:
+            return None
+        d = datetime.utcfromtimestamp(int(self.date)).strftime("%Y-%m-%d")
+        usable = (datetime.strptime(d, "%Y-%m-%d") - timedelta(days=3)).strftime("%Y-%m-%d")
+        cands = [k for k in series if k <= usable]
+        return series[max(cands)] if cands else None
 
     def close(self, sym):
         px = self.series.get(sym, {}).get(self.dates[self.i])
@@ -114,7 +129,7 @@ def load_candidate(path):
     return mod
 
 
-def simulate(cand, series, dates, symbols, is_end):
+def simulate(cand, series, dates, symbols, is_end, exog=None):
     cash = CASH0
     book = {}
     trades = {"is": [], "oos": []}
@@ -128,7 +143,7 @@ def simulate(cand, series, dates, symbols, is_end):
             if px:
                 e += (px[3] - pos["entry"]) * pos["units"]
         eq.append(e)
-        ctx = Ctx(series, dates, i, symbols)
+        ctx = Ctx(series, dates, i, symbols, exog_series=exog)
         for sym in list(book):
             px = series.get(sym, {}).get(d)
             if not px:
@@ -191,9 +206,12 @@ def main():
     alldates = sorted({d for sym in series for d in series[sym]})
     symbols = list(series)
     is_end = int(len(alldates) * 0.6)
+    exog = json.load(open(EXOG)) if EXOG.exists() else {}
+    exog_keys = [k for k in exog if k != "meta"]
     print(f"signal gym — {len(symbols)} majors, {len(alldates)} D1 dates, "
           f"IS {alldates[0]}..{alldates[is_end-1]}, OOS {alldates[is_end]}..{alldates[-1]}")
-    print(f"uniform risk: ${10_000}/pos, {ATR_STOP}/{ATR_TP} ATR stop/target, {HOLD}d hold, {SPREAD}/side\n")
+    print(f"uniform risk: ${10_000}/pos, {ATR_STOP}/{ATR_TP} ATR stop/target, {HOLD}d hold, {SPREAD}/side")
+    print(f"exogenous cache: {len(exog_keys)} series {exog_keys if exog_keys else '(none — exog candidates will honestly produce no picks)'}\n")
 
     cands = sorted(CAND_DIR.glob("*.py"))
     if not cands:
@@ -207,7 +225,7 @@ def main():
             print(f"  {path.name}: REJECTED ({e})")
             continue
         try:
-            trades, eq = simulate(cand, series, alldates, symbols, is_end)
+            trades, eq = simulate(cand, series, alldates, symbols, is_end, exog=exog)
         except Exception as e:
             print(f"  {getattr(cand, 'NAME', path.name)}: RUNTIME ERROR ({e})")
             continue
