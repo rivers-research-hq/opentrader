@@ -140,6 +140,22 @@ def refresh_accrual(expert_id):
     raise SystemExit(f"[registry] unknown expert {expert_id}")
 
 
+def annotate(expert_id, field, value, by="agent"):
+    """Update a descriptive field on an entry (universe, notes, promotion_bar)
+    with a logged event. Status changes go through set_status, not this."""
+    reg = load()
+    for e in reg["experts"]:
+        if e["expert_id"] == expert_id:
+            old = e.get(field)
+            e[field] = value
+            _save(reg)
+            _log({"event": "annotate", "expert_id": expert_id, "field": field,
+                  "from": old, "to": value, "by": by})
+            print(f"[registry] {expert_id}.{field}: {old!r} -> {value!r}")
+            return
+    raise SystemExit(f"[registry] unknown expert {expert_id}")
+
+
 def summary():
     reg = load()
     if not reg["experts"]:
