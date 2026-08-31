@@ -1,0 +1,44 @@
+{
+  "experts": [
+    {
+      "epoch": 1,
+      "expert_id": "fx_mom_k5_top2",
+      "kind": "incumbent",
+      "family": "momentum",
+      "venue": "oanda-practice",
+      "universe": "fx-majors-7",
+      "status": "accruing",
+      "registered": "2026-08-31T21:54:46.267759+00:00",
+      "registered_by": "human (Daryl) via 2026-08-31 postmortem session \u2014 'Let's go' approval",
+      "source": "commit 452270d \u2014 Track B FX runner v0, LIVE on OANDA practice 2026-08-31 with real OANDA fills (human-approved landing); ledger data/fx_ledger.jsonl",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_ledger.jsonl",
+        "closed_trades": 0,
+        "last_checked": "2026-08-31T22:04:09.382828+00:00"
+      },
+      "promotion_bar": "ADR-0002 clause evidence accrues from real venue fills; weight/order-flow changes remain human-gated",
+      "notes": "Expert #0 \u2014 the MoT seam's first entry. Registered as live incumbent; no arena gate claimed (gym mom_k5 family: IS PF 0.91 / OOS PF 1.12, not a survivor) \u2014 its track record is its own forward ledger, seed=null per ADR-0009 honest-seed rule."
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx_mr_fade_ma20",
+      "kind": "challenger",
+      "family": "mean-reversion",
+      "venue": "oanda-practice (shadow paper)",
+      "universe": "fx-majors-7",
+      "status": "accruing",
+      "registered": "2026-08-31T21:54:46.269680+00:00",
+      "registered_by": "human (Daryl) via 2026-08-31 postmortem session \u2014 'Let's go' approval",
+      "source": "data/signal_gym/baseline-2026-08-31.txt \u2014 IS PF 1.18 n=40 / OOS PF 2.27 n=28 WR 53.6%; positive in BOTH windows; near-miss on IS survival bar (1.18 vs 1.2) \u2014 a LEAD, not a proven edge",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_shadow_ledger.jsonl",
+        "closed_trades": null,
+        "last_checked": "2026-08-31T22:04:09.383080+00:00"
+      },
+      "promotion_bar": ">=30 closed shadow round trips, PF>1 over the shadow window, reconciliation clean, then HUMAN signoff at shadow->live boundary (ADR-0009 #4)",
+      "notes": "First challenger (compete-not-displace, ADR-0009 #3). Shadow paper lane: strategies/fx_shadow.py, faithful port of data/signal_gym/candidates/c04_mr_fade_ma20.py under the gym's uniform risk shape. Seed=null \u2014 shadow accrual is the evidence."
+    }
+  ]
+}
