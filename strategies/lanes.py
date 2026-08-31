@@ -256,10 +256,10 @@ def main():
 
         # accrue forward attribution into the MoT router so weight evolution
         # has LIVE evidence (the bridge: verified evidence -> forward evidence).
-        try:
-            _accrue_router(results)
-        except Exception as e:
-            print(f"[lanes] router accrual skipped: {e}")
+        # Track accrual owned by strategies/shadow_driver.py (#157, 2026-08-31):
+        # the driver accrues once per asof with the fwd_n gate — running the
+        # lanes accrual here double-counted the same daily return.
+        pass
 
 
 def _accrue_router(results: dict) -> None:
