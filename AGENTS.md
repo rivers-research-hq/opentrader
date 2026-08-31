@@ -6,7 +6,17 @@ value-head experts) trained by an adversarial arena. Read `ARCHITECTURE.md` and
 language. All changes are proven in the sandbox (`opentrader-sandbox`) first; the
 live tree and the GPU stay untouched until validated.
 
-## Role division — binding (2026-08-29; amended 2026-08-31 per measured evidence)
+## Role division — binding (2026-08-29; amended 2026-08-31; Qwen roles revoked 2026-08-31 postmortem)
+
+**Amendment 2026-08-31 (postmortem, human decision):** Qwen3.8-27B is no
+longer a trader or coder in ANY capacity — bounded lanes included. Clause 2
+below is void; the `opentask` card loop is closed; `qwen38-serve.service`
+and `headroom-proxy.service` are stopped and disabled. Binding process
+rules from the postmortem (`docs/agents/postmortem-2026-08-31.md`):
+every cron/systemd job must name a recent artifact it produced or be
+removed; one lane, one gate — the FX first-trader evidence path (epoch
+registry, `strategies/epoch_registry.py`) is the only active gate until
+Experts #0/#1 accrue.
 
 **Economics:** subscription-tier tokens are this project's scarce resource;
 the local Qwen3.8-27B is free, always-on, and measured-clean (eval 35/35,
