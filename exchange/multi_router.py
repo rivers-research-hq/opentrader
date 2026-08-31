@@ -169,6 +169,12 @@ class MultiExchangeRouter(ExchangeBase):
         stock_pos = {s: q for s, q in positions.items() if self._is_stock(s)}
         crypto_cb = {s: v for s, v in cost_basis.items() if self._is_crypto(s)}
         stock_cb = {s: v for s, v in cost_basis.items() if self._is_stock(s)}
+        # Fills are routed by symbol convention like positions/cost-basis:
+        # get_fills() concatenates child lists, so handing the FULL list to
+        # both children double-counts every fill (2026-08-31 defect).
+        _fills = fills or []
+        crypto_fl = [f for f in _fills if self._is_crypto(f.get("symbol", ""))]
+        stock_fl = [f for f in _fills if not self._is_crypto(f.get("symbol", ""))]
 
         def _child_cash(ex):
             try:
@@ -184,12 +190,12 @@ class MultiExchangeRouter(ExchangeBase):
             stock_cash = float(cash) - crypto_cash
         else:
             crypto_cash = stock_cash = float(cash) / 2.0
-        for ex, pos, cb, c in (
-            (self._crypto, crypto_pos, crypto_cb, crypto_cash),
-            (self._stock, stock_pos, stock_cb, stock_cash),
+        for ex, pos, cb, c, fl in (
+            (self._crypto, crypto_pos, crypto_cb, crypto_cash, crypto_fl),
+            (self._stock, stock_pos, stock_cb, stock_cash, stock_fl),
         ):
             if ex is not None and hasattr(ex, "restore_ledger"):
-                ex.restore_ledger(c, pos, cb, fills)
+                ex.restore_ledger(c, pos, cb, fl)
 
     def get_balance(self) -> Balance:
         """Aggregate balances from both exchanges."""
@@ -232,11 +238,23 @@ class MultiExchangeRouter(ExchangeBase):
 
     def get_fills(self) -> List[dict]:
         fills = []
+        seen = set()
         for ex in [self._crypto, self._stock]:
             if ex is None:
                 continue
             try:
-                fills.extend(ex.get_fills())
+                for f in ex.get_fills():
+                    k = (
+                        str(f.get("timestamp", "")),
+                        f.get("symbol", ""),
+                        (f.get("side") or "").lower(),
+                        f.get("quantity", 0),
+                        f.get("price", 0),
+                    )
+                    if k in seen:
+                        continue
+                    seen.add(k)
+                    fills.append(f)
             except Exception:
                 pass
         return fills
