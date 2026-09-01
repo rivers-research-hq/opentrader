@@ -127,6 +127,22 @@ UNDERscores the persistent golden regime — the head's conservatism in
 Absolute-probability thresholds are fragile across regimes; relative-ranking
 approval is the next decision-rule experiment.
 
+**Decision-rule experiment (v7, 2026-09-01):** three approval rules tested on
+the same episodes — forced top-1 daily (`vhrel:top1`), training-quantile
+approval (`vhrel:q0.5`: p must rank in the top half of the training
+distribution, not clear an absolute probability), and the no-trailing
+ablation (`vhnt:*`). Results: q0.5 is the best learned rule (n=9 PF 2.67,
++$667); forced top-1 bleeds in fade-abundant windows (ep0 negative, PF 0.93)
+and merely mirrors c08 where fades are rare; and the no-trailing ablation
+FALSIFIED the hypothesis that the contrarian regime feature was the
+suppressor — removing it drops AUC 0.605→0.585 and PF 2.12→1.28. The
+trailing-R feature carries real information even out-of-window. Standing
+conclusion after v4–v7: no learned variant beats the hard COT filter's
+absolute PnL on the frozen episodes; the best use of a thin ranker is
+training-quantile approval; forward shadow accrual (armed, zero signals
+yet) is the arbiter that can eventually settle golden-regime vs
+mean-reversion.
+
 **Deep-history extension (2026-09-01, v5):** training data extended to
 ~5,000 D1 bars per major from the same OANDA source
 (`scripts/fetch_deep_candles.py` → `candles_deep.json`; 3,493-bar overlap

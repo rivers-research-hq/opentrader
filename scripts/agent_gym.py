@@ -390,9 +390,26 @@ class FadeVH(Policy):
     under test: a learned court rediscovers more than the hard-coded COT
     filter — keeps PF while trading more of the fade set."""
 
-    def __init__(self, bars, alldates, exog, threshold=0.5, train_events=None):
+    def __init__(self, bars, alldates, exog, threshold=0.5, train_events=None,
+                 mode="abs", quantile=0.5, feature_subset="full"):
         self.bars, self.alldates, self.exog, self.threshold = bars, alldates, exog, threshold
-        self.name = f"vhfade:thr{threshold}"
+        self.mode, self.quantile = mode, quantile
+        # decision-rule variants (v7): abs = p >= threshold (calibration-
+        # fragile); top1 = force the day's best proposal (pure ranking);
+        # quantile = p >= quantile of the TRAINING predictions (relative to
+        # what the head has seen, not to an absolute probability)
+        if mode == "top1":
+            self.name = "vhrel:top1"
+        elif mode == "quantile":
+            self.name = f"vhrel:q{quantile}"
+        else:
+            self.name = f"vhfade:thr{threshold}"
+        if feature_subset == "no_trailing":
+            # ablation: drop the contrarian regime meta-feature
+            self.features = [f for f in fx_traj.FEATURES if f != "recent_fade_R"]
+            self.name += "-noTr"
+        else:
+            self.features = list(fx_traj.FEATURES)
         self.train_events = train_events if train_events is not None else \
             list(fx_traj.build_events(bars, alldates, exog))
         self.model, self.train_log = None, []
@@ -406,13 +423,16 @@ class FadeVH(Policy):
             self.train_log.append({"ep_start": cutoff, "n": 0})
             return
         self.model = vh.train([e["features"] for e in train],
-                              [e["win"] for e in train], fx_traj.FEATURES)
+                              [e["win"] for e in train], self.features)
         a_in = vh.auc(self.model, [e["features"] for e in train], [e["win"] for e in train])
         self.train_log.append({"ep_start": cutoff, "n": len(train),
                                "winrate": round(sum(e["win"] for e in train) / len(train), 3),
                                "auc_in": a_in})
+        if self.mode == "quantile":
+            preds = sorted(vh.predict(self.model, e["features"]) for e in train)
+            self.threshold = preds[int(self.quantile * len(preds))]
         vh.save(self.model, PROJECT / "data" / "agent_gym" /
-                f"valuehead_{self.name.replace(':', '_')}_before_{cutoff}.json",
+                f"valuehead_{self.name.replace(':', '_').replace('.', '_')}_before_{cutoff}.json",
                 meta={"trained_on_events_exiting_before": cutoff, "walkforward": True})
 
     def act(self, state, i):
@@ -452,7 +472,11 @@ class FadeVH(Policy):
             f["recent_fade_R"] = trailing
             scored.append((vh.predict(self.model, f), sym))
         scored.sort(reverse=True)  # most confident first
-        approved = [sym for p, sym in scored if p >= self.threshold][:MAX_OPEN_PER_DAY]
+        if self.mode == "top1":
+            approved = [sym for _p, sym in scored[:1]]  # force the day's best
+        else:
+            approved = [sym for p, sym in scored if p >= self.threshold]
+        approved = approved[:MAX_OPEN_PER_DAY]
         self.approved += len(approved)
         self.vetoed += len(scored) - len(approved)
         return {"opens": approved, "closes": []}
@@ -594,6 +618,24 @@ def main():
             cfg_path = Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv else None
             llm = _make_llm(tier, run_dir, log_suffix=f"_{cand_name}", cfg_path=cfg_path)
             policies.append(HybridVeto(cand_name, llm, series, alldates, exog))
+        elif name.startswith("vhrel:"):
+            spec = name.split(":", 1)[1]
+            train_events = ([json.loads(l) for l in open(argv[argv.index("--traj-file") + 1])
+                             if l.strip()] if "--traj-file" in argv else None)
+            if train_events:
+                print(f"  [vhrel] training from external trajectories: {len(train_events)} events")
+            if spec.startswith("q"):
+                policies.append(FadeVH(bars, alldates, exog, 0.5, train_events=train_events,
+                                       mode="quantile", quantile=float(spec[1:])))
+            else:
+                policies.append(FadeVH(bars, alldates, exog, 0.0, train_events=train_events,
+                                       mode="top1"))
+        elif name.startswith("vhnt:"):
+            thr = float(name.split(":", 1)[1])
+            train_events = ([json.loads(l) for l in open(argv[argv.index("--traj-file") + 1])
+                             if l.strip()] if "--traj-file" in argv else None)
+            policies.append(FadeVH(bars, alldates, exog, thr, train_events=train_events,
+                                   mode="abs", feature_subset="no_trailing"))
         elif name.startswith("vhfade:"):
             thr = float(name.split(":", 1)[1])
             train_events = None
