@@ -356,6 +356,8 @@ function buildCalendar(state, fx, cal) {
   const todayKey = dayKey(now);
   const tomorrowKey = dayKey(new Date(now.getTime() + 86400000));
 
+  const MAXR = W - 33;  // right-column budget — no wrapping, alignment holds
+  const trunc = (s) => String(s).slice(0, MAXR);
   const byDay = {};
   for (const d of (cal && cal.decisions) || []) {
     byDay[d.date] = byDay[d.date] || { decisions: [], ff: [] };
@@ -436,8 +438,6 @@ function buildCalendar(state, fx, cal) {
       right.push({ segments: [{ text: "  (nothing scheduled)", dim: true }] });
       return;
     }
-    const MAXR = W - 33;  // right-column budget — no wrapping, alignment holds
-    const trunc = (s) => String(s).slice(0, MAXR);
     for (const bank of ev.decisions) {
       const cur = BANK_CUR[bank] || "";
       const ih = (cal && cal.inhouse) || {};
@@ -456,7 +456,6 @@ function buildCalendar(state, fx, cal) {
   const upKeys = Object.keys(byDay).filter((k) => k > tomorrowKey).sort();
   for (const k of upKeys) {
     const ev = byDay[k];
-    const MAXR = W - 33;
     for (const bank of ev.decisions) {
       const cur = BANK_CUR[bank] || "";
       const ih = (cal && cal.inhouse) || {};
