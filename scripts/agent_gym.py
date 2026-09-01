@@ -390,16 +390,19 @@ class FadeVH(Policy):
     under test: a learned court rediscovers more than the hard-coded COT
     filter — keeps PF while trading more of the fade set."""
 
-    def __init__(self, bars, alldates, exog, threshold=0.5):
+    def __init__(self, bars, alldates, exog, threshold=0.5, train_events=None):
         self.bars, self.alldates, self.exog, self.threshold = bars, alldates, exog, threshold
         self.name = f"vhfade:thr{threshold}"
         self.events = list(fx_traj.fade_events(bars, alldates, exog))
+        # training source: external trajectory file (e.g. deep history) when
+        # provided, else the benchmark window's own events
+        self.train_events = train_events if train_events is not None else self.events
         self.model, self.train_log = None, []
         self.violations = self.approved = self.vetoed = 0
 
     def begin_episode(self, lo, hi):
         cutoff = self.alldates[lo]
-        train = [e for e in self.events if e["exit_ts"] < cutoff]
+        train = [e for e in self.train_events if e["exit_ts"] < cutoff]
         if not train:
             self.model = None
             self.train_log.append({"ep_start": cutoff, "n": 0})
@@ -583,7 +586,12 @@ def main():
             policies.append(HybridVeto(cand_name, llm, series, alldates, exog))
         elif name.startswith("vhfade:"):
             thr = float(name.split(":", 1)[1])
-            policies.append(FadeVH(bars, alldates, exog, thr))
+            train_events = None
+            if "--traj-file" in argv:
+                train_events = [json.loads(l) for l in
+                                open(argv[argv.index("--traj-file") + 1]) if l.strip()]
+                print(f"  [vhfade] training from external trajectories: {len(train_events)} events")
+            policies.append(FadeVH(bars, alldates, exog, thr, train_events=train_events))
         else:
             policies.append(GymCandidate(name, series, alldates, exog))
 

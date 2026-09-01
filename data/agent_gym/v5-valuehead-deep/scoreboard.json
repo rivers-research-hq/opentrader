@@ -1,0 +1,967 @@
+{
+ "meta": {
+  "run": "v5-valuehead-deep",
+  "template": "agent-gym-state-v0.2",
+  "episodes": [
+   [
+    85,
+    145
+   ],
+   [
+    235,
+    295
+   ],
+   [
+    385,
+    445
+   ]
+  ],
+  "cash0": 100000.0,
+  "notional": 10000,
+  "atr": [
+   1.5,
+   2.5
+  ],
+  "hold": 14,
+  "max_positions": 3,
+  "max_open_per_day": 1,
+  "spread": 0.0001,
+  "window": [
+   1727211600,
+   1787864400
+  ],
+  "policies": [
+   "c08_mr_fade_cot",
+   "vhfade:0.45",
+   "vhfade:0.5",
+   "vhfade:0.55"
+  ]
+ },
+ "scoreboard": {
+  "mr_fade_ma20_cot": {
+   "episodes": [
+    {
+     "n": 12,
+     "wr": 58.3,
+     "pf": 1.95,
+     "pnl": 637.49,
+     "ret_pct": 0.64,
+     "maxdd_pct": 0.42
+    },
+    {
+     "n": 5,
+     "wr": 80.0,
+     "pf": 4.87,
+     "pnl": 388.22,
+     "ret_pct": 0.39,
+     "maxdd_pct": 0.16
+    },
+    {
+     "n": 5,
+     "wr": 100.0,
+     "pf": Infinity,
+     "pnl": 549.58,
+     "ret_pct": 0.55,
+     "maxdd_pct": 0.14
+    }
+   ],
+   "pooled": {
+    "n": 22,
+    "wr": 72.7,
+    "pf": 3.04,
+    "pnl": 1575.29,
+    "ret_pct": 0.55,
+    "maxdd_pct": 0.8
+   },
+   "violations": 0,
+   "tokens": 0,
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "declared_cost_usd": 0.0,
+   "request_extras": null,
+   "approved": null,
+   "vetoed": null,
+   "train_log": null,
+   "parse_failures": 0
+  },
+  "vhfade:thr0.45": {
+   "episodes": [
+    {
+     "n": 6,
+     "wr": 50.0,
+     "pf": 3.5,
+     "pnl": 512.91,
+     "ret_pct": 0.51,
+     "maxdd_pct": 0.21
+    },
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    },
+    {
+     "n": 1,
+     "wr": 100.0,
+     "pf": Infinity,
+     "pnl": 272.22,
+     "ret_pct": 0.27,
+     "maxdd_pct": 0.0
+    }
+   ],
+   "pooled": {
+    "n": 7,
+    "wr": 57.1,
+    "pf": 4.82,
+    "pnl": 785.13,
+    "ret_pct": 0.27,
+    "maxdd_pct": 0.54
+   },
+   "violations": 0,
+   "tokens": 0,
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "declared_cost_usd": 0.0,
+   "request_extras": null,
+   "approved": 9,
+   "vetoed": 67,
+   "train_log": [
+    {
+     "ep_start": 1737669600,
+     "n": 3630,
+     "winrate": 0.443,
+     "auc_in": 0.551
+    },
+    {
+     "ep_start": 1755810000,
+     "n": 3744,
+     "winrate": 0.447,
+     "auc_in": 0.554
+    },
+    {
+     "ep_start": 1774299600,
+     "n": 3783,
+     "winrate": 0.45,
+     "auc_in": 0.55
+    }
+   ],
+   "parse_failures": 0
+  },
+  "vhfade:thr0.5": {
+   "episodes": [
+    {
+     "n": 1,
+     "wr": 0.0,
+     "pf": 0.0,
+     "pnl": -52.8,
+     "ret_pct": -0.05,
+     "maxdd_pct": 0.13
+    },
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    },
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    }
+   ],
+   "pooled": {
+    "n": 1,
+    "wr": 0.0,
+    "pf": 0.0,
+    "pnl": -52.8,
+    "ret_pct": 0.0,
+    "maxdd_pct": 0.13
+   },
+   "violations": 0,
+   "tokens": 0,
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "declared_cost_usd": 0.0,
+   "request_extras": null,
+   "approved": 1,
+   "vetoed": 85,
+   "train_log": [
+    {
+     "ep_start": 1737669600,
+     "n": 3630,
+     "winrate": 0.443,
+     "auc_in": 0.551
+    },
+    {
+     "ep_start": 1755810000,
+     "n": 3744,
+     "winrate": 0.447,
+     "auc_in": 0.554
+    },
+    {
+     "ep_start": 1774299600,
+     "n": 3783,
+     "winrate": 0.45,
+     "auc_in": 0.55
+    }
+   ],
+   "parse_failures": 0
+  },
+  "vhfade:thr0.55": {
+   "episodes": [
+    {
+     "n": 1,
+     "wr": 0.0,
+     "pf": 0.0,
+     "pnl": -1.22,
+     "ret_pct": -0.0,
+     "maxdd_pct": 0.0
+    },
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    },
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    }
+   ],
+   "pooled": {
+    "n": 1,
+    "wr": 0.0,
+    "pf": 0.0,
+    "pnl": -1.22,
+    "ret_pct": 0.0,
+    "maxdd_pct": 0.0
+   },
+   "violations": 0,
+   "tokens": 0,
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "declared_cost_usd": 0.0,
+   "request_extras": null,
+   "approved": 1,
+   "vetoed": 90,
+   "train_log": [
+    {
+     "ep_start": 1737669600,
+     "n": 3630,
+     "winrate": 0.443,
+     "auc_in": 0.551
+    },
+    {
+     "ep_start": 1755810000,
+     "n": 3744,
+     "winrate": 0.447,
+     "auc_in": 0.554
+    },
+    {
+     "ep_start": 1774299600,
+     "n": 3783,
+     "winrate": 0.45,
+     "auc_in": 0.55
+    }
+   ],
+   "parse_failures": 0
+  }
+ },
+ "fills": [
+  {
+   "ts": 1737928800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 154.516,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1738706400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 152.588,
+   "reason": "stop",
+   "pnl": -123.4,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1738706400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 152.588,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 149.616,
+   "reason": "stop",
+   "pnl": -193.19,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 149.616,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740693600,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.62094,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741125600,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.63352,
+   "reason": "target",
+   "pnl": 200.98,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741212000,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 147.986,
+   "reason": "stop",
+   "pnl": -107.59,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741212000,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 147.986,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741298400,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.87985,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1742936400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 150.587,
+   "reason": "hold",
+   "pnl": 174.26,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743022800,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8817,
+   "reason": "hold",
+   "pnl": 19.89,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743627600,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 146.071,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743714000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.60401,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743973200,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.27238,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.61545,
+   "reason": "stop",
+   "pnl": 187.75,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.61545,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 143.472,
+   "reason": "stop",
+   "pnl": -176.74,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.30887,
+   "reason": "target",
+   "pnl": 285.99,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 143.472,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744578000,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.81489,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.63916,
+   "reason": "episode-end",
+   "pnl": 383.62,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 142.466,
+   "reason": "episode-end",
+   "pnl": -69.42,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8195,
+   "reason": "episode-end",
+   "pnl": 55.34,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1757970000,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.7859,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1758747600,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.79956,
+   "reason": "target",
+   "pnl": 172.54,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1759957200,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.15648,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1760043600,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.64735,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1761685200,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.16006,
+   "reason": "hold",
+   "pnl": 30.09,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1761685200,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.65748,
+   "reason": "target",
+   "pnl": 154.93,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1761771600,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.3151,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1762207200,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.30202,
+   "reason": "stop",
+   "pnl": -100.21,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1762207200,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.30202,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1762984800,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.31916,
+   "reason": "episode-end",
+   "pnl": 130.87,
+   "paper": true,
+   "ep": 1,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1774386000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.69468,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1776114000,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.71266,
+   "reason": "hold",
+   "pnl": 257.38,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1776114000,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.78092,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1777496400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 156.624,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1777842000,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.78398,
+   "reason": "hold",
+   "pnl": 37.9,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1778792400,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.33242,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1779224400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 158.934,
+   "reason": "hold",
+   "pnl": 145.52,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1780520400,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.3424,
+   "reason": "hold",
+   "pnl": 74.15,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1780606800,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.70452,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1781470800,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.70706,
+   "reason": "episode-end",
+   "pnl": 34.63,
+   "paper": true,
+   "ep": 2,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740088800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 149.297,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1741298400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 148.036,
+   "reason": "stop",
+   "pnl": -83.23,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1741640400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 147.776,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1743368400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 149.97,
+   "reason": "hold",
+   "pnl": 146.99,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1743714000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.60401,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.61545,
+   "reason": "stop",
+   "pnl": 187.75,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.61545,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744232400,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.82375,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 143.472,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.63916,
+   "reason": "episode-end",
+   "pnl": 383.62,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8195,
+   "reason": "episode-end",
+   "pnl": -52.8,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 142.466,
+   "reason": "episode-end",
+   "pnl": -69.42,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1775163600,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.6895,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 2,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1775682000,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.70837,
+   "reason": "target",
+   "pnl": 272.22,
+   "paper": true,
+   "ep": 2,
+   "policy": "vhfade:thr0.45"
+  },
+  {
+   "ts": 1744232400,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.82375,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.5"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8195,
+   "reason": "episode-end",
+   "pnl": -52.8,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.5"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.8195,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.55"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8195,
+   "reason": "episode-end",
+   "pnl": -1.22,
+   "paper": true,
+   "ep": 0,
+   "policy": "vhfade:thr0.55"
+  }
+ ]
+}

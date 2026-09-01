@@ -105,14 +105,30 @@ filter) are proposed; a logistic value head (`strategies/valuehead.py`, L2
 logreg, inspectable JSON weights) trained at each episode start on fade
 events whose isolated uniform-risk trade **exited strictly before that
 episode** approves proposals with p_win ≥ THR. Dataset:
-`scripts/build_trajectories.py` → `data/agent_gym/trajectories.jsonl`
-(268 events, source-labeled, signed-COT features via
-`fx_traj.cot_z_signed` — the pair-perspective exposure sign, mirroring c08).
+`scripts/build_trajectories.py` → `data/agent_gym/trajectories.jsonl`.
 Walkforward only, no random splits, threshold sensitivity reported, model
 artifacts saved per episode. This is the seam where the RLHF loop and the
 benchmark gate the same object (spec gate T3 lives here). Pilot data is
 benchmark-internal; the production volume gates V1–V4 (live ledger volumes)
 are unchanged and still govern any registry promotion.
+
+**Deep-history extension (2026-09-01, v5):** training data extended to
+~5,000 D1 bars per major from the same OANDA source
+(`scripts/fetch_deep_candles.py` → `candles_deep.json`; 3,493-bar overlap
+verified 0-mismatch against the frozen cache). Dataset: 3,824 events,
+2008-11 → 2026-08. Findings that change the interpretation of every prior
+row: (1) deep base rate 45.4% win / mean R +0.083 vs 57.5% / +0.370 in the
+frozen window — **the 2024-26 evaluation window is a top-decile fade regime**
+(yearly mean R swings −0.355 (2010) → +0.994 (2026); the gym cache and the
+frozen episodes both sit inside it), so the c08 ceiling row is regime-bound
+evidence, not a universal bar; (2) the head's honest ranking power at full
+volume is AUC ≈ 0.55 — the pilot-era 0.66–0.75 was small-sample artifact;
+(3) with AUC ≈ 0.55 no threshold yields both coverage and edge (thr 0.45:
+n=7 PF 4.82; thr ≥0.5: ~nothing trades). The binding constraint on the head
+is now the FEATURE SET, not sample size — richer exogenous/structural
+features or the preference layer are the next levers, and forward shadow
+accrual (out-of-window by construction) is the honest arbiter for any
+head-vs-rule comparison.
 
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
