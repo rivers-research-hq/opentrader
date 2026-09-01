@@ -429,9 +429,13 @@ def _ff_events():
         pass
     try:
         import urllib.request
-        req = urllib.request.Request(FF_FEED, headers={"User-Agent": "OpenTrader/1.0"})
-        with urllib.request.urlopen(req, timeout=20) as r:
-            events = json.load(r)
+        events = []
+        for feed in ("ff_calendar_thisweek.json", "ff_calendar_nextweek.json"):
+            req = urllib.request.Request(
+                f"https://nfs.faireconomy.media/{feed}",
+                headers={"User-Agent": "OpenTrader/1.0"})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                events += json.load(r)
         FF_CACHE.parent.mkdir(parents=True, exist_ok=True)
         FF_CACHE.write_text(json.dumps(events))
         return events
