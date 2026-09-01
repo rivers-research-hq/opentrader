@@ -147,23 +147,50 @@ def _txns_since(ex, iso_from):
 
 def _reconcile(ex, dry=False):
     """Server-side SL/TP fills never produce ledger rows — replay them from
-    the venue transaction journal (dedup via the composite fill key)."""
+    the venue transaction journal. Dedup is tolerance-based (same symbol,
+    side, quantity, price within 5s) because the runner's own rows carry
+    Python isoformat timestamps while the venue journal uses OANDA format —
+    exact-string dedup double-counted every strategy fill (fixed 2026-09-01)."""
+    from datetime import datetime as _dt
     since = "2026-08-31T00:00:00Z"
     if STATE.exists():
         try:
             since = json.loads(STATE.read_text()).get("last_reconciled", since)
         except Exception:
             pass
+    existing = []
+    if LEDGER.exists():
+        for line in LEDGER.read_text().splitlines():
+            if line.strip():
+                try:
+                    r = json.loads(line)
+                    ts = _dt.fromisoformat(str(r.get("timestamp")).replace("Z", "+00:00"))
+                    existing.append((r.get("symbol"), (r.get("side") or "").upper(),
+                                     float(r.get("quantity", 0)), float(r.get("price", 0)), ts))
+                except Exception:
+                    pass
+
+    def known(sym, side, qty, price, ts):
+        return any(e[0] == sym and e[1] == side and abs(e[2] - qty) < 1e-9
+                   and abs(e[3] - price) < 1e-9 and abs((e[4] - ts).total_seconds()) <= 5
+                   for e in existing)
+
     fills = []
     syms = set(ex.discover_symbols())
     for t in _txns_since(ex, since):
         if t.get("type") != "ORDER_FILL" or t.get("instrument") not in syms:
             continue
         units = float(t.get("units", 0))
+        side = "BUY" if units > 0 else "SELL"
+        qty, price = abs(units), float(t.get("price", 0))
+        ts = _dt.fromisoformat(str(t.get("time")).replace("Z", "+00:00"))
+        if known(t["instrument"], side, qty, price, ts):
+            continue  # the runner's own row — same fill, different timestamp format
         fills.append({"timestamp": t.get("time"), "symbol": t["instrument"],
-                      "side": "BUY" if units > 0 else "SELL", "quantity": abs(units),
-                      "price": float(t.get("price", 0)), "order_id": t.get("transactionID"),
+                      "side": side, "quantity": qty,
+                      "price": price, "order_id": t.get("transactionID"),
                       "reason": "venue-reconciliation"})
+        existing.append((t["instrument"], side, qty, price, ts))
     _append_ledger(fills)
     if fills:
         print(f"[fx] reconciled {len(fills)} venue fill(s) into the ledger")
