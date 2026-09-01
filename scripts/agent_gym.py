@@ -43,9 +43,11 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
+sys.path.insert(0, str(PROJECT / "scripts"))
 from strategies.fx_shadow import ShadowCtx, load_candidate  # noqa: E402  (ctx + candidate loading: single source of truth)
 from strategies import fx_traj  # noqa: E402
 from strategies import valuehead as vh  # noqa: E402
+from worlds import build_world  # noqa: E402  (Stage-1 bootstrap realities)
 
 CANDLES = PROJECT / "data" / "signal_gym" / "candles.json"
 EXOG = PROJECT / "data" / "exog_cache.json"
@@ -391,9 +393,10 @@ class FadeVH(Policy):
     filter — keeps PF while trading more of the fade set."""
 
     def __init__(self, bars, alldates, exog, threshold=0.5, train_events=None,
-                 mode="abs", quantile=0.5, feature_subset="full"):
+                 mode="abs", quantile=0.5, feature_subset="full", augment_worlds=0):
         self.bars, self.alldates, self.exog, self.threshold = bars, alldates, exog, threshold
         self.mode, self.quantile = mode, quantile
+        self.augment_worlds = augment_worlds
         # decision-rule variants (v7): abs = p >= threshold (calibration-
         # fragile); top1 = force the day's best proposal (pure ranking);
         # quantile = p >= quantile of the TRAINING predictions (relative to
@@ -404,6 +407,11 @@ class FadeVH(Policy):
             self.name = f"vhrel:q{quantile}"
         else:
             self.name = f"vhfade:thr{threshold}"
+        if augment_worlds:
+            # v10: train across bootstrap realities — same bars recombined
+            # into different sequences, so the head learns what survives
+            # recomposition instead of the one real path's shape
+            self.name += f":aug{augment_worlds}"
         if feature_subset == "no_trailing":
             # ablation: drop the contrarian regime meta-feature
             self.features = [f for f in fx_traj.FEATURES if f != "recent_fade_R"]
@@ -424,6 +432,20 @@ class FadeVH(Policy):
     def begin_episode(self, lo, hi):
         cutoff = self.alldates[lo]
         train = [e for e in self.train_events if e["exit_ts"] < cutoff]
+        if self.augment_worlds:
+            # augmentation: events from bootstrap worlds whose trade resolved
+            # before the cutoff (same no-leakage rule as real events)
+            series_dicts = {sym: {self.alldates[i]: px for i, px in enumerate(bl) if px}
+                            for sym, bl in self.bars.items()}
+            rng = random.Random(f"{self.name}-{cutoff}")
+            for _w in range(self.augment_worlds):
+                w_series, w_dates, w_exog = build_world(
+                    self.alldates, series_dicts, self.exog, rng, 21)
+                w_bars = {sym: [w_series[sym].get(ts) for ts in w_dates]
+                          for sym in w_series}
+                for e in fx_traj.build_events(w_bars, w_dates, self.exog):
+                    if e["exit_ts"] < cutoff:
+                        train.append(e)
         if not train:
             self.model = None
             self.train_log.append({"ep_start": cutoff, "n": 0})
@@ -625,17 +647,20 @@ def main():
             llm = _make_llm(tier, run_dir, log_suffix=f"_{cand_name}", cfg_path=cfg_path)
             policies.append(HybridVeto(cand_name, llm, series, alldates, exog))
         elif name.startswith("vhrel:"):
-            spec = name.split(":", 1)[1]
+            parts = name.split(":")
+            spec = parts[1]
+            aug = int(parts[2][3:]) if len(parts) > 2 and parts[2].startswith("aug") else 0
             train_events = ([json.loads(l) for l in open(argv[argv.index("--traj-file") + 1])
                              if l.strip()] if "--traj-file" in argv else None)
             if train_events:
                 print(f"  [vhrel] training from external trajectories: {len(train_events)} events")
             if spec.startswith("q"):
                 policies.append(FadeVH(bars, alldates, exog, 0.5, train_events=train_events,
-                                       mode="quantile", quantile=float(spec[1:])))
+                                       mode="quantile", quantile=float(spec[1:]),
+                                       augment_worlds=aug))
             else:
                 policies.append(FadeVH(bars, alldates, exog, 0.0, train_events=train_events,
-                                       mode="top1"))
+                                       mode="top1", augment_worlds=aug))
         elif name.startswith("vhnt:"):
             thr = float(name.split(":", 1)[1])
             train_events = ([json.loads(l) for l in open(argv[argv.index("--traj-file") + 1])

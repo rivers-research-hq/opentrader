@@ -1,0 +1,62 @@
+[
+ {
+  "file": "/home/mrc/opentrader/data/signal_gym/candidates/p01_carry_break_ma20.py",
+  "name": "carry_break_ma20",
+  "idx": 1,
+  "gym": {
+   "is": {
+    "n": 29,
+    "wr": 55.172413793103445,
+    "pf": 1.9185324317212273,
+    "pl": 1075.3216449999982
+   },
+   "oos": {
+    "n": 34,
+    "wr": 35.294117647058826,
+    "pf": 0.8545089836494368,
+    "pl": -230.91597535714425
+   },
+   "survives": false
+  }
+ },
+ {
+  "file": "/home/mrc/opentrader/data/signal_gym/candidates/p02_carry_mom_filter.py",
+  "name": "carry_mom_filter",
+  "idx": 2,
+  "gym": {
+   "is": {
+    "n": 27,
+    "wr": 51.85185185185185,
+    "pf": 1.3064076543611767,
+    "pl": 330.59222000000176
+   },
+   "oos": {
+    "n": 27,
+    "wr": 44.44444444444444,
+    "pf": 0.997810554473601,
+    "pl": -2.9285382142893113
+   },
+   "survives": false
+  }
+ },
+ {
+  "file": "/home/mrc/opentrader/data/signal_gym/candidates/p03_carry_regime_breakout.py",
+  "name": "carry_regime_breakout",
+  "idx": 3,
+  "gym": {
+   "is": {
+    "n": 14,
+    "wr": 42.857142857142854,
+    "pf": 0.7462634680055901,
+    "pl": -150.30402428571685
+   },
+   "oos": {
+    "n": 15,
+    "wr": 46.666666666666664,
+    "pf": 1.1694715924747852,
+    "pl": 101.4793635714272
+   },
+   "survives": false
+  }
+ }
+]
