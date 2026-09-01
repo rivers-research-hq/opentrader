@@ -29,6 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from exchange.oanda import OandaExchange  # noqa: E402
+from data.economic_calendar import blackout as econ_blackout  # noqa: E402
 from strategies.fx_shadow import ShadowCtx, load_candidate  # noqa: E402
 from strategies.fx_runner import (_venue_book, _venue_net, _digits,  # noqa: E402
                                   _append_ledger, LEDGER, _ensure_protection)
@@ -134,8 +135,12 @@ def run(dry=False):
     if not targets:
         print(f"[c08] no entries today ({len(proposals)} signal(s), {len(mine)} held)")
 
-    # 4. opens
+    # 4. opens (event-gated: no entries into central-bank decision windows)
     for sym in targets:
+        blocked, why = econ_blackout(today, sym)
+        if blocked:
+            print(f"[c08] {sym} entry BLOCKED — {why}")
+            continue
         px = ex.get_current_price(sym)
         ctx_atr = _ctx(sym).atr(sym, 14)
         if not px or not ctx_atr or ctx_atr <= 0:

@@ -143,6 +143,95 @@ def release_proximity(date: dt.date, half_life_days: float = 3.0) -> float:
     return float(2.0 ** (-days / half_life_days))
 
 
+# ── Central-bank decision gate (2026-09-01, ToC BM5) ──────────────────────
+#
+# The weekly-entry / daily-decision book is blind to scheduled monetary
+# events between runs. blackout() blocks NEW entries for a pair when a
+# decision for either currency's bank falls inside the exposure window.
+#
+# HONESTY: FOMC dates are exact (pre-announced). The other 7 banks are
+# PATTERN-APPROXIMATE: anchored on their 2024 meeting rhythm and projected
+# (one meeting every ~6-7 weeks, first meeting late January, snapped to the
+# bank's weekday) — typical error grows from ±3 days (2025) to ±1-2 weeks
+# (2027). Over-blocking (a missed entry) is cheap; under-blocking is the
+# residual shock risk, covered by the watchdog lane. Replacing the
+# approximations with fetched published schedules is the standing follow-up
+# (ToC BM5).
+
+_CURRENCY_BANK = {
+    "USD": "FED", "EUR": "ECB", "GBP": "BOE", "JPY": "BOJ",
+    "CHF": "SNB", "CAD": "BOC", "AUD": "RBA", "NZD": "RBNZ",
+}
+
+# (anchor date from the bank's 2024 rhythm, mean gap in weeks, weekday 0=Mon)
+_CB_BANKS = {
+    "ECB":  (dt.date(2024, 1, 25), 6.6, 3),   # Thursdays
+    "BOE":  (dt.date(2024, 2, 1), 6.7, 3),    # Thursdays
+    "BOC":  (dt.date(2024, 1, 24), 6.5, 2),   # Wednesdays
+    "BOJ":  (dt.date(2024, 1, 23), 6.6, 2),   # ~Wednesdays
+    "RBA":  (dt.date(2024, 2, 6), 7.2, 1),    # Tuesdays
+    "RBNZ": (dt.date(2024, 2, 28), 6.0, 2),   # Wednesdays
+    "SNB":  (dt.date(2024, 3, 21), 13.0, 3),  # quarterly Thursdays
+}
+
+
+def _snap_weekday(d: dt.date, weekday: int) -> dt.date:
+    while d.weekday() != weekday:
+        d += dt.timedelta(days=1)
+    return d
+
+
+def bank_dates(bank: str) -> set:
+    """Decision dates for a bank, 2024-2027. FOMC = exact; others =
+    pattern-approximate (see honesty note). Cached in the module."""
+    cached = _CB_CACHE.get(bank)
+    if cached is not None:
+        return cached
+    out: set = set()
+    if bank == "FED":
+        for year, dates in FOMC_DATES.items():
+            out.update(dates)
+    else:
+        anchor, gap_weeks, weekday = _CB_BANKS[bank]
+        d = anchor
+        last_year = None
+        while d.year <= 2027:
+            # each NEW YEAR, restart the rhythm from a late-January meeting
+            if last_year is not None and d.year > last_year:
+                d = _snap_weekday(dt.date(d.year, 1, 22), weekday)
+            out.add(d)
+            last_year = d.year
+            d = _snap_weekday(d + dt.timedelta(weeks=gap_weeks), weekday)
+    _CB_CACHE[bank] = out
+    return out
+
+
+_CB_CACHE: dict = {}
+
+
+def blackout(now: dt.datetime, pair: str, days: int = 1) -> Tuple[bool, str]:
+    """Entry gate: True when a monetary decision for either currency of the
+    pair falls within ±`days` of `now`'s date, or a high-impact US release
+    within the same window for USD pairs. Decisions land mid-afternoon UTC —
+    often AFTER the daily 17:10 UTC run — so the decision DAY itself blocks
+    entries made that morning/afternoon."""
+    check = {now.date() + dt.timedelta(o) for o in range(-days, days + 1)}
+    reasons = []
+    for cur in pair.split("_"):
+        bank = _CURRENCY_BANK.get(cur)
+        if bank and bank_dates(bank) & check:
+            hit = sorted(bank_dates(bank) & check)[0]
+            approx = "" if bank == "FED" else " (approx date)"
+            reasons.append(f"{bank} decision {hit}{approx}")
+    if "USD" in pair.split("_"):
+        for r in releases_between(min(check), max(check)):
+            if r.impact == "high" and "FOMC" not in r.name:
+                reasons.append(f"US {r.name} {r.date}")
+    if reasons:
+        return True, "; ".join(reasons[:3])
+    return False, ""
+
+
 if __name__ == "__main__":
     today = dt.date(2026, 8, 14)
     print(f"today: {today}")
@@ -154,3 +243,9 @@ if __name__ == "__main__":
     print("\nnext 10 releases:")
     for r in releases_between(today, today + dt.timedelta(days=90))[:10]:
         print(f"  {r.date} {r.name:28s} {r.impact}")
+    print("\nblackout checks (gate semantics):")
+    for pair in ("EUR_USD", "USD_JPY", "GBP_USD"):
+        blocked, why = blackout(dt.datetime(2026, 9, 16, 17, 10, tzinfo=dt.timezone.utc), pair)
+        print(f"  {pair} @ FOMC-day 2026-09-16 17:10 UTC: blocked={blocked} ({why})")
+
+

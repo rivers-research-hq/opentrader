@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from exchange.oanda import OandaExchange  # noqa: E402
+from data.economic_calendar import blackout as econ_blackout  # noqa: E402
 
 PROJECT = Path(__file__).resolve().parent.parent
 STATE = PROJECT / "data" / "fx_state.json"
@@ -281,9 +282,15 @@ def run(dry=False):
         print(f"[fx] CLOSE {sym} ({reason}) -> {r.status} @ {r.price}")
         book.pop(sym, None)
 
-    # 4. open: target instruments not in book
+    # 4. open: target instruments not in book (event-gate: no entries into
+    #    central-bank decision windows — the book is blind intra-day, so
+    #    scheduled shocks are avoided, not survived)
     for sym in sorted(target):
         if sym in book:
+            continue
+        blocked, why = econ_blackout(today, sym)
+        if blocked:
+            print(f"[fx] {sym} entry BLOCKED — {why}")
             continue
         atr = atrs.get(sym, 0.0)
         px = ex.get_current_price(sym)
