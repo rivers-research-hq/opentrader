@@ -31,6 +31,8 @@ DATA_DIR = Path(PROJECT) / "data"
 STATE_FILE = DATA_DIR / "paper_state.json"
 HISTORY_DIR = DATA_DIR / "history"
 
+
+
 # ── Helpers ────────────────────────────────────────────────────────────
 _SANITIZE_RE = re.compile(r"\b(?:NaN|-?Infinity)\b")
 
@@ -177,6 +179,109 @@ app = FastAPI(title="OpenTrader Dashboard", version="1.0")
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 _STATIC_DIR.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+def _fx_snapshot() -> dict:
+    """Live FX watch data: venue book (owner-tagged), recent ledger fills,
+    registry, preference-queue depth. Built for /fx — read-only, OANDA is
+    queried fresh per call (page refresh is 60s, well under rate limits)."""
+    out = {"book": [], "fills": [], "registry": [], "queue": {}, "error": None}
+    try:
+        from exchange.oanda import OandaExchange
+        ex = OandaExchange()
+        if ex.connect():
+            book = ex._request("GET", f"/v3/accounts/{ex._account_id}/openTrades").get("trades", [])
+            for t in book:
+                out["book"].append({
+                    "trade_id": t.get("id"), "instrument": t.get("instrument"),
+                    "units": t.get("currentUnits"), "price": t.get("price"),
+                    "opened": str(t.get("openTime", ""))[:19],
+                    "owner": (t.get("clientExtensions") or {}).get("tag") or "unknown",
+                    "pl": t.get("unrealizedPL"),
+                    "protected": bool(t.get("stopLossOrder") or t.get("takeProfitOrder")),
+                })
+            acct = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
+            out["balance"] = acct.get("balance")
+            out["nav"] = acct.get("NAV")
+        else:
+            out["error"] = "OANDA connect failed"
+    except Exception as e:
+        out["error"] = str(e)
+    ledger = DATA_DIR / "fx_ledger.jsonl"
+    if ledger.exists():
+        rows = [json.loads(l) for l in ledger.read_text().splitlines() if l.strip()]
+        out["fills"] = rows[-25:][::-1]
+    reg = DATA_DIR / "epoch_registry.json"
+    if reg.exists():
+        out["registry"] = json.loads(reg.read_text()).get("experts", [])
+    try:
+        from strategies.fx_review import load_events, load_labels
+        out["queue"] = {"events": len(load_events()), "labeled": len(load_labels())}
+    except Exception:
+        pass
+    return out
+
+
+FX_PAGE = """<!doctype html><html><head><title>OpenTrader FX — practice book</title>
+<meta charset="utf-8"><meta http-equiv="refresh" content="60">
+<style>
+body{background:#0b0f14;color:#c9d4de;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:24px}
+h1,h2{color:#7fb3d5}h2{border-bottom:1px solid #1d2b38;padding-bottom:4px;margin-top:28px}
+table{border-collapse:collapse;margin-top:8px}td,th{border:1px solid #1d2b38;padding:4px 10px;text-align:left}
+th{color:#8aa2b8;background:#101820}.ok{color:#5fd38a}.err{color:#f0616f}
+.dim{color:#5b6b7a}.num{text-align:right}
+</style></head><body>
+<h1>OpenTrader FX — practice book <span class="dim">(auto-refresh 60s · venue is authoritative)</span></h1>
+__CONTENT__
+</body></html>"""
+
+
+@app.get("/fx")
+async def fx_page():
+    """Live FX practice-book watch page (positions, fills, registry, queue)."""
+    s = _fx_snapshot()
+    rows = []
+    if s["error"]:
+        rows.append(f'<p class="err">venue error: {s["error"]}</p>')
+    rows.append(f'<p>balance <b>${float(s.get("balance") or 0):,.2f}</b> &middot; '
+                f'NAV <b>${float(s.get("nav") or 0):,.2f}</b> &middot; '
+                f'preference queue: <b>{s["queue"].get("events", 0)}</b> events, '
+                f'{s["queue"].get("labeled", 0)} labeled</p>')
+    rows.append('<h2>Open book (by owner tag)</h2><table><tr><th>trade</th><th>instrument</th>'
+                '<th>units</th><th>entry</th><th>opened (UTC)</th><th>owner</th><th>unrealized</th>'
+                '<th>SL/TP</th></tr>')
+    if not s["book"]:
+        rows.append('<tr><td colspan="8" class="dim">flat</td></tr>')
+    for t in s["book"]:
+        prot = '<span class="ok">yes</span>' if t["protected"] else '<span class="err">NO</span>'
+        pl = float(t["pl"] or 0)
+        rows.append(f"<tr><td>{t['trade_id']}</td><td>{t['instrument']}</td>"
+                    f"<td class='num'>{t['units']}</td><td class='num'>{t['price']}</td>"
+                    f"<td>{t['opened']}</td><td>{t['owner']}</td>"
+                    f"<td class='num'>{pl:+.2f}</td><td>{prot}</td></tr>")
+    rows.append('</table><h2>Recent fills (ledger tail)</h2>'
+                '<table><tr><th>time (UTC)</th><th>symbol</th><th>side</th><th>qty</th>'
+                '<th>price</th><th>reason</th></tr>')
+    if not s["fills"]:
+        rows.append('<tr><td colspan="6" class="dim">no fills yet</td></tr>')
+    for f in s["fills"]:
+        rows.append(f"<tr><td>{str(f.get('timestamp'))[:19]}</td><td>{f.get('symbol')}</td>"
+                    f"<td>{f.get('side')}</td><td class='num'>{f.get('quantity')}</td>"
+                    f"<td class='num'>{f.get('price')}</td><td>{f.get('reason')}</td></tr>")
+    rows.append('</table><h2>Epoch registry</h2><table><tr><th>expert</th><th>kind</th>'
+                '<th>status</th><th>closed (accrual)</th></tr>')
+    for e in s["registry"]:
+        a = e.get("accrual") or {}
+        rows.append(f"<tr><td>{e['expert_id']}</td><td>{e['kind']}</td>"
+                    f"<td>{e['status']}</td><td class='num'>{a.get('closed_trades')}</td></tr>")
+    rows.append('</table>')
+    return HTMLResponse(content=FX_PAGE.replace("__CONTENT__", "\n".join(rows)),
+                        headers={"Cache-Control": "no-store, max-age=0"})
+
+
+@app.get("/api/fx")
+async def api_fx():
+    """FX watch data as JSON (same source as /fx)."""
+    return _fx_snapshot()
 
 
 @app.get("/")
