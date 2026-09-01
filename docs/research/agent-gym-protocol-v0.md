@@ -78,6 +78,14 @@ works); temperature 0; token usage logged per decision. The raw completion
 is logged verbatim — no metric is derived from anything the model *says
 about itself*.
 
+**State versions:** `--state v0.1` (minimal template: 8 closes, ret30,
+ma20-flag, cot_z) and `--state v0.2` (enriched: 15 closes, ma20 value and
+distance, ret5, ATR as volatility fraction, 30-day close-range position,
+and per-position current price / unrealized PnL / stop-target distances).
+Rule policies are state-independent by construction — their rows must be
+byte-identical across state versions (the determinism check). State-version
+comparisons are only meaningful at fixed episodes.
+
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
 - Rules load **directly from the signal gym's candidate files** (single

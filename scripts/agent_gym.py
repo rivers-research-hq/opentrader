@@ -53,7 +53,7 @@ CASH0 = 100_000.0
 NOTIONAL, ATR_STOP, ATR_TP, HOLD = 10_000, 1.5, 2.5, 14
 MAX_POS, MAX_OPEN_PER_DAY, SPREAD = 3, 1, 0.0001
 EPISODES = [(85, 145), (235, 295), (385, 445)]  # decision-bar ranges (early/mid/late)
-TEMPLATE = "agent-gym-state-v0.1"
+STATE_VERSIONS = ("v0.1", "v0.2")
 
 
 # bars: list aligned to alldates; entry None where a symbol lacks that date
@@ -84,6 +84,69 @@ def exog_z(exog, key, ts):
     usable = (datetime.strptime(d, "%Y-%m-%d") - timedelta(days=3)).strftime("%Y-%m-%d")
     cands = [k for k in series if k <= usable]
     return series[max(cands)] if cands else None
+
+
+def _ma20_before(bars, i):
+    """Gym convention: mean of the 20 closes BEFORE bar i."""
+    if i < 20 or any(bars[j] is None for j in range(i - 20, i)):
+        return None
+    return sum(bars[j][3] for j in range(i - 20, i)) / 20.0
+
+
+def build_state(bars, alldates, i, book, cash, exog, version):
+    """Point-in-time state at bar i. v0.1 = the original minimal template;
+    v0.2 adds what a trader needs to manage positions: current price vs
+    entry, unrealized PnL, stop/target distances, MA20 value, ret5, ATR as
+    a volatility fraction, 30-day close-range position."""
+    template = f"agent-gym-state-{version}"
+    state = {
+        "date": datetime.fromtimestamp(int(alldates[i]), tz=timezone.utc).strftime("%Y-%m-%d"),
+        "equity": None, "cash": cash, "template": template,
+        "positions": [], "symbols": {},
+    }
+    if version == "v0.1":
+        state["positions"] = [{"symbol": s, "entry": round(p["entry"], 5), "bars_seen": p["bars_seen"]}
+                              for s, p in book.items()]
+        for sym, bl in bars.items():
+            z = exog_z(exog, "COT:" + sym.split("_")[0], alldates[i])
+            ma20 = _ma20_before(bl, i)
+            state["symbols"][sym] = {
+                "closes": [bl[j][3] for j in range(max(0, i - 9), i + 1) if bl[j]],
+                "ret30": _mom(bl, i, 30) or 0.0,
+                "above_ma20": bool(ma20 and bl[i][3] > ma20),
+                "cot_z": z,
+            }
+        return state
+
+    # v0.2
+    for sym, p in book.items():
+        bl = bars[sym]
+        cur = bl[i][3] if bl[i] else None
+        state["positions"].append({
+            "symbol": sym, "entry": round(p["entry"], 5), "bars_seen": p["bars_seen"],
+            "now": round(cur, 5) if cur else None,
+            "unrealized_pct": round(cur / p["entry"] - 1, 4) if cur else None,
+            "stop_dist_pct": round(p["sl"] / cur - 1, 4) if cur else None,
+            "target_dist_pct": round(p["tp"] / cur - 1, 4) if cur else None,
+        })
+    for sym, bl in bars.items():
+        cur = bl[i][3] if bl[i] else None
+        if cur is None:
+            continue
+        ma20 = _ma20_before(bl, i)
+        range30 = [bl[j][3] for j in range(max(0, i - 29), i + 1) if bl[j]]
+        lo, hi30 = min(range30), max(range30)
+        state["symbols"][sym] = {
+            "closes": [round(bl[j][3], 5) for j in range(max(0, i - 14), i + 1) if bl[j]],
+            "ma20": round(ma20, 5) if ma20 else None,
+            "vs_ma20_pct": round(cur / ma20 - 1, 4) if ma20 else None,
+            "ret5": _mom(bl, i, 5),
+            "ret30": _mom(bl, i, 30) or 0.0,
+            "atr_pct": round((_atr14(bl, i) or 0) / cur, 4) if _atr14(bl, i) else None,
+            "pos_in_30d_range": round((cur - lo) / (hi30 - lo), 3) if hi30 > lo else None,
+            "cot_z": exog_z(exog, "COT:" + sym.split("_")[0], alldates[i]),
+        }
+    return state
 
 
 # ── policies: act(state) -> {"opens": [sym], "closes": [sym]} ─────────────
@@ -168,11 +231,26 @@ class LLM(Policy):
         self.prompt_tokens = self.completion_tokens = self.cost = 0.0
 
     def _prompt(self, state):
-        syms = []
-        for s, d in state["symbols"].items():
-            syms.append(f"{s}: closes={['%.5f' % c for c in d['closes'][-8:]]} "
-                        f"ret30={d['ret30']:+.2%} vs_ma20={'above' if d['above_ma20'] else 'below'} "
-                        f"cot_z={d['cot_z']}")
+        if state["template"].endswith("v0.1"):
+            syms = []
+            for s, d in state["symbols"].items():
+                syms.append(f"{s}: closes={['%.5f' % c for c in d['closes'][-8:]]} "
+                            f"ret30={d['ret30']:+.2%} vs_ma20={'above' if d['above_ma20'] else 'below'} "
+                            f"cot_z={d['cot_z']}")
+            pos = state["positions"] or "none"
+        else:  # v0.2
+            pos_rows = []
+            for p in state["positions"]:
+                pos_rows.append(f"{p['symbol']}: entry {p['entry']} now {p['now']} "
+                                f"unrealized {p['unrealized_pct']:+.2%} held {p['bars_seen']}d "
+                                f"stop {p['stop_dist_pct']:+.2%} target {p['target_dist_pct']:+.2%}")
+            pos = "; ".join(pos_rows) or "none"
+            syms = []
+            for s, d in state["symbols"].items():
+                syms.append(
+                    f"{s}: close {d['closes'][-1]} ma20 {d['ma20']} ({d['vs_ma20_pct']:+.2%}) "
+                    f"ret5 {d['ret5']:+.2%} ret30 {d['ret30']:+.2%} atr {d['atr_pct']:.2%} "
+                    f"30d-range-pos {d['pos_in_30d_range']:.2f} cot_z {d['cot_z']}")
         return (
             "You are the sole decision-maker of a $100,000 FX book (7 majors). "
             "Once per trading day you may OPEN one new position ($10,000 notional, "
@@ -180,7 +258,7 @@ class LLM(Policy):
             "held positions, or HOLD. Respond with ONLY JSON:\n"
             '{"opens": ["SYMBOL"], "closes": ["SYMBOL"]}\n\n'
             f"Date: {state['date']}  Equity: ${state['equity']:,.0f}  Cash: ${state['cash']:,.0f}\n"
-            f"Open positions: {state['positions'] or 'none'}\n" + "\n".join(syms))
+            f"Open positions: {pos}\n" + "\n".join(syms))
 
     def act(self, state, i):
         body = {"model": self.model, "temperature": 0, **self.extras,
@@ -224,7 +302,7 @@ class LLM(Policy):
 
 # ── engine ────────────────────────────────────────────────────────────────
 
-def run_episode(policy, bars, alldates, lo, hi, exog, fills_out):
+def run_episode(policy, bars, alldates, lo, hi, exog, fills_out, state_version="v0.1"):
     cash, book, curve = CASH0, {}, []
 
     def mark(i):
@@ -260,23 +338,8 @@ def run_episode(policy, bars, alldates, lo, hi, exog, fills_out):
                 close_pos(sym, i, "hold")
 
         # 2. policy decides (state strictly ≤ bar i)
-        state = {
-            "date": datetime.fromtimestamp(int(alldates[i]), tz=timezone.utc).strftime("%Y-%m-%d"),
-            "equity": mark(i), "cash": cash, "template": TEMPLATE,
-            "positions": [{"symbol": s, "entry": round(p["entry"], 5), "bars_seen": p["bars_seen"]}
-                          for s, p in book.items()],
-            "symbols": {},
-        }
-        for sym, bl in bars.items():
-            z = exog_z(exog, "COT:" + sym.split("_")[0], alldates[i])
-            ma20 = (sum(bl[j][3] for j in range(i - 20, i)) / 20.0) if i >= 20 and all(
-                bl[j] is not None for j in range(i - 20, i)) else None
-            state["symbols"][sym] = {
-                "closes": [bl[j][3] for j in range(max(0, i - 9), i + 1) if bl[j]],
-                "ret30": _mom(bl, i, 30) or 0.0,
-                "above_ma20": bool(ma20 and bl[i][3] > ma20),
-                "cot_z": z,
-            }
+        state = build_state(bars, alldates, i, book, cash, exog, state_version)
+        state["equity"] = mark(i)
         act = policy.act(state, i)
         if act.get("_violation"):
             fills_out.append({"ts": alldates[i], "symbol": "-", "side": "VIOLATION",
@@ -327,6 +390,9 @@ def main():
     run_label = (argv[argv.index("--run-label") + 1] if "--run-label" in argv
                  else datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S"))
     episodes = EPISODES[:int(argv[argv.index("--episodes") + 1])] if "--episodes" in argv else EPISODES
+    state_version = (argv[argv.index("--state") + 1] if "--state" in argv else "v0.1")
+    if state_version not in STATE_VERSIONS:
+        raise SystemExit(f"state must be one of {STATE_VERSIONS}")
 
     series = {s: {int(ts): tuple(px) for ts, px in d.items()}
               for s, d in json.load(open(CANDLES)).items()}
@@ -363,7 +429,8 @@ def main():
         else:
             policies.append(GymCandidate(name, series, alldates, exog))
 
-    meta = {"run": run_label, "template": TEMPLATE, "episodes": episodes, "cash0": CASH0,
+    meta = {"run": run_label, "template": f"agent-gym-state-{state_version}", "episodes": episodes,
+            "cash0": CASH0,
             "notional": NOTIONAL, "atr": [ATR_STOP, ATR_TP], "hold": HOLD,
             "max_positions": MAX_POS, "max_open_per_day": MAX_OPEN_PER_DAY,
             "spread": SPREAD, "window": [alldates[0], alldates[-1]], "policies": pol_names}
@@ -374,7 +441,7 @@ def main():
         eps, pol_fills, curves = [], [], []
         for k, (lo, hi) in enumerate(episodes):
             ep_fills = []
-            r = run_episode(pol, bars, alldates, lo, hi, exog, ep_fills)
+            r = run_episode(pol, bars, alldates, lo, hi, exog, ep_fills, state_version)
             for f in ep_fills:
                 f["ep"] = k
             pol_fills.extend(ep_fills)
