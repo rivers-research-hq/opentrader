@@ -408,8 +408,14 @@ class FadeVH(Policy):
             # ablation: drop the contrarian regime meta-feature
             self.features = [f for f in fx_traj.FEATURES if f != "recent_fade_R"]
             self.name += "-noTr"
-        else:
+        elif feature_subset == "with_rates":
+            # research variant: + carry/us_rate_lvl/us_rate_chg90 (ToC BM3)
             self.features = list(fx_traj.FEATURES)
+            self.name += "+rates"
+        else:
+            # production: the 17-feature set — rate features lift walkforward
+            # AUC but degrade the scoreboard (v9 finding, fx_traj docstring)
+            self.features = list(fx_traj.FEATURES_NO_RATES)
         self.train_events = train_events if train_events is not None else \
             list(fx_traj.build_events(bars, alldates, exog))
         self.model, self.train_log = None, []

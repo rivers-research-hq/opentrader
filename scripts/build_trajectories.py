@@ -70,10 +70,14 @@ def main():
             continue
         X = [e["features"] for e in train]
         y = [e["win"] for e in train]
-        a_full = vh.auc(vh.train(X, y, fx_traj.FEATURES), X, y)
         a_base = vh.auc(vh.train(X, y, fx_traj.BASE_FEATURES), X, y)
+        a_full = vh.auc(vh.train(X, y, fx_traj.FEATURES), X, y)
+        no_rates = [f for f in fx_traj.FEATURES
+                    if f not in ("carry", "us_rate_lvl", "us_rate_chg90")]
+        a_norates = vh.auc(vh.train(X, y, no_rates), X, y)
         print(f"  ep{k} (start {d}): train n={len(train)} "
-              f"winrate {sum(y) / len(y):.1%} | AUC base {a_base} -> full {a_full}")
+              f"winrate {sum(y) / len(y):.1%} | AUC base {a_base} -> "
+              f"no-rates {a_norates} -> +rates {a_full}")
 
 
 if __name__ == "__main__":

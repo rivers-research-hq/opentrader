@@ -30,13 +30,59 @@ is the claim, see scripts/build_trajectories.py):
 from datetime import datetime, timedelta, timezone
 
 BASE_FEATURES = ["fade_depth", "ret5", "ret30", "atr_pct", "pos_in_30d_range", "cot_z"]
+RATE_FEATURES = ["carry", "us_rate_lvl", "us_rate_chg90"]
 FEATURES = ["fade_depth", "fade_atrs", "ret5", "ret30", "ret60", "ret120",
             "atr_pct", "atr_ratio", "vol_pctile", "pos_in_30d_range",
             "pos_in_1y_range", "cot_z", "fade_rank", "recent_fade_R",
-            "dow_mon", "dow_tue", "dow_wed", "dow_thu"]
+            "dow_mon", "dow_tue", "dow_wed", "dow_thu"] + RATE_FEATURES
+# PRODUCTION head features: the 17-feature set (v7/v8 best). The rate
+# features lift walkforward AUC (+0.012) but DEGRADE the scoreboard
+# (v9: PF 2.67 -> 0.08) — regime features map the golden window onto
+# historical easing cycles where fades died; out-of-window transfer fails.
+# They stay in the dataset as a research finding (ToC BM3).
+FEATURES_NO_RATES = [f for f in FEATURES if f not in RATE_FEATURES]
 FADE = -0.015
 ATR_STOP, ATR_TP, HOLD, SPREAD = 1.5, 2.5, 14, 0.0001
 TRAILING_N = 30
+ATR_STOP, ATR_TP, HOLD, SPREAD = 1.5, 2.5, 14, 0.0001
+TRAILING_N = 30
+
+RATE_KEY = {"USD": "RATE:US", "EUR": "RATE:EA", "GBP": "RATE:GB", "CAD": "RATE:CA"}
+# missing legs (source hunt continues, ToC BM3): JPY, CHF, AUD, NZD
+
+
+def _rate(exog, cur, ts):
+    """Point-in-time policy/overnight rate for a currency (series are
+    publication-lag-shifted at fetch time). None where no source yet."""
+    series = exog.get(RATE_KEY.get(cur, ""), {})
+    if not series:
+        return None
+    d = _iso(ts)
+    cands = [k for k in series if k <= d]
+    return series[max(cands)] if cands else None
+
+
+def carry(exog, sym, ts):
+    """Annualized carry of a LONG position in the pair: policy rate of the
+    base minus the quote currency. None where either leg has no source."""
+    base, quote = sym.split("_")
+    rb, rq = _rate(exog, base, ts), _rate(exog, quote, ts)
+    if rb is None or rq is None:
+        return None
+    return round(rb - rq, 4)
+
+
+def us_rate_lvl(exog, ts):
+    return _rate(exog, "USD", ts)
+
+
+def us_rate_chg90(exog, ts):
+    d = datetime.fromtimestamp(int(ts), tz=timezone.utc)
+    cur = _rate(exog, "USD", ts)
+    past = _rate(exog, "USD", int((d - timedelta(days=90)).timestamp()))
+    if cur is None or past is None:
+        return None
+    return round(cur - past, 4)
 
 # Signed positioning exposure, from the pair-trading perspective (mirrors c08's
 # EXPOSURE): buying the pair = long the COT currency (+1) or short it (−1 for
@@ -150,6 +196,9 @@ def base_features(sym, i, bars, alldates, exog):
         "dow_tue": 1 if dow == 1 else 0,
         "dow_wed": 1 if dow == 2 else 0,
         "dow_thu": 1 if dow == 3 else 0,
+        "carry": carry(exog, sym, alldates[i]),
+        "us_rate_lvl": us_rate_lvl(exog, alldates[i]),
+        "us_rate_chg90": us_rate_chg90(exog, alldates[i]),
     }
 
 
