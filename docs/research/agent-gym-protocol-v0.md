@@ -112,6 +112,21 @@ benchmark gate the same object (spec gate T3 lives here). Pilot data is
 benchmark-internal; the production volume gates V1–V4 (live ledger volumes)
 are unchanged and still govern any registry promotion.
 
+**Feature-set extension (v6, 2026-09-01):** features rebuilt on a single
+shared code path (`fx_traj.base_features` — builder and policy cannot skew):
+vol-normalized fade depth, ATR structure, longer trend, 1-year range,
+cross-sectional fade rank, day-of-week, and a trailing realized-R regime
+meta-feature. Ablation at the three frozen boundaries: AUC 0.55 (6 base
+features) → 0.60 (17 features) — real but modest. Two findings of record:
+(1) a trailing-R skew bug (policy took last-30 in file order, not exit
+order) was caught by a scoreboard-vs-diagnostic contradiction — the shared-
+path discipline exists for exactly this; (2) the trailing-R feature encodes
+historical mean-reversion of fade success and therefore systematically
+UNDERscores the persistent golden regime — the head's conservatism in
+2025-26 is a learned, defensible pattern that is wrong out-of-window.
+Absolute-probability thresholds are fragile across regimes; relative-ranking
+approval is the next decision-rule experiment.
+
 **Deep-history extension (2026-09-01, v5):** training data extended to
 ~5,000 D1 bars per major from the same OANDA source
 (`scripts/fetch_deep_candles.py` → `candles_deep.json`; 3,493-bar overlap

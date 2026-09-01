@@ -20,7 +20,8 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
-from strategies.fx_traj import fade_events, FEATURES  # noqa: E402
+from strategies import fx_traj  # noqa: E402
+from strategies.fx_traj import build_events, FEATURES, BASE_FEATURES  # noqa: E402
 from strategies import valuehead as vh  # noqa: E402
 
 CANDLES = PROJECT / "data" / "signal_gym" / "candles.json"       # frozen benchmark window
@@ -46,7 +47,7 @@ def main():
     bars = {s: [series[s].get(ts) for ts in alldates] for s in series}
     exog = json.load(open(EXOG)) if EXOG.exists() else {}
 
-    events = list(fade_events(bars, alldates, exog))
+    events = fx_traj.build_events(bars, alldates, exog)
     for e in events:
         e["source"] = "oanda-d1-deep/isolated-counterfactual/spread-adjusted"
     OUT.write_text("\n".join(json.dumps(e, default=str) for e in events) + "\n")
@@ -67,11 +68,12 @@ def main():
         if not train:
             print(f"  ep{k} (start {d}): NO training events — head untrained")
             continue
-        model = vh.train([e["features"] for e in train],
-                         [e["win"] for e in train], FEATURES)
-        a_in = vh.auc(model, [e["features"] for e in train], [e["win"] for e in train])
+        X = [e["features"] for e in train]
+        y = [e["win"] for e in train]
+        a_full = vh.auc(vh.train(X, y, fx_traj.FEATURES), X, y)
+        a_base = vh.auc(vh.train(X, y, fx_traj.BASE_FEATURES), X, y)
         print(f"  ep{k} (start {d}): train n={len(train)} "
-              f"winrate {sum(e['win'] for e in train) / len(train):.1%} in-sample AUC {a_in}")
+              f"winrate {sum(y) / len(y):.1%} | AUC base {a_base} -> full {a_full}")
 
 
 if __name__ == "__main__":

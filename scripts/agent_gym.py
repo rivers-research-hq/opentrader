@@ -393,10 +393,8 @@ class FadeVH(Policy):
     def __init__(self, bars, alldates, exog, threshold=0.5, train_events=None):
         self.bars, self.alldates, self.exog, self.threshold = bars, alldates, exog, threshold
         self.name = f"vhfade:thr{threshold}"
-        self.events = list(fx_traj.fade_events(bars, alldates, exog))
-        # training source: external trajectory file (e.g. deep history) when
-        # provided, else the benchmark window's own events
-        self.train_events = train_events if train_events is not None else self.events
+        self.train_events = train_events if train_events is not None else \
+            list(fx_traj.build_events(bars, alldates, exog))
         self.model, self.train_log = None, []
         self.violations = self.approved = self.vetoed = 0
 
@@ -421,26 +419,38 @@ class FadeVH(Policy):
         if self.model is None:
             return {"opens": [], "closes": []}
         held = [p["symbol"] for p in state["positions"]]
-        scored = []
+        today = self.alldates[i]
+
+        # cross-sectional context: fade depth of EVERY major today
+        depths = {}
         for sym, bl in self.bars.items():
-            if sym in held or bl[i] is None:
+            if bl[i] is None:
                 continue
-            close = bl[i][3]
             ma20 = fx_traj._ma20_before(bl, i)
-            if not ma20 or (close / ma20 - 1) >= fx_traj.FADE:
+            if ma20:
+                depths[sym] = round(bl[i][3] / ma20 - 1, 5)
+        ranked = sorted(depths.values())
+
+        # trailing realized-R regime feature: fade trades that FULLY RESOLVED
+        # before today — sorted by exit time, exactly like the builder
+        # (the events file is per-symbol ordered; taking [-30:] unsorted would
+        # silently feed the head a different feature than training saw)
+        prior = sorted((e for e in self.train_events if e["exit_ts"] < today),
+                       key=lambda e: e["exit_ts"])
+        prior_r = [e["r_multiple"] for e in prior]
+        trailing = (sum(prior_r[-fx_traj.TRAILING_N:]) / min(fx_traj.TRAILING_N, len(prior_r))
+                    if prior_r else None)
+
+        scored = []
+        for sym in self.bars:
+            if sym in held or sym not in depths:
                 continue
-            atr = fx_traj._atr14(bl, i)
-            range30 = [bl[j][3] for j in range(max(0, i - 29), i + 1) if bl[j]]
-            lo30, hi30 = min(range30), max(range30)
-            feats = {
-                "fade_depth": close / ma20 - 1,
-                "ret5": fx_traj._mom(bl, i, 5),
-                "ret30": fx_traj._mom(bl, i, 30),
-                "atr_pct": atr / close if atr else None,
-                "pos_in_30d_range": (close - lo30) / (hi30 - lo30) if hi30 > lo30 else None,
-                "cot_z": fx_traj.cot_z_signed(self.exog, sym, self.alldates[i]),
-            }
-            scored.append((vh.predict(self.model, feats), sym))
+            f = fx_traj.base_features(sym, i, self.bars, self.alldates, self.exog)
+            if f is None:
+                continue
+            f["fade_rank"] = round(ranked.index(f["fade_depth"]) / max(1, len(ranked) - 1), 4)
+            f["recent_fade_R"] = trailing
+            scored.append((vh.predict(self.model, f), sym))
         scored.sort(reverse=True)  # most confident first
         approved = [sym for p, sym in scored if p >= self.threshold][:MAX_OPEN_PER_DAY]
         self.approved += len(approved)
