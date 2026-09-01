@@ -18,16 +18,22 @@ Policies (v0 baseline set, identical pipeline for all):
   <gym-candidate>     any candidate file in data/signal_gym/candidates/,
                       loaded directly (no drift from what was verified),
                       e.g. c08_mr_fade_cot (the gym survivor = rule ceiling)
-  llm                 OpenAI-compatible endpoint (--llm-base-url/--llm-model)
+  llm:TIER            OpenAI-compatible endpoint per cost tier, from
+                      config/agent_gate_models.json (free = local 4B,
+                      flash/pro = deepseek-v4-flash / -v4-pro by declared
+                      per-M pricing; api keys come from env var names)
 
 Usage:
   python3 scripts/agent_gym.py                       # all rule baselines
   python3 scripts/agent_gym.py --policies random,c08_mr_fade_cot
-  python3 scripts/agent_gym.py --policies llm \
-      --llm-base-url http://127.0.0.1:5802/v1 --llm-model qwen38-4b [--run-label smoke]
+  python3 scripts/agent_gym.py --episodes 1 --policies llm:free
+  python3 scripts/agent_gym.py \
+      --policies buy_hold,random,mom_k5,c08_mr_fade_cot,llm:free,llm:flash,llm:pro \
+      --run-label v1-tiers
 """
 
 import json
+import os
 import random
 import sys
 import time
@@ -145,10 +151,21 @@ class GymCandidate(Policy):
 
 
 class LLM(Policy):
+    """One OpenAI-compatible endpoint per cost tier (free/flash/pro).
+    Cost accounting is derived from provider-reported token usage × declared
+    per-M pricing in the tier config — declared, never measured from the
+    provider's billing, and labeled as such in the config."""
     name = "llm"
-    def __init__(self, base_url, model, api_key="", log=None):
-        self.base_url, self.model, self.api_key, self.log = base_url, model, api_key, log
+    def __init__(self, tier, base_url, model, api_key="", price_in=0.0, price_out=0.0,
+                 extras=None, log=None):
+        self.tier = tier
+        self.name = f"llm:{tier}"
+        self.base_url, self.model, self.api_key = base_url, model, api_key
+        self.price_in, self.price_out = price_in, price_out  # USD per 1M tokens
+        self.extras = extras or {}  # recorded serving config (e.g. thinking disabled)
+        self.log = log
         self.violations = self.tokens = self.parse_failures = 0
+        self.prompt_tokens = self.completion_tokens = self.cost = 0.0
 
     def _prompt(self, state):
         syms = []
@@ -166,7 +183,7 @@ class LLM(Policy):
             f"Open positions: {state['positions'] or 'none'}\n" + "\n".join(syms))
 
     def act(self, state, i):
-        body = {"model": self.model, "temperature": 0,
+        body = {"model": self.model, "temperature": 0, **self.extras,
                 "messages": [{"role": "user", "content": self._prompt(state)}]}
         req = urllib.request.Request(
             self.base_url.rstrip("/") + "/chat/completions",
@@ -182,7 +199,11 @@ class LLM(Policy):
             return {"opens": [], "closes": [], "_violation": f"endpoint: {e}"}
         msg = (resp.get("choices") or [{}])[0].get("message", {}).get("content", "")
         usage = resp.get("usage", {})
-        self.tokens += usage.get("total_tokens", 0)
+        pt, ct = usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+        self.prompt_tokens += pt
+        self.completion_tokens += ct
+        self.tokens += usage.get("total_tokens", pt + ct)
+        self.cost += (pt * self.price_in + ct * self.price_out) / 1e6
         if self.log:
             self.log.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(),
                                        "bar": i, "date": state["date"],
@@ -328,14 +349,16 @@ def main():
             policies.append(RandomAction(symbols))
         elif name == "mom_k5":
             policies.append(MomentumK5(symbols, bars))
-        elif name == "llm":
-            base_url = (argv[argv.index("--llm-base-url") + 1] if "--llm-base-url" in argv
-                        else "http://127.0.0.1:5802/v1")
-            model = (argv[argv.index("--llm-model") + 1] if "--llm-model" in argv
-                     else "qwen38-4b")
-            api_key = (argv[argv.index("--llm-api-key") + 1] if "--llm-api-key" in argv else "")
-            p = LLM(base_url, model, api_key, log=(run_dir / "llm_responses.jsonl").open("a"))
-            p.name = f"llm({model})"
+        elif name.startswith("llm:"):
+            tier = name.split(":", 1)[1]
+            cfg_path = (Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv
+                        else PROJECT / "config" / "agent_gate_models.json")
+            cfg = json.load(open(cfg_path))["tiers"][tier]
+            api_key = os.environ.get(cfg["api_key_env"], "") if cfg.get("api_key_env") else ""
+            p = LLM(tier, cfg["base_url"], cfg["model"], api_key,
+                    cfg.get("price_in_per_m", 0.0), cfg.get("price_out_per_m", 0.0),
+                    extras=cfg.get("request_extras"),
+                    log=(run_dir / f"llm_responses_{tier}.jsonl").open("a"))
             policies.append(p)
         else:
             policies.append(GymCandidate(name, series, alldates, exog))
@@ -362,12 +385,18 @@ def main():
         scoreboard[pol.name] = {"episodes": eps, "pooled": pooled,
                                 "violations": getattr(pol, "violations", 0),
                                 "tokens": getattr(pol, "tokens", 0),
+                                "prompt_tokens": getattr(pol, "prompt_tokens", 0),
+                                "completion_tokens": getattr(pol, "completion_tokens", 0),
+                                "declared_cost_usd": round(getattr(pol, "cost", 0.0), 4),
+                                "request_extras": getattr(pol, "extras", None),
                                 "parse_failures": getattr(pol, "parse_failures", 0)}
+        cost_txt = f" cost=${pol.cost:.4f}" if isinstance(pol, LLM) else ""
         print(f"  {pol.name:<20} " + "  ".join(
             f"ep{k}[n={e['n']} PF {e['pf']} ret {e['ret_pct']:+.2f}% dd {e['maxdd_pct']:.2f}%]"
             for k, e in enumerate(eps))
             + f"  pooled[n={pooled['n']} PF {pooled['pf']} PnL {pooled['pnl']:+,.0f}]"
-            + (f" viol={pol.violations} tokens={pol.tokens}" if isinstance(pol, LLM) else ""))
+            + (f" viol={pol.violations} tokens={pol.tokens}" if isinstance(pol, LLM) else "")
+            + cost_txt)
 
     (run_dir / "scoreboard.json").write_text(json.dumps(
         {"meta": meta, "scoreboard": scoreboard, "fills": all_fills}, indent=1, default=str))

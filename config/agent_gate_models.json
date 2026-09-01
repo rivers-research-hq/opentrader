@@ -1,0 +1,30 @@
+{
+  "tiers": {
+    "free": {
+      "base_url": "http://127.0.0.1:5802/v1",
+      "model": "qwen38-4b",
+      "api_key_env": null,
+      "price_in_per_m": 0.0,
+      "price_out_per_m": 0.0,
+      "note": "local Qwen3.8-4B (llama-server :5802) — free; declared cost excludes electricity"
+    },
+    "flash": {
+      "base_url": "https://api.deepseek.com/v1",
+      "model": "deepseek-v4-flash",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "price_in_per_m": 0.049,
+      "price_out_per_m": 0.098,
+      "request_extras": {"thinking": {"type": "disabled"}},
+      "note": "declared pricing from docs/agents/research/openrouter-standin-matrix.md (2026-08-23); verify against current provider pricing before quoting dollars. Thinking disabled (verified 2026-08-31: default reasoning burned 1.4k-12k tokens per daily decision, up to 123s latency — run v1-tiers died at timeout mid-flash; disabled drops completion to the JSON alone)"
+    },
+    "pro": {
+      "base_url": "https://api.deepseek.com/v1",
+      "model": "deepseek-v4-pro",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "price_in_per_m": 0.40,
+      "price_out_per_m": 0.79,
+      "request_extras": {"thinking": {"type": "disabled"}},
+      "note": "same source as flash; same model family as flash at a higher tier — cleaner cost-efficiency comparison than mixing families. Thinking disabled for symmetric serving config (recorded, not assumed)"
+    }
+  }
+}

@@ -63,13 +63,20 @@ recorded per run.
 
 ## 5. Model harness (any model, same harness)
 
-OpenAI-compatible `chat/completions` at a configurable `base_url` (v0 smoke
-target: the local Qwen3.8-4B researcher at `http://127.0.0.1:5802/v1` — free;
-subscription models come later via the same interface). Fixed, versioned
-state-serialization template; JSON-action response contract (no tool-call
-API dependency, so any provider works); temperature 0; token budget logged
-per decision. The raw completion is logged verbatim — no metric is derived
-from anything the model *says about itself*.
+OpenAI-compatible `chat/completions` at a configurable `base_url`, one policy
+per **cost tier** (`config/agent_gate_models.json`: `free` = local Qwen3.8-4B
+at :5802, `flash` = deepseek-v4-flash, `pro` = deepseek-v4-pro — same family,
+two price points, for a clean cost-efficiency comparison). Declared per-M
+pricing lives in the tier config and is labeled as declared, not measured.
+Per-tier **serving extras are part of the policy's definition** and are
+recorded verbatim in the run's config/scoreboard (e.g. flash/pro run with
+`thinking: disabled` — verified 2026-08-31 that default reasoning burned
+1.4k–12k tokens per daily decision; the partial run `data/agent_gym/v1-tiers`
+preserves that evidence). Fixed, versioned state-serialization template;
+JSON-action response contract (no tool-call API dependency, so any provider
+works); temperature 0; token usage logged per decision. The raw completion
+is logged verbatim — no metric is derived from anything the model *says
+about itself*.
 
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
