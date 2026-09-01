@@ -15,7 +15,7 @@ authoritative; the TUI is read-only — it never trades.
 Style: dark slate theme, rounded panels, per-lane color identity:
   mom-k5 cyan · c08-fade green · h1-mom yellow · crash red · watchdog magenta
 
-Run: /home/mrc/rocm_venv/bin/python3 tui/app.py
+Run: /home/mrc/rocm_venv/bin/python3 tui.py
 """
 
 import json
