@@ -137,3 +137,4 @@ data/loop_state.json
 data/model_schedule.json
 tui/node_modules/
 data/signal_gym/candles.json
+data/cache/

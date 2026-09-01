@@ -54,15 +54,22 @@ function loadState() {
 }
 
 // live FX snapshot — dashboard /api/fx (venue is authoritative)
+async function fetchCalendar(setCal) {
+  try {
+    const r = await fetch("http://127.0.0.1:8097/api/calendar", { signal: AbortSignal.timeout(8000) });
+    setCal(await r.json());
+  } catch { /* keep last */ }
+}
+
 async function fetchFx(setFx) {
   try {
-    const r = await fetch("http://127.0.0.1:8097/api/fx", { signal: AbortSignal.timeout(4000) });
+    const r = await fetch("http://127.0.0.1:8097/api/fx", { signal: AbortSignal.timeout(8000) });
     setFx(await r.json());
   } catch { /* keep last snapshot; page shows offline state */ }
 }
 
 // ledger → per-lane realized P&L / round trips / win rate (FIFO, USD-approx)
-function laneStats() {
+export function laneStats() {
   const raw = read(`${BASE}/fx_ledger.jsonl`);
   if (!raw) return {};
   const rows = raw.trim().split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
@@ -167,7 +174,7 @@ function laneRow(tag, s, note) {
   return { text: ` ● ${tag.padEnd(10)} realized ${sign}${(s.realized || 0).toFixed(2)}  ·  ${s.rounds || 0} RT  ·  WR ${wr}   ${note || ""}`, color: laneColor(tag) };
 }
 
-function buildHome(state, fx) {
+export function buildHome(state, fx) {
   const { last, mainSeries, shadowSeries, paperMain, paperShadow, deploy, router,
           ledgerLines, registry, crash, watchdog, proposals } = state;
   const lanes = state.lanes || {};
@@ -257,7 +264,7 @@ function buildHome(state, fx) {
   return L;
 }
 
-function buildForex(state, fx) {
+export function buildForex(state, fx) {
   const lanes = state.lanes || {};
   const crash = state.crash || {};
   const book = (fx && fx.book) || [];
@@ -279,8 +286,18 @@ function buildForex(state, fx) {
   L.push({ text: "" });
 
   const laneLines = [];
+  const flat = (fx && fx.flat) || {};
+  const laneOwners = new Set(book.map((t) => t.owner));
   for (const tag of ["mom-k5", "c08-fade", "h1-mom", "crash", "watchdog"]) {
-    laneLines.push(laneRow(tag, lanes[tag] || {}));
+    const row = laneRow(tag, lanes[tag] || {});
+    laneLines.push(row);
+    const isFlat = !laneOwners.has(tag);  // no open position carries this tag
+    if (tag === "watchdog" || isFlat) {
+      const why = tag === "watchdog"
+        ? "response-only — flattens shocks, never opens"
+        : String(flat[tag] || "no signal — entry condition not met");
+      laneLines.push({ text: `     ↳ flat: ${why}`.slice(0, W - 4), dim: true, color: laneColor(tag) });
+    }
   }
   const events = state.events || "—";
   const queue = (fx && fx.queue) || { events: 0, labeled: 0 };
@@ -313,11 +330,87 @@ function buildForex(state, fx) {
   return L;
 }
 
+function buildCalendar(state, fx, cal) {
+  const L = [];
+  const now = new Date();
+  const year = now.getUTCFullYear(), month = now.getUTCMonth();
+  const months = ["January", "February", "March", "April", "May", "June", "July",
+                  "August", "September", "October", "November", "December"];
+  const BANK_TAG = { FED: "FED", ECB: "ECB", BOE: "BOE", BOJ: "BOJ",
+                     SNB: "SNB", BOC: "BOC", RBA: "RBA", RBNZ: "RBNZ" };
+  const BANK_COLOR = { FED: "cyan", ECB: "green", BOE: "yellow", BOJ: "yellow",
+                       SNB: "magenta", BOC: "cyan", RBA: "green", RBNZ: "magenta" };
+  const decisions = (cal && cal.decisions) || [];
+  const byDay = {};
+  for (const d of decisions) {
+    const day = parseInt(d.date.slice(8, 10), 10);
+    (byDay[day] = byDay[day] || []).push(BANK_TAG[d.bank] || d.bank.slice(0, 3));
+  }
+  for (const e of (cal && cal.ff_events) || []) {
+    const day = parseInt(e.date.slice(8, 10), 10);
+    (byDay[day] = byDay[day] || []).push(e.impact === "High" ? "!" : "*");
+  }
+
+  // month grid: Mon-Sun columns
+  const first = new Date(Date.UTC(year, month, 1));
+  const startDow = (first.getUTCDay() + 6) % 7; // Mon=0
+  const daysIn = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= daysIn; d++) cells.push(d);
+  while (cells.length % 7) cells.push(null);
+  const grid = [];
+  grid.push({ text: `  ${months[month]} ${year}  ·  [bank] = decision (pattern-approx for non-FED)  ·  ! = high-impact release  ·  * = medium`, dim: true });
+  grid.push({ text: `  ${"MON".padEnd(14)}${"TUE".padEnd(14)}${"WED".padEnd(14)}${"THU".padEnd(14)}${"FRI".padEnd(14)}${"SAT".padEnd(14)}SUN`, dim: true, bold: true });
+  for (let w = 0; w < cells.length / 7; w++) {
+    let row = "  ";
+    for (let c = 0; c < 7; c++) {
+      const day = cells[w * 7 + c];
+      if (day == null) { row += "".padEnd(14); continue; }
+      const tags = (byDay[day] || []).join(",").slice(0, 9);
+      const mark = day === now.getUTCDate() ? ">" : " ";
+      row += `${mark}${String(day).padStart(2)}${tags.padEnd(11)}`;
+    }
+    grid.push({ text: row });
+  }
+  L.push(...box(`CALENDAR — ${months[month]} ${year}`, grid, "cyan"));
+  L.push({ text: "" });
+
+  const inhouse = (cal && cal.inhouse) || {};
+  const decLines = [];
+  for (const d of decisions.slice(0, 8)) {
+    const cur = { FED: "USD", ECB: "EUR", BOE: "GBP", BOJ: "JPY",
+                  SNB: "CHF", BOC: "CAD", RBA: "AUD", RBNZ: "NZD" }[d.bank];
+    const ih = inhouse[cur] || {};
+    const ihS = ih.rate != null
+      ? `rate ${ih.rate}%  90dΔ ${ih.chg90 >= 0 ? "+" : ""}${ih.chg90 ?? "—"}${ih.cot_z != null ? `  COT z ${ih.cot_z}` : ""}`
+      : (ih.note || "state n/a");
+    const approx = d.bank === "FED" ? "" : " (approx)";
+    decLines.push({ text: ` ${d.date}  ${d.bank.padEnd(5)} ${cur}  in-house state: ${ihS}${approx}`, color: BANK_COLOR[d.bank] || null });
+  }
+  if (!decLines.length) decLines.push({ text: "  (none in window)", dim: true });
+  L.push(...box("CENTRAL-BANK DECISIONS — next 45 days · in-house state (not a forecast)", decLines, "yellow"));
+  L.push({ text: "" });
+
+  const ffLines = [];
+  for (const e of ((cal && cal.ff_events) || []).slice(0, 12)) {
+    const when = `${e.date.slice(5, 10)} ${e.date.slice(11, 16)} UTC`;
+    ffLines.push({ text: ` ${when}  ${String(e.currency).padEnd(4)} [${String(e.impact).padEnd(6)}] ${String(e.title).padEnd(34).slice(0, 34)} analyst: ${String(e.forecast).padEnd(7)} prev: ${e.previous}`, dim: e.impact !== "High" });
+  }
+  if (!ffLines.length) ffLines.push({ text: "  (feed unavailable)", dim: true });
+  L.push(...box("MACRO RELEASES — next 14 days · analyst consensus (ForexFactory feed)", ffLines, "green"));
+  L.push({ text: "" });
+  L.push({ text: "  in-house columns are STATE reads (policy rate, 90d trend, positioning) — not predictions. The system does not forecast decisions; it avoids holding through them (event gate) and measures what they do (crash book).", dim: true });
+  return L;
+}
+
 function App() {
   const { exit } = useApp();
-  const [page, setPage] = useState(process.argv.includes("--forex") ? "forex" : "home");
+  const [page, setPage] = useState(
+    process.argv.includes("--forex") ? "forex" : process.argv.includes("--calendar") ? "calendar" : "home");
   const [state, setState] = useState(loadState);
   const [fx, setFx] = useState(null);
+  const [cal, setCal] = useState(null);
   const [events] = useState(nextEvents);
 
   useInput((input) => {
@@ -325,17 +418,22 @@ function App() {
     if (input === "r") setState(loadState());
     if (input === "1") setPage("home");
     if (input === "2") setPage("forex");
+    if (input === "3") setPage("calendar");
   });
   useEffect(() => {
     const t = setInterval(() => setState(loadState()), 2000);
     const f = setInterval(() => fetchFx(setFx), 5000);
+    const c = setInterval(() => fetchCalendar(setCal), 60000);
     fetchFx(setFx);
-    return () => { clearInterval(t); clearInterval(f); };
+    fetchCalendar(setCal);
+    return () => { clearInterval(t); clearInterval(f); clearInterval(c); };
   }, []);
 
   const lanes = laneStats();
   const withAll = { ...state, lanes, events, proposals: proposals() };
-  const lines = page === "home" ? buildHome(withAll, fx) : buildForex(withAll, fx);
+  const lines = page === "home" ? buildHome(withAll, fx)
+    : page === "forex" ? buildForex(withAll, fx)
+    : buildCalendar(withAll, fx, cal);
   return React.createElement(
     Box, { flexDirection: "column", paddingX: 1 },
     lines.map((l, i) =>
@@ -345,8 +443,10 @@ function App() {
       )
     ),
     React.createElement(Text, { dimColor: true, marginTop: 1 },
-      `  [1] home  [2] forex  [r] refresh  [q] quit  —  page: ${page}  ·  polls 2s (files) / 5s (venue)`)
+      `  [1] home  [2] forex  [3] calendar  [r] refresh  [q] quit  —  page: ${page}  ·  polls 2s (files) / 5s (venue) / 60s (calendar)`)
   );
 }
 
-render(React.createElement(App));
+import { pathToFileURL } from "node:url";
+const _isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (_isMain) render(React.createElement(App));

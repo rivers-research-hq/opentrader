@@ -180,10 +180,44 @@ _STATIC_DIR = Path(__file__).resolve().parent / "static"
 _STATIC_DIR.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
+_FX_CACHE = {"ts": 0.0, "data": None}
+_FLAT_CACHE = {"ts": 0.0, "data": None}
+
+
+_FX_REFRESHING = {"t": False}
+
+
+def _refresh_fx_cache():
+    """Background recompute — the served snapshot stays available (stale-while-
+    revalidate), so fast pollers never block on OANDA latency."""
+    import time as _time
+    try:
+        out = _compute_fx()
+        _FX_CACHE["data"] = out
+        _FX_CACHE["ts"] = _time.time()
+    finally:
+        _FX_REFRESHING["t"] = False
+
+
 def _fx_snapshot() -> dict:
-    """Live FX watch data: venue book (owner-tagged), recent ledger fills,
-    registry, preference-queue depth. Built for /fx — read-only, OANDA is
-    queried fresh per call (page refresh is 60s, well under rate limits)."""
+    """Live FX watch data. Stale-while-revalidate: instant serve from cache;
+    a background thread refreshes when older than 30s. Fast pollers (the
+    TUIs) never block on OANDA latency and never trigger concurrent refreshes."""
+    import threading
+    import time as _time
+    if _FX_CACHE["data"] is not None:
+        if _time.time() - _FX_CACHE["ts"] >= 30 and not _FX_REFRESHING["t"]:
+            _FX_REFRESHING["t"] = True
+            threading.Thread(target=_refresh_fx_cache, daemon=True).start()
+        out = dict(_FX_CACHE["data"])
+        out["flat"] = _flat_reasons()  # reasons have their own 300s TTL
+        return out
+    out = _compute_fx()  # cold path: compute synchronously once, cache, serve
+    _FX_CACHE["ts"] = _time.time()
+    _FX_CACHE["data"] = {k: v for k, v in out.items()}
+    return out
+def _compute_fx() -> dict:
+    import time as _time
     out = {"book": [], "fills": [], "registry": [], "queue": {}, "error": None}
     try:
         from exchange.oanda import OandaExchange
@@ -202,15 +236,16 @@ def _fx_snapshot() -> dict:
             acct = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
             out["balance"] = acct.get("balance")
             out["nav"] = acct.get("NAV")
+            out["_ex"] = ex
         else:
             out["error"] = "OANDA connect failed"
     except Exception as e:
         out["error"] = str(e)
-    ledger = DATA_DIR / "fx_ledger.jsonl"
+    ledger = DATA / "fx_ledger.jsonl"
     if ledger.exists():
         rows = [json.loads(l) for l in ledger.read_text().splitlines() if l.strip()]
         out["fills"] = rows[-25:][::-1]
-    reg = DATA_DIR / "epoch_registry.json"
+    reg = DATA / "epoch_registry.json"
     if reg.exists():
         out["registry"] = json.loads(reg.read_text()).get("experts", [])
     try:
@@ -218,6 +253,107 @@ def _fx_snapshot() -> dict:
         out["queue"] = {"events": len(load_events()), "labeled": len(load_labels())}
     except Exception:
         pass
+    out["flat"] = _flat_reasons()
+    return out
+
+
+def _flat_reasons() -> dict:
+    """Why each non-watchdog lane holds no positions — computed from live
+    bars, TTL 300s (signal state changes at most daily)."""
+    import time as _time
+    if _FLAT_CACHE["data"] is not None and _time.time() - _FLAT_CACHE["ts"] < 300:
+        return _FLAT_CACHE["data"]
+    out = {}
+    try:
+        sys.path.insert(0, str(Path(PROJECT) / "scripts"))
+        from exchange.oanda import OandaExchange
+        from strategies.fx_runner import _venue_book, atr14
+        from signal_gym import Ctx, load_candidate, CAND_DIR
+        ex = OandaExchange()
+        if not ex.connect():
+            return {"error": "OANDA down"}
+        book = _venue_book(ex)
+        held = set(book)
+        owners = {i["owner"] for i in book.values()}
+        exog = {}
+        if (DATA / "exog_cache.json").exists():
+            exog = json.load(open(DATA / "exog_cache.json"))
+        d1, h1 = {}, {}
+        for sym in ex.discover_symbols():
+            d1[sym] = ex.get_bars(sym, "1d", 60)
+            h1[sym] = ex.get_bars(sym, "1h", 20)
+        now_s = datetime.now(timezone.utc)
+
+        # mom-k5: 5d momentum top-2, positive only
+        moms = {}
+        for sym, bars in d1.items():
+            if len(bars) >= 7:
+                moms[sym] = bars[-1].close / bars[-6].close - 1.0
+        target = [s for s, m in sorted(moms.items(), key=lambda kv: -kv[1])[:2] if m > 0]
+        if "mom-k5" not in owners:
+            if target:
+                out["mom-k5"] = f"would enter {target} — next run"
+            else:
+                best = min(moms.items(), key=lambda kv: kv[1]) if moms else None
+                out["mom-k5"] = (f"no positive 5d momentum (deepest {best[0]} {best[1]:+.2%})"
+                                 if best else "no data")
+
+        # c08-fade: evaluate the gym candidate on the live ctx
+        if "c08-fade" not in owners:
+            cand = load_candidate(CAND_DIR / "c08_mr_fade_cot.py")
+            all_dates = sorted({b.timestamp for bars in d1.values() for b in bars})
+            picks = {}
+            deepest = None
+            for sym, bars in d1.items():
+                if len(bars) < 22:
+                    continue
+                closes = [b.close for b in bars]
+                i = len(closes) - 1
+                ma20 = sum(closes[i - 20:i]) / 20.0 if i >= 20 else None
+                if ma20:
+                    gap = closes[i] / ma20 - 1
+                    if deepest is None or gap < deepest[1]:
+                        deepest = (sym, gap)
+            series = {sym: {b.timestamp: (b.open, b.high, b.low, b.close) for b in bars}
+                      for sym, bars in d1.items()}
+            try:
+                picks = cand.entry(Ctx(series, all_dates, len(all_dates) - 1,
+                                       list(series), exog_series=exog)) or {}
+            except Exception:
+                picks = {}
+            if picks:
+                out["c08-fade"] = f"signal live: {list(picks)[:2]} — enters next run"
+            elif deepest:
+                out["c08-fade"] = (f"no fade setup — deepest {deepest[0]} "
+                                   f"{deepest[1]:+.2%} vs -1.50% trigger")
+            else:
+                out["c08-fade"] = "no data"
+
+        # h1-mom + crash: H1 8-bar momentum on the non-held pool
+        pool = [s for s in ex.discover_symbols() if s not in held]
+        pool_mom = {}
+        for sym in pool:
+            bars = h1.get(sym) or []
+            if len(bars) >= 9:
+                pool_mom[sym] = bars[-1].close / bars[-9].close - 1.0
+        pos_pool = {s: m for s, m in pool_mom.items() if m > 0}
+        if "h1-mom" not in owners:
+            if not pool:
+                out["h1-mom"] = "pool empty — all 7 pairs held by other lanes"
+            elif pos_pool:
+                out["h1-mom"] = f"momentum live: {sorted(pos_pool, key=pos_pool.get, reverse=True)[:2]}"
+            else:
+                worst = sorted(pool_mom.items(), key=lambda kv: kv[1])[:2]
+                out["h1-mom"] = ("pool squeezed to " + str(len(pool)) + " pairs (" +
+                                 "held: " + ", ".join(sorted(held)) + ") — all H1 momentum non-positive")
+        if "crash" not in owners:
+            out["crash"] = ("waiting for positive H1 momentum in pool" if not pos_pool
+                            else f"momentum live: {sorted(pos_pool, key=pos_pool.get, reverse=True)[:2]}")
+        out["watchdog"] = "response-only — flattens shocks, never opens"
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}: {e}"
+    _FLAT_CACHE["ts"] = _time.time()
+    _FLAT_CACHE["data"] = out
     return out
 
 
@@ -276,6 +412,98 @@ async def fx_page():
     rows.append('</table>')
     return HTMLResponse(content=FX_PAGE.replace("__CONTENT__", "\n".join(rows)),
                         headers={"Cache-Control": "no-store, max-age=0"})
+
+
+DATA = Path(PROJECT) / "data"  # FX data root (also used by /fx page)
+FF_FEED = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+FF_CACHE = DATA / "cache" / "ff_calendar.json"
+
+
+def _ff_events():
+    """Analyst-consensus calendar (ForexFactory community feed), 6h file cache."""
+    import time as _time
+    try:
+        if FF_CACHE.exists() and _time.time() - FF_CACHE.stat().st_mtime < 6 * 3600:
+            return json.loads(FF_CACHE.read_text())
+    except Exception:
+        pass
+    try:
+        import urllib.request
+        req = urllib.request.Request(FF_FEED, headers={"User-Agent": "OpenTrader/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            events = json.load(r)
+        FF_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        FF_CACHE.write_text(json.dumps(events))
+        return events
+    except Exception:
+        return []
+
+
+def _inhouse_state():
+    """In-house per-currency state for the calendar: policy rate, 90d change,
+    COT leveraged-money z. This is a STATE READ, not a forecast — labeled as
+    such everywhere it renders."""
+    try:
+        exog = json.load(open(DATA / "exog_cache.json"))
+    except Exception:
+        return {}
+    from data.economic_calendar import blackout  # noqa: F401  (module import warm)
+    import datetime as dt
+    now = dt.date.today()
+    out = {}
+    for cur, key in (("USD", "RATE:US"), ("EUR", "RATE:EA"), ("GBP", "RATE:GB"), ("CAD", "RATE:CA")):
+        s = exog.get(key, {})
+        ds = sorted(k for k in s if k <= now.isoformat())
+        if not ds:
+            continue
+        lvl = s[ds[-1]]
+        past = [k for k in ds if k <= (now - dt.timedelta(days=90)).isoformat()]
+        chg = round(lvl - s[past[-1]], 3) if past else None
+        out[cur] = {"rate": lvl, "chg90": chg}
+    for cur in ("JPY", "CHF", "AUD", "NZD"):
+        out[cur] = {"rate": None, "chg90": None, "note": "no rate source yet (ToC BM3)"}
+    for key, cur in (("COT:EUR", "EUR"), ("COT:JPY", "JPY"), ("COT:GBP", "GBP"),
+                     ("COT:CHF", "CHF"), ("COT:CAD", "CAD"), ("COT:AUD", "AUD"),
+                     ("COT:NZD", "NZD")):
+        s = exog.get(key, {})
+        usable = [k for k in s if k <= now.isoformat()]
+        if usable:
+            out.setdefault(cur, {})["cot_z"] = s[usable[-1]]
+    return out
+
+
+@app.get("/api/calendar")
+async def api_calendar():
+    """Calendar page data: bank decisions (pattern-approx for non-FOMC, ToC BM5),
+    analyst-consensus events (ForexFactory feed), in-house per-currency state."""
+    import datetime as dt
+    now = dt.datetime.now(dt.timezone.utc)
+    decisions = []
+    try:
+        sys.path.insert(0, str(PROJECT))
+        from data.economic_calendar import bank_dates
+        for bank in ("FED", "ECB", "BOE", "BOJ", "SNB", "BOC", "RBA", "RBNZ"):
+            for d in sorted(bank_dates(bank)):
+                if now.date() <= d <= now.date() + dt.timedelta(days=45):
+                    decisions.append({"date": d.isoformat(), "bank": bank})
+        decisions.sort(key=lambda x: x["date"])
+    except Exception:
+        pass
+    cutoff = now + dt.timedelta(days=14)
+    ff = []
+    for e in _ff_events():
+        try:
+            ed = dt.datetime.fromisoformat(e["date"])
+            if ed >= now and ed <= cutoff and e.get("impact") in ("High", "Medium"):
+                ff.append({"date": ed.astimezone(dt.timezone.utc).isoformat(),
+                           "title": e.get("title"), "currency": e.get("country"),
+                           "impact": e.get("impact"), "forecast": e.get("forecast") or "—",
+                           "previous": e.get("previous") or "—"})
+        except Exception:
+            continue
+    ff.sort(key=lambda x: x["date"])
+    return {"decisions": decisions[:20], "ff_events": ff[:25],
+            "inhouse": _inhouse_state(), "generated": now.isoformat()}
 
 
 @app.get("/api/fx")
