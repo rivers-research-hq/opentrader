@@ -57,8 +57,13 @@ function loadState() {
 async function fetchCalendar(setCal) {
   try {
     const r = await fetch("http://127.0.0.1:8097/api/calendar", { signal: AbortSignal.timeout(8000) });
-    setCal(await r.json());
-  } catch { /* keep last */ }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    setCal(d);
+  } catch (e) {
+    // surface the failure on the page (retry timer keeps running)
+    setCal({ error: `calendar fetch failed: ${e.message} — retrying` });
+  }
 }
 
 async function fetchFx(setFx) {
@@ -347,6 +352,15 @@ function buildCalendar(state, fx, cal) {
   // total capped to stdout.rows. Forecasts and in-house state live INLINE in
   // the agenda — no detail boxes below to push content off-screen.
   const ROWS = Math.max((process.stdout.rows || 40) - 3, 20);
+  if (cal && cal.error) {
+    return [
+      { text: ` CALENDAR — data source error: ${cal.error}`, color: "red", bold: true },
+      { text: "   the retry timer is running; this page fills in automatically.", dim: true },
+    ];
+  }
+  if (!cal) {
+    return [{ text: " CALENDAR — loading… (fetches /api/calendar on mount, then every 20s)", dim: true }];
+  }
   const BANK_CUR = { FED: "USD", ECB: "EUR", BOE: "GBP", BOJ: "JPY",
                      SNB: "CHF", BOC: "CAD", RBA: "AUD", RBNZ: "NZD" };
   const BANK_COLOR = { FED: "cyan", ECB: "green", BOE: "yellow", BOJ: "yellow",
@@ -497,11 +511,11 @@ function App() {
     if (input === "1") setPage("home");
     if (input === "2") setPage("forex");
     if (input === "3") setPage("calendar");
-  });
+  }, { isActive: Boolean(process.stdout.isTTY) });  // non-TTY: skip raw mode so effects flush (testable)
   useEffect(() => {
-    const t = setInterval(() => setState(loadState()), 2000);
+      const t = setInterval(() => setState(loadState()), 2000);
     const f = setInterval(() => fetchFx(setFx), 5000);
-    const c = setInterval(() => fetchCalendar(setCal), 60000);
+    const c = setInterval(() => fetchCalendar(setCal), 20000);
     fetchFx(setFx);
     fetchCalendar(setCal);
     return () => { clearInterval(t); clearInterval(f); clearInterval(c); };
