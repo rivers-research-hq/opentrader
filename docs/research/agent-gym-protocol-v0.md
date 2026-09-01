@@ -97,6 +97,23 @@ rule and counts a violation; days with no proposal make no LLM call.
 Requires `--state v0.2`. The comparison baseline is the bare rule on the
 same episodes. Exit-discretion variants (v0.3b) are future protocol bumps.
 
+## 5c. Value-head pilot (v0.4, 2026-09-01)
+
+`vhfade:THR` — the first policy in the gate that is a *trained model* rather
+than a rule or an LLM: all raw fade events (c04's condition, NO hard COT
+filter) are proposed; a logistic value head (`strategies/valuehead.py`, L2
+logreg, inspectable JSON weights) trained at each episode start on fade
+events whose isolated uniform-risk trade **exited strictly before that
+episode** approves proposals with p_win ≥ THR. Dataset:
+`scripts/build_trajectories.py` → `data/agent_gym/trajectories.jsonl`
+(268 events, source-labeled, signed-COT features via
+`fx_traj.cot_z_signed` — the pair-perspective exposure sign, mirroring c08).
+Walkforward only, no random splits, threshold sensitivity reported, model
+artifacts saved per episode. This is the seam where the RLHF loop and the
+benchmark gate the same object (spec gate T3 lives here). Pilot data is
+benchmark-internal; the production volume gates V1–V4 (live ledger volumes)
+are unchanged and still govern any registry promotion.
+
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
 - Rules load **directly from the signal gym's candidate files** (single

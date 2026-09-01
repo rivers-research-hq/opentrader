@@ -44,6 +44,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 from strategies.fx_shadow import ShadowCtx, load_candidate  # noqa: E402  (ctx + candidate loading: single source of truth)
+from strategies import fx_traj  # noqa: E402
+from strategies import valuehead as vh  # noqa: E402
 
 CANDLES = PROJECT / "data" / "signal_gym" / "candles.json"
 EXOG = PROJECT / "data" / "exog_cache.json"
@@ -108,7 +110,7 @@ def build_state(bars, alldates, i, book, cash, exog, version):
         state["positions"] = [{"symbol": s, "entry": round(p["entry"], 5), "bars_seen": p["bars_seen"]}
                               for s, p in book.items()]
         for sym, bl in bars.items():
-            z = exog_z(exog, "COT:" + sym.split("_")[0], alldates[i])
+            z = fx_traj.cot_z_signed(exog, sym, alldates[i])
             ma20 = _ma20_before(bl, i)
             state["symbols"][sym] = {
                 "closes": [bl[j][3] for j in range(max(0, i - 9), i + 1) if bl[j]],
@@ -144,7 +146,7 @@ def build_state(bars, alldates, i, book, cash, exog, version):
             "ret30": _mom(bl, i, 30) or 0.0,
             "atr_pct": round((_atr14(bl, i) or 0) / cur, 4) if _atr14(bl, i) else None,
             "pos_in_30d_range": round((cur - lo) / (hi30 - lo), 3) if hi30 > lo else None,
-            "cot_z": exog_z(exog, "COT:" + sym.split("_")[0], alldates[i]),
+            "cot_z": fx_traj.cot_z_signed(exog, sym, alldates[i]),
         }
     return state
 
@@ -378,10 +380,77 @@ class LLM(Policy):
             return {"opens": [], "closes": [], "_violation": "unparseable response"}
 
 
+class FadeVH(Policy):
+    """v0.4 value-head pilot (RLHF spec §5, SFT-on-outcomes stage): proposes
+    ALL raw fade events (c04's condition, NO COT filter) and a logistic value
+    head approves those with p_win >= threshold. The head is retrained at
+    every episode start on events that EXITED strictly before that episode
+    (walkforward, no leakage — an event is training data only if its
+    isolated trade fully resolved before the episode begins). Hypothesis
+    under test: a learned court rediscovers more than the hard-coded COT
+    filter — keeps PF while trading more of the fade set."""
+
+    def __init__(self, bars, alldates, exog, threshold=0.5):
+        self.bars, self.alldates, self.exog, self.threshold = bars, alldates, exog, threshold
+        self.name = f"vhfade:thr{threshold}"
+        self.events = list(fx_traj.fade_events(bars, alldates, exog))
+        self.model, self.train_log = None, []
+        self.violations = self.approved = self.vetoed = 0
+
+    def begin_episode(self, lo, hi):
+        cutoff = self.alldates[lo]
+        train = [e for e in self.events if e["exit_ts"] < cutoff]
+        if not train:
+            self.model = None
+            self.train_log.append({"ep_start": cutoff, "n": 0})
+            return
+        self.model = vh.train([e["features"] for e in train],
+                              [e["win"] for e in train], fx_traj.FEATURES)
+        a_in = vh.auc(self.model, [e["features"] for e in train], [e["win"] for e in train])
+        self.train_log.append({"ep_start": cutoff, "n": len(train),
+                               "winrate": round(sum(e["win"] for e in train) / len(train), 3),
+                               "auc_in": a_in})
+        vh.save(self.model, PROJECT / "data" / "agent_gym" /
+                f"valuehead_{self.name.replace(':', '_')}_before_{cutoff}.json",
+                meta={"trained_on_events_exiting_before": cutoff, "walkforward": True})
+
+    def act(self, state, i):
+        if self.model is None:
+            return {"opens": [], "closes": []}
+        held = [p["symbol"] for p in state["positions"]]
+        scored = []
+        for sym, bl in self.bars.items():
+            if sym in held or bl[i] is None:
+                continue
+            close = bl[i][3]
+            ma20 = fx_traj._ma20_before(bl, i)
+            if not ma20 or (close / ma20 - 1) >= fx_traj.FADE:
+                continue
+            atr = fx_traj._atr14(bl, i)
+            range30 = [bl[j][3] for j in range(max(0, i - 29), i + 1) if bl[j]]
+            lo30, hi30 = min(range30), max(range30)
+            feats = {
+                "fade_depth": close / ma20 - 1,
+                "ret5": fx_traj._mom(bl, i, 5),
+                "ret30": fx_traj._mom(bl, i, 30),
+                "atr_pct": atr / close if atr else None,
+                "pos_in_30d_range": (close - lo30) / (hi30 - lo30) if hi30 > lo30 else None,
+                "cot_z": fx_traj.cot_z_signed(self.exog, sym, self.alldates[i]),
+            }
+            scored.append((vh.predict(self.model, feats), sym))
+        scored.sort(reverse=True)  # most confident first
+        approved = [sym for p, sym in scored if p >= self.threshold][:MAX_OPEN_PER_DAY]
+        self.approved += len(approved)
+        self.vetoed += len(scored) - len(approved)
+        return {"opens": approved, "closes": []}
+
+
 # ── engine ────────────────────────────────────────────────────────────────
 
 def run_episode(policy, bars, alldates, lo, hi, exog, fills_out, state_version="v0.1"):
     cash, book, curve = CASH0, {}, []
+    if hasattr(policy, "begin_episode"):
+        policy.begin_episode(lo, hi)
 
     def mark(i):
         eq = cash
@@ -512,6 +581,9 @@ def main():
             cfg_path = Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv else None
             llm = _make_llm(tier, run_dir, log_suffix=f"_{cand_name}", cfg_path=cfg_path)
             policies.append(HybridVeto(cand_name, llm, series, alldates, exog))
+        elif name.startswith("vhfade:"):
+            thr = float(name.split(":", 1)[1])
+            policies.append(FadeVH(bars, alldates, exog, thr))
         else:
             policies.append(GymCandidate(name, series, alldates, exog))
 
@@ -549,11 +621,16 @@ def main():
                                 "request_extras": getattr(pol, "extras", None) or getattr(getattr(pol, "llm", None), "extras", None),
                                 "approved": getattr(pol, "approved", None),
                                 "vetoed": getattr(pol, "vetoed", None),
+                                "train_log": getattr(pol, "train_log", None),
                                 "parse_failures": getattr(pol, "parse_failures", 0)}
         if isinstance(pol, HybridVeto):
             tail = f" viol={pol.violations} appr={pol.approved} veto={pol.vetoed} cost=${pol.cost:.4f}"
         elif isinstance(pol, LLM):
             tail = f" viol={pol.violations} tokens={pol.tokens} cost=${pol.cost:.4f}"
+        elif isinstance(pol, FadeVH):
+            tail = (f" appr={pol.approved} veto={pol.vetoed} "
+                    f"train={[t.get('n') for t in pol.train_log]} "
+                    f"auc={[t.get('auc_in') for t in pol.train_log]}")
         else:
             tail = ""
         print(f"  {pol.name:<26} " + "  ".join(
