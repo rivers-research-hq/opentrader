@@ -72,12 +72,115 @@ def atr14(bars):
     return sum(trs) / len(trs) if trs else 0.0
 
 
+def _venue_book(ex):
+    """Rebuild the book from venue openTrades — venue is authoritative.
+    fx_state.json is a write-through cache, NEVER a source of truth: a
+    foreign writer clobbered it 2026-08-31 and crashed the next run.
+    Protection state reads the NESTED stopLossOrder/takeProfitOrder objects
+    (the top-level *OrderID fields are not present on this API surface)."""
+    ot = ex._request("GET", f"/v3/accounts/{ex._account_id}/openTrades").get("trades", [])
+    book = {}
+    for t in ot:
+        sym = t.get("instrument")
+        if sym not in ex.discover_symbols():
+            continue
+        book[sym] = {
+            "units": abs(float(t.get("currentUnits", 0))),
+            "opened": str(t.get("openTime", ""))[:19],
+            "entry": float(t.get("price", 0)),
+            "trade_id": t.get("id"),
+            "protected": bool(t.get("stopLossOrder") or t.get("takeProfitOrder")),
+        }
+    return book
+
+
+def _venue_net(ex, sym):
+    acc = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
+    for p in acc.get("positions", []):
+        if p.get("instrument") == sym:
+            lu = float(p.get("long", {}).get("units", 0))
+            su = float(p.get("short", {}).get("units", 0))
+            return lu + su
+    return 0.0
+
+
+def _digits(sym):
+    """JPY pairs quote at 3 decimals; everything else at 5 (OANDA rejects
+    over-precise attached orders — TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED)."""
+    return 3 if "JPY" in sym else 5
+
+
+def _ensure_protection(ex, sym, info, hint, atrs):
+    """Self-heal: if a book position lost its SL/TP (the 2026-09-01 FIFO
+    incident stripped both), re-attach from the state hint or fresh ATR."""
+    if info.get("protected"):
+        return
+    sl, tp = hint.get(sym, (None, None))
+    if not sl or not tp:
+        px = ex.get_current_price(sym)
+        atr = atrs.get(sym, 0.0)
+        if not px or not atr:
+            print(f"[fx] !! {sym} UNPROTECTED and no levels available — manual attention")
+            return
+        d = _digits(sym)
+        sl, tp = round(px - ATR_STOP * atr, d), round(px + ATR_TP * atr, d)
+    r = ex._request("PUT", f"/v3/accounts/{ex._account_id}/trades/{info['trade_id']}/orders",
+                    body={"stopLoss": {"price": f"{sl:.{_digits(sym)}f}", "timeInForce": "GTC"},
+                          "takeProfit": {"price": f"{tp:.{_digits(sym)}f}", "timeInForce": "GTC"}})
+    ok = "stopLossOrderTransaction" in r or "stopLossOrderRejectTransaction" not in r
+    print(f"[fx] protection {'restored' if ok else 'FAILED'} on {sym} "
+          f"(trade {info['trade_id']}) SL {sl:.5f} TP {tp:.5f}")
+
+
+def _txns_since(ex, iso_from):
+    """Venue transactions since iso_from (handles the paged response)."""
+    from urllib.parse import quote
+    r = ex._request("GET", f"/v3/accounts/{ex._account_id}/transactions"
+                            f"?from={quote(iso_from)}&pageSize=1000")
+    out = []
+    for page in r.get("pages", []):
+        path = "/v3/" + page.split("/v3/", 1)[-1]
+        out += ex._request("GET", path).get("transactions", [])
+    return out
+
+
+def _reconcile(ex, dry=False):
+    """Server-side SL/TP fills never produce ledger rows — replay them from
+    the venue transaction journal (dedup via the composite fill key)."""
+    since = "2026-08-31T00:00:00Z"
+    if STATE.exists():
+        try:
+            since = json.loads(STATE.read_text()).get("last_reconciled", since)
+        except Exception:
+            pass
+    fills = []
+    syms = set(ex.discover_symbols())
+    for t in _txns_since(ex, since):
+        if t.get("type") != "ORDER_FILL" or t.get("instrument") not in syms:
+            continue
+        units = float(t.get("units", 0))
+        fills.append({"timestamp": t.get("time"), "symbol": t["instrument"],
+                      "side": "BUY" if units > 0 else "SELL", "quantity": abs(units),
+                      "price": float(t.get("price", 0)), "order_id": t.get("transactionID"),
+                      "reason": "venue-reconciliation"})
+    _append_ledger(fills)
+    if fills:
+        print(f"[fx] reconciled {len(fills)} venue fill(s) into the ledger")
+    if not dry:
+        cache = json.loads(STATE.read_text()) if STATE.exists() else {}
+        cache["last_reconciled"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        STATE.write_text(json.dumps(cache, indent=2))
+
+
 def run(dry=False):
     ex = OandaExchange()
     if not ex.connect():
         raise SystemExit("[fx] connect failed — check config/oanda_keys.json")
     bal = ex.get_balance()
     print(f"[fx] connected: balance ${bal.cash:,.2f} | instruments {ex.discover_symbols()}")
+
+    if not dry:
+        _reconcile(ex)
 
     # 1. momentum rank
     mom = {}
@@ -96,68 +199,206 @@ def run(dry=False):
     target = {sym for sym, m in ranked[:TOP_N] if m > 0}
     print(f"[fx] target book: {sorted(target) or '(flat — no positive momentum)'}")
 
-    state = json.loads(STATE.read_text()) if STATE.exists() else {"positions": {}}
-    book = state.setdefault("positions", {})
+    # 2. venue-authoritative book + protection self-heal
+    book = _venue_book(ex)
+    hint = {}
+    if STATE.exists():
+        try:
+            for sym, pos in json.loads(STATE.read_text()).get("positions", {}).items():
+                for e in (pos.get("entries") or [pos]) if isinstance(pos, dict) else []:
+                    if isinstance(e, dict) and e.get("sl") and e.get("tp"):
+                        hint[sym] = (e["sl"], e["tp"])
+        except Exception:
+            pass
+    for sym, info in book.items():
+        _ensure_protection(ex, sym, info, hint, atrs)
+        if info["protected"]:
+            print(f"[fx] {sym}: {info['units']}u @ {info['entry']:.5f} protected "
+                  f"(opened {info['opened']})")
+        else:
+            print(f"[fx] {sym}: {info['units']}u @ {info['entry']:.5f} "
+                  f"(opened {info['opened']})")
     fills = []
 
-    # 2. close: positions no longer in target or beyond max hold
+    # 3. close: positions no longer in target or beyond max hold — only when
+    # the venue net is EXACTLY ours (never touch netting-ambiguous positions)
     today = datetime.now(timezone.utc)
     for sym in list(book):
-        age_days = (today - datetime.fromisoformat(book[sym]["opened"])).days
+        opened = datetime.fromisoformat(book[sym]["opened"])
+        if opened.tzinfo is None:
+            opened = opened.replace(tzinfo=timezone.utc)
+        age_days = (today - opened).days
         if sym in target and age_days < MAX_HOLD_DAYS:
             continue
         reason = "max-hold" if age_days >= MAX_HOLD_DAYS else "out-of-target"
-        net = bal.positions.get(sym, 0) or book[sym].get("units", 0)
+        net = _venue_net(ex, sym)
+        if abs(net - book[sym]["units"]) > 1e-9:
+            print(f"[fx] !! {sym} venue net {net} != book {book[sym]['units']} "
+                  f"— not ours alone, close deferred")
+            continue
         if not net:
-            book.pop(sym, None)
             continue
         close_side = "SELL" if net > 0 else "BUY"
         if dry:
             print(f"[fx] (dry) would CLOSE {sym} ({reason}) {abs(net)} units")
             continue
         r = ex.place_order(sym, close_side, abs(net), "market")
+        if r.status != "filled":
+            print(f"[fx] CLOSE {sym} REJECTED ({r.status}) — retried next run")
+            continue
         fills.append({"timestamp": r.timestamp, "symbol": sym, "side": close_side,
                       "quantity": abs(net), "price": r.price, "order_id": r.order_id,
                       "reason": reason})
         print(f"[fx] CLOSE {sym} ({reason}) -> {r.status} @ {r.price}")
         book.pop(sym, None)
 
-    # 3. open: target instruments not in book
+    # 4. open: target instruments not in book
     for sym in sorted(target):
         if sym in book:
             continue
         atr = atrs.get(sym, 0.0)
         px = ex.get_current_price(sym)
-        sl = px - ATR_STOP * atr if atr else None
-        tp = px + ATR_TP * atr if atr else None
+        d = _digits(sym)
+        sl = round(px - ATR_STOP * atr, d) if atr else None
+        tp = round(px + ATR_TP * atr, d) if atr else None
         if dry:
             print(f"[fx] (dry) would OPEN  {sym} 100 units SL {sl and round(sl, 5)} TP {tp and round(tp, 5)}")
             continue
         r = ex.place_order(sym, "BUY", UNITS, "market", stop_loss=sl, take_profit=tp)
+        if r.status != "filled":
+            print(f"[fx] OPEN  {sym} REJECTED ({r.status}) — retried next run")
+            continue
         fills.append({"timestamp": r.timestamp, "symbol": sym, "side": "BUY",
                       "quantity": UNITS, "price": r.price, "order_id": r.order_id,
                       "reason": "momentum-entry", "sl": sl, "tp": tp})
-        if r.status == "filled":
-            book[sym] = {"units": UNITS, "opened": today.isoformat(), "entry": r.price,
-                         "sl": sl, "tp": tp}
+        book[sym] = {"units": UNITS, "opened": today.isoformat(), "entry": r.price,
+                     "sl": sl, "tp": tp}
         print(f"[fx] OPEN  {sym} 100 units -> {r.status} @ {r.price:.5f} "
               f"SL {sl and round(sl, 5)} TP {tp and round(tp, 5)}")
 
-    # 4. persist
+    # 5. persist (ledger always; state is a cache)
     _append_ledger(fills)
     if not dry:
-        STATE.write_text(json.dumps({"positions": book, "updated": today.isoformat()}, indent=2))
-        print(f"[fx] state written: {STATE} ({len(book)} positions)")
+        cache = {sym: {"units": info["units"], "opened": info["opened"],
+                       "entry": info["entry"], "trade_id": info["trade_id"],
+                       "protected": info["protected"]}
+                 for sym, info in book.items()}
+        STATE.write_text(json.dumps({"positions": cache, "updated": today.isoformat(),
+                                     "note": "cache only — venue is authoritative"}, indent=2))
+        print(f"[fx] state cache written: {STATE} ({len(cache)} positions)")
     else:
         print("[fx] dry run — no state write")
-    bal2 = ex.get_balance()
-    print(f"[fx] book after: ${bal2.cash:,.2f} cash | positions {bal2.positions}")
+    ot2 = _venue_book(ex)
+    print(f"[fx] book after (venue): {len(ot2)} positions | "
+          f"protection: { {s: i['protected'] for s, i in ot2.items()} }")
     return book
+
+
+def run_intraday(dry=False):
+    """Hourly lab loop: H1 momentum on majors NOT held by the daily book.
+    2,000-unit clips, tight server-side SL/TP (1x / 1.5x ATR-H1), 12h max
+    hold. Demo-only evidence velocity: fills, execution stats, netting
+    behavior — this lane does not go live (intraday is ADR-0004 research)."""
+    ex = OandaExchange()
+    if not ex.connect():
+        raise SystemExit("[fx-id] connect failed")
+    # venue-authoritative: this lane owns positions of exactly 2,000 units
+    # (its signature size) that no other lane claims; closes only when the
+    # venue net is exactly ours — the two lanes can never close each other.
+    book_all = _venue_book(ex)
+    held = set(book_all)
+    pool = [s for s in ex.discover_symbols() if s not in held]
+    print(f"[fx-id] pool (not held by daily book): {pool}")
+
+    istate_p = PROJECT / "data" / "fx_intraday.json"
+    fills = []
+    now = datetime.now(timezone.utc)
+    book = {sym: info for sym, info in book_all.items()
+            if abs(info["units"] - 2000) < 1e-9}
+
+    # close: stale holds (12h) or any with SL/TP already consumed (venue closed)
+    for sym in list(book):
+        opened = datetime.fromisoformat(book[sym]["opened"])
+        if opened.tzinfo is None:
+            opened = opened.replace(tzinfo=timezone.utc)
+        age_h = (now - opened).total_seconds() / 3600
+        net = _venue_net(ex, sym)
+        if age_h >= 12 or not net or abs(net - 2000) > 1e-9:
+            if abs(net - 2000) > 1e-9 and net:
+                print(f"[fx-id] !! {sym} venue net {net} != ours 2000 — close deferred")
+                continue
+            if not net:
+                book.pop(sym, None)
+                print(f"[fx-id] {sym} venue-closed (SL/TP) — ledger reconciled by daily run")
+                continue
+            close_side = "SELL" if net > 0 else "BUY"
+            reason = "max-hold-12h"
+            if dry:
+                print(f"[fx-id] (dry) would CLOSE {sym} ({reason})")
+                continue
+            r = ex.place_order(sym, close_side, abs(net), "market")
+            fills.append({"timestamp": r.timestamp, "symbol": sym, "side": close_side,
+                          "quantity": abs(net), "price": r.price, "order_id": r.order_id,
+                          "reason": f"intraday-{reason}"})
+            print(f"[fx-id] CLOSE {sym} ({reason}) -> {r.status} @ {r.price}")
+            book.pop(sym, None)
+        else:
+            print(f"[fx-id] holding {sym} ({age_h:.1f}h, net {net})")
+
+    # open: H1 momentum on pool, positive only, top-2
+    mom = {}
+    atrs = {}
+    for sym in pool[:]:
+        bars = ex.get_bars(sym, "1h", 20)
+        if len(bars) < 10:
+            continue
+        mom[sym] = bars[-1].close / bars[-9].close - 1.0
+        trs = [max(bars[i].high - bars[i].low, abs(bars[i].high - bars[i-1].close),
+                   abs(bars[i].low - bars[i-1].close)) for i in range(1, len(bars))]
+        atrs[sym] = sum(trs) / len(trs)
+    ranked = sorted(mom.items(), key=lambda kv: -kv[1])[:2]
+    for sym, m in ranked:
+        if m <= 0 or sym in book:
+            continue
+        atr = atrs[sym]
+        px = ex.get_current_price(sym)
+        sl, tp = px - atr, px + 1.5 * atr
+        if dry:
+            print(f"[fx-id] (dry) would OPEN {sym} 2000 units SL {sl:.5f} TP {tp:.5f}")
+            continue
+        r = ex.place_order(sym, "BUY", 2000, "market", stop_loss=sl, take_profit=tp)
+        fills.append({"timestamp": r.timestamp, "symbol": sym, "side": "BUY",
+                      "quantity": 2000, "price": r.price, "order_id": r.order_id,
+                      "reason": "intraday-momentum", "sl": sl, "tp": tp})
+        book[sym] = {"units": 2000, "opened": now.isoformat(), "entry": r.price, "sl": sl, "tp": tp}
+        print(f"[fx-id] OPEN {sym} 2000 units -> {r.status} @ {r.price:.5f} SL {sl:.5f} TP {tp:.5f}")
+
+    _append_ledger(fills)
+    if not dry:
+        istate_p.write_text(json.dumps({"positions": book, "updated": now.isoformat()}, indent=2))
+        print(f"[fx-id] state written ({len(book)} intraday positions)")
+    else:
+        print("[fx-id] dry run — no state write")
 
 
 def main():
     dry = "--once" not in sys.argv
-    run(dry=dry)
+    if "--intraday" in sys.argv:
+        run_intraday(dry=dry)
+    else:
+        # one instance at a time — a double-run triggered the 2026-09-01 FIFO
+        # incident that stripped the book's protective orders
+        lock = PROJECT / "data" / "fx_runner.lock"
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode())
+        except FileExistsError:
+            raise SystemExit("[fx] another fx_runner instance is running — exiting")
+        try:
+            run(dry=dry)
+        finally:
+            os.close(fd)
+            os.unlink(lock)
 
 
 if __name__ == "__main__":
