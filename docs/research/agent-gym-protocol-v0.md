@@ -86,6 +86,17 @@ Rule policies are state-independent by construction — their rows must be
 byte-identical across state versions (the determinism check). State-version
 comparisons are only meaningful at fixed episodes.
 
+## 5b. Hybrid mode (v0.3a, 2026-09-01)
+
+`hybrid:<candidate>:<tier>` — a gym rule proposes entries (its opportunity
+set, computed point-in-time); the LLM sees each proposal with the rule's
+rationale (fade depth, COT z, volatility, range position) and may approve or
+veto it. Opens come ONLY from the rule's set (attribution stays clean);
+exits remain with the engine; unparseable output fails OPEN to the verified
+rule and counts a violation; days with no proposal make no LLM call.
+Requires `--state v0.2`. The comparison baseline is the bare rule on the
+same episodes. Exit-discretion variants (v0.3b) are future protocol bumps.
+
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
 - Rules load **directly from the signal gym's candidate files** (single

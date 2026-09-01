@@ -201,16 +201,87 @@ class GymCandidate(Policy):
         self.name = self.cand.NAME
         self.series, self.alldates, self.exog = series, alldates, exog
     def act(self, state, i):
-        ctx = ShadowCtx(self.series, self.alldates, i, list(self.series), exog_series=self.exog)
+        ordered = candidate_opens(self.cand, self.series, self.alldates, i, self.exog)
+        held = [p["symbol"] for p in state["positions"]]
+        return {"opens": [s for s in ordered if s not in held][:MAX_OPEN_PER_DAY], "closes": []}
+
+
+def candidate_opens(cand, series, alldates, i, exog):
+    """Run a gym candidate's entry() over the point-in-time ctx; return its
+    proposed symbols in stable weight order (the rule's opportunity set)."""
+    ctx = ShadowCtx(series, alldates, i, list(series), exog_series=exog)
+    picks = cand.entry(ctx)
+    assert isinstance(picks, dict)
+    return [s for s, _w in sorted(picks.items(), key=lambda kv: -kv[1])]
+
+
+class HybridVeto(Policy):
+    """v0.3a hybrid mode: a rule proposes entries; the LLM sees each proposal
+    with the rule's rationale and may approve or veto it. Opens come ONLY
+    from the rule's opportunity set (attribution stays clean); exits remain
+    with the engine. On unparseable LLM output the rule's proposal is
+    approved as-is (fail-open to the verified rule) and the violation is
+    counted. Days with no proposal make no LLM call."""
+    def __init__(self, cand_name, llm, series, alldates, exog):
+        self.cand = load_candidate(cand_name)
+        self.llm = llm
+        self.name = f"hybrid:{cand_name}:{llm.tier}"
+        self.series, self.alldates, self.exog = series, alldates, exog
+        self.violations = self.approved = self.vetoed = 0
+        self.tokens = self.cost = 0.0  # proxied from llm at report time
+
+    def act(self, state, i):
         try:
-            picks = self.cand.entry(ctx)
-            assert isinstance(picks, dict)
+            ordered = candidate_opens(self.cand, self.series, self.alldates, i, self.exog)
         except Exception as e:
             print(f"    ! candidate entry failed on bar {i}: {e}")
             return {"opens": [], "closes": []}
-        ordered = [s for s, _w in sorted(picks.items(), key=lambda kv: -kv[1])]
         held = [p["symbol"] for p in state["positions"]]
-        return {"opens": [s for s in ordered if s not in held][:MAX_OPEN_PER_DAY], "closes": []}
+        proposals = [s for s in ordered if s not in held][:MAX_OPEN_PER_DAY]
+        if not proposals:
+            return {"opens": [], "closes": []}
+
+        lines = []
+        for sym in proposals:
+            d = state["symbols"][sym]
+            lines.append(f"{sym}: fade {d['vs_ma20_pct']:+.2%} vs ma20 {d['ma20']} "
+                         f"(close {d['closes'][-1]}), ret5 {d['ret5']:+.2%}, ret30 {d['ret30']:+.2%}, "
+                         f"atr {d['atr_pct']:.2%}, 30d-range-pos {d['pos_in_30d_range']:.2f}, cot_z {d['cot_z']}")
+        prompt = (
+            "You are reviewing entry signals for a $100,000 FX book (7 majors). A systematic "
+            "mean-reversion rule proposes to OPEN these positions today ($10,000 notional each, "
+            "ATR 1.5/2.5 stop/target auto-attached, long only, max 3 positions, one open per day):\n"
+            + "\n".join(lines)
+            + f"\n\nBook context — date {state['date']}, equity ${state['equity']:,.0f}, "
+            f"cash ${state['cash']:,.0f}, held: {state['positions'] or 'none'}.\n"
+            "Market snapshot (all majors):\n"
+            + "\n".join(f"{s}: close {d['closes'][-1]} vs ma20 {d['ma20']} ({d['vs_ma20_pct']:+.2%}), "
+                        f"ret5 {d['ret5']:+.2%}, atr {d['atr_pct']:.2%}, cot_z {d['cot_z']}"
+                        for s, d in state["symbols"].items())
+            + "\n\nFor EACH proposal decide approve or veto. Respond with ONLY JSON, every "
+              'proposed symbol in exactly one list:\n{"approve": ["SYMBOL"], "veto": ["SYMBOL"]}')
+        try:
+            msg, _u = self.llm._chat(prompt, log_ctx={"mode": "veto", "bar": i, "date": state["date"],
+                                                       "proposals": proposals})
+        except Exception as e:
+            self.violations += 1
+            return {"opens": proposals, "closes": [], "_violation": f"endpoint: {e} — fail-open to rule"}
+        try:
+            j = msg[msg.index("{"): msg.rindex("}") + 1]
+            out = json.loads(j)
+            approve = [str(s).upper() for s in out.get("approve", [])]
+            veto = [str(s).upper() for s in out.get("veto", [])]
+            approved = [s for s in proposals if s in approve and s not in veto]
+            missing = [s for s in proposals if s not in approve and s not in veto]
+            if missing:
+                self.violations += 1
+                approved = list(proposals)  # fail-open
+            self.approved += len(approved)
+            self.vetoed += len(proposals) - len(approved)
+            return {"opens": approved, "closes": []}
+        except Exception:
+            self.violations += 1
+            return {"opens": proposals, "closes": [], "_violation": "unparseable veto — fail-open to rule"}
 
 
 class LLM(Policy):
@@ -260,21 +331,19 @@ class LLM(Policy):
             f"Date: {state['date']}  Equity: ${state['equity']:,.0f}  Cash: ${state['cash']:,.0f}\n"
             f"Open positions: {pos}\n" + "\n".join(syms))
 
-    def act(self, state, i):
+    def _chat(self, prompt, log_ctx=None):
+        """Low-level OpenAI-compatible call; logs the raw completion verbatim.
+        Raises on endpoint failure (caller counts the violation)."""
         body = {"model": self.model, "temperature": 0, **self.extras,
-                "messages": [{"role": "user", "content": self._prompt(state)}]}
+                "messages": [{"role": "user", "content": prompt}]}
         req = urllib.request.Request(
             self.base_url.rstrip("/") + "/chat/completions",
             data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json",
                      **({"Authorization": f"Bearer {self.api_key}"} if self.api_key else {})})
         t0 = time.time()
-        try:
-            with urllib.request.urlopen(req, timeout=120) as r:
-                resp = json.load(r)
-        except Exception as e:
-            self.violations += 1
-            return {"opens": [], "closes": [], "_violation": f"endpoint: {e}"}
+        with urllib.request.urlopen(req, timeout=120) as r:
+            resp = json.load(r)
         msg = (resp.get("choices") or [{}])[0].get("message", {}).get("content", "")
         usage = resp.get("usage", {})
         pt, ct = usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
@@ -283,11 +352,20 @@ class LLM(Policy):
         self.tokens += usage.get("total_tokens", pt + ct)
         self.cost += (pt * self.price_in + ct * self.price_out) / 1e6
         if self.log:
-            self.log.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(),
-                                       "bar": i, "date": state["date"],
-                                       "latency_s": round(time.time() - t0, 2),
-                                       "usage": usage, "raw": msg}, default=str) + "\n")
+            row = {"ts": datetime.now(timezone.utc).isoformat(),
+                   "latency_s": round(time.time() - t0, 2), "usage": usage, "raw": msg}
+            if log_ctx:
+                row.update(log_ctx)
+            self.log.write(json.dumps(row, default=str) + "\n")
             self.log.flush()
+        return msg, usage
+
+    def act(self, state, i):
+        try:
+            msg, _u = self._chat(self._prompt(state), log_ctx={"bar": i, "date": state["date"]})
+        except Exception as e:
+            self.violations += 1
+            return {"opens": [], "closes": [], "_violation": f"endpoint: {e}"}
         try:
             j = msg[msg.index("{"): msg.rindex("}") + 1]
             out = json.loads(j)
@@ -383,6 +461,16 @@ def stats(fills, curve):
             "maxdd_pct": round(mdd * 100, 2)}
 
 
+def _make_llm(tier, run_dir, log_suffix="", cfg_path=None):
+    cfg_path = cfg_path or (PROJECT / "config" / "agent_gate_models.json")
+    cfg = json.load(open(cfg_path))["tiers"][tier]
+    api_key = os.environ.get(cfg["api_key_env"], "") if cfg.get("api_key_env") else ""
+    return LLM(tier, cfg["base_url"], cfg["model"], api_key,
+               cfg.get("price_in_per_m", 0.0), cfg.get("price_out_per_m", 0.0),
+               extras=cfg.get("request_extras"),
+               log=(run_dir / f"llm_responses_{tier}{log_suffix}.jsonl").open("a"))
+
+
 def main():
     argv = sys.argv
     pol_names = (argv[argv.index("--policies") + 1].split(",")
@@ -417,17 +505,18 @@ def main():
             policies.append(MomentumK5(symbols, bars))
         elif name.startswith("llm:"):
             tier = name.split(":", 1)[1]
-            cfg_path = (Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv
-                        else PROJECT / "config" / "agent_gate_models.json")
-            cfg = json.load(open(cfg_path))["tiers"][tier]
-            api_key = os.environ.get(cfg["api_key_env"], "") if cfg.get("api_key_env") else ""
-            p = LLM(tier, cfg["base_url"], cfg["model"], api_key,
-                    cfg.get("price_in_per_m", 0.0), cfg.get("price_out_per_m", 0.0),
-                    extras=cfg.get("request_extras"),
-                    log=(run_dir / f"llm_responses_{tier}.jsonl").open("a"))
-            policies.append(p)
+            cfg_path = Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv else None
+            policies.append(_make_llm(tier, run_dir, cfg_path=cfg_path))
+        elif name.startswith("hybrid:"):
+            _, cand_name, tier = name.split(":", 2)
+            cfg_path = Path(argv[argv.index("--llm-config") + 1]) if "--llm-config" in argv else None
+            llm = _make_llm(tier, run_dir, log_suffix=f"_{cand_name}", cfg_path=cfg_path)
+            policies.append(HybridVeto(cand_name, llm, series, alldates, exog))
         else:
             policies.append(GymCandidate(name, series, alldates, exog))
+
+    if any(isinstance(p, HybridVeto) for p in policies) and state_version != "v0.2":
+        raise SystemExit("hybrid mode requires --state v0.2 (proposal lines use v0.2 fields)")
 
     meta = {"run": run_label, "template": f"agent-gym-state-{state_version}", "episodes": episodes,
             "cash0": CASH0,
@@ -449,21 +538,28 @@ def main():
             eps.append(stats(ep_fills, r["curve"]))
         all_fills.extend([{**f, "policy": pol.name} for f in pol_fills])
         pooled = stats(pol_fills, curves)
+        if isinstance(pol, HybridVeto):
+            pol.tokens, pol.cost = pol.llm.tokens, pol.llm.cost
         scoreboard[pol.name] = {"episodes": eps, "pooled": pooled,
                                 "violations": getattr(pol, "violations", 0),
                                 "tokens": getattr(pol, "tokens", 0),
-                                "prompt_tokens": getattr(pol, "prompt_tokens", 0),
-                                "completion_tokens": getattr(pol, "completion_tokens", 0),
+                                "prompt_tokens": getattr(pol, "prompt_tokens", 0) or getattr(getattr(pol, "llm", None), "prompt_tokens", 0),
+                                "completion_tokens": getattr(pol, "completion_tokens", 0) or getattr(getattr(pol, "llm", None), "completion_tokens", 0),
                                 "declared_cost_usd": round(getattr(pol, "cost", 0.0), 4),
-                                "request_extras": getattr(pol, "extras", None),
+                                "request_extras": getattr(pol, "extras", None) or getattr(getattr(pol, "llm", None), "extras", None),
+                                "approved": getattr(pol, "approved", None),
+                                "vetoed": getattr(pol, "vetoed", None),
                                 "parse_failures": getattr(pol, "parse_failures", 0)}
-        cost_txt = f" cost=${pol.cost:.4f}" if isinstance(pol, LLM) else ""
-        print(f"  {pol.name:<20} " + "  ".join(
+        if isinstance(pol, HybridVeto):
+            tail = f" viol={pol.violations} appr={pol.approved} veto={pol.vetoed} cost=${pol.cost:.4f}"
+        elif isinstance(pol, LLM):
+            tail = f" viol={pol.violations} tokens={pol.tokens} cost=${pol.cost:.4f}"
+        else:
+            tail = ""
+        print(f"  {pol.name:<26} " + "  ".join(
             f"ep{k}[n={e['n']} PF {e['pf']} ret {e['ret_pct']:+.2f}% dd {e['maxdd_pct']:.2f}%]"
             for k, e in enumerate(eps))
-            + f"  pooled[n={pooled['n']} PF {pooled['pf']} PnL {pooled['pnl']:+,.0f}]"
-            + (f" viol={pol.violations} tokens={pol.tokens}" if isinstance(pol, LLM) else "")
-            + cost_txt)
+            + f"  pooled[n={pooled['n']} PF {pooled['pf']} PnL {pooled['pnl']:+,.0f}]" + tail)
 
     (run_dir / "scoreboard.json").write_text(json.dumps(
         {"meta": meta, "scoreboard": scoreboard, "fills": all_fills}, indent=1, default=str))
