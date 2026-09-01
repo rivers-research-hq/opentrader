@@ -343,6 +343,10 @@ const dayKey = (d) => d.getFullYear() + "-" +
 const localTime = (d) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 function buildCalendar(state, fx, cal) {
+  // FITS THE TERMINAL: left grid (3 compact months) + right agenda, zipped,
+  // total capped to stdout.rows. Forecasts and in-house state live INLINE in
+  // the agenda — no detail boxes below to push content off-screen.
+  const ROWS = Math.max((process.stdout.rows || 40) - 3, 20);
   const BANK_CUR = { FED: "USD", ECB: "EUR", BOE: "GBP", BOJ: "JPY",
                      SNB: "CHF", BOC: "CAD", RBA: "AUD", RBNZ: "NZD" };
   const BANK_COLOR = { FED: "cyan", ECB: "green", BOE: "yellow", BOJ: "yellow",
@@ -352,15 +356,12 @@ function buildCalendar(state, fx, cal) {
   const todayKey = dayKey(now);
   const tomorrowKey = dayKey(new Date(now.getTime() + 86400000));
 
-  // group events by LOCAL day
   const byDay = {};
-  const decisions = (cal && cal.decisions) || [];
-  const ff = (cal && cal.ff_events) || [];
-  for (const d of decisions) {
+  for (const d of (cal && cal.decisions) || []) {
     byDay[d.date] = byDay[d.date] || { decisions: [], ff: [] };
     byDay[d.date].decisions.push(d.bank);
   }
-  for (const e of ff) {
+  for (const e of (cal && cal.ff_events) || []) {
     const d = new Date(e.date);
     const k = dayKey(d);
     byDay[k] = byDay[k] || { decisions: [], ff: [] };
@@ -369,11 +370,11 @@ function buildCalendar(state, fx, cal) {
   }
 
   const dayColor = (y, m, d) => {
-    const k = dayKey(new Date(y, m, d));
-    const ev = byDay[k];
-    const hasDec = ev && ev.decisions.length;
-    const hasHigh = ev && ev.ff.some((e) => e.impact === "High");
-    const hasMed = ev && ev.ff.some((e) => e.impact === "Medium");
+    const ev = byDay[dayKey(new Date(y, m, d))];
+    if (!ev) return null;
+    const hasDec = ev.decisions.length > 0;
+    const hasHigh = ev.ff.some((e) => e.impact === "High");
+    const hasMed = ev.ff.some((e) => e.impact === "Medium");
     if (hasDec && hasHigh) return "magenta";
     if (hasDec) return "green";
     if (hasHigh) return "red";
@@ -381,142 +382,104 @@ function buildCalendar(state, fx, cal) {
     return null;
   };
 
-  // month grid (khal style) — returns segment rows
-  function monthBlock(y, m, today) {
+  function monthBlock(y, m) {
     const label = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m];
     const rows = [];
     const first = new Date(y, m, 1);
-    const startDow = (first.getDay() + 6) % 7; // Mon=0
+    const startDow = (first.getDay() + 6) % 7;
     const daysIn = new Date(y, m + 1, 0).getDate();
     const cells = [];
     for (let i = startDow; i > 0; i--) {
       const pm = new Date(y, m, 1 - i);
-      cells.push({ d: pm.getDate(), dim: true, key: dayKey(pm) });
+      cells.push({ d: pm.getDate(), dim: true });
     }
     for (let d = 1; d <= daysIn; d++) cells.push({ d, key: dayKey(new Date(y, m, d)) });
-    while (cells.length % 7) {
-      const nm = new Date(y, m + 1, cells.length - startDow - daysIn + 1);
-      cells.push({ d: nm.getDate(), dim: true, key: dayKey(nm) });
-    }
-    const hdr = "Mo Tu We Th Fr Sa Su";
+    let trail = 1;
+    while (cells.length % 7) cells.push({ d: trail++, dim: true, next: true });
     for (let w = 0; w < cells.length / 7; w++) {
       const segs = [];
       if (w === 0) segs.push({ text: label + " ", color: "cyan", bold: true });
-      else segs.push({ text: "    " });
+      else segs.push({ text: "     " });
       for (let c = 0; c < 7; c++) {
         const cell = cells[w * 7 + c];
-        const isToday = cell.key === todayKey;
-        const col = isToday ? null : dayColor(
-          Number(cell.key.slice(0, 4)), Number(cell.key.slice(5, 7)) - 1,
-          Number(cell.key.slice(8, 10)));
-        segs.push({ text: String(cell.d).padStart(2) + " ",
-                    color: col, bold: isToday, inverse: isToday, dim: cell.dim && !isToday });
+        const isToday = cell.key === todayKey && !cell.dim && !cell.next;
+        const col = isToday ? null
+          : cell.dim || cell.next ? "dim"
+          : dayColor(y, m, cell.d) || (c >= 5 ? "dim" : null);
+        segs.push({ text: String(cell.d).padStart(2) + " ", color: col,
+                    bold: isToday, inverse: isToday, dim: !isToday && (cell.dim || cell.next || col === "dim") });
       }
-      const monday = new Date(y, m, cells[w * 7 + 0]?.d || 1);
-      if (w > 0 || startDow > 0) { /* week num from the row's first day */ }
-      const firstCellKey = cells[w * 7 + (startDow && w === 0 ? startDow : 0)]?.key;
-      segs.push({ text: " " + String(isoWeek(new Date(firstCellKey + "T12:00:00Z"))).padStart(2), dim: true });
+      const weekFirst = cells[w * 7].next ? null : new Date(y, m, cells[w * 7].d);
+      const wk = weekFirst ? isoWeek(weekFirst) : isoWeek(new Date(y, m, 1));
+      segs.push({ text: " " + String(wk).padStart(2), dim: true });
       rows.push({ segments: segs });
     }
-    return { label, hdr, rows };
+    return rows;
   }
 
-  const months = [];
-  const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  for (const m0 of [pm, new Date(now.getFullYear(), now.getMonth(), 1),
-                    new Date(now.getFullYear(), now.getMonth() + 1, 1)]) {
-    months.push(monthBlock(m0.getFullYear(), m0.getMonth(), now));
-  }
-
-  // assemble left column: month blocks + day-of-week header per block
   const left = [];
-  for (const mb of months) {
-    left.push({ segments: [{ text: "" }] });
-    left.push({ segments: [{ text: "    " }, { text: mb.hdr, dim: true, bold: true }] });
-    for (const r of mb.rows) left.push(r);
+  for (const m0 of [new Date(now.getFullYear(), now.getMonth() - 1, 1),
+                    new Date(now.getFullYear(), now.getMonth(), 1),
+                    new Date(now.getFullYear(), now.getMonth() + 1, 1)]) {
+    left.push({ segments: [{ text: "    " }, { text: "Mo Tu We Th Fr Sa Su", dim: true, bold: true },
+                            { text: "  wk", dim: true }] });
+    for (const r of monthBlock(m0.getFullYear(), m0.getMonth())) left.push(r);
   }
 
-  // right column: agenda
+  // agenda (right) — compact one-liners, capped to the grid height
   const right = [];
-  const agendaFor = (key, title) => {
-    const ev = byDay[key];
-    const segs = [{ text: title + ":", bold: true, color: "cyan" }];
-    right.push({ segments: segs });
+  const agendaDay = (k, label) => {
+    const ev = byDay[k];
+    if (label) right.push({ segments: [{ text: label + ":", bold: true, color: "cyan" }] });
     if (!ev || (!ev.decisions.length && !ev.ff.length)) {
       right.push({ segments: [{ text: "  (nothing scheduled)", dim: true }] });
       return;
     }
+    const MAXR = W - 33;  // right-column budget — no wrapping, alignment holds
+    const trunc = (s) => String(s).slice(0, MAXR);
     for (const bank of ev.decisions) {
       const cur = BANK_CUR[bank] || "";
       const ih = (cal && cal.inhouse) || {};
-      const ihS = ih[cur] || {};
-      const ihTxt = ihS.rate != null
-        ? `rate ${ihS.rate}% 90dΔ ${ihS.chg90 ?? "—"}`
-        : "rate n/a";
-      right.push({ segments: [
-        { text: "· " }, { text: `${bank} decision`, color: BANK_COLOR[bank], bold: true },
-        { text: ` — ${cur} · in-house: ${ihTxt}`, dim: true }] });
+      const s = ih[cur] || {};
+      const ihTxt = s.rate != null ? `rate ${s.rate}% 90dΔ ${s.chg90 ?? "—"}${s.cot_z != null ? ` COT z ${s.cot_z}` : ""}` : "rate n/a";
+      right.push({ text: trunc(`  · ${bank} decision — in-house: ${ihTxt}`), color: BANK_COLOR[bank], bold: true });
     }
     for (const e of ev.ff.sort((a, b) => a.time < b.time ? -1 : 1)) {
       const col = e.impact === "High" ? "red" : e.impact === "Medium" ? "yellow" : null;
-      const fc = e.forecast !== "—" ? ` analyst ${e.forecast}` : "";
-      const pv = e.previous !== "—" ? ` (prev ${e.previous})` : "";
-      right.push({ segments: [
-        { text: "→ " + e.time + " " },
-        { text: `${e.title}`, color: col, bold: e.impact === "High" },
-        { text: ` [${e.currency}${fc ? "," + fc.trim() + pv : ""}]`, dim: true }] });
+      right.push({ text: trunc(`  → ${e.time} ${e.title} [${e.currency}] analyst ${e.forecast} prev ${e.previous}`), color: col });
     }
   };
-  agendaFor(todayKey, "Today");
-  agendaFor(tomorrowKey, "Tomorrow");
-  right.push({ segments: [{ text: "" }] });
-  right.push({ segments: [{ text: "Upcoming (14d):", bold: true, color: "cyan" }] });
-  const upKeys = Object.keys(byDay).filter((k) => k > tomorrowKey).sort().slice(0, 10);
+  agendaDay(todayKey, "Today");
+  agendaDay(tomorrowKey, "Tomorrow");
+  right.push({ segments: [{ text: "Upcoming:", bold: true, color: "cyan" }] });
+  const upKeys = Object.keys(byDay).filter((k) => k > tomorrowKey).sort();
   for (const k of upKeys) {
     const ev = byDay[k];
-    for (const bank of ev.decisions)
-      right.push({ segments: [{ text: `  ${k.slice(5)} ${bank} decision`, color: BANK_COLOR[bank] || "green" }] });
-    for (const e of ev.ff)
-      right.push({ segments: [{ text: `  ${k.slice(5)} ${e.time} ${e.title} [${e.currency}]`, color: e.impact === "High" ? "red" : e.impact === "Medium" ? "yellow" : null, dim: e.impact !== "High" }] });
+    const MAXR = W - 33;
+    for (const bank of ev.decisions) {
+      const cur = BANK_CUR[bank] || "";
+      const ih = (cal && cal.inhouse) || {};
+      const s = ih[cur] || {};
+      const ihTxt = s.rate != null ? `rate ${s.rate}%` : "rate n/a";
+      right.push({ text: trunc(`  ${k.slice(5)} · ${bank} decision — ${ihTxt}`), color: BANK_COLOR[bank] });
+    }
+    for (const e of ev.ff) {
+      const col = e.impact === "High" ? "red" : e.impact === "Medium" ? "yellow" : null;
+      right.push({ text: trunc(`  ${k.slice(5)} · ${e.title} [${e.currency}] analyst ${e.forecast}`), color: col, dim: e.impact !== "High" });
+    }
   }
 
-  // zip left (30 wide) + right
-  const LW = 30;
-  const n = Math.max(left.length, right.length);
+  // zip, capping the agenda to the grid height
+  const LW = 31;
+  const n = Math.min(Math.max(left.length, right.length), ROWS);
   for (let i = 0; i < n; i++) {
     const lft = (left[i] && left[i].segments) || [{ text: "" }];
+    const rgt = (right[i] && right[i].segments) || [{ text: "" }];
     const lftWidth = lft.reduce((a, s) => a + s.text.length, 0);
-    const segs = [...lft, { text: " ".repeat(Math.max(1, LW - lftWidth)) },
-                  ...(right[i] && right[i].segments ? right[i].segments : [{ text: "" }])];
-    L.push({ segments: segs });
+    L.push({ segments: [...lft, { text: " ".repeat(Math.max(1, LW - lftWidth)) }, ...rgt] });
   }
-
-  // detailed boxes below (in-house state + analyst forecasts per event)
-  const inhouse = (cal && cal.inhouse) || {};
-  const decLines = [];
-  for (const d of decisions.slice(0, 8)) {
-    const cur = BANK_CUR[d.bank];
-    const ih = inhouse[cur] || {};
-    const ihS = ih.rate != null
-      ? `rate ${ih.rate}%  90dΔ ${ih.chg90 >= 0 ? "+" : ""}${ih.chg90 ?? "—"}${ih.cot_z != null ? `  COT z ${ih.cot_z}` : ""}`
-      : (ih.note || "state n/a");
-    const approx = d.bank === "FED" ? "" : " (approx)";
-    decLines.push({ text: ` ${d.date}  ${d.bank.padEnd(5)} ${cur}  in-house state: ${ihS}${approx}`, color: BANK_COLOR[d.bank] || null });
-  }
-  if (!decLines.length) decLines.push({ text: "  (none in window)", dim: true });
-  L.push(...box("CENTRAL-BANK DECISIONS — next 45 days · in-house state (not a forecast)", decLines, "yellow"));
-  L.push({ text: "" });
-
-  const ffLines = [];
-  for (const e of ff.slice(0, 12)) {
-    const when = `${e.date.slice(5, 10)} ${e.date.slice(11, 16)} UTC`;
-    ffLines.push({ text: ` ${when}  ${String(e.currency).padEnd(4)} [${String(e.impact).padEnd(6)}] ${String(e.title).padEnd(34).slice(0, 34)} analyst: ${String(e.forecast).padEnd(7)} prev: ${e.previous}`, dim: e.impact !== "High" });
-  }
-  if (!ffLines.length) ffLines.push({ text: "  (feed unavailable)", dim: true });
-  L.push(...box("MACRO RELEASES — next 14 days · analyst consensus (ForexFactory feed)", ffLines, "green"));
-  L.push({ text: "" });
-  L.push({ text: "  in-house columns are STATE reads (policy rate, 90d trend, positioning) — not predictions. The system does not forecast decisions; it avoids holding through them (event gate) and measures what they do (crash book).", dim: true });
+  L.push({ segments: [{ text: "  in-house columns are STATE reads (rate, trend, positioning) — not forecasts. Decisions are avoided via the event gate; measured by the crash book.", dim: true }] });
   return L;
 }
 
