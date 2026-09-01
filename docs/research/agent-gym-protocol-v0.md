@@ -161,6 +161,30 @@ features or the preference layer are the next levers, and forward shadow
 accrual (out-of-window by construction) is the honest arbiter for any
 head-vs-rule comparison.
 
+## 5d. Worlds — Stage 1 of the adversarial loop (2026-09-01)
+
+`scripts/worlds.py` — robustness realities via **date-block bootstrap**:
+blocks of consecutive real dates (geometric length, mean ~1 month) are
+resampled with all symbols moving together, so within-block cross-asset
+structure and volatility clustering are REAL and only the path ordering is
+perturbed. No learned generator, no artifact risk (Stage 2 puts a learned
+generator behind acceptance tests; this stage needs none). Worlds are
+re-dated onto synthetic timestamps so the gym engine runs unchanged; COT and
+carry travel with each source date. Per candidate: OOS PF distribution over
+N worlds, fraction of worlds with PF>1 and positive P&L, real-path
+percentile. **Recommended promotion bar (human-set): ≥70% of worlds PF>1 and
+the real path inside the 25th–90th percentile.** A non-edge control
+(mom_k5_pos) is part of every run — a harness that cannot fail the control
+cannot pass anything.
+
+First run (1000 worlds, block 21): **c08_mr_fade_cot — OOS PF mean 2.52,
+p5 1.16, PF>1 in 98.1% of worlds, real path at p60.8 — ROBUST.** c04 also
+robust (96.8%; COT filter's marginal value shrinks under resampling: 2.52 vs
+2.39 mean). mom_k5 control fails as designed (42.8% PF>1, mean 0.98).
+Block-63 sensitivity: c08 95.6% PF>1, p5 1.03 — edge survives, with regime
+sensitivity as the residual risk (worlds inherit the source window's regime
+mix; novel-regime risk remains the forward accrual's job).
+
 ## 6. Integration with the existing seams (this is gate infrastructure, not a lane)
 
 - Rules load **directly from the signal gym's candidate files** (single

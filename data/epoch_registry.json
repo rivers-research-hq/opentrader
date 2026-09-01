@@ -15,7 +15,7 @@
       "accrual": {
         "ledger": "data/fx_ledger.jsonl",
         "closed_trades": 0,
-        "last_checked": "2026-08-31T22:04:09.382828+00:00"
+        "last_checked": "2026-09-01T14:14:57.062608+00:00"
       },
       "promotion_bar": "ADR-0002 clause evidence accrues from real venue fills; weight/order-flow changes remain human-gated",
       "notes": "Expert #0 \u2014 the MoT seam's first entry. Registered as live incumbent; no arena gate claimed (gym mom_k5 family: IS PF 0.91 / OOS PF 1.12, not a survivor) \u2014 its track record is its own forward ledger, seed=null per ADR-0009 honest-seed rule."
@@ -55,10 +55,10 @@
       "accrual": {
         "ledger": "data/fx_shadow_ledger.jsonl",
         "closed_trades": null,
-        "last_checked": null
+        "last_checked": "2026-09-01T14:14:57.062864+00:00"
       },
       "promotion_bar": ">=30 closed shadow round trips, PF>1 over the shadow window, reconciliation clean, then HUMAN signoff at shadow->live boundary (ADR-0009 #4)",
-      "notes": "First gym survivor in project history. Sentiment filter removed ~15-20% of c04 trades and improved BOTH windows (IS PF 1.18->1.73, OOS 2.27->2.54). Caveats: single walkforward, one a-priori threshold (z=1.5, not swept), small n \u2014 the shadow forward window is the confirmation test. Supersedes c04 as the shadowed challenger (compete-not-displace: c04 stays registered)."
+      "notes": "WORLDS-ROBUST (2026-09-01, 1000 block-bootstrap realities, protocol \u00a75d): OOS PF mean 2.52, p5 1.16, PF>1 in 98.1% of worlds, real path at p60.8 (inside distribution, not a lucky draw); block-63 sensitivity 95.6% PF>1 p5 1.03. Control (mom_k5_pos) fails as designed at 42.8%. Edge is not a path artifact. Combined with the regime-bound caveat (BM2: worlds inherit the 2024-26 golden mix \u2014 novel-regime risk stays with forward accrual), the sleeve proceeds toward the Sep 7-14 review."
     }
   ]
 }

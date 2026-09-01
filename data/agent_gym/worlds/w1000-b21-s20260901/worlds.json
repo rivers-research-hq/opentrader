@@ -1,0 +1,58 @@
+{
+ "meta": {
+  "worlds": 1000,
+  "block_mean": 21,
+  "seed": 20260901,
+  "window": [
+   1727211600,
+   1787864400
+  ]
+ },
+ "candidates": {
+  "c08_mr_fade_cot": {
+   "real_oos": {
+    "n": 22,
+    "wr": 54.54545454545454,
+    "pf": 2.53937432407112,
+    "pl": 1101.2299164285746
+   },
+   "worlds_pf_mean": 2.52,
+   "worlds_pf_p5": 1.162,
+   "worlds_pf_median": 2.281,
+   "worlds_pf_pct_gt1": 98.1,
+   "worlds_pnl_pct_pos": 98.1,
+   "worlds_mean_n": 37.7,
+   "real_pf_percentile": 60.8
+  },
+  "c04_mr_fade_ma20": {
+   "real_oos": {
+    "n": 28,
+    "wr": 53.57142857142857,
+    "pf": 2.265237484748034,
+    "pl": 1268.933928928575
+   },
+   "worlds_pf_mean": 2.394,
+   "worlds_pf_p5": 1.116,
+   "worlds_pf_median": 2.155,
+   "worlds_pf_pct_gt1": 96.8,
+   "worlds_pnl_pct_pos": 96.8,
+   "worlds_mean_n": 43.0,
+   "real_pf_percentile": 54.2
+  },
+  "c01_mom_k5_pos": {
+   "real_oos": {
+    "n": 75,
+    "wr": 44.0,
+    "pf": 1.1209676495696215,
+    "pl": 442.35644178572346
+   },
+   "worlds_pf_mean": 0.979,
+   "worlds_pf_p5": 0.679,
+   "worlds_pf_median": 0.961,
+   "worlds_pf_pct_gt1": 42.8,
+   "worlds_pnl_pct_pos": 42.8,
+   "worlds_mean_n": 82.6,
+   "real_pf_percentile": 76.9
+  }
+ }
+}

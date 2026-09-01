@@ -18,6 +18,7 @@ Candles are cached once from the OANDA practice API (7 majors, 500 D1).
 """
 
 import ast
+import bisect
 import importlib.util
 import json
 import os
@@ -70,14 +71,19 @@ class Ctx:
     def exog(self, key):
         """Point-in-time exogenous value: latest cached observation whose
         publication date is usable at the bar's date. COT reports carry
-        Tuesday positions and go public Friday -> 3-day publication lag."""
+        Tuesday positions and go public Friday -> 3-day publication lag.
+        Sorted-key index is cached on the series dict for bisect lookup."""
         series = self.exog_series.get(key)
         if not series:
             return None
+        ks = series.get("_sorted_keys")
+        if ks is None:
+            ks = sorted(k for k in series if k != "_sorted_keys")
+            series["_sorted_keys"] = ks
         d = datetime.utcfromtimestamp(int(self.date)).strftime("%Y-%m-%d")
         usable = (datetime.strptime(d, "%Y-%m-%d") - timedelta(days=3)).strftime("%Y-%m-%d")
-        cands = [k for k in series if k <= usable]
-        return series[max(cands)] if cands else None
+        j = bisect.bisect_right(ks, usable)
+        return series[ks[j - 1]] if j else None
 
     def close(self, sym):
         px = self.series.get(sym, {}).get(self.dates[self.i])

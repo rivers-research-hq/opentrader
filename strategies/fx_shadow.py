@@ -50,6 +50,7 @@ Usage:   python3 -m strategies.fx_shadow [--apply]   (default: dry)
 """
 
 import importlib.util
+import bisect
 import json
 import os
 import sys
@@ -168,14 +169,19 @@ class ShadowCtx:
 
     def exog(self, key):
         """Point-in-time: latest observation with a 3-day publication lag
-        (COT Tuesday-position reports go public Friday) — mirrors gym."""
+        (COT Tuesday-position reports go public Friday) — mirrors gym.
+        Sorted-key index cached on the series dict for bisect lookup."""
         series = self.exog_series.get(key)
         if not series:
             return None
+        ks = series.get("_sorted_keys")
+        if ks is None:
+            ks = sorted(k for k in series if k != "_sorted_keys")
+            series["_sorted_keys"] = ks
         d = datetime.utcfromtimestamp(int(self.date)).strftime("%Y-%m-%d")
         usable = (datetime.strptime(d, "%Y-%m-%d") - timedelta(days=3)).strftime("%Y-%m-%d")
-        cands = [k for k in series if k <= usable]
-        return series[max(cands)] if cands else None
+        j = bisect.bisect_right(ks, usable)
+        return series[ks[j - 1]] if j else None
 
 
 def load_candidate(name):
