@@ -89,6 +89,7 @@ def _venue_book(ex):
             "opened": str(t.get("openTime", ""))[:19],
             "entry": float(t.get("price", 0)),
             "trade_id": t.get("id"),
+            "owner": (t.get("clientExtensions") or {}).get("tag") or "unknown",
             "protected": bool(t.get("stopLossOrder") or t.get("takeProfitOrder")),
         }
     return book
@@ -199,8 +200,9 @@ def run(dry=False):
     target = {sym for sym, m in ranked[:TOP_N] if m > 0}
     print(f"[fx] target book: {sorted(target) or '(flat — no positive momentum)'}")
 
-    # 2. venue-authoritative book + protection self-heal
-    book = _venue_book(ex)
+    # 2. venue-authoritative book + protection self-heal (this lane owns only
+    # its tag — the c08 challenger sleeve and the intraday lane share the book)
+    book = {s: i for s, i in _venue_book(ex).items() if i["owner"] == "mom-k5"}
     hint = {}
     if STATE.exists():
         try:
@@ -264,7 +266,8 @@ def run(dry=False):
         if dry:
             print(f"[fx] (dry) would OPEN  {sym} 100 units SL {sl and round(sl, 5)} TP {tp and round(tp, 5)}")
             continue
-        r = ex.place_order(sym, "BUY", UNITS, "market", stop_loss=sl, take_profit=tp)
+        r = ex.place_order(sym, "BUY", UNITS, "market", stop_loss=sl, take_profit=tp,
+                           tag="mom-k5")
         if r.status != "filled":
             print(f"[fx] OPEN  {sym} REJECTED ({r.status}) — retried next run")
             continue
@@ -302,9 +305,7 @@ def run_intraday(dry=False):
     ex = OandaExchange()
     if not ex.connect():
         raise SystemExit("[fx-id] connect failed")
-    # venue-authoritative: this lane owns positions of exactly 2,000 units
-    # (its signature size) that no other lane claims; closes only when the
-    # venue net is exactly ours — the two lanes can never close each other.
+    # venue-authoritative: this lane owns only positions tagged h1-mom
     book_all = _venue_book(ex)
     held = set(book_all)
     pool = [s for s in ex.discover_symbols() if s not in held]
@@ -313,8 +314,7 @@ def run_intraday(dry=False):
     istate_p = PROJECT / "data" / "fx_intraday.json"
     fills = []
     now = datetime.now(timezone.utc)
-    book = {sym: info for sym, info in book_all.items()
-            if abs(info["units"] - 2000) < 1e-9}
+    book = {sym: info for sym, info in book_all.items() if info["owner"] == "h1-mom"}
 
     # close: stale holds (12h) or any with SL/TP already consumed (venue closed)
     for sym in list(book):
@@ -366,7 +366,8 @@ def run_intraday(dry=False):
         if dry:
             print(f"[fx-id] (dry) would OPEN {sym} 2000 units SL {sl:.5f} TP {tp:.5f}")
             continue
-        r = ex.place_order(sym, "BUY", 2000, "market", stop_loss=sl, take_profit=tp)
+            r = ex.place_order(sym, "BUY", 2000, "market", stop_loss=sl, take_profit=tp,
+                               tag="h1-mom")
         fills.append({"timestamp": r.timestamp, "symbol": sym, "side": "BUY",
                       "quantity": 2000, "price": r.price, "order_id": r.order_id,
                       "reason": "intraday-momentum", "sl": sl, "tp": tp})

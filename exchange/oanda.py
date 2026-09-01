@@ -264,12 +264,16 @@ class OandaExchange(ExchangeBase):
         price: Optional[float] = None,
         stop_loss: Optional[float] = None,
         take_profit: Optional[float] = None,
+        tag: Optional[str] = None,
     ) -> OrderResult:
         """Place an order. OANDA is netted: BUY adds units, SELL subtracts.
 
         order_type: "market" (FOK), "limit" (GTC), "mit" (market-if-touched, GTC).
         stop_loss / take_profit: attach SL/TP on fill (server-side exits —
         they survive restarts because they live on OANDA, not on this box).
+        tag: strategy ownership stamp — carried as tradeClientExtensions and
+        copied onto the resulting venue trade, so multiple lanes can share
+        one account without ever closing each other's positions.
         """
         is_buy = side.upper() == "BUY"
         units = int(round(quantity)) if is_buy else -int(round(quantity))
@@ -289,6 +293,11 @@ class OandaExchange(ExchangeBase):
                 "timeInForce": "FOK",
                 "positionFill": "DEFAULT",
             }
+            if tag:
+                # client id must be unique across open trades; the tag is the
+                # ownership group (one position per symbol per strategy)
+                order["tradeClientExtensions"] = {"id": f"{tag}-{symbol}", "tag": tag,
+                                                  "comment": tag}
             if stop_loss:
                 order["stopLossOnFill"] = {"price": f"{stop_loss:.5f}", "timeInForce": "GTC"}
             if take_profit:
