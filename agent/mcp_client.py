@@ -4,6 +4,8 @@
 This is how agents actually invoke trading tools.
 Each tool maps to a method that calls the MCP server's HTTP endpoint.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 from typing import Any, Dict, List, Optional

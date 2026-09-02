@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Crypto news and sentiment pipeline — feeds the debate model real-time context.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Sources (all free, no API keys):
   - Fear & Greed Index (alternative.me) — market sentiment 0-100
   - CoinGecko Trending — top searched coins
@@ -11,6 +13,8 @@ All data is cached to respect rate limits:
   - F&G: 1 hour (updates daily)
   - CoinGecko: 5 min (public API, ~30 calls/min limit)
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 import time

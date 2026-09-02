@@ -1,0 +1,5459 @@
+{
+  "cycle": 9152,
+  "timestamp": "2026-08-31T16:06:33.399829+00:00",
+  "initial_cash": 500.0,
+  "cash": 335.95,
+  "portfolio_value": 495.8,
+  "positions": [
+    {
+      "symbol": "BTC/USDT",
+      "quantity": 0.00040903,
+      "current_price": 78599.6,
+      "entry_price": 78599.6,
+      "stop_loss": 68947.56912,
+      "take_profit": 92598.18876,
+      "highest_price": 78599.6,
+      "cycle_opened": 9152
+    },
+    {
+      "symbol": "ETH/USDT",
+      "quantity": 0.01468002,
+      "current_price": 2470.06,
+      "entry_price": 2470.06,
+      "stop_loss": 2166.736632,
+      "take_profit": 2909.9776859999997,
+      "highest_price": 2470.06,
+      "cycle_opened": 9152
+    },
+    {
+      "symbol": "SOL/USDT",
+      "quantity": 0.33591471,
+      "current_price": 102.9,
+      "entry_price": 102.9,
+      "stop_loss": 90.26388,
+      "take_profit": 121.22649,
+      "highest_price": 102.9,
+      "cycle_opened": 9152
+    },
+    {
+      "symbol": "XLRE",
+      "quantity": 1.29307377,
+      "current_price": 43.97999954223633,
+      "entry_price": 44.00367660384914,
+      "stop_loss": 43.482118586645505,
+      "take_profit": 45.04679263825639,
+      "highest_price": 44.00367660384914,
+      "cycle_opened": 9147
+    }
+  ],
+  "prices": {
+    "BTC/USDT": 78599.6,
+    "ETH/USDT": 2470.06,
+    "SOL/USDT": 102.9,
+    "XLRE": 43.97999954223633
+  },
+  "fills": [
+    {
+      "order_id": "live_1",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "quantity": 0.00051992,
+      "price": 78307.5342,
+      "cost": 40.71,
+      "fee": 0.11,
+      "cash_after": 209.18,
+      "timestamp": "2026-08-29T19:22:54.084249+00:00"
+    },
+    {
+      "order_id": "live_2",
+      "symbol": "ETH/USDT",
+      "side": "BUY",
+      "quantity": 0.01668036,
+      "price": 2459.198985,
+      "cost": 41.02,
+      "fee": 0.11,
+      "cash_after": 168.05,
+      "timestamp": "2026-08-29T19:22:55.028903+00:00"
+    },
+    {
+      "order_id": "live_3",
+      "symbol": "SOL/USDT",
+      "side": "BUY",
+      "quantity": 0.62041585,
+      "price": 105.65780249999999,
+      "cost": 65.55,
+      "fee": 0.17,
+      "cash_after": 102.33,
+      "timestamp": "2026-08-29T19:22:55.396603+00:00"
+    },
+    {
+      "order_id": "live_1",
+      "symbol": "BTC/USDT",
+      "side": "SELL",
+      "quantity": 0.00051992,
+      "price": 78573.99335,
+      "cost": 40.85,
+      "fee": 0.11,
+      "cash_after": 216.91,
+      "timestamp": "2026-08-31T15:56:06.935747+00:00"
+    },
+    {
+      "order_id": "live_2",
+      "symbol": "ETH/USDT",
+      "side": "SELL",
+      "quantity": 0.01668036,
+      "price": 2469.6945350000005,
+      "cost": 41.2,
+      "fee": 0.11,
+      "cash_after": 257.99,
+      "timestamp": "2026-08-31T15:56:08.212911+00:00"
+    },
+    {
+      "order_id": "live_3",
+      "symbol": "SOL/USDT",
+      "side": "SELL",
+      "quantity": 0.62041585,
+      "price": 102.87853500000001,
+      "cost": 63.83,
+      "fee": 0.17,
+      "cash_after": 321.66,
+      "timestamp": "2026-08-31T15:56:08.256879+00:00"
+    },
+    {
+      "order_id": "live_4",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "quantity": 0.00040777,
+      "price": 78637.749225,
+      "cost": 32.07,
+      "fee": 0.08,
+      "cash_after": 289.51,
+      "timestamp": "2026-08-31T15:56:51.755839+00:00"
+    },
+    {
+      "order_id": "live_5",
+      "symbol": "ETH/USDT",
+      "side": "BUY",
+      "quantity": 0.01450761,
+      "price": 2471.27502,
+      "cost": 35.85,
+      "fee": 0.09,
+      "cash_after": 253.56,
+      "timestamp": "2026-08-31T15:56:52.147458+00:00"
+    },
+    {
+      "order_id": "live_6",
+      "symbol": "SOL/USDT",
+      "side": "BUY",
+      "quantity": 0.33645184,
+      "price": 102.9564525,
+      "cost": 34.64,
+      "fee": 0.09,
+      "cash_after": 218.83,
+      "timestamp": "2026-08-31T15:56:52.725562+00:00"
+    },
+    {
+      "order_id": "live_1",
+      "symbol": "BTC/USDT",
+      "side": "SELL",
+      "quantity": 0.00040777,
+      "price": 78528.41615,
+      "cost": 32.02,
+      "fee": 0.08,
+      "cash_after": 229.43,
+      "timestamp": "2026-08-31T15:59:00.380339+00:00"
+    },
+    {
+      "order_id": "live_2",
+      "symbol": "ETH/USDT",
+      "side": "SELL",
+      "quantity": 0.01450761,
+      "price": 2466.6310675,
+      "cost": 35.78,
+      "fee": 0.09,
+      "cash_after": 265.13,
+      "timestamp": "2026-08-31T15:59:01.604194+00:00"
+    },
+    {
+      "order_id": "live_3",
+      "symbol": "SOL/USDT",
+      "side": "SELL",
+      "quantity": 0.33645184,
+      "price": 102.77358749999999,
+      "cost": 34.58,
+      "fee": 0.09,
+      "cash_after": 299.61,
+      "timestamp": "2026-08-31T15:59:01.748596+00:00"
+    },
+    {
+      "order_id": "live_4",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "quantity": 0.00040688,
+      "price": 78613.4871,
+      "cost": 31.99,
+      "fee": 0.08,
+      "cash_after": 267.54,
+      "timestamp": "2026-08-31T15:59:45.830497+00:00"
+    },
+    {
+      "order_id": "live_5",
+      "symbol": "ETH/USDT",
+      "side": "BUY",
+      "quantity": 0.01442937,
+      "price": 2469.0989324999996,
+      "cost": 35.63,
+      "fee": 0.09,
+      "cash_after": 231.82,
+      "timestamp": "2026-08-31T15:59:46.244942+00:00"
+    },
+    {
+      "order_id": "live_6",
+      "symbol": "SOL/USDT",
+      "side": "BUY",
+      "quantity": 0.33488704,
+      "price": 102.87641249999999,
+      "cost": 34.45,
+      "fee": 0.09,
+      "cash_after": 197.28,
+      "timestamp": "2026-08-31T15:59:46.660601+00:00"
+    },
+    {
+      "order_id": "live_1",
+      "symbol": "BTC/USDT",
+      "side": "SELL",
+      "quantity": 0.00040688,
+      "price": 78554.1033,
+      "cost": 31.96,
+      "fee": 0.08,
+      "cash_after": 200.64,
+      "timestamp": "2026-08-31T16:05:12.265970+00:00"
+    },
+    {
+      "order_id": "live_2",
+      "symbol": "ETH/USDT",
+      "side": "SELL",
+      "quantity": 0.01442937,
+      "price": 2468.1603025,
+      "cost": 35.61,
+      "fee": 0.09,
+      "cash_after": 236.17,
+      "timestamp": "2026-08-31T16:05:14.092060+00:00"
+    },
+    {
+      "order_id": "live_3",
+      "symbol": "SOL/USDT",
+      "side": "SELL",
+      "quantity": 0.33488704,
+      "price": 102.82356250000001,
+      "cost": 34.43,
+      "fee": 0.09,
+      "cash_after": 270.51,
+      "timestamp": "2026-08-31T16:05:14.307964+00:00"
+    },
+    {
+      "order_id": "live_4",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "quantity": 0.00040903,
+      "price": 78648.5046,
+      "cost": 32.17,
+      "fee": 0.08,
+      "cash_after": 238.26,
+      "timestamp": "2026-08-31T16:06:30.148264+00:00"
+    },
+    {
+      "order_id": "live_5",
+      "symbol": "ETH/USDT",
+      "side": "BUY",
+      "quantity": 0.01468002,
+      "price": 2471.3100375,
+      "cost": 36.28,
+      "fee": 0.09,
+      "cash_after": 201.88,
+      "timestamp": "2026-08-31T16:06:30.719460+00:00"
+    },
+    {
+      "order_id": "live_6",
+      "symbol": "SOL/USDT",
+      "side": "BUY",
+      "quantity": 0.33591471,
+      "price": 103.00647749999999,
+      "cost": 34.6,
+      "fee": 0.09,
+      "cash_after": 167.19,
+      "timestamp": "2026-08-31T16:06:31.306412+00:00"
+    },
+    {
+      "order_id": "fh_1",
+      "symbol": "XLRE",
+      "side": "BUY",
+      "quantity": 1.29307377,
+      "price": 44.00198954200744,
+      "cost": 56.9,
+      "fee": 0.35,
+      "cash_after": 140.25,
+      "timestamp": "2026-08-31T15:59:44.340623+00:00"
+    }
+  ],
+  "data_provenance": {
+    "mode": "live",
+    "exchange": "multi",
+    "synthetic_data": false,
+    "note": "Real market prices (kraken crypto + finnhub stocks) \u2014 paper settlement."
+  },
+  "fundamentals_coverage": {},
+  "signals": [
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.060",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.052",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.042",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.107",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.080",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.089",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.067",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.156",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.120",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.101",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.269",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.149",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.164",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.190",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.028",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.106",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.217",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.458",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.542",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.636",
+      "timestamp": "2026-08-30T22:46:47+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T01:11:26+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T02:52:26+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T04:33:26+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T06:14:26+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T07:55:27+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T09:36:27+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T11:17:27+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T12:58:27+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary: no data",
+      "timestamp": "2026-08-31T15:35:00+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.047",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.081",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.162",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.006",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.079",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.069",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.123",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.059",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.002",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.194",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.119",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.278",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.005",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.114",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "BUY",
+      "confidence": 0.7197,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.439",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "BUY",
+      "confidence": 0.74865,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.497",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "BUY",
+      "confidence": 0.78545,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.571",
+      "timestamp": "2026-08-31T15:56:32+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.047",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.081",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.162",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.006",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.079",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.069",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.123",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.059",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.002",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.194",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.119",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.278",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.005",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.114",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.441",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.495",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.570",
+      "timestamp": "2026-08-31T15:57:56+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.048",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.078",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.161",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.080",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.066",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.057",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.007",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.125",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.195",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "BUY",
+      "confidence": 0.6402,
+      "position_pct": 0.15,
+      "reason": "rule-primary score=0.280 (vixgate NEUTRALIZED (informational vix_z=-0.94 regime=calm (threshold=0.5)) mt disabled (no swarm))",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.008",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.113",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "BUY",
+      "confidence": 0.72065,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.441",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "BUY",
+      "confidence": 0.7467,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.493",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "BUY",
+      "confidence": 0.78485,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.570",
+      "timestamp": "2026-08-31T15:59:25+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.048",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.078",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.161",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.080",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.066",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.057",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.007",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.125",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.195",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.280",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.008",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.113",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.440",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.494",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.567",
+      "timestamp": "2026-08-31T16:00:57+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.048",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.078",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.161",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.080",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.066",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.057",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.007",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.125",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.195",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.280",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.008",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.113",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.440",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.490",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.566",
+      "timestamp": "2026-08-31T16:02:00+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.048",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.078",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.161",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.080",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.066",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.057",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.007",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.125",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.195",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.280",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.008",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.113",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.444",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.499",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.573",
+      "timestamp": "2026-08-31T16:03:03+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.060",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.048",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.078",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.161",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.080",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.066",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.124",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.057",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.007",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.134",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.270",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.036",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.125",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.195",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.280",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.008",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.043",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.113",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.209",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.440",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.499",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "crypto-rule score=0.572",
+      "timestamp": "2026-08-31T16:04:06+00:00"
+    },
+    {
+      "symbol": "AAPL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.064",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.050",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "NVDA",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.076",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.163",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "AMZN",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.052",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.000",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "META",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.082",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "JPM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.071",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XOM",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.123",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "JNJ",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.059",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "PG",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.023",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "KO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.053",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "DIS",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.161",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "CSCO",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.135",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "WMT",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.054",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "NFLX",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.269",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLF",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.038",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.123",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.197",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLB",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.118",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLRE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.278",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLP",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.003",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLV",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.044",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "XLU",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.112",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "GLD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.210",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "action": "BUY",
+      "confidence": 0.7199,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.440",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "action": "BUY",
+      "confidence": 0.7493,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.499",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "action": "BUY",
+      "confidence": 0.7844,
+      "position_pct": 0.05,
+      "reason": "crypto-rule score=0.569",
+      "timestamp": "2026-08-31T16:05:54+00:00"
+    }
+  ],
+  "models": {
+    "agent": "trading_agent",
+    "stage": 3,
+    "symbols": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMD",
+      "AMZN",
+      "GOOGL",
+      "META",
+      "JPM",
+      "XOM",
+      "JNJ",
+      "PG",
+      "KO",
+      "DIS",
+      "CSCO",
+      "WMT",
+      "NFLX",
+      "XLF",
+      "XLE",
+      "XLI",
+      "XLB",
+      "XLRE",
+      "XLP",
+      "XLV",
+      "XLU",
+      "GLD",
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT"
+    ],
+    "llama_available": true,
+    "llama_host": "http://127.0.0.1:5801",
+    "debate_model": "qwythos-9b-mtp"
+  },
+  "metrics": {
+    "cycle_time_s": 0,
+    "total_cycles": 9152,
+    "total_fills": 22,
+    "drawdown_pct": 1.25,
+    "peak_value": 502.09,
+    "stage": 3,
+    "symbol_count": 28,
+    "fear_greed": {
+      "value": 50,
+      "classification": "unknown"
+    },
+    "signal_accuracy": {
+      "overall_accuracy_pct": 0.0,
+      "total_predictions": 9,
+      "total_correct": 0,
+      "by_action": {
+        "BUY": {
+          "correct": 0,
+          "total": 3,
+          "accuracy_pct": 0.0
+        }
+      }
+    }
+  },
+  "portfolio_optimization": {
+    "diversification_ratio": 1.35,
+    "portfolio_var": 0.74,
+    "total_exposure_pct": 0.3008,
+    "correlation_matrix": {
+      "AAPL": {
+        "AAPL": 1.0,
+        "MSFT": 0.125,
+        "NVDA": -0.29,
+        "AMD": -0.178,
+        "AMZN": 0.569,
+        "GOOGL": 0.458,
+        "META": 0.231,
+        "JPM": 0.475,
+        "XOM": -0.177,
+        "JNJ": 0.14,
+        "PG": 0.187,
+        "KO": 0.306,
+        "DIS": 0.371,
+        "CSCO": -0.014,
+        "WMT": 0.077,
+        "NFLX": 0.503,
+        "XLF": 0.412,
+        "XLE": -0.145,
+        "XLI": 0.26,
+        "XLB": 0.166,
+        "XLRE": 0.325,
+        "XLP": 0.359,
+        "XLV": 0.096,
+        "XLU": 0.245,
+        "GLD": 0.069,
+        "BTC/USDT": -0.118,
+        "ETH/USDT": -0.104,
+        "SOL/USDT": -0.092
+      },
+      "MSFT": {
+        "AAPL": 0.125,
+        "MSFT": 1.0,
+        "NVDA": 0.316,
+        "AMD": -0.069,
+        "AMZN": 0.436,
+        "GOOGL": 0.409,
+        "META": 0.548,
+        "JPM": -0.032,
+        "XOM": -0.492,
+        "JNJ": -0.239,
+        "PG": -0.147,
+        "KO": -0.118,
+        "DIS": -0.143,
+        "CSCO": -0.07,
+        "WMT": 0.023,
+        "NFLX": 0.032,
+        "XLF": -0.015,
+        "XLE": -0.397,
+        "XLI": -0.179,
+        "XLB": -0.155,
+        "XLRE": 0.045,
+        "XLP": -0.023,
+        "XLV": -0.185,
+        "XLU": 0.045,
+        "GLD": -0.048,
+        "BTC/USDT": 0.147,
+        "ETH/USDT": 0.132,
+        "SOL/USDT": 0.138
+      },
+      "NVDA": {
+        "AAPL": -0.29,
+        "MSFT": 0.316,
+        "NVDA": 1.0,
+        "AMD": 0.287,
+        "AMZN": -0.335,
+        "GOOGL": -0.243,
+        "META": 0.087,
+        "JPM": -0.491,
+        "XOM": -0.13,
+        "JNJ": -0.508,
+        "PG": -0.53,
+        "KO": -0.503,
+        "DIS": -0.557,
+        "CSCO": 0.191,
+        "WMT": -0.15,
+        "NFLX": -0.396,
+        "XLF": -0.511,
+        "XLE": -0.251,
+        "XLI": -0.294,
+        "XLB": -0.404,
+        "XLRE": -0.263,
+        "XLP": -0.615,
+        "XLV": -0.253,
+        "XLU": -0.264,
+        "GLD": -0.077,
+        "BTC/USDT": 0.261,
+        "ETH/USDT": 0.239,
+        "SOL/USDT": 0.234
+      },
+      "AMD": {
+        "AAPL": -0.178,
+        "MSFT": -0.069,
+        "NVDA": 0.287,
+        "AMD": 1.0,
+        "AMZN": -0.175,
+        "GOOGL": -0.223,
+        "META": 0.199,
+        "JPM": -0.402,
+        "XOM": -0.113,
+        "JNJ": -0.071,
+        "PG": -0.437,
+        "KO": -0.484,
+        "DIS": -0.416,
+        "CSCO": 0.424,
+        "WMT": -0.101,
+        "NFLX": 0.152,
+        "XLF": -0.417,
+        "XLE": 0.006,
+        "XLI": 0.27,
+        "XLB": -0.247,
+        "XLRE": -0.076,
+        "XLP": -0.524,
+        "XLV": 0.122,
+        "XLU": 0.033,
+        "GLD": -0.197,
+        "BTC/USDT": 0.14,
+        "ETH/USDT": 0.118,
+        "SOL/USDT": 0.221
+      },
+      "AMZN": {
+        "AAPL": 0.569,
+        "MSFT": 0.436,
+        "NVDA": -0.335,
+        "AMD": -0.175,
+        "AMZN": 1.0,
+        "GOOGL": 0.859,
+        "META": 0.545,
+        "JPM": 0.543,
+        "XOM": -0.451,
+        "JNJ": 0.339,
+        "PG": 0.342,
+        "KO": 0.286,
+        "DIS": 0.393,
+        "CSCO": -0.096,
+        "WMT": 0.315,
+        "NFLX": 0.536,
+        "XLF": 0.483,
+        "XLE": -0.441,
+        "XLI": 0.158,
+        "XLB": 0.117,
+        "XLRE": 0.442,
+        "XLP": 0.483,
+        "XLV": 0.252,
+        "XLU": 0.313,
+        "GLD": 0.22,
+        "BTC/USDT": -0.161,
+        "ETH/USDT": -0.072,
+        "SOL/USDT": -0.133
+      },
+      "GOOGL": {
+        "AAPL": 0.458,
+        "MSFT": 0.409,
+        "NVDA": -0.243,
+        "AMD": -0.223,
+        "AMZN": 0.859,
+        "GOOGL": 1.0,
+        "META": 0.503,
+        "JPM": 0.503,
+        "XOM": -0.534,
+        "JNJ": 0.365,
+        "PG": 0.299,
+        "KO": 0.316,
+        "DIS": 0.421,
+        "CSCO": -0.044,
+        "WMT": 0.181,
+        "NFLX": 0.446,
+        "XLF": 0.534,
+        "XLE": -0.578,
+        "XLI": 0.147,
+        "XLB": 0.198,
+        "XLRE": 0.41,
+        "XLP": 0.452,
+        "XLV": 0.325,
+        "XLU": 0.205,
+        "GLD": 0.416,
+        "BTC/USDT": -0.221,
+        "ETH/USDT": -0.08,
+        "SOL/USDT": -0.169
+      },
+      "META": {
+        "AAPL": 0.231,
+        "MSFT": 0.548,
+        "NVDA": 0.087,
+        "AMD": 0.199,
+        "AMZN": 0.545,
+        "GOOGL": 0.503,
+        "META": 1.0,
+        "JPM": 0.17,
+        "XOM": -0.387,
+        "JNJ": -0.01,
+        "PG": 0.0,
+        "KO": -0.128,
+        "DIS": 0.104,
+        "CSCO": 0.285,
+        "WMT": -0.036,
+        "NFLX": 0.356,
+        "XLF": 0.217,
+        "XLE": -0.331,
+        "XLI": 0.257,
+        "XLB": 0.123,
+        "XLRE": 0.286,
+        "XLP": 0.037,
+        "XLV": 0.086,
+        "XLU": 0.241,
+        "GLD": 0.18,
+        "BTC/USDT": 0.033,
+        "ETH/USDT": 0.122,
+        "SOL/USDT": 0.163
+      },
+      "JPM": {
+        "AAPL": 0.475,
+        "MSFT": -0.032,
+        "NVDA": -0.491,
+        "AMD": -0.402,
+        "AMZN": 0.543,
+        "GOOGL": 0.503,
+        "META": 0.17,
+        "JPM": 1.0,
+        "XOM": 0.029,
+        "JNJ": 0.594,
+        "PG": 0.511,
+        "KO": 0.398,
+        "DIS": 0.618,
+        "CSCO": -0.047,
+        "WMT": 0.239,
+        "NFLX": 0.304,
+        "XLF": 0.878,
+        "XLE": -0.029,
+        "XLI": 0.219,
+        "XLB": 0.59,
+        "XLRE": 0.378,
+        "XLP": 0.644,
+        "XLV": 0.382,
+        "XLU": 0.192,
+        "GLD": 0.524,
+        "BTC/USDT": -0.132,
+        "ETH/USDT": -0.05,
+        "SOL/USDT": -0.176
+      },
+      "XOM": {
+        "AAPL": -0.177,
+        "MSFT": -0.492,
+        "NVDA": -0.13,
+        "AMD": -0.113,
+        "AMZN": -0.451,
+        "GOOGL": -0.534,
+        "META": -0.387,
+        "JPM": 0.029,
+        "XOM": 1.0,
+        "JNJ": 0.015,
+        "PG": -0.033,
+        "KO": 0.088,
+        "DIS": -0.061,
+        "CSCO": 0.009,
+        "WMT": -0.292,
+        "NFLX": -0.245,
+        "XLF": -0.053,
+        "XLE": 0.847,
+        "XLI": -0.155,
+        "XLB": 0.136,
+        "XLRE": -0.177,
+        "XLP": -0.166,
+        "XLV": -0.145,
+        "XLU": -0.281,
+        "GLD": -0.071,
+        "BTC/USDT": 0.231,
+        "ETH/USDT": 0.083,
+        "SOL/USDT": 0.136
+      },
+      "JNJ": {
+        "AAPL": 0.14,
+        "MSFT": -0.239,
+        "NVDA": -0.508,
+        "AMD": -0.071,
+        "AMZN": 0.339,
+        "GOOGL": 0.365,
+        "META": -0.01,
+        "JPM": 0.594,
+        "XOM": 0.015,
+        "JNJ": 1.0,
+        "PG": 0.405,
+        "KO": 0.3,
+        "DIS": 0.265,
+        "CSCO": 0.303,
+        "WMT": 0.284,
+        "NFLX": 0.208,
+        "XLF": 0.652,
+        "XLE": -0.016,
+        "XLI": 0.38,
+        "XLB": 0.603,
+        "XLRE": 0.289,
+        "XLP": 0.55,
+        "XLV": 0.81,
+        "XLU": 0.146,
+        "GLD": 0.483,
+        "BTC/USDT": -0.285,
+        "ETH/USDT": -0.16,
+        "SOL/USDT": -0.239
+      },
+      "PG": {
+        "AAPL": 0.187,
+        "MSFT": -0.147,
+        "NVDA": -0.53,
+        "AMD": -0.437,
+        "AMZN": 0.342,
+        "GOOGL": 0.299,
+        "META": 0.0,
+        "JPM": 0.511,
+        "XOM": -0.033,
+        "JNJ": 0.405,
+        "PG": 1.0,
+        "KO": 0.466,
+        "DIS": 0.485,
+        "CSCO": -0.143,
+        "WMT": 0.482,
+        "NFLX": 0.24,
+        "XLF": 0.542,
+        "XLE": -0.083,
+        "XLI": -0.02,
+        "XLB": 0.292,
+        "XLRE": 0.092,
+        "XLP": 0.774,
+        "XLV": 0.201,
+        "XLU": -0.019,
+        "GLD": 0.293,
+        "BTC/USDT": -0.087,
+        "ETH/USDT": -0.038,
+        "SOL/USDT": -0.067
+      },
+      "KO": {
+        "AAPL": 0.306,
+        "MSFT": -0.118,
+        "NVDA": -0.503,
+        "AMD": -0.484,
+        "AMZN": 0.286,
+        "GOOGL": 0.316,
+        "META": -0.128,
+        "JPM": 0.398,
+        "XOM": 0.088,
+        "JNJ": 0.3,
+        "PG": 0.466,
+        "KO": 1.0,
+        "DIS": 0.661,
+        "CSCO": -0.284,
+        "WMT": -0.11,
+        "NFLX": 0.339,
+        "XLF": 0.54,
+        "XLE": -0.004,
+        "XLI": -0.129,
+        "XLB": 0.296,
+        "XLRE": 0.373,
+        "XLP": 0.546,
+        "XLV": 0.138,
+        "XLU": 0.131,
+        "GLD": 0.239,
+        "BTC/USDT": -0.066,
+        "ETH/USDT": -0.028,
+        "SOL/USDT": -0.073
+      },
+      "DIS": {
+        "AAPL": 0.371,
+        "MSFT": -0.143,
+        "NVDA": -0.557,
+        "AMD": -0.416,
+        "AMZN": 0.393,
+        "GOOGL": 0.421,
+        "META": 0.104,
+        "JPM": 0.618,
+        "XOM": -0.061,
+        "JNJ": 0.265,
+        "PG": 0.485,
+        "KO": 0.661,
+        "DIS": 1.0,
+        "CSCO": -0.251,
+        "WMT": -0.02,
+        "NFLX": 0.563,
+        "XLF": 0.667,
+        "XLE": -0.12,
+        "XLI": 0.011,
+        "XLB": 0.4,
+        "XLRE": 0.437,
+        "XLP": 0.511,
+        "XLV": 0.158,
+        "XLU": 0.2,
+        "GLD": 0.341,
+        "BTC/USDT": -0.029,
+        "ETH/USDT": -0.003,
+        "SOL/USDT": -0.066
+      },
+      "CSCO": {
+        "AAPL": -0.014,
+        "MSFT": -0.07,
+        "NVDA": 0.191,
+        "AMD": 0.424,
+        "AMZN": -0.096,
+        "GOOGL": -0.044,
+        "META": 0.285,
+        "JPM": -0.047,
+        "XOM": 0.009,
+        "JNJ": 0.303,
+        "PG": -0.143,
+        "KO": -0.284,
+        "DIS": -0.251,
+        "CSCO": 1.0,
+        "WMT": -0.144,
+        "NFLX": -0.007,
+        "XLF": 0.067,
+        "XLE": -0.013,
+        "XLI": 0.444,
+        "XLB": 0.31,
+        "XLRE": 0.036,
+        "XLP": -0.125,
+        "XLV": 0.447,
+        "XLU": 0.007,
+        "GLD": 0.267,
+        "BTC/USDT": 0.047,
+        "ETH/USDT": 0.033,
+        "SOL/USDT": 0.046
+      },
+      "WMT": {
+        "AAPL": 0.077,
+        "MSFT": 0.023,
+        "NVDA": -0.15,
+        "AMD": -0.101,
+        "AMZN": 0.315,
+        "GOOGL": 0.181,
+        "META": -0.036,
+        "JPM": 0.239,
+        "XOM": -0.292,
+        "JNJ": 0.284,
+        "PG": 0.482,
+        "KO": -0.11,
+        "DIS": -0.02,
+        "CSCO": -0.144,
+        "WMT": 1.0,
+        "NFLX": 0.051,
+        "XLF": 0.154,
+        "XLE": -0.279,
+        "XLI": -0.019,
+        "XLB": -0.035,
+        "XLRE": -0.106,
+        "XLP": 0.595,
+        "XLV": 0.242,
+        "XLU": -0.036,
+        "GLD": 0.064,
+        "BTC/USDT": 0.067,
+        "ETH/USDT": 0.044,
+        "SOL/USDT": -0.008
+      },
+      "NFLX": {
+        "AAPL": 0.503,
+        "MSFT": 0.032,
+        "NVDA": -0.396,
+        "AMD": 0.152,
+        "AMZN": 0.536,
+        "GOOGL": 0.446,
+        "META": 0.356,
+        "JPM": 0.304,
+        "XOM": -0.245,
+        "JNJ": 0.208,
+        "PG": 0.24,
+        "KO": 0.339,
+        "DIS": 0.563,
+        "CSCO": -0.007,
+        "WMT": 0.051,
+        "NFLX": 1.0,
+        "XLF": 0.362,
+        "XLE": -0.177,
+        "XLI": 0.124,
+        "XLB": -0.009,
+        "XLRE": 0.341,
+        "XLP": 0.206,
+        "XLV": 0.178,
+        "XLU": 0.404,
+        "GLD": -0.046,
+        "BTC/USDT": 0.06,
+        "ETH/USDT": 0.035,
+        "SOL/USDT": 0.064
+      },
+      "XLF": {
+        "AAPL": 0.412,
+        "MSFT": -0.015,
+        "NVDA": -0.511,
+        "AMD": -0.417,
+        "AMZN": 0.483,
+        "GOOGL": 0.534,
+        "META": 0.217,
+        "JPM": 0.878,
+        "XOM": -0.053,
+        "JNJ": 0.652,
+        "PG": 0.542,
+        "KO": 0.54,
+        "DIS": 0.667,
+        "CSCO": 0.067,
+        "WMT": 0.154,
+        "NFLX": 0.362,
+        "XLF": 1.0,
+        "XLE": -0.108,
+        "XLI": 0.275,
+        "XLB": 0.735,
+        "XLRE": 0.433,
+        "XLP": 0.71,
+        "XLV": 0.494,
+        "XLU": 0.172,
+        "GLD": 0.609,
+        "BTC/USDT": -0.195,
+        "ETH/USDT": -0.115,
+        "SOL/USDT": -0.194
+      },
+      "XLE": {
+        "AAPL": -0.145,
+        "MSFT": -0.397,
+        "NVDA": -0.251,
+        "AMD": 0.006,
+        "AMZN": -0.441,
+        "GOOGL": -0.578,
+        "META": -0.331,
+        "JPM": -0.029,
+        "XOM": 0.847,
+        "JNJ": -0.016,
+        "PG": -0.083,
+        "KO": -0.004,
+        "DIS": -0.12,
+        "CSCO": -0.013,
+        "WMT": -0.279,
+        "NFLX": -0.177,
+        "XLF": -0.108,
+        "XLE": 1.0,
+        "XLI": 0.047,
+        "XLB": 0.13,
+        "XLRE": -0.134,
+        "XLP": -0.186,
+        "XLV": -0.157,
+        "XLU": -0.102,
+        "GLD": -0.227,
+        "BTC/USDT": 0.072,
+        "ETH/USDT": -0.091,
+        "SOL/USDT": 0.074
+      },
+      "XLI": {
+        "AAPL": 0.26,
+        "MSFT": -0.179,
+        "NVDA": -0.294,
+        "AMD": 0.27,
+        "AMZN": 0.158,
+        "GOOGL": 0.147,
+        "META": 0.257,
+        "JPM": 0.219,
+        "XOM": -0.155,
+        "JNJ": 0.38,
+        "PG": -0.02,
+        "KO": -0.129,
+        "DIS": 0.011,
+        "CSCO": 0.444,
+        "WMT": -0.019,
+        "NFLX": 0.124,
+        "XLF": 0.275,
+        "XLE": 0.047,
+        "XLI": 1.0,
+        "XLB": 0.495,
+        "XLRE": 0.486,
+        "XLP": 0.196,
+        "XLV": 0.468,
+        "XLU": 0.54,
+        "GLD": 0.222,
+        "BTC/USDT": -0.449,
+        "ETH/USDT": -0.329,
+        "SOL/USDT": -0.307
+      },
+      "XLB": {
+        "AAPL": 0.166,
+        "MSFT": -0.155,
+        "NVDA": -0.404,
+        "AMD": -0.247,
+        "AMZN": 0.117,
+        "GOOGL": 0.198,
+        "META": 0.123,
+        "JPM": 0.59,
+        "XOM": 0.136,
+        "JNJ": 0.603,
+        "PG": 0.292,
+        "KO": 0.296,
+        "DIS": 0.4,
+        "CSCO": 0.31,
+        "WMT": -0.035,
+        "NFLX": -0.009,
+        "XLF": 0.735,
+        "XLE": 0.13,
+        "XLI": 0.495,
+        "XLB": 1.0,
+        "XLRE": 0.367,
+        "XLP": 0.487,
+        "XLV": 0.642,
+        "XLU": 0.036,
+        "GLD": 0.666,
+        "BTC/USDT": -0.194,
+        "ETH/USDT": -0.138,
+        "SOL/USDT": -0.154
+      },
+      "XLRE": {
+        "AAPL": 0.325,
+        "MSFT": 0.045,
+        "NVDA": -0.263,
+        "AMD": -0.076,
+        "AMZN": 0.442,
+        "GOOGL": 0.41,
+        "META": 0.286,
+        "JPM": 0.378,
+        "XOM": -0.177,
+        "JNJ": 0.289,
+        "PG": 0.092,
+        "KO": 0.373,
+        "DIS": 0.437,
+        "CSCO": 0.036,
+        "WMT": -0.106,
+        "NFLX": 0.341,
+        "XLF": 0.433,
+        "XLE": -0.134,
+        "XLI": 0.486,
+        "XLB": 0.367,
+        "XLRE": 1.0,
+        "XLP": 0.302,
+        "XLV": 0.327,
+        "XLU": 0.687,
+        "GLD": 0.39,
+        "BTC/USDT": -0.295,
+        "ETH/USDT": -0.169,
+        "SOL/USDT": -0.169
+      },
+      "XLP": {
+        "AAPL": 0.359,
+        "MSFT": -0.023,
+        "NVDA": -0.615,
+        "AMD": -0.524,
+        "AMZN": 0.483,
+        "GOOGL": 0.452,
+        "META": 0.037,
+        "JPM": 0.644,
+        "XOM": -0.166,
+        "JNJ": 0.55,
+        "PG": 0.774,
+        "KO": 0.546,
+        "DIS": 0.511,
+        "CSCO": -0.125,
+        "WMT": 0.595,
+        "NFLX": 0.206,
+        "XLF": 0.71,
+        "XLE": -0.186,
+        "XLI": 0.196,
+        "XLB": 0.487,
+        "XLRE": 0.302,
+        "XLP": 1.0,
+        "XLV": 0.357,
+        "XLU": 0.173,
+        "GLD": 0.407,
+        "BTC/USDT": -0.215,
+        "ETH/USDT": -0.151,
+        "SOL/USDT": -0.232
+      },
+      "XLV": {
+        "AAPL": 0.096,
+        "MSFT": -0.185,
+        "NVDA": -0.253,
+        "AMD": 0.122,
+        "AMZN": 0.252,
+        "GOOGL": 0.325,
+        "META": 0.086,
+        "JPM": 0.382,
+        "XOM": -0.145,
+        "JNJ": 0.81,
+        "PG": 0.201,
+        "KO": 0.138,
+        "DIS": 0.158,
+        "CSCO": 0.447,
+        "WMT": 0.242,
+        "NFLX": 0.178,
+        "XLF": 0.494,
+        "XLE": -0.157,
+        "XLI": 0.468,
+        "XLB": 0.642,
+        "XLRE": 0.327,
+        "XLP": 0.357,
+        "XLV": 1.0,
+        "XLU": 0.111,
+        "GLD": 0.54,
+        "BTC/USDT": -0.276,
+        "ETH/USDT": -0.156,
+        "SOL/USDT": -0.224
+      },
+      "XLU": {
+        "AAPL": 0.245,
+        "MSFT": 0.045,
+        "NVDA": -0.264,
+        "AMD": 0.033,
+        "AMZN": 0.313,
+        "GOOGL": 0.205,
+        "META": 0.241,
+        "JPM": 0.192,
+        "XOM": -0.281,
+        "JNJ": 0.146,
+        "PG": -0.019,
+        "KO": 0.131,
+        "DIS": 0.2,
+        "CSCO": 0.007,
+        "WMT": -0.036,
+        "NFLX": 0.404,
+        "XLF": 0.172,
+        "XLE": -0.102,
+        "XLI": 0.54,
+        "XLB": 0.036,
+        "XLRE": 0.687,
+        "XLP": 0.173,
+        "XLV": 0.111,
+        "XLU": 1.0,
+        "GLD": 0.039,
+        "BTC/USDT": -0.402,
+        "ETH/USDT": -0.308,
+        "SOL/USDT": -0.346
+      },
+      "GLD": {
+        "AAPL": 0.069,
+        "MSFT": -0.048,
+        "NVDA": -0.077,
+        "AMD": -0.197,
+        "AMZN": 0.22,
+        "GOOGL": 0.416,
+        "META": 0.18,
+        "JPM": 0.524,
+        "XOM": -0.071,
+        "JNJ": 0.483,
+        "PG": 0.293,
+        "KO": 0.239,
+        "DIS": 0.341,
+        "CSCO": 0.267,
+        "WMT": 0.064,
+        "NFLX": -0.046,
+        "XLF": 0.609,
+        "XLE": -0.227,
+        "XLI": 0.222,
+        "XLB": 0.666,
+        "XLRE": 0.39,
+        "XLP": 0.407,
+        "XLV": 0.54,
+        "XLU": 0.039,
+        "GLD": 1.0,
+        "BTC/USDT": -0.091,
+        "ETH/USDT": 0.028,
+        "SOL/USDT": -0.122
+      },
+      "BTC/USDT": {
+        "AAPL": -0.118,
+        "MSFT": 0.147,
+        "NVDA": 0.261,
+        "AMD": 0.14,
+        "AMZN": -0.161,
+        "GOOGL": -0.221,
+        "META": 0.033,
+        "JPM": -0.132,
+        "XOM": 0.231,
+        "JNJ": -0.285,
+        "PG": -0.087,
+        "KO": -0.066,
+        "DIS": -0.029,
+        "CSCO": 0.047,
+        "WMT": 0.067,
+        "NFLX": 0.06,
+        "XLF": -0.195,
+        "XLE": 0.072,
+        "XLI": -0.449,
+        "XLB": -0.194,
+        "XLRE": -0.295,
+        "XLP": -0.215,
+        "XLV": -0.276,
+        "XLU": -0.402,
+        "GLD": -0.091,
+        "BTC/USDT": 1.0,
+        "ETH/USDT": 0.827,
+        "SOL/USDT": 0.858
+      },
+      "ETH/USDT": {
+        "AAPL": -0.104,
+        "MSFT": 0.132,
+        "NVDA": 0.239,
+        "AMD": 0.118,
+        "AMZN": -0.072,
+        "GOOGL": -0.08,
+        "META": 0.122,
+        "JPM": -0.05,
+        "XOM": 0.083,
+        "JNJ": -0.16,
+        "PG": -0.038,
+        "KO": -0.028,
+        "DIS": -0.003,
+        "CSCO": 0.033,
+        "WMT": 0.044,
+        "NFLX": 0.035,
+        "XLF": -0.115,
+        "XLE": -0.091,
+        "XLI": -0.329,
+        "XLB": -0.138,
+        "XLRE": -0.169,
+        "XLP": -0.151,
+        "XLV": -0.156,
+        "XLU": -0.308,
+        "GLD": 0.028,
+        "BTC/USDT": 0.827,
+        "ETH/USDT": 1.0,
+        "SOL/USDT": 0.775
+      },
+      "SOL/USDT": {
+        "AAPL": -0.092,
+        "MSFT": 0.138,
+        "NVDA": 0.234,
+        "AMD": 0.221,
+        "AMZN": -0.133,
+        "GOOGL": -0.169,
+        "META": 0.163,
+        "JPM": -0.176,
+        "XOM": 0.136,
+        "JNJ": -0.239,
+        "PG": -0.067,
+        "KO": -0.073,
+        "DIS": -0.066,
+        "CSCO": 0.046,
+        "WMT": -0.008,
+        "NFLX": 0.064,
+        "XLF": -0.194,
+        "XLE": 0.074,
+        "XLI": -0.307,
+        "XLB": -0.154,
+        "XLRE": -0.169,
+        "XLP": -0.232,
+        "XLV": -0.224,
+        "XLU": -0.346,
+        "GLD": -0.122,
+        "BTC/USDT": 0.858,
+        "ETH/USDT": 0.775,
+        "SOL/USDT": 1.0
+      }
+    },
+    "kelly_fractions": {
+      "AAPL": 0.0,
+      "MSFT": 0.0,
+      "NVDA": 0.0,
+      "AMD": 0.0,
+      "AMZN": 0.0,
+      "GOOGL": 0.0,
+      "META": 0.0,
+      "JPM": 0.0,
+      "XOM": 0.0,
+      "JNJ": 0.0,
+      "PG": 0.0,
+      "KO": 0.0,
+      "DIS": 0.0,
+      "CSCO": 0.0,
+      "WMT": 0.0,
+      "NFLX": 0.0,
+      "XLF": 0.0,
+      "XLE": 0.0,
+      "XLI": 0.0,
+      "XLB": 0.0,
+      "XLRE": 0.0932,
+      "XLP": 0.0,
+      "XLV": 0.0,
+      "XLU": 0,
+      "GLD": 0.0,
+      "BTC/USDT": 0.0648,
+      "ETH/USDT": 0.0731,
+      "SOL/USDT": 0.0697
+    },
+    "allocations": [
+      {
+        "symbol": "BTC/USDT",
+        "side": "BUY",
+        "weight_pct": 0.06475180639868663,
+        "quantity": 0.0004088,
+        "reason": "kelly=6.48% corr-adjusted"
+      },
+      {
+        "symbol": "ETH/USDT",
+        "side": "BUY",
+        "weight_pct": 0.07314299897325416,
+        "quantity": 0.01468151,
+        "reason": "kelly=7.31% corr-adjusted"
+      },
+      {
+        "symbol": "SOL/USDT",
+        "side": "BUY",
+        "weight_pct": 0.06974280588680118,
+        "quantity": 0.33638175,
+        "reason": "kelly=6.97% corr-adjusted"
+      }
+    ]
+  },
+  "trades": [
+    {
+      "symbol": "BTC/USDT",
+      "entry_price": 156601.02,
+      "exit_price": 78578.5,
+      "quantity": 0.00051992,
+      "pnl_pct": -0.5034,
+      "pnl_dollar": -40.99,
+      "fees_paid": 0.42,
+      "entry_cycle": 6702,
+      "exit_cycle": 9145,
+      "duration_cycles": 2443,
+      "timestamp": "2026-08-31T15:56:08.042721+00:00",
+      "exit_reason": "stop-loss: $78578.50 <= $155206.72"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "entry_price": 4918.36,
+      "exit_price": 2470.53,
+      "quantity": 0.01668036,
+      "pnl_pct": -0.5029,
+      "pnl_dollar": -41.26,
+      "fees_paid": 0.43,
+      "entry_cycle": 6702,
+      "exit_cycle": 9145,
+      "duration_cycles": 2443,
+      "timestamp": "2026-08-31T15:56:08.214566+00:00",
+      "exit_reason": "stop-loss: $2470.53 <= $4860.51"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "entry_price": 211.31,
+      "exit_price": 102.95,
+      "quantity": 0.62041585,
+      "pnl_pct": -0.518,
+      "pnl_dollar": -67.91,
+      "fees_paid": 0.68,
+      "entry_cycle": 6702,
+      "exit_cycle": 9145,
+      "duration_cycles": 2443,
+      "timestamp": "2026-08-31T15:56:08.259015+00:00",
+      "exit_reason": "stop-loss: $102.95 <= $208.31"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "entry_price": 178482.97,
+      "exit_price": 78620.9,
+      "quantity": 0.00040777,
+      "pnl_pct": -0.5647,
+      "pnl_dollar": -41.1,
+      "fees_paid": 0.38,
+      "entry_cycle": 9145,
+      "exit_cycle": 9147,
+      "duration_cycles": 2,
+      "timestamp": "2026-08-31T15:59:01.563722+00:00",
+      "exit_reason": "stop-loss: $78620.90 <= $177088.67"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "entry_price": 5298.6,
+      "exit_price": 2469.46,
+      "quantity": 0.01450761,
+      "pnl_pct": -0.5391,
+      "pnl_dollar": -41.44,
+      "fees_paid": 0.4,
+      "entry_cycle": 9145,
+      "exit_cycle": 9147,
+      "duration_cycles": 2,
+      "timestamp": "2026-08-31T15:59:01.605916+00:00",
+      "exit_reason": "stop-loss: $2469.46 <= $5240.75"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "entry_price": 297.78,
+      "exit_price": 102.9,
+      "quantity": 0.33645184,
+      "pnl_pct": -0.6596,
+      "pnl_dollar": -66.09,
+      "fees_paid": 0.52,
+      "entry_cycle": 9145,
+      "exit_cycle": 9147,
+      "duration_cycles": 2,
+      "timestamp": "2026-08-31T15:59:01.750170+00:00",
+      "exit_reason": "stop-loss: $102.90 <= $294.78"
+    },
+    {
+      "symbol": "BTC/USDT",
+      "entry_price": 178871.53,
+      "exit_price": 78588.4,
+      "quantity": 0.00040688,
+      "pnl_pct": -0.5658,
+      "pnl_dollar": -41.18,
+      "fees_paid": 0.38,
+      "entry_cycle": 9147,
+      "exit_cycle": 9152,
+      "duration_cycles": 5,
+      "timestamp": "2026-08-31T16:05:13.872882+00:00",
+      "exit_reason": "stop-loss: $78588.40 <= $177553.61"
+    },
+    {
+      "symbol": "ETH/USDT",
+      "entry_price": 5318.5,
+      "exit_price": 2471.86,
+      "quantity": 0.01442937,
+      "pnl_pct": -0.5404,
+      "pnl_dollar": -41.47,
+      "fees_paid": 0.4,
+      "entry_cycle": 9147,
+      "exit_cycle": 9152,
+      "duration_cycles": 5,
+      "timestamp": "2026-08-31T16:05:14.093656+00:00",
+      "exit_reason": "stop-loss: $2471.86 <= $5263.32"
+    },
+    {
+      "symbol": "SOL/USDT",
+      "entry_price": 296.85,
+      "exit_price": 102.87,
+      "quantity": 0.33488704,
+      "pnl_pct": -0.6587,
+      "pnl_dollar": -65.48,
+      "fees_paid": 0.52,
+      "entry_cycle": 9147,
+      "exit_cycle": 9152,
+      "duration_cycles": 5,
+      "timestamp": "2026-08-31T16:05:14.309506+00:00",
+      "exit_reason": "stop-loss: $102.87 <= $294.01"
+    }
+  ],
+  "alerts": [
+    {
+      "type": "guardrail",
+      "symbol": "BTC/USDT",
+      "reason": "stop-loss: $78588.40 <= $177553.61",
+      "pnl_pct": -0.5658,
+      "pnl_dollar": -41.18,
+      "cycle": 9152,
+      "timestamp": "2026-08-31T16:05:13.872964+00:00"
+    },
+    {
+      "type": "guardrail",
+      "symbol": "ETH/USDT",
+      "reason": "stop-loss: $2471.86 <= $5263.32",
+      "pnl_pct": -0.5404,
+      "pnl_dollar": -41.47,
+      "cycle": 9152,
+      "timestamp": "2026-08-31T16:05:14.093715+00:00"
+    },
+    {
+      "type": "guardrail",
+      "symbol": "SOL/USDT",
+      "reason": "stop-loss: $102.87 <= $294.01",
+      "pnl_pct": -0.6587,
+      "pnl_dollar": -65.48,
+      "cycle": 9152,
+      "timestamp": "2026-08-31T16:05:14.309558+00:00"
+    }
+  ],
+  "hodl_benchmark": {
+    "enabled": true,
+    "value": 0,
+    "return_pct": 0,
+    "outperform_pct": -5.35,
+    "hodl_return_pct": 4.51,
+    "bot_return_pct": -0.84
+  },
+  "Committee": {
+    "accuracy": {
+      "BTC/USDT:BUY": {
+        "correct": 0,
+        "total": 3,
+        "accuracy": 0.0
+      },
+      "ETH/USDT:BUY": {
+        "correct": 0,
+        "total": 3,
+        "accuracy": 0.0
+      },
+      "SOL/USDT:BUY": {
+        "correct": 0,
+        "total": 3,
+        "accuracy": 0.0
+      }
+    },
+    "risk_limits": {
+      "max_position_pct": 0.2,
+      "max_total_exposure": 0.7
+    }
+  },
+  "symbol_regimes": {}
+}

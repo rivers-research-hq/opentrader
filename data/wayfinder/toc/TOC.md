@@ -13,9 +13,9 @@
 
 | chapter | est. tokens | size | staleness | status |
 |---|--:|--:|--:|---|
-| 01-scope.md | 699 | 2.8 KB | 2d ago | hand-written |
-| 02-variables.md | 1584 | 6.2 KB | just now | rendered from ledger |
-| 03-plan.md | 58 | 0.2 KB | 2d ago | hand-written |
+| 01-scope.md | 699 | 2.8 KB | 3d ago | hand-written |
+| 02-variables.md | 2303 | 9.0 KB | just now | rendered from ledger |
+| 03-plan.md | 58 | 0.2 KB | 3d ago | hand-written |
 
 ## Raw findings log (append-only, never compacted away)
 
@@ -33,5 +33,5 @@ last: `checkpoints/ckpt-04.md` (verified)
 
 ---
 
-_generated 2026-08-31T18:24:23.166Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
+_generated 2026-09-01T17:38:43.239Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
 

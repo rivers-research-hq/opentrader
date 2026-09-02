@@ -18,6 +18,8 @@ Usage:
   PYTHONPATH=/home/mrc/opentrader-sandbox /home/mrc/rocm_venv/bin/python3 \
       -m strategies.shadow_current_alloc [--asof auto] [--no-fetch]
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import argparse
 import json
@@ -213,7 +215,6 @@ def main():
     out = os.path.join(os.path.dirname(__file__), "..", "data",
                        "shadow_current_alloc.json")
     out = os.path.abspath(out)
-    os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
         json.dump(report, f, indent=1)
     print(f"\nwrote {out}")

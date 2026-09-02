@@ -1,0 +1,17 @@
+{
+  "ctx": 32768,
+  "layers": 75,
+  "budget": 1024,
+  "rc": 124,
+  "seconds": 3600.7,
+  "reason": "timeout",
+  "found": {
+    "future-bar": "implied",
+    "rank-dead": "explicit"
+  },
+  "n_found": 2,
+  "n_ground": 2,
+  "fp": 4,
+  "vram_free_before_gib": 2.87,
+  "vram_free_after_gib": 1.01
+}

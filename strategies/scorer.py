@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Shared honest scorer for strategies. Single source of truth for metrics,
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 fees, lookahead discipline, and the tournament bars. Ported from the swarm's
 scorer.py (commit-traceable) so arena evaluation matches the tournament.
 
@@ -8,12 +9,14 @@ equity pd.Series indexed by the data master; this aligns, computes honest
 stats (ann/sharpe/maxdd/calmar), fold beats vs the basket & SPY benchmarks,
 and the tournament round bars.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import math
 import os
 import pickle
 
 import pandas as pd
+from security.guards import guarded_urlopen, guarded_open, sec_pickle_load  # noqa: E402  (hardening layer)
 
 _DATA_PATHS = [
     # /tmp/opentrader/swarm/swarm_data.pkl (the authoritative copy) was LOST
@@ -28,7 +31,7 @@ DATA = None
 def _load():
     global DATA, MASTER, BENCH_BASKET, BENCH_SPY, FOLDS, _loaded
     for p in _DATA_PATHS:
-        if os.path.exists(p):
+            DATA = sec_pickle_load(open(p, "rb"))
             DATA = pickle.load(open(p, "rb"))
             break
     if DATA is None:

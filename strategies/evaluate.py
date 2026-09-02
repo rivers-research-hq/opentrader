@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tournament evaluation entry point for the roster strategies.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 Usage:
   python -m strategies.evaluate momtrend        # R1 + OOS for one expert
   python -m strategies.evaluate --all           # both survivors
@@ -10,6 +11,7 @@ This is the canonical bridge between the arena roster and the honest scorer:
   - runs it on the US tournament data (R1) and the intl OOS data (R2)
   - prints score_equity stats and pass/fail against the round bars
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import os
 import pickle
@@ -32,7 +34,7 @@ def _load_tournament():
     intl_p = os.path.join(root, "data", "evidence", "swarm", "intl_data.pkl")
     if not (os.path.exists(us_p) and os.path.exists(intl_p)):
         raise FileNotFoundError(_LOST_MSG)
-    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
+    return sec_pickle_load(open(us_p, "rb")), sec_pickle_load(open(intl_p, "rb"))
 
 
 US = None
@@ -41,6 +43,7 @@ INTL = None
 from strategies.momtrend import run as momtrend  # noqa: E402
 from strategies.multiasset import backtest as multiasset  # noqa: E402
 from strategies import scorer, scorer_intl  # noqa: E402
+from security.guards import guarded_urlopen, guarded_open, sec_pickle_load  # noqa: E402  (hardening layer)
 
 CONFIGS = {
     "momtrend": dict(mom_lb=60, k=5, rebal=20, breadth_thr=0.6,

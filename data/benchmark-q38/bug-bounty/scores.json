@@ -1,0 +1,64 @@
+[
+  {
+    "combo": "ctx32768_l75_b1024",
+    "ctx": 32768,
+    "layers": 75,
+    "budget": 1024,
+    "rc": 124,
+    "seconds": 3600.7,
+    "reason": "timeout",
+    "found": {
+      "future-bar": "evidence"
+    },
+    "n_found": 1,
+    "n_ground": 2,
+    "reports": 0,
+    "fp": 0
+  },
+  {
+    "combo": "ctx32768_l99_b1024",
+    "ctx": 32768,
+    "layers": 99,
+    "budget": 1024,
+    "rc": -15,
+    "seconds": 1340.2,
+    "reason": "found-all",
+    "found": {
+      "future-bar": "evidence"
+    },
+    "n_found": 1,
+    "n_ground": 2,
+    "reports": 0,
+    "fp": 0
+  },
+  {
+    "combo": "ctx32768_l75_b2048",
+    "ctx": 32768,
+    "layers": 75,
+    "budget": 2048,
+    "rc": 124,
+    "seconds": 3601.1,
+    "reason": "timeout",
+    "found": {
+      "rank-dead": "evidence"
+    },
+    "n_found": 1,
+    "n_ground": 2,
+    "reports": 0,
+    "fp": 0
+  },
+  {
+    "combo": "ctx32768_l99_b2048",
+    "ctx": 32768,
+    "layers": 99,
+    "budget": 2048,
+    "rc": 124,
+    "seconds": 3600.8,
+    "reason": "timeout",
+    "found": {},
+    "n_found": 0,
+    "n_ground": 2,
+    "reports": 0,
+    "fp": 0
+  }
+]

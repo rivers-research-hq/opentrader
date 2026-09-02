@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Discover and download Hugging Face models.
 Search via HuggingHack API, download via huggingface_hub directly."""
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import sys, json, urllib.request, urllib.parse, os, time
 

@@ -8,6 +8,8 @@ each symbol based on actual win/loss distributions.
 Triggers every N cycles when enough trades have closed. Writes
 data/optimal_params.json which RiskManager picks up automatically.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import json
 import logging

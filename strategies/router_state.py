@@ -17,6 +17,8 @@ regime keys. As of 2026-08-29:
 
 Declared in data/MANIFEST.json (runtime-state tier).
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import json
 import os
@@ -49,7 +51,6 @@ def _atomic_write_json(path: Path, obj: dict) -> None:
     """Per-writer temp file + atomic replace (state/manager.py pattern)."""
     tmp = path.with_name(f"{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
         with open(tmp, "w") as f:
             json.dump(obj, f, indent=1)
         os.replace(tmp, path)

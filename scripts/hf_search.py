@@ -53,3 +53,5 @@ if __name__ == "__main__":
     )
     args = p.parse_args()
     search(args.query, args.sort, args.limit, args.task, args.library)
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow

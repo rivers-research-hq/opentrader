@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Multi-Agent Debate Engine — Bull/Bear/Risk agents debate → final signal.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Architecture:
   Bull Agent  → makes the bullish case (BUY)
   Bear Agent  → makes the bearish case (SELL/HOLD) — independent of Bull
@@ -12,6 +14,8 @@ Risk runs after both complete (~3.7s). Total LLM time: ~7.4s (was ~11s).
 
 Based on TradingAgents (arXiv:2412.20138) with ATLANTIS orchestration pattern.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

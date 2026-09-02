@@ -24,6 +24,8 @@ Architecture:
     │
     └── Recommend: serialized analysis for harness/debugging
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import json
 import logging
@@ -300,7 +302,6 @@ class TrainingCoach:
                     curated.append(ex)
 
             out_file = self.output_dir / "training" / "training_data_curated.jsonl"
-            out_file.parent.mkdir(parents=True, exist_ok=True)
             with open(out_file, "w") as f:
                 for ex in curated:
                     f.write(json.dumps(ex) + "\n")

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Alpaca Paper Exchange — real prices via Alpaca/yfinance, paper settlement.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Waterfall: Alpaca (if keys) -> yfinance (cached 5min) -> synthetic GBM.
 Order execution: in-memory ledger (matches exchange/paper.py pattern).
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

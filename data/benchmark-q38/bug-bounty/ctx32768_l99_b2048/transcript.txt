@@ -1,0 +1,679 @@
+[0m
+> build · qwen38-agentic
+[0m
+[0m$ [0mfind /tmp/opencode/bb-sandbox -type f -name "*.py" | head -100 && echo "---" && ls -la /tmp/opencode/bb-sandbox
+/tmp/opencode/bb-sandbox/.opencode/tools/_subagent_watch.py
+/tmp/opencode/bb-sandbox/.opencode/tools/_project_context.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/__init__.py
+/tmp/opencode/bb-sandbox/risk/param_optimizer.py
+/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py
+/tmp/opencode/bb-sandbox/risk/regime_adaptation.py
+/tmp/opencode/bb-sandbox/risk/performance_analytics.py
+/tmp/opencode/bb-sandbox/risk/manager.py
+/tmp/opencode/bb-sandbox/risk/asset_allocator.py
+/tmp/opencode/bb-sandbox/risk/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/risk/__init__.py
+/tmp/opencode/bb-sandbox/exchange/base.py
+/tmp/opencode/bb-sandbox/exchange/ibkr.py
+/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/multi_router.py
+/tmp/opencode/bb-sandbox/exchange/paper.py
+/tmp/opencode/bb-sandbox/exchange/realtime.py
+/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py
+/tmp/opencode/bb-sandbox/exchange/live.py
+/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/exchange/__init__.py
+/tmp/opencode/bb-sandbox/state/context.py
+/tmp/opencode/bb-sandbox/state/manager.py
+/tmp/opencode/bb-sandbox/state/__init__.py
+/tmp/opencode/bb-sandbox/scripts/hf_download.py
+/tmp/opencode/bb-sandbox/scripts/load_adapter.py
+/tmp/opencode/bb-sandbox/scripts/service_mgr.py
+/tmp/opencode/bb-sandbox/scripts/rtx3070-bench.py
+/tmp/opencode/bb-sandbox/scripts/hf_search.py
+/tmp/opencode/bb-sandbox/scripts/hf_library.py
+/tmp/opencode/bb-sandbox/scripts/hf_models.py
+/tmp/opencode/bb-sandbox/scripts/__init__.py
+/tmp/opencode/bb-sandbox/arena/train.py
+/tmp/opencode/bb-sandbox/arena/tech.py
+/tmp/opencode/bb-sandbox/arena/curriculum.py
+/tmp/opencode/bb-sandbox/arena/loop.py
+/tmp/opencode/bb-sandbox/arena/opponents.py
+/tmp/opencode/bb-sandbox/arena/export.py
+/tmp/opencode/bb-sandbox/arena/architect.py
+/tmp/opencode/bb-sandbox/arena/agent.py
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/build_architect_dataset.py
+/tmp/opencode/bb-sandbox/arena/battle.py
+/tmp/opencode/bb-sandbox/arena/epoch_engine.py
+/tmp/opencode/bb-sandbox/arena/view.py
+/tmp/opencode/bb-sandbox/arena/candidates_fullcross.py
+/tmp/opencode/bb-sandbox/arena/candidates.py
+/tmp/opencode/bb-sandbox/arena/war.py
+/tmp/opencode/bb-sandbox/arena/grpo.py
+/tmp/opencode/bb-sandbox/arena/candidates_international.py
+/tmp/opencode/bb-sandbox/arena/architect_probe.py
+/tmp/opencode/bb-sandbox/arena/__init__.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothORPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothNashMDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRewardTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothSFTTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGRPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothBCOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothXPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothCPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/moe_utils.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPRMTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGKDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothDPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRLOOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothKTOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothOnlineDPOTrainer.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/indexer.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/main.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/database.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/config.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/downloads.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/download_worker.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/hub_service.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/__init__.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/tests/test_core.py
+/tmp/opencode/bb-sandbox/tools/ab_debate_test.py
+/tmp/opencode/bb-sandbox/tools/c2_platform_transmit.py
+/tmp/opencode/bb-sandbox/tools/dev_reload.py
+/tmp/opencode/bb-sandbox/tools/qmath.py
+/tmp/opencode/bb-sandbox/tools/runway_review.py
+/tmp/opencode/bb-sandbox/tools/weekly_review.py
+/tmp/opencode/bb-sandbox/tools/molecule_model.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/training_technique.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/inference_efficiency.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/regime_detection.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/data_augmentation.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/eval_methodology.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/trade_signal.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/risk_management.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/multi_step_reasoning.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/sentiment_analysis.py
+/tmp/opencode/bb-sandbox/data/falsify.py
+/tmp/opencode/bb-sandbox/data/synthetic.py
+/tmp/opencode/bb-sandbox/data/accumulator.py
+/tmp/opencode/bb-sandbox/data/alt_data_mcp.py
+/tmp/opencode/bb-sandbox/data/news.py
+---
+total 456
+drwxr-xr-x 21 mrc mrc    740 Aug 18 14:25 .
+drwxr-xr-x  6 mrc mrc    200 Aug 18 14:25 ..
+drwxr-xr-x  3 mrc mrc    140 Aug 18 14:25 agent
+-rw-r--r--  1 mrc mrc  17924 Aug  7 16:36 alpaca_paper.py
+drwxr-xr-x  2 mrc mrc    440 Aug 18 14:25 arena
+-rw-r--r--  1 mrc mrc  10343 Jul  6 07:56 benchmark_models.py
+-rw-r--r--  1 mrc mrc  13880 Aug 12 23:50 connections.py
+-rw-r--r--  1 mrc mrc   8804 Jul  4 11:02 coordinator.py
+-rw-r--r--  1 mrc mrc  16883 Aug 14 15:20 dashboard.py
+drwxr-xr-x  4 mrc mrc    580 Aug 18 14:25 data
+-rw-r--r--  1 mrc mrc  10067 Jul 10 14:02 data_mgmt.py
+drwxr-xr-x  3 mrc mrc    280 Aug 18 14:25 exchange
+drwxr-xr-x  3 mrc mrc     80 Aug 18 14:25 exchange-engine
+-rw-r--r--  1 mrc mrc  16952 Aug 12 23:07 gpu_sync.py
+-rw-r--r--  1 mrc mrc 215170 Aug 18 14:25 harness.py
+drwxr-xr-x  2 mrc mrc     60 Aug 18 14:25 hunt_output
+-rw-r--r--  1 mrc mrc      0 Jul  2 11:20 __init__.py
+-rw-r--r--  1 mrc mrc  46832 Jul 30 10:02 mcp_server.py
+-rw-r--r--  1 mrc mrc  25884 Jul 30 14:07 model_manager.py
+drwxr-xr-x  4 mrc mrc    460 Aug 18 14:25 mot
+-rw-r--r--  1 mrc mrc   5168 Jul  8 21:30 onchain.py
+-rw-r--r--  1 mrc mrc  10182 Jul  4 16:22 onchain_web3.py
+drwxr-xr-x  4 mrc mrc    140 Aug 18 14:25 .opencode
+drwxr-xr-x  2 mrc mrc     60 Aug 18 14:25 __pycache__
+-rwxr-xr-x  1 mrc mrc   1584 Jul  9 14:29 report_risk.py
+-rw-r--r--  1 mrc mrc   2281 Jul 29 11:33 repro_volatility.py
+drwxr-xr-x  3 mrc mrc    220 Aug 18 14:25 risk
+drwxr-xr-x  2 mrc mrc    220 Aug 18 14:25 scenarios
+drwxr-xr-x  2 mrc mrc    480 Aug 18 14:25 scripts
+drwxr-xr-x  3 mrc mrc    920 Aug 18 14:25 setup_search
+drwxr-xr-x  3 mrc mrc    120 Aug 18 14:25 state
+drwxr-xr-x  2 mrc mrc    460 Aug 18 14:25 strategies
+drwxr-xr-x  2 mrc mrc    120 Aug 18 14:25 tests
+drwxr-xr-x  3 mrc mrc    200 Aug 18 14:25 tools
+drwxr-xr-x  3 mrc mrc    860 Aug 18 14:25 training
+-rwxr-xr-x  1 mrc mrc  28082 Jul 29 22:01 tui_dashboard.py
+drwxr-xr-x  2 mrc mrc    360 Aug 18 14:25 unsloth_compiled_cache
+[0m
+## Objective
+- Audit the copied trading system at `/tmp/opencode/bb-sandbox` for real bugs by reading source only.
+- Identify two likely re-introduced historical defects and report each using the required `FOUNDBUG` line format.
+
+## Important Details
+- Target directory: `/tmp/opencode/bb-sandbox`.
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- Required output format for each bug: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+- Likely bug IDs to consider:
+  - `rank-dead`
+  - `future-bar`
+- `rank-dead` likely means cross-sectional ranking is silently disabled.
+- `future-bar` likely means a future-dated daily bar is not filtered, risking a crash loop.
+- Other real bugs may be reported if clearly supported by source inspection.
+- If no qualifying bugs are found, state that explicitly.
+
+## Work State
+### Completed
+- Received the bug-hunt task and output constraints.
+
+### Active
+- Need to inspect source under `/tmp/opencode/bb-sandbox`.
+- Need to locate the cross-sectional ranking logic and daily-bar ingestion/filtering logic.
+- Need to verify whether either hinted defect is actually present.
+- Need to scan for additional real bugs if encountered.
+
+### Blocked
+- No source files have been read yet, so no bugs have been confirmed.
+
+## Next Move
+1. List and explore `/tmp/opencode/bb-sandbox` to identify the main source layout.
+2. Search for ranking-related code, especially cross-sectional rank calculations and any disabled/no-op behavior.
+3. Search for daily-bar handling, especially date validation or filtering for future-dated bars.
+4. Produce `FOUNDBUG` lines for confirmed issues, or state that no qualifying bugs were found.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root of the copied trading system to audit.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mls -la /tmp/opencode/bb-sandbox/hunt_output /tmp/opencode/bb-sandbox/strategies /tmp/opencode/bb-sandbox/data
+/tmp/opencode/bb-sandbox/data:
+total 268
+drwxr-xr-x  4 mrc mrc   580 Aug 18 14:25 .
+drwxr-xr-x 21 mrc mrc   740 Aug 18 14:25 ..
+-rw-r--r--  1 mrc mrc  4827 Aug  9 13:46 accumulator.py
+-rwxr-xr-x  1 mrc mrc  1699 Aug  9 19:00 accumulator_run.sh
+-rw-r--r--  1 mrc mrc  6266 Aug  9 14:05 acquire.py
+-rw-r--r--  1 mrc mrc 12544 Jul 16 15:35 alt_data_mcp.py
+-rw-r--r--  1 mrc mrc 26578 Aug  1 22:09 arxiv.py
+-rw-r--r--  1 mrc mrc  6326 Aug 14 13:00 economic_calendar.py
+-rw-r--r--  1 mrc mrc 10727 Aug  1 18:15 economics.py
+-rw-r--r--  1 mrc mrc  6331 Aug  9 14:12 falsify.py
+-rw-r--r--  1 mrc mrc 16219 Jul 10 11:51 feature_integrator.py
+-rw-r--r--  1 mrc mrc 25572 Jul 29 14:46 fundamentals.py
+-rw-r--r--  1 mrc mrc  2916 Aug  9 14:12 gpu_bootstrap.py
+-rw-r--r--  1 mrc mrc  6894 Aug  9 14:54 gpu_falsify.py
+-rw-r--r--  1 mrc mrc  4373 Aug  9 14:30 gpu_monitor.py
+-rw-r--r--  1 mrc mrc     0 Jul  2 11:20 __init__.py
+-rw-r--r--  1 mrc mrc  4402 Aug  1 18:02 market_ctx.py
+-rw-r--r--  1 mrc mrc  6685 Jul 23 19:44 multi_tf.py
+-rw-r--r--  1 mrc mrc 10746 Jul 17 13:26 news.py
+-rw-r--r--  1 mrc mrc  8571 Jul  9 21:10 paper_deck.py
+drwxr-xr-x  2 mrc mrc   100 Aug 18 14:25 __pycache__
+-rw-r--r--  1 mrc mrc  5369 Aug  9 14:12 refresh.py
+-rw-r--r--  1 mrc mrc 11607 Jul  5 23:39 regime_classifier.py
+drwxr-xr-x  3 mrc mrc    60 Aug 18 14:25 research
+-rw-r--r--  1 mrc mrc  9999 Jul  9 13:57 social_sentiment.py
+-rw-r--r--  1 mrc mrc  5963 Jul  4 11:43 synthetic.py
+-rw-r--r--  1 mrc mrc 13149 Jul 29 14:09 valuation.py
+-rw-r--r--  1 mrc mrc  5052 Aug 12 23:06 vix_gate.py
+-rw-r--r--  1 mrc mrc  5497 Aug 14 12:58 world_bank.py
+
+/tmp/opencode/bb-sandbox/hunt_output:
+total 12
+drwxr-xr-x  2 mrc mrc   60 Aug 18 14:25 .
+drwxr-xr-x 21 mrc mrc  740 Aug 18 14:25 ..
+-rw-r--r--  1 mrc mrc 9563 Aug 18 14:27 transcript.txt
+
+/tmp/opencode/bb-sandbox/strategies:
+total 140
+drwxr-xr-x  2 mrc mrc   460 Aug 18 14:25 .
+drwxr-xr-x 21 mrc mrc   740 Aug 18 14:25 ..
+-rw-r--r--  1 mrc mrc  6562 Aug 14 20:46 bayes.py
+-rw-r--r--  1 mrc mrc  4242 Aug 14 20:46 entropy.py
+-rw-r--r--  1 mrc mrc  2989 Aug 13 23:03 evaluate.py
+-rw-r--r--  1 mrc mrc  4783 Aug 14 13:34 evolve_weights.py
+-rw-r--r--  1 mrc mrc  6414 Aug 14 12:29 experts.py
+-rw-r--r--  1 mrc mrc  5358 Aug 14 11:15 handoff.py
+-rw-r--r--  1 mrc mrc  4581 Aug 14 20:45 hurst.py
+-rw-r--r--  1 mrc mrc  1830 Aug 13 23:00 __init__.py
+-rw-r--r--  1 mrc mrc  4264 Aug 14 20:46 kalman.py
+-rw-r--r--  1 mrc mrc  5611 Aug 14 20:45 laggard.py
+-rw-r--r--  1 mrc mrc 11539 Aug 14 20:47 lanes.py
+-rw-r--r--  1 mrc mrc  3622 Aug 14 13:00 macro_features.py
+-rw-r--r--  1 mrc mrc  5064 Aug 13 23:00 momtrend.py
+-rw-r--r--  1 mrc mrc  4393 Aug 13 23:01 multiasset.py
+-rw-r--r--  1 mrc mrc  3720 Aug 14 12:05 scorer_intl.py
+-rw-r--r--  1 mrc mrc  5098 Aug 14 12:04 scorer.py
+-rw-r--r--  1 mrc mrc  3791 Aug 14 11:39 seed_router.py
+-rw-r--r--  1 mrc mrc  3600 Aug 14 11:39 shadow.py
+-rw-r--r--  1 mrc mrc  4344 Aug 14 20:45 spectral.py
+-rw-r--r--  1 mrc mrc  2497 Aug 13 23:02 verify.py
+-rw-r--r--  1 mrc mrc  3508 Aug 14 20:46 wavelet.py
+[0m
+[0m✱ [0mGrep "rank"[90m in strategies · 0 matches[0m
+## Objective
+- Audit the copied trading system at `/tmp/opencode/bb-sandbox` by reading source only to identify real, source-supported bugs, especially the hinted re-introduced defects `rank-dead` and `future-bar`.
+- Report each confirmed bug in the required format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`; if no qualifying bugs are found, state that explicitly.
+
+## Important Details
+- Target directory: `/tmp/opencode/bb-sandbox`.
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- Only report bugs clearly supported by source inspection.
+- Likely bug IDs:
+  - `rank-dead`: cross-sectional ranking may be silently disabled or reduced to a no-op.
+  - `future-bar`: a future-dated daily bar may not be filtered, risking a crash loop.
+- Initial file discovery confirmed main Python packages/modules under the target: `exchange/`, `risk/`, `state/`, `scripts/`, `arena/`, `exchange-engine/`, and `.opencode/tools/`.
+- The initial `find` output was truncated, so additional files may exist beyond the first 100 listed.
+
+## Work State
+### Completed
+- Received the audit task and output constraints.
+- Ran initial source-layout discovery: `find /tmp/opencode/bb-sandbox -type f -name "*.py" | head -100 && echo "---" && ls -la /tmp/opencode/bb-sandbox`.
+- Identified candidate module areas for the hinted bugs:
+  - daily-bar handling likely under `exchange/`
+  - cross-sectional ranking / risk allocation likely under `risk/`
+
+### Active
+- Need to inspect source files to confirm or reject `rank-dead` and `future-bar`.
+- Need to locate cross-sectional ranking logic and daily-bar ingestion/filtering logic.
+- Need to scan for other real bugs only if clearly supported by source.
+
+### Blocked
+- No source content has been read yet, so no bugs have been confirmed.
+
+## Next Move
+1. Search for ranking-related code, e.g. `rg -n "rank|cross.section|percentile|quantile|zscore|z_score" /tmp/opencode/bb-sandbox`, then inspect likely files such as `/tmp/opencode/bb-sandbox/risk/manager.py`, `/tmp/opencode/bb-sandbox/risk/asset_allocator.py`, and `/tmp/opencode/bb-sandbox/risk/performance_analytics.py`.
+2. Search for daily-bar ingestion/filtering code, e.g. `rg -n "bar|daily|date|timestamp|timestamp_ms|timestamp_s" /tmp/opencode/bb-sandbox/exchange`, then inspect `/tmp/opencode/bb-sandbox/exchange/realtime.py`, `/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py`, and `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`.
+3. Output `FOUNDBUG` lines for confirmed bugs, or explicitly state that no qualifying bugs were found.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: audit root for the copied trading system.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: likely live/realtime data path; check daily-bar filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py`: Finnhub realtime/data path; check future-dated bar handling.
+- `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`: stock data path; check daily bar ingestion and date validation.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: likely risk orchestration; check ranking usage and dead logic.
+- `/tmp/opencode/bb-sandbox/risk/asset_allocator.py`: likely allocation/ranking logic; check cross-sectional ranking implementation.
+- `/tmp/opencode/bb-sandbox/risk/performance_analytics.py`: possible ranking/percentile/quantile analytics.
+- `/tmp/opencode/bb-sandbox/risk/`: candidate area for `rank-dead`.
+- `/tmp/opencode/bb-sandbox/exchange/`: candidate area for `future-bar`.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead hunt_output/transcript.txt
+[0m
+[0m$ [0mgrep -rn "rank" /tmp/opencode/bb-sandbox --include="*.py" -il | head -40
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/war.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothORPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothNashMDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRewardTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothSFTTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGRPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothBCOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothXPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothCPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/moe_utils.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPRMTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGKDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothDPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRLOOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothKTOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothOnlineDPOTrainer.py
+/tmp/opencode/bb-sandbox/data/news.py
+/tmp/opencode/bb-sandbox/data/feature_integrator.py
+/tmp/opencode/bb-sandbox/setup_search/loop.py
+/tmp/opencode/bb-sandbox/setup_search/core.py
+/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py
+/tmp/opencode/bb-sandbox/setup_search/engine.py
+/tmp/opencode/bb-sandbox/mot/roster.py
+/tmp/opencode/bb-sandbox/scenarios/neural.py
+/tmp/opencode/bb-sandbox/training/dpo_trainer.py
+/tmp/opencode/bb-sandbox/training/finetune_cycle.py
+/tmp/opencode/bb-sandbox/training/legacy_data_builder.py
+/tmp/opencode/bb-sandbox/harness.py
+[0m
+## Objective
+- Audit the copied trading system at `/tmp/opencode/bb-sandbox` by inspecting source only to identify real, source-supported bugs, especially the hinted defects `rank-dead` and `future-bar`.
+- Report each confirmed bug exactly as `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`; if no qualifying bugs are confirmed, state that explicitly.
+
+## Important Details
+- Target directory: `/tmp/opencode/bb-sandbox`.
+- Do not run the full harness because it may require live exchanges.
+- Do not modify any files.
+- Only report bugs clearly supported by source inspection.
+- Likely bug IDs:
+  - `rank-dead`: cross-sectional ranking may be silently disabled or reduced to a no-op.
+  - `future-bar`: a future-dated daily bar may not be filtered, risking a crash loop or incorrect state.
+- `hunt_output/transcript.txt` contains a prior transcript with a truncated `find` listing; it did not directly reveal the bug locations.
+- `strategies/` had no files matching `rank` when searched directly.
+- A broad case-insensitive `rank` search identified likely relevant files in `arena/`, `setup_search/`, `data/`, `mot/`, `scenarios/`, `training/`, and `harness.py`; `unsloth_compiled_cache/` hits are likely irrelevant to the trading-system bug hunt.
+
+## Work State
+### Completed
+- Received the audit task and output constraints.
+- Listed `/tmp/opencode/bb-sandbox/hunt_output`, `/tmp/opencode/bb-sandbox/strategies`, and `/tmp/opencode/bb-sandbox/data`; found `hunt_output/transcript.txt`, many data modules, and at least `strategies/bayes.py` before truncation.
+- Searched `rank` under `/tmp/opencode/bb-sandbox/strategies`; no files matched.
+- Read `/tmp/opencode/bb-sandbox/hunt_output/transcript.txt`; it contains a prior `find`/`ls` transcript with a truncated Python-file list and no direct bug details.
+- Ran `grep -rn "rank" /tmp/opencode/bb-sandbox --include="*.py" -il | head -40`; relevant non-`unsloth_compiled_cache` matches included:
+  - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`
+  - `/tmp/opencode/bb-sandbox/arena/war.py`
+  - `/tmp/opencode/bb-sandbox/data/news.py`
+  - `/tmp/opencode/bb-sandbox/data/feature_integrator.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/loop.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/core.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py`
+  - `/tmp/opencode/bb-sandbox/mot/roster.py`
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py`
+  - `/tmp/opencode/bb-sandbox/training/dpo_trainer.py`
+  - `/tmp/opencode/bb-sandbox/training/finetune_cycle.py`
+  - `/tmp/opencode/bb-sandbox/training/legacy_data_builder.py`
+  - `/tmp/opencode/bb-sandbox/harness.py`
+
+### Active
+- Need to inspect ranking-related code in the newly identified files to confirm or reject `rank-dead`.
+- Need to locate daily-bar ingestion/filtering logic and confirm or reject `future-bar`.
+- Need to scan for other real bugs only if clearly supported by source.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Run a line-number grep on the relevant `rank` hits, for example: `grep -n "rank" /tmp/opencode/bb-sandbox/arena/candidates_macro.py /tmp/opencode/bb-sandbox/arena/war.py /tmp/opencode/bb-sandbox/data/news.py /tmp/opencode/bb-sandbox/data/feature_integrator.py /tmp/opencode/bb-sandbox/setup_search/loop.py /tmp/opencode/bb-sandbox/setup_search/core.py /tmp/opencode/bb-sandbox/setup_search/value_head_1m.py /tmp/opencode/bb-sandbox/setup_search/engine.py /tmp/opencode/bb-sandbox/mot/roster.py /tmp/opencode/bb-sandbox/scenarios/neural.py /tmp/opencode/bb-sandbox/harness.py`.
+2. Inspect the most likely ranking functions first, starting with `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`, `/tmp/opencode/bb-sandbox/arena/war.py`, `/tmp/opencode/bb-sandbox/data/feature_integrator.py`, `/tmp/opencode/bb-sandbox/setup_search/engine.py`, `/tmp/opencode/bb-sandbox/setup_search/core.py`, and targeted sections of `/tmp/opencode/bb-sandbox/harness.py`.
+3. Search for future-dated daily-bar handling, for example: `grep -RnE "future|daily_bar|bar_date|bar_time|date >=|date <=|timestamp >=|now|utcnow" /tmp/opencode/bb-sandbox/exchange /tmp/opencode/bb-sandbox/data /tmp/opencode/bb-sandbox/risk /tmp/opencode/bb-sandbox/harness.py --include="*.py"`.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: audit root for the copied trading system.
+- `/tmp/opencode/bb-sandbox/hunt_output/transcript.txt`: prior transcript with truncated file discovery; no direct bug details.
+- `/tmp/opencode/bb-sandbox/strategies`: searched for `rank`; no matching files found.
+- `/tmp/opencode/bb-sandbox/data`: contains data modules and `rank` matches in `/tmp/opencode/bb-sandbox/data/news.py` and `/tmp/opencode/bb-sandbox/data/feature_integrator.py`.
+- `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`: contains `rank`; candidate for `rank-dead`.
+- `/tmp/opencode/bb-sandbox/arena/war.py`: contains `rank`; candidate for `rank-dead`.
+- `/tmp/opencode/bb-sandbox/data/feature_integrator.py`: contains `rank`; candidate for cross-sectional ranking or feature logic.
+- `/tmp/opencode/bb-sandbox/setup_search/loop.py`: contains `rank`; candidate search/ranking logic.
+- `/tmp/opencode/bb-sandbox/setup_search/core.py`: contains `rank`; candidate search/ranking logic.
+- `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`: contains `rank`; candidate search/ranking logic.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: contains `rank`; candidate search/ranking engine.
+- `/tmp/opencode/bb-sandbox/mot/roster.py`: contains `rank`; possible ranking/roster logic.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: contains `rank`; possible scenario/ranking logic.
+- `/tmp/opencode/bb-sandbox/training/dpo_trainer.py`: contains `rank`; possibly training-related rather than live bug.
+- `/tmp/opencode/bb-sandbox/training/finetune_cycle.py`: contains `rank`; possibly training-related rather than live bug.
+- `/tmp/opencode/bb-sandbox/training/legacy_data_builder.py`: contains `rank`; possibly data/training-related.
+- `/tmp/opencode/bb-sandbox/harness.py`: contains `rank`; large integration file likely needing targeted inspection.
+- `/tmp/opencode/bb-sandbox/exchange/`: candidate area for live/realtime daily-bar ingestion and `future-bar`.
+- `/tmp/opencode/bb-sandbox/data/`: candidate area for daily-bar normalization/filtering and `future-bar`.
+- `/tmp/opencode/bb-sandbox/risk/`: candidate area for risk allocation and `rank-dead`.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mls /tmp/opencode/bb-sandbox
+agent
+alpaca_paper.py
+arena
+benchmark_models.py
+connections.py
+coordinator.py
+dashboard.py
+data
+data_mgmt.py
+exchange
+exchange-engine
+gpu_sync.py
+harness.py
+hunt_output
+__init__.py
+mcp_server.py
+model_manager.py
+mot
+onchain.py
+onchain_web3.py
+__pycache__
+report_risk.py
+repro_volatility.py
+risk
+scenarios
+scripts
+setup_search
+state
+strategies
+tests
+tools
+training
+tui_dashboard.py
+unsloth_compiled_cache
+[0m
+[0m✱ [0mGrep "rank"[90m in arena · 12 matches[0m
+[0m✱ [0mGrep "rank"[90m in setup_search · 24 matches[0m
+[0m✱ [0mGrep "rank"[90m in data · 4 matches[0m
+[0m✱ [0mGrep "rank"[90m in mot · 1 match[0m
+[0m✱ [0mGrep "rank"[90m in scenarios · 6 matches[0m
+[0m✱ [0mGrep "rank"[90m in training · 3 matches[0m
+[0m✱ [0mGrep "rank"[90m in . · 1 match[0m
+## Objective
+- Audit the copied trading system at `/tmp/opencode/bb-sandbox` using source inspection only to confirm or reject the hinted defects `rank-dead` and `future-bar`.
+- Report each confirmed bug exactly as `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`; if no qualifying bugs are confirmed, state that explicitly.
+
+## Important Details
+- Target directory: `/tmp/opencode/bb-sandbox`.
+- Do not run the full harness because it may require live exchanges.
+- Do not modify any files.
+- Only report bugs clearly supported by source inspection.
+- Likely bug IDs:
+  - `rank-dead`: cross-sectional ranking may be silently disabled, zero-weighted, or reduced to a no-op.
+  - `future-bar`: a future-dated daily bar may not be filtered, risking a crash loop or incorrect state.
+- `hunt_output/transcript.txt` contains a prior transcript with a truncated file discovery listing; it did not directly reveal bug locations.
+- `strategies/` had no files matching `rank` when searched directly.
+- Top-level listing shows likely active directories for the bug hunt: `agent`, `arena`, `data`, `exchange`, `exchange-engine`, `hunt_output`, `mot`, `risk`, `scenarios`, `scripts`, `setup_search`, `state`, `strategies`, `tests`, `tools`, `training`, plus large irrelevant `unsloth_compiled_cache`.
+- Targeted `rank` greps now have line-level hits in `arena/`, `setup_search/`, `data/`, `mot/`, `scenarios/`, `training/`, and `harness.py`.
+
+## Work State
+### Completed
+- Received the audit task and output constraints.
+- Listed `/tmp/opencode/bb-sandbox` and confirmed major directories including `exchange`, `exchange-engine`, `risk`, `state`, `setup_search`, `data`, `arena`, and top-level `harness.py`.
+- Listed and inspected `hunt_output`, `strategies`, and `data` discovery output from prior work.
+- Searched `rank` under `/tmp/opencode/bb-sandbox/strategies`; no files matched.
+- Read `/tmp/opencode/bb-sandbox/hunt_output/transcript.txt`; it contained only prior discovery output, not direct bug evidence.
+- Ran broad `rank` discovery and identified relevant non-`unsloth_compiled_cache` files.
+- Ran targeted line-level `rank` greps and obtained:
+  - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`: lines 4, 8, 115, 116, 130, 131 referencing `mom_rank`, `rsi_rank`, and `DataFrame.rank(axis=1, pct=True)`.
+  - `/tmp/opencode/bb-sandbox/arena/war.py`: lines 42, 62, 74, 75, 81, 82 referencing precomputed per-symbol macro rank arrays.
+  - `/tmp/opencode/bb-sandbox/setup_search/core.py`: lines 24, 25, 68, 69, 102 referencing `rank_on` and `w_rank` defaults/search space.
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py`: lines 5, 80, 84, 91, 97, 98, 101, 108, 109, 127, 177 referencing `_score_at`, `_cross_sectional_rank`, `rank_on`, and `w_rank`.
+  - `/tmp/opencode/bb-sandbox/setup_search/loop.py`: lines 55, 77 referencing `rank_on` parameter handling.
+  - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`: lines 113, 117, 118, 125, 132, 133 referencing cross-sectional momentum/RSI ranks.
+  - `/tmp/opencode/bb-sandbox/data/feature_integrator.py`: line 85 referencing composite score used for ranking/selection.
+  - `/tmp/opencode/bb-sandbox/data/news.py`: lines 8, 99, 135 referencing `market_cap_rank`, likely unrelated to cross-sectional `rank-dead`.
+  - `/tmp/opencode/bb-sandbox/mot/roster.py`: line 57 referencing value-head cross-sectional ranks in a feature plan.
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py`: lines 154, 159, 170, 180, 181, 204 referencing rank-based Gaussianization, likely scenario-specific.
+  - `/tmp/opencode/bb-sandbox/training/legacy_data_builder.py`: line 378 referencing “shrank”, likely unrelated.
+  - `/tmp/opencode/bb-sandbox/training/finetune_cycle.py`: line 441 referencing LoRA rank.
+  - `/tmp/opencode/bb-sandbox/training/dpo_trainer.py`: line 45 referencing LoRA rank.
+  - `/tmp/opencode/bb-sandbox/harness.py`: line 2308 referencing Tier 2 simplified ranking by radar momentum score.
+
+### Active
+- Need to read the ranking-related code around the identified line hits to confirm or reject `rank-dead`, especially whether `rank_on`/`w_rank` defaults or runtime paths make cross-sectional ranking dead.
+- Need to locate and inspect daily-bar ingestion/normalization/filtering logic to confirm or reject `future-bar`, likely in `exchange/`, `exchange-engine/`, `data/`, `risk/`, `state/`, `scripts/`, or `harness.py`.
+- Need to scan for additional real bugs only if clearly supported by source.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Inspect the highest-value `rank-dead` candidates with targeted reads:
+   - `/tmp/opencode/bb-sandbox/setup_search/core.py` around lines 20-110 for `rank_on`, `w_rank`, defaults, and search space.
+   - `/tmp/opencode/bb-sandbox/setup_search/engine.py` around lines 75-180 for `_score_at`, `_cross_sectional_rank`, and whether rank contribution can be zeroed.
+   - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py` around lines 105-140 for rank computation and use.
+   - `/tmp/opencode/bb-sandbox/arena/war.py` around lines 55-90 for precomputed rank feature arrays.
+   - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py` around lines 105-140 for vectorized composite scoring.
+   - `/tmp/opencode/bb-sandbox/harness.py` around lines 2290-2330 for the Tier 2 radar momentum ranking path.
+2. Run targeted `future-bar` searches and inspect the first plausible daily-bar ingestion/filtering path, for example:
+   - `grep -nE "future|daily_bar|bar_date|bar_time|bar_ts|timestamp|utcnow|datetime\.now|date >=|date <=|exchange_time|candle" /tmp/opencode/bb-sandbox/exchange /tmp/opencode/bb-sandbox/exchange-engine /tmp/opencode/bb-sandbox/data /tmp/opencode/bb-sandbox/risk /tmp/opencode/bb-sandbox/state /tmp/opencode/bb-sandbox/scripts /tmp/opencode/bb-sandbox/harness.py --include="*.py"`
+   - Prioritize files handling daily bars, exchange timestamps, state persistence, and risk/allocation updates.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: audit root for the copied trading system.
+- `/tmp/opencode/bb-sandbox/harness.py`: large integration file; contains Tier 2 ranking at line 2308 and may also contain daily-bar loop/state logic.
+- `/tmp/opencode/bb-sandbox/setup_search/core.py`: contains `rank_on` and `w_rank` defaults/search-space entries; strong `rank-dead` candidate.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: contains `_score_at`, `_cross_sectional_rank`, and rank-weighted scoring; strong `rank-dead` candidate.
+- `/tmp/opencode/bb-sandbox/setup_search/loop.py`: handles `rank_on` in parameter/search loop; relevant to whether rank is enabled.
+- `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`: computes cross-sectional `mom_rank` and `rsi_rank`; relevant to rank implementation and possible no-op scoring.
+- `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`: computes `mom_rank` and `rsi_rank` for macro candidate rows; relevant to `rank-dead`.
+- `/tmp/opencode/bb-sandbox/arena/war.py`: precomputes per-symbol macro rank arrays; relevant to `rank-dead`.
+- `/tmp/opencode/bb-sandbox/data/feature_integrator.py`: mentions composite score used for ranking/selection; lower-priority but relevant.
+- `/tmp/opencode/bb-sandbox/data/news.py`: references `market_cap_rank`; likely unrelated to cross-sectional `rank-dead`.
+- `/tmp/opencode/bb-sandbox/mot/roster.py`: references value-head cross-sectional ranks in a feature plan; context for expected rank usage.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: uses rank-based Gaussianization; likely scenario-specific and less likely for `rank-dead`.
+- `/tmp/opencode/bb-sandbox/training/finetune_cycle.py`, `/tmp/opencode/bb-sandbox/training/dpo_trainer.py`, `/tmp/opencode/bb-sandbox/training/legacy_data_builder.py`: contain `rank` matches but likely training or unrelated wording.
+- `/tmp/opencode/bb-sandbox/exchange/`: candidate area for live/realtime daily-bar ingestion and `future-bar`.
+- `/tmp/opencode/bb-sandbox/exchange-engine/`: newly confirmed top-level candidate area for exchange/daily-bar logic.
+- `/tmp/opencode/bb-sandbox/data/`: candidate area for daily-bar normalization/filtering and `future-bar`.
+- `/tmp/opencode/bb-sandbox/risk/`: candidate area for risk allocation, rank usage, or `future-bar` state impact.
+- `/tmp/opencode/bb-sandbox/state/`: candidate area for persisted daily-bar state or stale/future-bar handling.
+- `/tmp/opencode/bb-sandbox/scripts/`: candidate area for operational bar ingestion or replay scripts.
+- `/tmp/opencode/bb-sandbox/hunt_output/transcript.txt`: prior discovery transcript; no direct bug evidence.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m
+[0m# [0mTodos
+[•] Inspect rank-related candidate code for rank-dead
+[ ] Inspect daily-bar ingestion/filtering code for future-bar
+[ ] Compile final bug report or explicit no-bug statement
+[0m
+[0m→ [0mRead setup_search/core.py[90m [offset=1, limit=130][0m
+[0m→ [0mRead setup_search/engine.py[90m [offset=1, limit=220][0m
+[0m→ [0mRead arena/candidates_macro.py[90m [offset=1, limit=170][0m
+[0m→ [0mRead arena/war.py[90m [offset=1, limit=120][0m
+[0m→ [0mRead setup_search/value_head_1m.py[90m [offset=1, limit=170][0m
+[0m→ [0mRead harness.py[90m [offset=2280, limit=70][0m
+[0m✱ [0mGrep "future|daily_bar|bar_date|bar_time|bar_ts|timestamp|utcnow|datetime\.now|date >=|date <=|exchange_time|candle"[90m in exchange · 60 matches[0m
+[0m✱ [0mGrep "future|daily_bar|bar_date|bar_time|bar_ts|timestamp|utcnow|datetime\.now|date >=|date <=|exchange_time|candle"[90m in exchange-engine · 1 match[0m
+## Objective
+- Audit the copied trading system at `/tmp/opencode/bb-sandbox` using source inspection only to confirm or reject the hinted defects `rank-dead` and `future-bar`.
+- If either is confirmed, report it exactly as `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`; if neither is confirmed, state explicitly that no qualifying bugs were found.
+
+## Important Details
+- Target root: `/tmp/opencode/bb-sandbox`.
+- Do not run the full harness because it may require live exchanges.
+- Do not modify any files.
+- Only report bugs clearly supported by source inspection.
+- `rank-dead` means cross-sectional ranking may be silently disabled, zero-weighted, or reduced to a no-op.
+- `future-bar` means a future-dated daily bar may not be filtered, risking a crash loop or incorrect state.
+- Prior transcript at `/tmp/opencode/bb-sandbox/hunt_output/transcript.txt` contained only discovery output and no direct bug evidence.
+- `strategies/` had no files matching `rank`.
+- Likely active areas: `agent`, `arena`, `data`, `exchange`, `exchange-engine`, `risk`, `scripts`, `setup_search`, `state`, `training`, and top-level `harness.py`.
+- `rank` discovery already narrowed the main candidates to `setup_search/`, `arena/`, and a few secondary files.
+- `future-bar` discovery in `exchange/` and `exchange-engine/` has narrowed the main live-bar candidate to `exchange/stock_finnhub.py`; `exchange-engine/` currently looks unrelated except for a `from __future__ import annotations` import.
+
+## Work State
+### Completed
+- Received the audit task and output constraints.
+- Listed `/tmp/opencode/bb-sandbox` and confirmed major directories including `exchange`, `exchange-engine`, `risk`, `state`, `setup_search`, `data`, `arena`, and top-level `harness.py`.
+- Inspected `hunt_output`, `strategies`, and prior discovery output; no direct bug evidence found there.
+- Ran broad and targeted `rank` discovery across the repository.
+- Obtained line-level `rank` hits in:
+  - `/tmp/opencode/bb-sandbox/setup_search/core.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/loop.py`
+  - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`
+  - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`
+  - `/tmp/opencode/bb-sandbox/arena/war.py`
+  - `/tmp/opencode/bb-sandbox/data/feature_integrator.py`
+  - `/tmp/opencode/bb-sandbox/mot/roster.py`
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py`
+  - `/tmp/opencode/bb-sandbox/harness.py`
+- Read initial windows of the main `rank-dead` candidates:
+  - `/tmp/opencode/bb-sandbox/setup_search/core.py`: confirmed `CONFIG_BOUNDS` contains `rank_on: (0, 1)` and `w_rank: (0.0, 3.0)`, but the default config and full rank wiring still need inspection.
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py`: read the top of the file through the start of `_features`; still need `_score_at`, `_cross_sectional_rank`, and the backtest scoring path.
+  - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`: read the top of the file through the start of `macro_state`; still need the actual `mom_rank` / `rsi_rank` computation.
+  - `/tmp/opencode/bb-sandbox/arena/war.py`: read the top of the file through the start of `_entry_state`; still need the precomputed rank arrays and how they feed entry states.
+  - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`: read the top of the file through the start of `load_fred`; still need the cross-sectional rank construction used for training/features.
+  - `/tmp/opencode/bb-sandbox/harness.py` around lines 2280–2330: confirmed Tier 2 scout ranking is a simple `top6 = top20[:focus]` after LLM top-20 selection; not yet conclusive for `rank-dead`.
+- Ran targeted `future-bar` / timestamp discovery in `exchange/`:
+  - Found 60 matches across `exchange/*.py`.
+  - Most relevant hits are in `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`, especially:
+    - line 193: parses ISO timestamp into unix seconds
+    - line 198: assigns `timestamp=ts`
+    - lines 306–307: `_compute_from_timestamp`
+    - lines 347–373: candle-fetch comments and Finnhub candle path
+    - lines 394–405: `_parse_candle_bars`
+    - lines 447–450: assigns `timestamp=ts` from index
+    - lines 597, 623, 643, 664: `timestamp=datetime.now(timezone.utc).isoformat()`
+- Ran targeted `future-bar` / timestamp discovery in `exchange-engine/`:
+  - Only one match:
+    - `/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py:8`: `from __future__ import annotations`
+
+### Active
+- Need to confirm or reject `rank-dead` by inspecting the actual rank implementation and scoring path, especially:
+  - `/tmp/opencode/bb-sandbox/setup_search/core.py` around lines 60–130 for `DEFAULT_CONFIG` and default `rank_on` / `w_rank`.
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py` around lines 75–180 for `_cross_sectional_rank`, `_score_at`, and whether rank can be zeroed or bypassed.
+  - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py` around lines 105–170 for how `mom_rank` / `rsi_rank` are computed and emitted.
+  - `/tmp/opencode/bb-sandbox/arena/war.py` around lines 40–120 for how precomputed rank arrays are consumed.
+  - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py` around lines 105–170 for vectorized rank feature construction.
+- Need to confirm or reject `future-bar` by inspecting daily-bar ingestion/normalization/filtering paths, especially:
+  - `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py` around lines 180–210, 300–460, and 590–680.
+  - `/tmp/opencode/bb-sandbox/exchange/realtime.py` around lines 200–220.
+  - Then, if needed, expand to `/tmp/opencode/bb-sandbox/data/`, `/tmp/opencode/bb-sandbox/risk/`, `/tmp/opencode/bb-sandbox/state/`, `/tmp/opencode/bb-sandbox/scripts/`, and `/tmp/opencode/bb-sandbox/harness.py`.
+- Need to compile the final report in the required `FOUNDBUG` format, or explicitly state that no qualifying bugs are confirmed.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Read the deeper rank-related sections to determine whether cross-sectional ranking is actually live in scoring:
+   - `/tmp/opencode/bb-sandbox/setup_search/core.py` lines 60–130
+   - `/tmp/opencode/bb-sandbox/setup_search/engine.py` lines 75–180
+   - `/tmp/opencode/bb-sandbox/arena/candidates_macro.py` lines 105–170
+   - `/tmp/opencode/bb-sandbox/arena/war.py` lines 40–120
+   - `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py` lines 105–170
+2. Inspect the main `future-bar` candidate paths in `exchange/` before expanding the search:
+   - `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py` around lines 180–210, 300–460, and 590–680
+   - `/tmp/opencode/bb-sandbox/exchange/realtime.py` around lines 200–220
+3. If neither bug is confirmed after those reads, state explicitly that no qualifying bugs were found.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: audit root for the copied trading system.
+- `/tmp/opencode/bb-sandbox/setup_search/core.py`:
+  - Strong `rank-dead` candidate.
+  - Contains `CONFIG_BOUNDS` with `rank_on` and `w_rank`; need to inspect `DEFAULT_CONFIG` and related defaults.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`:
+  - Strong `rank-dead` candidate.
+  - Contains the backtest feature/scoring pipeline, likely including `_cross_sectional_rank` and `_score_at`.
+- `/tmp/opencode/bb-sandbox/setup_search/loop.py`:
+  - Handles `rank_on` in the search loop; relevant to whether ranking is enabled in practice.
+- `/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py`:
+  - Relevant to rank feature construction and cross-sectional `mom_rank` / `rsi_rank` usage.
+- `/tmp/opencode/bb-sandbox/arena/candidates_macro.py`:
+  - Emits macro-augmented candidate rows and computes rank features; relevant to `rank-dead`.
+- `/tmp/opencode/bb-sandbox/arena/war.py`:
+  - Precomputes and consumes rank arrays in entry-state construction; relevant to `rank-dead`.
+- `/tmp/opencode/bb-sandbox/data/feature_integrator.py`:
+  - Lower-priority `rank` hit related to composite score/selection.
+- `/tmp/opencode/bb-sandbox/mot/roster.py`:
+  - Context for expected value-head rank feature usage.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`:
+  - Contains rank-based normalization, but likely scenario-specific.
+- `/tmp/opencode/bb-sandbox/harness.py`:
+  - Large integration file.
+  - Lines 2280–2330 show Tier 2 scout ranking via `top20` / `top6`.
+  - May also contain daily-bar loop or state logic relevant to `future-bar`.
+- `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`:
+  - Main current `future-bar` candidate.
+  - Contains candle fetching, timestamp parsing, and several `datetime.now(timezone.utc).isoformat()` call sites.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`:
+  - Secondary `future-bar` candidate around line 206; comment indicates it tracks the newest price.
+- `/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py`:
+  - Secondary timestamp-related match around line 107.
+- `/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py`:
+  - Currently only relevant as an unrelated `from __future__ import annotations` match.
+- `/tmp/opencode/bb-sandbox/data/`:
+  - Candidate area for daily-bar normalization/filtering if `exchange/` does not confirm `future-bar`.
+- `/tmp/opencode/bb-sandbox/risk/`:
+  - Candidate area for risk allocation, rank usage, or state impact from bad bars.
+- `/tmp/opencode/bb-sandbox/state/`:
+  - Candidate area for persisted daily-bar state or stale/future-bar handling.
+- `/tmp/opencode/bb-sandbox/scripts/`:
+  - Candidate area for operational bar ingestion or replay logic.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/core.py[90m [offset=50, limit=160][0m
+[0m→ [0mRead setup_search/engine.py[90m [offset=70, limit=220][0m
+[0m→ [0mRead arena/candidates_macro.py[90m [offset=100, limit=90][0m
+[0m→ [0mRead arena/war.py[90m [offset=40, limit=140][0m
+[0m→ [0mRead setup_search/value_head_1m.py[90m [offset=100, limit=120][0m
+[0m→ [0mRead exchange/stock_finnhub.py[90m [offset=180, limit=50][0m
+[0m→ [0mRead exchange/stock_finnhub.py[90m [offset=300, limit=170][0m
+[0m→ [0mRead exchange/stock_finnhub.py[90m [offset=580, limit=100][0m
+[0m→ [0mRead exchange/realtime.py[90m [offset=190, limit=50][0m

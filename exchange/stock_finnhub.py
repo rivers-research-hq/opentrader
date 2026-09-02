@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Finnhub Stock Exchange — free OHLCV data for US equities.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Paper execution on real market data. No real money leaves the system.
 Finnhub free tier: 60 API calls/minute, all US stocks, real-time quotes.
 
@@ -11,6 +13,8 @@ Usage:
 This adapter follows the same ExchangeBase interface as LiveExchange (crypto).
 Once registered, use --exchange finnhub exactly like --exchange kraken.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

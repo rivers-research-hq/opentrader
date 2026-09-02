@@ -28,6 +28,7 @@ import argparse
 import json
 import logging
 import signal
+import shlex
 import subprocess
 import time
 from pathlib import Path
@@ -94,7 +95,7 @@ def _wait_hold_ack(task, timeout=180) -> bool:
 
 
 def _spawn(task) -> subprocess.Popen:
-    return subprocess.Popen(task["cmd"], shell=True, cwd=str(PROJECT),
+    return subprocess.Popen(shlex.split(task["cmd"]), shell=False, cwd=str(PROJECT),
                             stdout=open(OUT / f"{task['name']}.out", "w"),
                             stderr=subprocess.STDOUT)
 

@@ -20,6 +20,7 @@ False (no entry).
 DO NOT RE-RUN as validation: the ff_falling lead is already OOS-disproved.
 This script exists so the probe is reproducible, not to re-claim the edge.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 import json
 import pickle
 from pathlib import Path
@@ -35,7 +36,7 @@ MACRO_CACHE = OUT / "macro_series.pkl"
 
 
 def load_macro() -> dict:
-    ck = pickle.load(open(MACRO_CACHE, "rb"))
+    ck = sec_pickle_load(open(MACRO_CACHE, "rb"))
     return ck["data"]  # {"fred": {FF, T10, CPI}, "vix": Series}
 
 

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "threatModel": {
+    "inherit": true,
+    "assets": [
+      "OANDA practice/live API credentials",
+      "trade ledger and strategy state",
+      "config API keys"
+    ],
+    "attackerControlledInputs": [
+      "market data feed contents",
+      "LLM-generated candidate files (gym sandbox)",
+      "operator commands"
+    ],
+    "trustBoundaries": [
+      "external HTTP APIs (allowlisted hosts only)",
+      "local cron lanes on this box"
+    ],
+    "securityInvariants": [
+      "no unreviewed code reaches order flow (ADR-0009 seam)",
+      "venue is authoritative for positions",
+      "single-writer ledgers with reconciliation"
+    ],
+    "exclusions": [
+      "scripts/bug-bounty/**",
+      "data/shadow_scaled/**",
+      "training/**",
+      "arena/**",
+      "setup_search/**"
+    ]
+  },
+  "network": {
+    "allowedProtocols": [
+      "https:"
+    ],
+    "allowedHosts": [
+      "api-fxpractice.oanda.com",
+      "api-fxtrade.oanda.com",
+      "api.oanda.com",
+      "finnhub.io",
+      "api.tiingo.com",
+      "query1.finance.yahoo.com",
+      "query2.finance.yahoo.com",
+      "api.binance.com",
+      "api.kraken.com",
+      "api.alpaca.markets",
+      "paper-api.alpaca.markets",
+      "fred.stlouisfed.org",
+      "api.stlouisfed.org",
+      "nfs.faireconomy.media",
+      "data.bis.org",
+      "www.bis.org",
+      "api.worldbank.org",
+      "www.worldbank.org",
+      "export.arxiv.org",
+      "arxiv.org",
+      "api.github.com",
+      "api.deepseek.com",
+      "api.openai.com",
+      "api.anthropic.com",
+      "openrouter.ai",
+      "huggingface.co",
+      "cdn-lfs.huggingface.co",
+      "api.coingecko.com",
+      "api.alternative.me"
+    ],
+    "blockPrivateNetworks": true,
+    "maxRedirects": 0
+  },
+  "command": {
+    "forbidShell": true,
+    "allowedBinaries": [
+      "git",
+      "node",
+      "python3"
+    ]
+  },
+  "path": {
+    "allowedWriteRoots": [
+      "/home/mrc/opentrader",
+      "/tmp"
+    ],
+    "requireBasename": true
+  },
+  "data": {
+    "allowedSortFields": [],
+    "requireOwnerScope": true
+  }
+}

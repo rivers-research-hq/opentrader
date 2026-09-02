@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "qwen38/qwen38-agentic",
+  "small_model": "qwen38/qwen38-agentic",
+  "compaction": {
+    "auto": false,
+    "prune": true,
+    "reserved": 4096,
+    "tail_turns": 10,
+    "preserve_recent_tokens": 8192
+  },
+  "mcp": {},
+  "provider": {
+    "qwen38": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Qwen3.8-27B agentic (llama-server :5804)",
+      "options": {
+        "baseURL": "http://localhost:5804/v1"
+      },
+      "models": {
+        "qwen38-agentic": {
+          "name": "Qwen3.8-27B UD-Q3_K_XL (32K ctx, KV in RAM, reasoning budget 8K)",
+          "limit": {
+            "context": 32768,
+            "output": 16384
+          }
+        }
+      },
+      "blacklist": []
+    }
+  }
+}

@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """OpenTrader Harness — the event loop.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
+open = guarded_open  # hardening shadow
 Architecture (sync-only, matching the spec):
   Exchange → Agent (MCP tools) → Risk → State → Dashboard
 
 The model calls tools via MCP. The harness orchestrates the cycle.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
+open = guarded_open  # hardening shadow
 
 import argparse
 import concurrent.futures

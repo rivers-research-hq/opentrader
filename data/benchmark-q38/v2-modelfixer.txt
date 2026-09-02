@@ -1,0 +1,5 @@
+[93m[1m! [0m agent "modelfixer" is a subagent, not a primary agent. Falling back to default agent
+[0m
+> build · deepseek-v4-pro-qwen3.5-9b
+[0m
+[91m[1mError: [0mCannot connect to API: Unable to connect. Is the computer able to access the url?

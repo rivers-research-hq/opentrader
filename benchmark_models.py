@@ -7,6 +7,8 @@ debate prompt matching the Bull agent's actual workload.
 Usage:
     python3 benchmark_models.py [--skip-gemma] [--skip-qwythos]
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 import json, time, subprocess, sys, os, argparse, urllib.request
 
 DEBATE_PROMPT = (

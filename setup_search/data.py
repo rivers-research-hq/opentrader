@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from security.guards import guarded_urlopen, guarded_open, sec_pickle_load  # noqa: E402  (hardening layer)
 
 PROJECT = Path(__file__).resolve().parent.parent
 OUT_DIR = PROJECT / "data" / "setup_search"
@@ -154,7 +155,7 @@ def load_ohlcv(period: str = "2y", force: bool = False, allow_synthetic: bool = 
     cache = OUT_DIR / f"ohlcv_{period}.pkl"
     if cache.exists() and not force:
         try:
-            with open(cache, "rb") as f:
+                return sec_pickle_load(f)
                 return pickle.load(f)
         except Exception:
             pass

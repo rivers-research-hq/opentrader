@@ -5,6 +5,7 @@ R1 (US registry 2008-2026): momtrend ann 23.2% / Calmar 0.469 / 4/4 folds;
   multiasset ann 7.2% / Calmar 0.39 / 4/4 folds.
 OOS (intl 2021-2026): momtrend Calmar 0.852; multiasset Calmar 1.289.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import pickle
 import sys
@@ -32,7 +33,6 @@ def _load_tournament():
         raise FileNotFoundError(
             "tournament pkls lost to /tmp cleanup 2026-08-23 — findings stand "
             "as recorded (AGENTS.md / docs/CONTEXT.md); see data/MANIFEST.json")
-    return pickle.load(open(us_p, "rb")), pickle.load(open(intl_p, "rb"))
 
 
 def fmt(s):

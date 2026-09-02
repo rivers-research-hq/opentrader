@@ -1,0 +1,15 @@
+{
+  "model": "qwen9b/deepseek-v4-pro-qwen3.5-9b",
+  "ctx": 16384,
+  "layers": 99,
+  "budget": 1024,
+  "rc": 124,
+  "seconds": 1801.6,
+  "reason": "timeout",
+  "found": {},
+  "n_found": 0,
+  "n_ground": 2,
+  "fp": 0,
+  "vram_free_before_gib": 2.59,
+  "vram_free_after_gib": 2.59
+}

@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+"""Small-cap transfer backtest: does the LIVE rule floor have edge on small/mid caps?
+
+The live system is blind to small caps for two independent reasons (scout off via
+--no-universe; scout universe is large-cap-only). This backtest asks the upstream
+question: if we DID trade small caps, would the existing technical rule have edge?
+
+Compares the LIVE rule strategy (setup_search.engine.run_backtest) on:
+  A) 16 large caps only            (main harness stock sleeve, from breadth cache)
+  C) curated small/mid-cap universe (fetched fresh via yfinance, validated)
+
+Faithful to live: SPY is REGIME-ONLY (not tradable). We exclude SPY from the
+tradable set, set regime_filter=0, and pass the SPY>SMA(regime_window) series as
+macro_gate -- the engine applies it at entry with no lookahead, exactly like the
+live regime_filter. Crypto is excluded from both arms.
+
+UNIVERSE CAVEAT: S&P 460 constituents are not obtainable (Wikipedia has no index
+article; S&P DJI page is 403). We therefore use a CURATED list of real, liquid
+small/mid-cap US tickers (cross-sector, outside the S&P 100). yfinance validates
+existence at fetch time (non-resolving names are dropped and reported). This is a
+proxy, not a clean point-in-time index -- survivorship/selection bias is possible.
+
+Run:  /home/mrc/rocm_venv/bin/python3 smallcap_bt.py
+"""
+import sys
+import time
+import pickle
+import warnings
+
+warnings.filterwarnings("ignore")
+sys.path.insert(0, "/home/mrc/opentrader")
+import pandas as pd  # noqa: E402
+import yfinance as yf  # noqa: E402
+from setup_search.rule_gate import load_rule_config  # noqa: E402
+from setup_search.engine import run_backtest  # noqa: E402
+
+cfg = load_rule_config()
+SW = int(cfg["regime_window"])
+print("=== CONFIG (live) ===")
+for k in ["buy_thresh", "sell_thresh", "regime_filter", "regime_window",
+          "risk_pct", "max_hold", "max_positions", "max_exposure", "rank_on",
+          "tp", "sl", "trailing_pct"]:
+    if k in cfg:
+        print(f"  {k} = {cfg[k]}")
+
+LARGE = ["AAPL", "MSFT", "NVDA", "AMD", "AMZN", "GOOGL", "META", "JPM",
+         "XOM", "JNJ", "PG", "KO", "DIS", "CSCO", "WMT", "NFLX"]
+
+# Curated small/mid-cap candidates (real US tickers, cross-sector, outside S&P 100).
+# yfinance validates which resolve; non-resolving names are dropped + reported.
+SMALLCAP_CANDIDATES = [
+    # software / tech (small-mid)
+    "SNOW", "PLTR", "DDOG", "NET", "MDB", "ZI", "TEAM", "HUBS", "IOT", "CUBE",
+    "AFRM", "SOFI", "HOOD", "COIN", "NU", "STNE", "RBLX", "DKNG", "DASH", "LYFT",
+    "PINS", "SNAP", "TTWO", "U", "ZM", "WDAY",
+    # EV / auto
+    "RIVN", "LCID", "NIO", "XPEV", "LI", "GEL",
+    # crypto miners (small, volatile)
+    "WULF", "CLSK", "BITF", "HUT", "RIOT", "MARA", "CIFR", "CORZ",
+    # biotech (small, volatile)
+    "MRNA", "BNTX", "ILMN", "BIIB", "ALNY", "CRSP", "NVCR", "SMMT", "ARWR",
+    "INSM", "RARE", "ATKR",
+    # consumer (small)
+    "ONON", "AALB", "TTDI", "LTHM", "FL", "WING", "PZZA", "BAKS", "CAVA",
+    # industrial (small)
+    "HII", "TDG", "LHX", "WSO", "WSC", "AAL", "LUV", "ULTA", "FLEX", "FAST",
+    "HWM", "CTSH", "EPAM", "GEN", "FSLR",
+    # energy (small)
+    "DVN", "FANG", "SM", "CHW", "CRK", "OXY", "HAL", "SLB",
+    # health (small)
+    "THC", "CHS", "SE", "FLIC", "HAIN", "BEN", "HCA",
+]
+
+
+def fetch_batch(batch):
+    """Fetch 2y daily OHLCV for a batch of tickers. Returns {sym: {close,high,low,volume}}."""
+    out = {}
+    try:
+        df = yf.download(" ".join(batch), period="2y", interval="1d",
+                         auto_adjust=True, threads=True, progress=False,
+                         group_by="ticker")
+    except Exception as e:
+        print(f"  batch error: {e}")
+        return out
+    if df is None or df.empty:
+        return out
+    cols = df.columns
+    if isinstance(cols, pd.MultiIndex):
+        tickers = [t for t in batch if t in cols.get_level_values(0)]
+        for t in tickers:
+            try:
+                sub = df[t]
+                out[t] = {
+                    "close": sub["Close"].dropna(),
+                    "high": sub["High"].dropna(),
+                    "low": sub["Low"].dropna(),
+                    "volume": sub["Volume"].dropna(),
+                }
+            except Exception:
+                pass
+    else:
+        out[batch[0]] = {
+            "close": df["Close"].dropna(),
+            "high": df["High"].dropna(),
+            "low": df["Low"].dropna(),
+            "volume": df["Volume"].dropna(),
+        }
+    return out
+
+
+print("\n=== FETCH small/mid-cap universe (2y daily, yfinance) ===")
+raw = {}
+CHUNK = 60
+for i in range(0, len(SMALLCAP_CANDIDATES), CHUNK):
+    batch = SMALLCAP_CANDIDATES[i:i + CHUNK]
+    got = fetch_batch(batch)
+    raw.update(got)
+    print(f"  batch {i // CHUNK + 1}: requested {len(batch)}, resolved {len(got)}")
+    time.sleep(1.0)
+
+resolved = sorted(raw.keys())
+dropped = sorted(set(SMALLCAP_CANDIDATES) - set(resolved))
+print(f"\nresolved {len(resolved)} small/mid-cap tickers")
+if dropped:
+    print(f"DROPPED (no yfinance data, {len(dropped)}): {', '.join(dropped)}")
+
+# Load 16-large + SPY from the breadth cache (arm A reference + regime).
+CACHE = "/tmp/ot_breadth_data.pkl"
+    breadth = pickle.load(f)
+print(f"\nloaded breadth cache: {len(breadth)} symbols (16 large + ETFs + SPY)")
+
+# Master index = SPY (from breadth cache).
+master = breadth["SPY"]["close"].dropna().index
+print(f"master (SPY): {master[0].date()} .. {master[-1].date()} ({len(master)} bars)")
+
+# Build aligned data dicts.
+closes, highs, lows, vols = {}, {}, {}, {}
+
+# Arm A: 16 large (from breadth cache).
+for s in LARGE:
+    if s not in breadth:
+        print(f"  MISSING large {s}"); continue
+    c = breadth[s]["close"].reindex(master).ffill(limit=5).dropna()
+    if len(c) < 200:
+        print(f"  SHORT large {s} ({len(c)})"); continue
+    closes[s] = c
+    highs[s] = breadth[s]["high"].reindex(c.index).ffill(limit=5)
+    lows[s] = breadth[s]["low"].reindex(c.index).ffill(limit=5)
+    vols[s] = breadth[s]["volume"].reindex(c.index).ffill(limit=5)
+
+# SPY (regime-only, not tradable).
+spy = breadth["SPY"]["close"].reindex(master).ffill(limit=5).dropna()
+closes["SPY"] = spy
+highs["SPY"] = breadth["SPY"]["high"].reindex(spy.index).ffill(limit=5)
+lows["SPY"] = breadth["SPY"]["low"].reindex(spy.index).ffill(limit=5)
+vols["SPY"] = breadth["SPY"]["volume"].reindex(spy.index).ffill(limit=5)
+
+# Arm C: small/mid caps (fresh fetch), aligned to SPY master.
+def match_tz(s, ref):
+    """Make s's DatetimeIndex tz-awareness match ref's (fixes reindex->all-NaN)."""
+    if isinstance(s.index, pd.DatetimeIndex) and isinstance(ref, pd.DatetimeIndex):
+        if ref.tz is None and s.index.tz is not None:
+            s = s.copy(); s.index = s.index.tz_localize(None)
+        elif ref.tz is not None and s.index.tz is None:
+            s = s.copy(); s.index = s.index.tz_localize(ref.tz)
+    return s
+
+
+def align_raw(entry, ref):
+    out = {}
+    for k in ["close", "high", "low", "volume"]:
+        out[k] = match_tz(entry[k], ref).reindex(ref).ffill(limit=5)
+    return out
+
+
+# Diagnostic: show index types to confirm the mismatch is fixed.
+if resolved:
+    _s0 = resolved[0]
+    print(f"\n[diag] master tz={master.tz}  first={master[0]}  last={master[-1]}")
+    print(f"[diag] {_s0} raw tz={raw[_s0]['close'].index.tz}  "
+          f"first={raw[_s0]['close'].index[0]}  last={raw[_s0]['close'].index[-1]}")
+
+sc_aligned = []
+for s in resolved:
+    al = align_raw(raw[s], master)
+    c = al["close"].dropna()
+    if len(c) < 200:
+        continue
+    closes[s] = c
+    highs[s] = al["high"].reindex(c.index)
+    lows[s] = al["low"].reindex(c.index)
+    vols[s] = al["volume"].reindex(c.index)
+    sc_aligned.append(s)
+
+print(f"\narm A (16 large): {len([s for s in LARGE if s in closes])} tradable")
+print(f"arm C (small/mid): {len(sc_aligned)} tradable (of {len(resolved)} resolved)")
+if len(sc_aligned) < len(resolved):
+    short = sorted(set(resolved) - set(sc_aligned))
+    print(f"  short/dropped on align ({len(short)}): {', '.join(short)}")
+
+# SPY regime as macro_gate (SPY not tradable).
+spy_regime = (spy > spy.rolling(SW, min_periods=10).mean()).fillna(False)
+print(f"SPY regime (SMA{SW}) allows long on {spy_regime.mean():.1%} of bars")
+
+
+def run_univ(univ):
+    tc = {s: closes[s] for s in univ if s in closes}
+    th = {s: highs[s] for s in tc}
+    tl = {s: lows[s] for s in tc}
+    tv = {s: vols[s] for s in tc}
+    cfgb = dict(cfg)
+    cfgb["regime_filter"] = 0  # SPY regime applied via macro_gate instead
+    return run_backtest((tc, th, tl, tv), cfgb, macro_gate=spy_regime)
+
+
+rA = run_univ(LARGE)
+rC = run_univ(sc_aligned)
+
+
+def line(name, r):
+    return (f"{name:22} ret={r['net_return']:+7.1%}  sharpe={r['ann_sharpe']:5.2f}  "
+            f"mdd={r['max_drawdown']:6.1%}  win={r['win_rate']:4.0%}  "
+            f"n={r['n_trades']:3d}  pf={r['profit_factor']:4.2f}  "
+            f"eq=${r['final_equity']:7.2f}  fees=${r['total_fees']:.2f}")
+
+
+print("\n=== SMALL-CAP TRANSFER BACKTEST (2y daily, $500 start, no-lookahead, SPY regime) ===")
+print(line("A: 16 large", rA))
+print(line("C: small/mid", rC))
+d = rC["final_equity"] - rA["final_equity"]
+print(f"\n  C - A final equity: ${d:+.2f}  "
+      f"({rC['net_return'] - rA['net_return']:+.1%} net return)")
+
+# ---- per-symbol breakdown for arm C ----
+print(f"\n=== ARM C PER-SYMBOL ({len(rC['trades'])} trades) ===")
+by_sym = {}
+for t in rC["trades"]:
+    by_sym.setdefault(t["sym"], []).append(t)
+# Show all small-cap symbols, marking those with 0 trades.
+rows = []
+for s in sc_aligned:
+    ts = by_sym.get(s, [])
+    pnl = sum(t["pnl"] for t in ts)
+    w = sum(1 for t in ts if t["pnl"] > 0)
+    rows.append((s, len(ts), pnl, w))
+rows.sort(key=lambda x: x[2])  # worst first
+for s, n, pnl, w in rows:
+    if n == 0:
+        print(f"  {s:5}   0 trades  (never triggered)")
+    else:
+        print(f"  {s:5}  {n:2d} trades  pnl=${pnl:+7.2f}  win {w}/{n}")
+
+# ---- displacement / overlap check ----
+a_syms = {t["sym"] for t in rA["trades"]}
+c_syms = {t["sym"] for t in rC["trades"]}
+print(f"\n  distinct symbols traded: A={len(a_syms)} (of 16)  C={len(c_syms)} (of {len(sc_aligned)})")
+print("done")

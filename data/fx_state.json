@@ -1,0 +1,20 @@
+{
+  "positions": {
+    "USD_JPY": {
+      "units": 100.0,
+      "opened": "2026-09-01T14:57:35",
+      "entry": 160.086,
+      "trade_id": "51",
+      "protected": true
+    },
+    "USD_CHF": {
+      "units": 100.0,
+      "opened": "2026-08-31T18:46:24",
+      "entry": 0.80842,
+      "trade_id": "25",
+      "protected": true
+    }
+  },
+  "updated": "2026-09-01T22:10:10.545219+00:00",
+  "note": "cache only \u2014 venue is authoritative"
+}

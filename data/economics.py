@@ -7,6 +7,8 @@ otherwise returns simulated data that reflects the current environment.
 This prevents the model from seeing "macro data unavailable" which makes it
 overtly cautious.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging
@@ -82,7 +84,6 @@ def fetch_fred_series(series_id: str, api_key: str = None) -> Optional[dict]:
             f"&file_type=json&sort_order=desc&limit=3"
         )
         req = Request(url)
-        req.add_header("User-Agent", "OpenTrader/1.0")
         with urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
             obs = data.get("observations", [])

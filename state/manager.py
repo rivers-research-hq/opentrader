@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """State Manager — writes trading state for dashboard consumption.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 Ported from ATLANTIS TraderHarness. Writes JSON files atomically.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import hashlib
 import json

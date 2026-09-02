@@ -21,6 +21,7 @@ This is PAPER — no live order flow. It is the bridge the user asked for:
 each agent gets an avenue to trade on, so the self-evolution layer accrues
 real forward evidence per expert instead of being stuck at $500.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import argparse
 import datetime as dt
@@ -78,7 +79,6 @@ def _fetch_intl(force: bool = False) -> pd.DataFrame:
         return _intl_archive()
 
 
-def _intl_archive() -> pd.DataFrame:
     d = pickle.load(open(INTL_ARCHIVE, "rb"))["data"]
     closes = {s: d[s]["close"] for s in INTL_SYMS if s in d}
     return pd.DataFrame(closes)

@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""Scale-up backtest: does adding the 9 NEW9 symbols to the stock sleeve help?
+
+Compares the LIVE rule strategy (setup_search.engine.run_backtest) on:
+  A) 16 large caps only            (main harness stock sleeve)
+  B) 16 large caps + 9 NEW9        (shadow stock sleeve)
+     NEW9 = XLF XLE XLI XLB XLRE XLP XLV XLU GLD
+
+Faithful to live: SPY is REGIME-ONLY (not tradable). We exclude SPY from the
+tradable set, set regime_filter=0, and pass the SPY>SMA(regime_window) series
+as macro_gate -- the engine applies it at entry with no lookahead, exactly like
+the live regime_filter. Crypto is excluded from both arms (separate sleeve,
+identical in both, and not in the yfinance cache) so the comparison isolates
+the NEW9 effect on the stock sleeve.
+
+Data: reuses /tmp/ot_breadth_data.pkl (2y daily, all symbols present).
+Run:  /home/mrc/rocm_venv/bin/python3 scaleup_bt.py
+"""
+import sys
+import pickle
+import warnings
+
+warnings.filterwarnings("ignore")
+sys.path.insert(0, "/home/mrc/opentrader")
+import pandas as pd  # noqa: E402
+from setup_search.rule_gate import load_rule_config  # noqa: E402
+from setup_search.engine import run_backtest  # noqa: E402
+
+cfg = load_rule_config()
+SW = int(cfg["regime_window"])
+print("=== CONFIG (live) ===")
+for k in ["buy_thresh", "sell_thresh", "regime_filter", "regime_window",
+          "risk_pct", "max_hold", "max_positions", "max_exposure", "rank_on",
+          "tp", "sl", "trailing_pct"]:
+    if k in cfg:
+        print(f"  {k} = {cfg[k]}")
+
+LARGE = ["AAPL", "MSFT", "NVDA", "AMD", "AMZN", "GOOGL", "META", "JPM",
+         "XOM", "JNJ", "PG", "KO", "DIS", "CSCO", "WMT", "NFLX"]
+NEW9 = ["XLF", "XLE", "XLI", "XLB", "XLRE", "XLP", "XLV", "XLU", "GLD"]
+UNIV_A = LARGE                 # 16
+UNIV_B = LARGE + NEW9          # 25
+
+CACHE = "/tmp/ot_breadth_data.pkl"
+    raw = pickle.load(f)
+print(f"\nloaded cache: {len(raw)} symbols")
+
+master = raw["SPY"]["close"].dropna().index
+closes, highs, lows, vols = {}, {}, {}, {}
+need = set(UNIV_B) | {"SPY"}
+for s in sorted(need):
+    if s not in raw:
+        print(f"  MISSING {s}"); continue
+    c = raw[s]["close"].reindex(master).ffill(limit=5).dropna()
+    if len(c) < 200:
+        print(f"  SHORT {s} ({len(c)})"); continue
+    closes[s] = c
+    highs[s] = raw[s]["high"].reindex(c.index).ffill(limit=5)
+    lows[s] = raw[s]["low"].reindex(c.index).ffill(limit=5)
+    vols[s] = raw[s]["volume"].reindex(c.index).ffill(limit=5)
+
+print(f"aligned {len(closes)} symbols over "
+      f"{master[0].date()} .. {master[-1].date()} ({len(master)} bars)")
+
+# SPY regime as macro_gate (SPY not tradable)
+spy = closes["SPY"]
+spy_regime = (spy > spy.rolling(SW, min_periods=10).mean()).fillna(False)
+print(f"SPY regime (SMA{SW}) allows long on {spy_regime.mean():.1%} of bars")
+
+
+def run_univ(univ):
+    tc = {s: closes[s] for s in univ if s in closes}
+    th = {s: highs[s] for s in tc}
+    tl = {s: lows[s] for s in tc}
+    tv = {s: vols[s] for s in tc}
+    cfgb = dict(cfg)
+    cfgb["regime_filter"] = 0  # SPY regime applied via macro_gate instead
+    return run_backtest((tc, th, tl, tv), cfgb, macro_gate=spy_regime)
+
+
+rA = run_univ(UNIV_A)
+rB = run_univ(UNIV_B)
+
+
+def line(name, r):
+    return (f"{name:22} ret={r['net_return']:+7.1%}  sharpe={r['ann_sharpe']:5.2f}  "
+            f"mdd={r['max_drawdown']:6.1%}  win={r['win_rate']:4.0%}  "
+            f"n={r['n_trades']:3d}  pf={r['profit_factor']:4.2f}  "
+            f"eq=${r['final_equity']:7.2f}  fees=${r['total_fees']:.2f}")
+
+
+print("\n=== SCALE-UP BACKTEST (2y daily, $500 start, no-lookahead, SPY regime) ===")
+print(line("A: 16 large", rA))
+print(line("B: 16+NEW9", rB))
+d = rB["final_equity"] - rA["final_equity"]
+print(f"\n  B - A final equity: ${d:+.2f}  "
+      f"({rB['net_return'] - rA['net_return']:+.1%} net return)")
+
+# ---- NEW9 contribution (from B's trade list) ----
+new9_trades = [t for t in rB["trades"] if t["sym"] in NEW9]
+new9_pnl = sum(t["pnl"] for t in new9_trades)
+new9_wins = sum(1 for t in new9_trades if t["pnl"] > 0)
+print(f"\n=== NEW9 ACTIVITY in arm B ({len(new9_trades)} trades, "
+      f"pnl=${new9_pnl:+.2f}, win {new9_wins}/{len(new9_trades)}) ===")
+by_sym = {}
+for t in new9_trades:
+    by_sym.setdefault(t["sym"], []).append(t)
+for s in NEW9:
+    ts = by_sym.get(s, [])
+    if not ts:
+        print(f"  {s:5}  0 trades  (never triggered)")
+        continue
+    pnl = sum(t["pnl"] for t in ts)
+    w = sum(1 for t in ts if t["pnl"] > 0)
+    print(f"  {s:5}  {len(ts):2d} trades  pnl=${pnl:+7.2f}  win {w}/{len(ts)}")
+
+# ---- displacement: did NEW9 crowd out large-cap trades? ----
+a_syms = {t["sym"] for t in rA["trades"]}
+b_syms = {t["sym"] for t in rB["trades"]}
+print(f"\n  large-cap symbols traded: A={len(a_syms & set(LARGE))}  "
+      f"B={len(b_syms & set(LARGE))}  (of 16)")
+print(f"  total distinct symbols traded: A={len(a_syms)}  B={len(b_syms)}")
+print("done")

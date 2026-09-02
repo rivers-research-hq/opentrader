@@ -1,0 +1,29 @@
+{
+  "filter": {
+    "n_markets_total": 8,
+    "n_markets_after_candle_filter": 8,
+    "n_markets_after_vol_filter": 8,
+    "min_candles": 2,
+    "n_candles_total": 715
+  },
+  "verdict": "KILL",
+  "reasons": [
+    "overall edge -17.13c <= 0",
+    "AS ratio <1 in only 1/3 bins (need >=2)",
+    "worst bin 0.90-0.95 edge -1.00c <= 0"
+  ],
+  "tick": 0.01,
+  "nboot": 4000,
+  "seed": 42,
+  "min_candles": 2,
+  "source": "pm_kalshi_extended_1min.pkl (Aug 17-24)",
+  "assumptions": [
+    "tick size $0.01 (unverified, V12 explore)",
+    "zero maker fee (V04 backtest assumption; verify Q02)",
+    "1-min resolution, no intra-candle queue position (V10 unknowable)",
+    "touch-and-hold is conservative proxy, not true queue sim",
+    "MIN_CANDLES=2 (extended markets are short-duration, median 2h)"
+  ],
+  "ts": 1787885997,
+  "elapsed_s": 0.2
+}

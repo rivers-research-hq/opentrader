@@ -12,6 +12,8 @@ The model "calls tools" via structured JSON inside <tool_calls> tags.
 The agent executes those calls via MCPClient.
 This is the "model calls tools via MCP" paradigm.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

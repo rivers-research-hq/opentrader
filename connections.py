@@ -11,7 +11,11 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from security.guards import guarded_urlopen  # hardening (2026-09-02)
+
 logger = logging.getLogger("opentrader.connections")
+
+urlopen = guarded_urlopen  # hardening shadow — all outbound requests via guard
 
 CONNECTIONS_FILE = Path(__file__).resolve().parent / "data" / "connections.json"
 

@@ -38,3 +38,5 @@ if __name__ == "__main__":
     p.add_argument("query", nargs="?", default="", help="Filter by name")
     args = p.parse_args()
     list_local(args.query)
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow

@@ -1,0 +1,5 @@
+[0m
+> builder · qwen38-agentic
+[0m
+[0m• [0mRead paper_state.json[90m Qwen-Worker Agent[0m
+[0m✓ [0mRead paper_state.json[90m Qwen-Worker Agent[0m

@@ -26,6 +26,8 @@ Series mapped (World Bank indicator codes, US + peers):
 Countries: US + China + Euro-zone aggregate via key peers (DE, FR, IT, ES),
 plus EM representative (BR, IN, ID, MX, ZA).
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import time
@@ -63,7 +65,6 @@ COUNTRIES = {
 
 
 def _wb_get(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": "opentrader/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode())
 

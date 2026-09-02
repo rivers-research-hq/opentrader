@@ -1,0 +1,736 @@
+[0m
+> build · qwen38-agentic
+[0m
+[0m$ [0mfind /tmp/opencode/bb-sandbox -type f -name "*.py" | head -50 && echo "---" && ls /tmp/opencode/bb-sandbox
+/tmp/opencode/bb-sandbox/.opencode/tools/_subagent_watch.py
+/tmp/opencode/bb-sandbox/.opencode/tools/_project_context.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/__init__.py
+/tmp/opencode/bb-sandbox/risk/param_optimizer.py
+/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py
+/tmp/opencode/bb-sandbox/risk/regime_adaptation.py
+/tmp/opencode/bb-sandbox/risk/performance_analytics.py
+/tmp/opencode/bb-sandbox/risk/manager.py
+/tmp/opencode/bb-sandbox/risk/asset_allocator.py
+/tmp/opencode/bb-sandbox/risk/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/risk/__init__.py
+/tmp/opencode/bb-sandbox/exchange/base.py
+/tmp/opencode/bb-sandbox/exchange/ibkr.py
+/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/multi_router.py
+/tmp/opencode/bb-sandbox/exchange/paper.py
+/tmp/opencode/bb-sandbox/exchange/realtime.py
+/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py
+/tmp/opencode/bb-sandbox/exchange/live.py
+/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/exchange/__init__.py
+/tmp/opencode/bb-sandbox/state/context.py
+/tmp/opencode/bb-sandbox/state/manager.py
+/tmp/opencode/bb-sandbox/state/__init__.py
+/tmp/opencode/bb-sandbox/scripts/hf_download.py
+/tmp/opencode/bb-sandbox/scripts/load_adapter.py
+/tmp/opencode/bb-sandbox/scripts/service_mgr.py
+/tmp/opencode/bb-sandbox/scripts/rtx3070-bench.py
+/tmp/opencode/bb-sandbox/scripts/hf_search.py
+/tmp/opencode/bb-sandbox/scripts/hf_library.py
+/tmp/opencode/bb-sandbox/scripts/hf_models.py
+/tmp/opencode/bb-sandbox/scripts/__init__.py
+/tmp/opencode/bb-sandbox/arena/train.py
+/tmp/opencode/bb-sandbox/arena/tech.py
+/tmp/opencode/bb-sandbox/arena/curriculum.py
+/tmp/opencode/bb-sandbox/arena/loop.py
+/tmp/opencode/bb-sandbox/arena/opponents.py
+/tmp/opencode/bb-sandbox/arena/export.py
+/tmp/opencode/bb-sandbox/arena/architect.py
+/tmp/opencode/bb-sandbox/arena/agent.py
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/build_architect_dataset.py
+/tmp/opencode/bb-sandbox/arena/battle.py
+/tmp/opencode/bb-sandbox/arena/epoch_engine.py
+/tmp/opencode/bb-sandbox/arena/view.py
+/tmp/opencode/bb-sandbox/arena/candidates_fullcross.py
+/tmp/opencode/bb-sandbox/arena/candidates.py
+/tmp/opencode/bb-sandbox/arena/war.py
+---
+agent
+alpaca_paper.py
+arena
+benchmark_models.py
+connections.py
+coordinator.py
+dashboard.py
+data
+data_mgmt.py
+exchange
+exchange-engine
+gpu_sync.py
+harness.py
+hunt_output
+__init__.py
+mcp_server.py
+model_manager.py
+mot
+onchain.py
+onchain_web3.py
+__pycache__
+report_risk.py
+repro_volatility.py
+risk
+scenarios
+scripts
+setup_search
+state
+strategies
+tests
+tools
+training
+tui_dashboard.py
+unsloth_compiled_cache
+[0m
+## Objective
+- Audit a copied OpenTrader codebase at `/tmp/opencode/bb-sandbox` by reading source only, to locate two re-introduced historical bugs and any other clear real bugs.
+- Report each confirmed bug using the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- The two likely bug IDs are:
+  - `rank-dead`: cross-sectional rank silently disabled
+  - `future-bar`: future-dated daily bar not filtered, creating crash-loop risk
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- The report must come from source inspection and reasoning.
+- If no additional clear bugs are found beyond the two likely ones, state that explicitly.
+- The codebase is a Python trading system with exchange adapters, risk logic, state management, sidecars, scripts, and arena/training modules.
+
+## Work State
+### Completed
+- Started inspection of `/tmp/opencode/bb-sandbox`.
+- Ran a file discovery command that listed many Python files and top-level entries.
+- Confirmed candidate directories/files exist, including:
+  - `/tmp/opencode/bb-sandbox/exchange/`
+  - `/tmp/opencode/bb-sandbox/exchange-engine/python/`
+  - `/tmp/opencode/bb-sandbox/risk/`
+  - `/tmp/opencode/bb-sandbox/state/`
+  - `/tmp/opencode/bb-sandbox/scripts/`
+  - `/tmp/opencode/bb-sandbox/arena/`
+
+### Active
+- Need to read actual source to identify:
+  - where cross-sectional ranking is implemented or disabled
+  - where daily bars are fetched/validated and whether future-dated bars are filtered
+- Need to map each bug to the exact file and function for the required `FOUNDBUG` lines.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Search the sandbox for ranking-related code and disabled/dead ranking logic, for example with:
+   - `rg -n "rank" /tmp/opencode/bb-sandbox`
+   - `rg -n "cross[- _]?section" /tmp/opencode/bb-sandbox`
+2. Search for daily bar handling and date validation logic, for example with:
+   - `rg -n "daily" /tmp/opencode/bb-sandbox`
+   - `rg -n "bar" /tmp/opencode/bb-sandbox`
+   - `rg -n "future|timestamp|date|cutoff|valid" /tmp/opencode/bb-sandbox`
+3. Inspect the most relevant files and extract the exact `<file>:<function>` root causes for the two required bug reports.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: target codebase to audit.
+- `/tmp/opencode/bb-sandbox/risk/asset_allocator.py`: likely candidate for cross-sectional ranking or rank-disabled logic.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: likely candidate for ranking/risk pipeline behavior.
+- `/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py`: likely candidate for rank usage in allocation or optimization.
+- `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`: likely candidate for daily bar fetching and date filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py`: likely candidate for bar normalization or future-bar validation.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: likely candidate for market-data handling and date checks.
+- `/tmp/opencode/bb-sandbox/exchange/live.py`: likely candidate for live data ingestion paths.
+- `/tmp/opencode/bb-sandbox/exchange/paper.py`: likely candidate for paper-trading data paths.
+- `/tmp/opencode/bb-sandbox/exchange/base.py`: likely candidate for shared bar/data contract logic.
+- `/tmp/opencode/bb-sandbox/exchange/multi_router.py`: likely candidate for routing data into shared processing where future bars may leak.
+- `/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py`: likely candidate for adapter-level data handling.
+- `/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py`: likely candidate for sidecar data exchange and bar handling.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: possible location for state transitions or crash-loop behavior.
+- `/tmp/opencode/bb-sandbox/state/context.py`: possible location for context-level data validation.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcd /tmp/opencode/bb-sandbox && rg -n "rank" --glob "*.py" -i | head -80
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:635:        local_rank = -1,
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:804:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:2059:            ranks_of_first_completion = self.judge.judge(
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:2063:            # convert ranks to a True/False mask:
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:2064:            # when rank == 0, it means the first completion is the best
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:2065:            # when rank == 1, it means the second completion is the best
+unsloth_compiled_cache/UnslothOnlineDPOTrainer.py:2066:            mask = torch.tensor([rank == 0 for rank in ranks_of_first_completion], device=device)
+unsloth_compiled_cache/UnslothKTOTrainer.py:561:        local_rank = -1,
+unsloth_compiled_cache/UnslothKTOTrainer.py:714:            local_rank = local_rank,
+setup_search/engine.py:5:reversion, RSI, breakout proximity, z-score, cross-sectional rank) gated by
+setup_search/engine.py:80:def _score_at(feat: dict, cfg: dict, rank: dict) -> dict:
+setup_search/engine.py:84:        r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0
+setup_search/engine.py:91:            + w["w_rank"] * r
+setup_search/engine.py:97:def _cross_sectional_rank(mom: dict, idx: pd.Index) -> dict:
+setup_search/engine.py:98:    rank = {s: np.zeros(len(idx)) for s in mom}
+setup_search/engine.py:101:        return rank
+setup_search/engine.py:108:            rank[s][t] = norm[j]
+setup_search/engine.py:109:    return rank
+setup_search/engine.py:127:    rank = _cross_sectional_rank(mom_frame, master) if cfg["rank_on"] else {}
+setup_search/engine.py:177:            {s: rank[s][sig_t] if cfg["rank_on"] else 0.0 for s in bar_feat},
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2245:        local_rank = -1,
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2450:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2935:                os.environ["RANK"] = str(self.accelerator.process_index)
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2936:                os.environ["LOCAL_RANK"] = str(self.accelerator.local_process_index)
+unsloth_compiled_cache/UnslothGRPOTrainer.py:3058:                seed_worker, num_workers=self.args.dataloader_num_workers, rank=self.args.process_index
+unsloth_compiled_cache/UnslothGRPOTrainer.py:3177:        # Pad across processes so that every rank has the same tensor length
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4242:                    # Gather prompts from all ranks in the TP group and flatten.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4243:                    # Each rank starts with its own prompts; after gathering, all ranks see the full group set.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4279:                    # Slice completions for this rank within its TP group.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4280:                    # Each rank generates all outputs — we keep only our share.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4281:                    local_rank_in_group = torch.distributed.get_rank(group=self.tp_group)
+unsloth_compiled_cache/UnslothGRPOTrainer.py:4282:                    tp_slice = slice(local_rank_in_group * orig_size, (local_rank_in_group + 1) * orig_size)
+unsloth_compiled_cache/UnslothRLOOTrainer.py:807:        local_rank = -1,
+unsloth_compiled_cache/UnslothRLOOTrainer.py:1011:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothRLOOTrainer.py:1585:                os.environ["RANK"] = str(self.accelerator.process_index)
+unsloth_compiled_cache/UnslothRLOOTrainer.py:1586:                os.environ["LOCAL_RANK"] = str(self.accelerator.local_process_index)
+unsloth_compiled_cache/UnslothRLOOTrainer.py:1707:                seed_worker, num_workers=self.args.dataloader_num_workers, rank=self.args.process_index
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2167:                    # Gather prompts from all ranks in the TP group and flatten.
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2168:                    # Each rank starts with its own prompts; after gathering, all ranks see the full group set.
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2199:                    # Slice completions for this rank within its TP group.
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2200:                    # Each rank generates all outputs — we keep only our share.
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2201:                    local_rank_in_group = torch.distributed.get_rank(group=self.tp_group)
+unsloth_compiled_cache/UnslothRLOOTrainer.py:2202:                    tp_slice = slice(local_rank_in_group * orig_size, (local_rank_in_group + 1) * orig_size)
+setup_search/core.py:24:    "rank_on": (0, 1),
+setup_search/core.py:25:    "w_rank": (0.0, 3.0),
+setup_search/core.py:68:    "rank_on": 0,
+setup_search/core.py:69:    "w_rank": 0.0,
+setup_search/core.py:102:    "rank_on", "regime_filter", "regime_window", "max_positions", "max_hold",
+mot/roster.py:57:        feature_plan="value_head_1m features: cross-sectional ranks + DFF/DGS10/CPIAUCSL + VIX + breadth",
+setup_search/loop.py:55:            "rank_on",
+setup_search/loop.py:77:        if k in ("rank_on", "regime_filter"):
+unsloth_compiled_cache/UnslothSFTTrainer.py:573:        local_rank = -1,
+unsloth_compiled_cache/UnslothSFTTrainer.py:730:            local_rank = local_rank,
+setup_search/value_head_1m.py:113:    # cross-sectional relative strength: rank each symbol's momentum + RSI
+setup_search/value_head_1m.py:117:    mom_rank = mom_frame.rank(axis=1, pct=True)
+setup_search/value_head_1m.py:118:    rsi_rank = rsi_frame.rank(axis=1, pct=True)
+setup_search/value_head_1m.py:125:        # vectorized composite score (rank=0)
+setup_search/value_head_1m.py:132:        mr = mom_rank[sym].reindex(c.index).values
+setup_search/value_head_1m.py:133:        rr = rsi_rank[sym].reindex(c.index).values
+unsloth_compiled_cache/UnslothRewardTrainer.py:546:        local_rank = -1,
+unsloth_compiled_cache/UnslothRewardTrainer.py:696:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothDPOTrainer.py:724:        local_rank = -1,
+unsloth_compiled_cache/UnslothDPOTrainer.py:892:            local_rank = local_rank,
+scenarios/neural.py:154:    heavy tails (research fix #5). We use rank-based Gaussianization (empirical
+scenarios/neural.py:159:    rank copula (cross-symbol dependence). Crisis extrapolation beyond observed
+scenarios/neural.py:170:        self.gauss_basis = None   # (N,D) z-values of the rank transform
+scenarios/neural.py:180:        ranks = np.argsort(np.argsort(logret, axis=0), axis=0)  # 0..N-1
+scenarios/neural.py:181:        p = (ranks + 0.5) / N
+scenarios/neural.py:204:        per bar. With gaussianize=True (default) the returns are rank-
+unsloth_compiled_cache/UnslothNashMDTrainer.py:506:        local_rank = -1,
+unsloth_compiled_cache/UnslothNashMDTrainer.py:675:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothGKDTrainer.py:524:        local_rank = -1,
+unsloth_compiled_cache/UnslothGKDTrainer.py:694:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothPRMTrainer.py:522:        local_rank = -1,
+unsloth_compiled_cache/UnslothPRMTrainer.py:664:            local_rank = local_rank,
+unsloth_compiled_cache/UnslothORPOTrainer.py:539:        local_rank = -1,
+unsloth_compiled_cache/UnslothORPOTrainer.py:685:            local_rank = local_rank,
+harness.py:2308:        # ── Tier 2 (simplified): rank by the radar momentum score, skipping the
+unsloth_compiled_cache/moe_utils.py:562:    rank_per_expert: int,
+unsloth_compiled_cache/moe_utils.py:566:    first_weight = weight_A.view(num_experts, rank_per_expert, dim_A)
+[0m
+[0m$ [0mcd /tmp/opencode/bb-sandbox && rg -n "cross[- _]?section|percentile|quantile" --glob "*.py" -i | head -60
+mcp_server.py:658:            "var_historical", "cvar", "percentile", "correlation", "beta",
+mcp_server.py:1159:    """Accurate math/quant/stat (evaluate, mean, std, percentile, returns, sharpe_ratio, sortino_ratio, max_drawdown, var_historical, cvar, kelly_fraction, correlation, beta, ols_regression, black_scholes, irr, npv, percent_change, ...). Use this instead of hand-arithmetic."""
+strategies/entropy.py:31:    lo, hi = np.percentile(x, [2, 98])
+agent/trading_agent.py:321:            "description": "Accurate math/quant/stat. CALL THIS instead of hand-arithmetic. ops: evaluate, mean, median, std, percentile, iqr, skew, kurtosis, simple_returns, log_returns, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, sortino_ratio, calmar_ratio, var_historical, var_parametric, cvar, kelly_fraction, position_size_kelly, covariance, correlation, correlation_matrix, beta, ols_regression, black_scholes, future_value, present_value, npv, irr, compound_annual_growth_rate, percent_change, percent_of",
+training/traderbench.py:464:        90% confidence intervals via bootstrap percentile method on scores.
+risk/param_optimizer.py:62:    # Optimal SL: 75th percentile of losses, capped at 2× average loss
+arena/candidates_fullcross.py:2:"""Full-cross-section training source — the HuggingFace stock_market_dataset.
+arena/candidates_fullcross.py:103:    """Arena candidate rows from a sampled subset of the full cross-section
+arena/candidates_fullcross.py:113:        print("[fullcross] WARNING: SPY missing; regime proxy = cross-sectional mean")
+scenarios/neural.py:157:    Gaussian joint; generation inverts per column through the empirical quantile
+scenarios/neural.py:177:        per-column empirical quantile map for inversion."""
+scenarios/neural.py:189:        """(T,D) z-samples -> (T,D) raw log-returns via the empirical quantile
+arena/battle.py:5:z-scored forward return (cross-sectionally standardized against the round's
+arena/candidates_macro.py:4:VIX, market breadth, cross-sectional mom/RSI ranks) but emits rows in the SAME
+arena/agent.py:159:    for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+tools/qmath.py:138:def percentile(x, p: float):
+tools/qmath.py:141:    return _f(np.percentile(_seq(x), p))
+tools/qmath.py:144:def q1(x): return percentile(x, 25)
+tools/qmath.py:145:def q3(x): return percentile(x, 75)
+tools/qmath.py:146:def iqr(x): return _f(percentile(x, 75) - percentile(x, 25))
+tools/qmath.py:282:    return _f(np.percentile(_seq(returns), (1 - confidence) * 100))
+tools/qmath.py:298:    var = np.percentile(r, (1 - confidence) * 100)
+tools/qmath.py:495:    "percentile": (percentile, {"x": list, "p": float}, "p in [0,100]"),
+tools/qmath.py:496:    "q1": (q1, {"x": list}, "25th percentile"),
+tools/qmath.py:497:    "q3": (q3, {"x": list}, "75th percentile"),
+tools/qmath.py:568:        ("percentile", percentile(px, 90)), ("iqr", iqr(px)),
+mot/roster.py:44:        description="US cross-sectional momentum: V(state)->E[10-bar fwd], the arena's incumbent.",
+mot/roster.py:57:        feature_plan="value_head_1m features: cross-sectional ranks + DFF/DGS10/CPIAUCSL + VIX + breadth",
+setup_search/ftmo_universe.py:94:        print("[ftmo] WARNING: DXY missing; regime proxy = cross-sectional mean")
+setup_search/engine.py:5:reversion, RSI, breakout proximity, z-score, cross-sectional rank) gated by
+setup_search/engine.py:97:def _cross_sectional_rank(mom: dict, idx: pd.Index) -> dict:
+setup_search/engine.py:127:    rank = _cross_sectional_rank(mom_frame, master) if cfg["rank_on"] else {}
+setup_search/task_value_push.py:11:    print("[value-push] running value_head_1m (cross-sectional + FRED) holdout...")
+setup_search/value_head.py:177:    for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+setup_search/value_head_1m.py:113:    # cross-sectional relative strength: rank each symbol's momentum + RSI
+setup_search/value_head_1m.py:244:    for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+setup_search/evolution.py:198:        tail = np.quantile(y, 0.90)
+setup_search/evolution.py:261:    for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+setup_search/evolution.py:279:    quantiles, with the window's kept count >= `min_kept` at that quantile
+setup_search/evolution.py:287:    A window where NO quantile reaches min_kept scores -1.0 (hard fail).
+setup_search/evolution.py:299:        for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+setup_search/evolution.py:321:    windows). Picks the quantile maximizing the minimum per-window margin,
+setup_search/evolution.py:333:    for q in np.quantile(vp, np.linspace(0.05, 0.95, 19)):
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2089:    top_entropy_quantile (`float`, *optional*, defaults to `1.0`):
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2091:        loss term only the top-ρ quantile of tokens by entropy of the probability distribution at each sequence
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2287:        top_entropy_quantile = 1.0,
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2492:            top_entropy_quantile = top_entropy_quantile,
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2784:        self.top_entropy_quantile = args.top_entropy_quantile
+unsloth_compiled_cache/UnslothGRPOTrainer.py:2785:        if self.use_liger_loss and self.top_entropy_quantile < 1.0:
+unsloth_compiled_cache/UnslothGRPOTrainer.py:3156:        Returns a binary mask identifying tokens whose entropy exceeds a given quantile threshold.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:3164:                Quantile threshold between `0.0` and `1.0` to select high-entropy tokens.
+unsloth_compiled_cache/UnslothGRPOTrainer.py:3187:        entropy_threshold = torch.quantile(gathered, threshold)
+unsloth_compiled_cache/UnslothGRPOTrainer.py:5154:        if self.top_entropy_quantile < 1.0:
+unsloth_compiled_cache/UnslothGRPOTrainer.py:5155:            entropy_mask = self.get_high_entropy_mask(entropies, completion_mask, 1 - self.top_entropy_quantile)
+[0m
+[0m$ [0mcd /tmp/opencode/bb-sandbox && rg -n "daily" --glob "*.py" -i | head -60
+strategies/experts.py:4:The 8 verified strategies are DAILY-BAR, UNIVERSE-LEVEL allocators (300 US
+strategies/experts.py:83:    NOTE: the underlying strategies allocate across their universe at daily
+strategies/shadow.py:4:Re-runs each verified strategy on its native daily archive (US registry /
+strategies/lanes.py:8:paper lane: its validated universe, its own capital, refreshed forward daily.
+strategies/lanes.py:11:  - data: yfinance daily bars, cached (network-tolerant; falls back to the
+strategies/lanes.py:16:    daily returns weighted by the expert's allocation
+strategies/lanes.py:52:    """yfinance daily closes for the intl tradables, cached TTL_S."""
+tests/break_deep.py:223:    # SPY/BTC's daily bar hasn't arrived; screen() iterated feat including the
+strategies/macro_features.py:19:reality by ~a year) — labeled regime CONTEXT, not a daily signal.
+harness.py:152:        max_daily_trades: int = 500,  # daily trade cap (resets at UTC midnight)
+harness.py:397:            max_daily_trades=max_daily_trades,
+harness.py:1869:                bars_1d = self._daily_bars(sym, 30)
+harness.py:2352:        daily-bar strategy does not need fresher than ~30min quotes."""
+harness.py:2422:        else HOLD (SL/TP manages risk). Daily-bar based, like the validated config.
+harness.py:2467:            bars = self._daily_bars(s, 150)
+harness.py:2543:                bars = self._daily_bars(s, 150)
+harness.py:2583:        """Validated max_hold=14 TRADING days after the last daily close
+harness.py:2584:        (the harness's cycle counter is 1h-based and cannot express daily
+harness.py:2589:            bars = self._daily_bars(sym, 1)
+harness.py:2602:    def _daily_bars(self, sym: str, limit: int):
+harness.py:2603:        """Fetch daily bars, returning them UNFILTERED. NOTE: the stock
+harness.py:2713:            bars = self._daily_bars("SPY", 250)
+harness.py:2740:                bars = self._daily_bars(s, 150)
+harness.py:4410:        "--max-daily-trades",
+harness.py:4587:        max_daily_trades=args.max_daily_trades,
+strategies/entropy.py:6:daily returns (60d window, 16 bins, [2,98]pct range) > 2.53 and (b) market
+risk/sidecar_adapter.py:40:            "max_daily_trades": self.config.max_daily_trades,
+risk/sidecar_adapter.py:51:            "daily_vol_assumption": self.config.daily_vol_assumption,
+risk/manager.py:6:      daily trade limits, and multi-venue position tracking.
+risk/manager.py:39:    max_daily_trades: int = 500  # Max trades per day
+risk/manager.py:59:    daily_vol_assumption: float = 0.02  # 2% daily vol for VaR
+risk/manager.py:86:        self._daily_trades: int = 0
+risk/manager.py:87:        self._daily_fee_drag: float = 0.0
+risk/manager.py:171:    def _reset_daily(self) -> None:
+risk/manager.py:172:        """Reset daily trade counter at UTC midnight."""
+risk/manager.py:175:            self._daily_trades = 0
+risk/manager.py:176:            self._daily_fee_drag = 0.0
+risk/manager.py:276:        """Simple historical Value-at-Risk using daily volatility assumption.
+risk/manager.py:278:        VaR = portfolio_value * daily_vol * sqrt(window_days) * z_score
+risk/manager.py:282:        daily_vol = self.config.daily_vol_assumption
+risk/manager.py:283:        var = portfolio_value * daily_vol * math.sqrt(self.config.var_window_days) * z
+risk/manager.py:365:        self._reset_daily()
+risk/manager.py:451:        # ── Daily fee-drag ceiling (small-account guard) ───────
+risk/manager.py:463:                _total_drag = getattr(self, "_daily_fee_drag", 0.0) + _rt
+risk/manager.py:467:                        reason=f"daily fee drag ${_total_drag:.2f} exceeds 5% of account (${total_value:.2f})",
+risk/manager.py:472:        # ── Daily trade count ─────────────────────────────────
+risk/manager.py:473:        if self._daily_trades >= self.config.max_daily_trades:
+risk/manager.py:476:                reason=f"daily trade limit ({self.config.max_daily_trades}) reached",
+risk/manager.py:567:            self._daily_trades += 1
+risk/manager.py:568:            # Accumulate fee drag for the daily 5% ceiling (small-account guard)
+risk/manager.py:577:                    self._daily_fee_drag = getattr(self, "_daily_fee_drag", 0.0) + (
+risk/performance_analytics.py:8:  - Sharpe ratio (annualized, assuming daily equity values)
+risk/performance_analytics.py:36:        periods_per_year: Number of periods per year (365 for daily, 8760 for hourly)
+risk/performance_analytics.py:247:         Resample daily returns, project forward, count successes
+risk/performance_analytics.py:340:    # Group returns into daily returns, bootstrap daily paths
+risk/performance_analytics.py:341:    daily_returns: List[float] = []
+risk/performance_analytics.py:345:            daily_returns.append(sum(log_returns[i:i+chunk]))
+risk/performance_analytics.py:347:    if not daily_returns:
+risk/performance_analytics.py:348:        daily_returns = log_returns[:]
+risk/performance_analytics.py:358:            day_return = random.choice(daily_returns)
+[0m
+[0m$ [0mcd /tmp/opencode/bb-sandbox && rg -n "future|fwd|ahead|clock|cutoff|look[- ]?ahead" --glob "*.py" -i | head -60
+strategies/__init__.py:25:  - no same-bar lookahead: all signals read at prior close, fills at current close
+onchain.py:14:from __future__ import annotations
+gpu_sync.py:14:from __future__ import annotations
+strategies/experts.py:22:from __future__ import annotations
+onchain_web3.py:23:from __future__ import annotations
+strategies/scorer.py:3:fees, lookahead discipline, and the tournament bars. Ported from the swarm's
+connections.py:7:from __future__ import annotations
+strategies/lanes.py:14:    LATEST bar (no lookahead — signals from prior close, fill at current)
+data_mgmt.py:17:from __future__ import annotations
+data_mgmt.py:101:    recent_cutoff = min(f[0] for f in list_cycle_files(history_dir)[-50:]) if list_cycle_files(history_dir) else 0
+data_mgmt.py:107:        if cycle_num >= recent_cutoff:
+data_mgmt.py:271:            cutoff = files[-(args.max_cycles + 1)][0] + 1
+data_mgmt.py:275:            archive_before(history_dir, cutoff, archive_dir, dry_run=args.dry_run)
+agent/trading_agent.py:321:            "description": "Accurate math/quant/stat. CALL THIS instead of hand-arithmetic. ops: evaluate, mean, median, std, percentile, iqr, skew, kurtosis, simple_returns, log_returns, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, sortino_ratio, calmar_ratio, var_historical, var_parametric, cvar, kelly_fraction, position_size_kelly, covariance, correlation, correlation_matrix, beta, ols_regression, black_scholes, future_value, present_value, npv, irr, compound_annual_growth_rate, percent_change, percent_of",
+strategies/macro_features.py:17:release DATE is known; the VALUE is not) — legitimate, no lookahead on
+strategies/macro_features.py:56:        # ffill annual WB data onto the master index (no lookahead: a year's
+strategies/laggard.py:21:/tmp/opentrader/swarm/agents/r1d_laggard.py (no lookahead).
+tests/break_scenarios.py:9:from __future__ import annotations
+arena/candidates_international.py:8:contract (bar/sym/date/x/fwd/feats/score/regime_up/close/close_series) so the
+arena/candidates_international.py:12:from __future__ import annotations
+arena/candidates_international.py:115:                "fwd": float(c.loc[c.index[t + FORWARD]]) / float(c.iloc[t]) - 1.0,
+tests/smoke_multi_gpu.py:30:from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
+tests/smoke_multi_gpu.py:152:            futures = [
+tests/smoke_multi_gpu.py:157:            for i, f in enumerate(futures):
+tests/smoke_multi_gpu.py:160:                except FutureTimeout:
+tests/smoke_multi_gpu.py:186:        except FutureTimeout:
+tests/smoke_multi_gpu.py:190:        except FutureTimeout:
+arena/grpo.py:12:    (the doc's optional-critic note), so the value head still regresses E[fwd].
+arena/grpo.py:21:from __future__ import annotations
+tests/break_deep.py:12:from __future__ import annotations
+tests/break_deep.py:48:             "fwd": float(rng.randn() * 0.01), "date": None,
+tests/break_deep.py:446:    fwds = [1.0, 2.0, 3.0]  # mean=2 -> fwd 2.0 has z=0
+tests/break_deep.py:447:    zs, m = _round_field_z(fwds)
+tests/break_deep.py:448:    zero_idx = fwds.index(2.0)
+tests/break_deep.py:528:@t(4, "NO lookahead leakage: mutating future prices leaves past rows' features unchanged")
+tests/break_deep.py:550:    assert diffs == 0, f"{diffs} feature rows changed when the future was mutated"
+arena/candidates.py:89:                    "fwd": float(c.loc[c.index[t + FORWARD]]) / float(c.iloc[t]) - 1.0,
+scenarios/evaluate.py:16:from __future__ import annotations
+tests/test_prop_gate.py:3:from __future__ import annotations
+scenarios/tail_library.py:14:from __future__ import annotations
+arena/candidates_fullcross.py:21:from __future__ import annotations
+scenarios/parametric.py:12:from __future__ import annotations
+arena/epoch_engine.py:46:    kept = [r["fwd"] for r, p in zip(rows, wp) if p >= theta]
+arena/epoch_engine.py:47:    all_m = statistics.mean(r["fwd"] for r in rows)
+scenarios/generator.py:17:from __future__ import annotations
+arena/battle.py:15:def _round_field_z(fwds):
+arena/battle.py:16:    m = statistics.mean(fwds)
+arena/battle.py:17:    s = statistics.pstdev(fwds)
+arena/battle.py:19:        return [0.0] * len(fwds), m
+arena/battle.py:20:    return [(f - m) / s for f in fwds], m
+arena/battle.py:33:        b.name: {"n": 0, "takes": 0, "take_fwd_sum": 0.0, "take_z_sum": 0.0}
+arena/battle.py:36:    standings["agent"] = {"n": 0, "takes": 0, "take_fwd_sum": 0.0, "take_z_sum": 0.0}
+arena/battle.py:48:        zs, r_field = _round_field_z([r["fwd"] for r in batch])
+arena/battle.py:70:                    bot_takes[b.name].append(row["fwd"])
+arena/battle.py:73:                agent_takes.append(row["fwd"])
+arena/battle.py:79:            s["take_fwd_sum"] += sum(bot_takes[b.name])
+arena/battle.py:91:        sa["take_fwd_sum"] += sum(agent_takes)
+harness.py:11:import concurrent.futures
+harness.py:2605:        can key other series' lookups on a future date."""
+harness.py:3009:            with concurrent.futures.ThreadPoolExecutor(
+[0m
+Continuing the audit. Let me run targeted searches for the two likely bug locations.
+## Objective
+- Audit the copied OpenTrader codebase at `/tmp/opencode/bb-sandbox` by reading source only to locate the two re-introduced historical bugs, `rank-dead` and `future-bar`, plus any other clear real bugs.
+- Report each confirmed bug in the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- The report must be based only on source inspection and reasoning.
+- If no additional clear bugs are found beyond the two likely ones, state that explicitly.
+- The codebase is a Python trading system with exchange adapters, risk logic, state management, sidecars, scripts, arena/training modules, and strategy code.
+- Latest targeted searches narrowed the two likely bugs to:
+  - `rank-dead`: likely in `setup_search/engine.py`, especially around `_score_at`, `_cross_sectional_rank`, `cfg["rank_on"]`, and rank population/consumption.
+  - `future-bar`: likely in `harness.py`, especially `_daily_bars` and callers that use daily bars without filtering out future-dated or incomplete bars.
+
+## Work State
+### Completed
+- Started source-only inspection of `/tmp/opencode/bb-sandbox`.
+- Confirmed top-level candidate directories exist, including `exchange/`, `exchange-engine/python/`, `risk/`, `state/`, `scripts/`, and `arena/`.
+- Ran targeted searches for rank-related code and found relevant hits in `setup_search/engine.py`, while `unsloth_compiled_cache/` hits appear unrelated to the audit.
+- Ran targeted searches for cross-sectional / percentile / quantile logic and found mostly strategy, arena, and agent-tooling references; no clear additional `rank-dead` location yet.
+- Ran targeted searches for `daily` and found strong `future-bar` evidence in `harness.py`, including `_daily_bars` and multiple callers.
+- Ran targeted searches for lookahead / cutoff / future-bar terminology and found general no-lookahead documentation, but the concrete risk remains centered on `harness.py` daily-bar handling.
+
+### Active
+- Need to inspect `setup_search/engine.py` in detail to confirm the exact root cause of `rank-dead`, including how `cfg["rank_on"]` is set, whether rank arrays are actually populated, and whether the score path silently falls back to `0.0`.
+- Need to inspect `harness.py` in detail around `_daily_bars` and its callers to confirm whether future-dated daily bars are accepted, unfiltered, and passed into strategy/decision logic, causing the historical crash-loop risk.
+- Need to determine whether any other clear real bug was found during source inspection.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Read `setup_search/engine.py` around lines `80`, `97`, `108`, `127`, and `177`, plus any config/default definition for `rank_on`, to identify the exact file:function root cause for `rank-dead`.
+2. Read `harness.py` around line `2602` (`_daily_bars`) and caller contexts near lines `1869`, `2467`, `2543`, `2589`, `2713`, and `2740` to confirm the exact file:function root cause for `future-bar`.
+3. If both bugs are confirmed, emit the required `FOUNDBUG` lines; otherwise continue inspecting nearby date filtering, bar validation, or config wiring before deciding.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: target codebase to audit.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: leading candidate for `rank-dead`; contains `_score_at`, `_cross_sectional_rank`, and `cfg["rank_on"]` logic where rank can be silently disabled or unused.
+- `/tmp/opencode/bb-sandbox/harness.py`: leading candidate for `future-bar`; contains `_daily_bars`, whose docstring indicates it returns bars `UNFILTERED`, and multiple callers may pass daily bars into trading logic.
+- `/tmp/opencode/bb-sandbox/tests/break_deep.py`: likely contains a historical note or regression clue about a daily bar not having arrived and screen logic iterating stale/incomplete features.
+- `/tmp/opencode/bb-sandbox/strategies/experts.py`, `/tmp/opencode/bb-sandbox/strategies/lanes.py`, `/tmp/opencode/bb-sandbox/strategies/__init__.py`: useful context for daily-bar strategy assumptions and no-same-bar-lookahead contracts.
+- `/tmp/opencode/bb-sandbox/exchange/`: secondary candidate area if `future-bar` originates upstream in data ingestion or normalization rather than `harness.py`.
+- `/tmp/opencode/bb-sandbox/risk/`: secondary candidate area if rank scoring or disabled rank behavior is consumed by allocator/optimizer logic.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py[90m [offset=1, limit=260][0m
+[0m✱ [0mGrep "rank_on"[90m in . · 8 matches[0m
+[0m→ [0mRead harness.py[90m [offset=2580, limit=220][0m
+[0m→ [0mRead harness.py[90m [offset=1850, limit=50][0m
+filtered bars; docstring says can include next-UTC-midnight placeholder future date; caller at 1869 uses it for daily RSI/SMA.
+- Codebase description maybe keep.
+
+## Work State
+Completed:
+- prior items plus:
+  - read engine.py lines 1-49 (imports/features start) and grep rank_on; confirmed rank_on usage in engine and config files.
+  - read harness.py 2580-2621: confirmed _daily_bars unfiltered and future placeholder warning; read 1850-1887: caller uses _daily_bars without filtering for RSI/SMA.
+Active:
+- confirm rank-dead exact root cause by reading engine.py lines ~80-200 and core.py/loop.py rank_on config; identify whether rank is disabled by default, not populated, or consumed dead.
+- finalize future-bar report; maybe inspect other callers if needed to state one-line root cause confidently.
+- look for other clear real bugs.
+Blocked none.
+
+Next Move:
+1. Read /tmp/opencode/bb-sandbox/setup_search/engine.py offset 70 limit 140 (or 80-200) to inspect _score_at/_cross_sectional_rank and rank usage.
+2. Read core.py around 20-110 and loop.py 40-90 to determine rank_on default/wiring; then emit FOUNDBUG rank-dead and FOUNDBUG future-bar if no other bugs.
+Maybe 3. If needed, read harness.py 2460-2560, 2700-2760.
+
+Relevant Files:
+- target codebase
+- engine.py with grep lines
+- core.py config lines
+- loop.py lines
+- harness.py _daily_bars/callers
+- tests/break_deep.py maybe still relevant
+- strategies, exchange, risk as secondary.
+
+Need be terse. Ensure exact file paths.
+
+Double-check if final answer should be only Markdown. Yes. No template tags. Keep section order. Use bullets.
+
+Potential issue: "rank-dead" maybe bug id hint exact? User says two bugs rank-dead and future-bar. FOUNDBUG <bug-id-hint>: ... likely bug-id-hint is rank-dead/future-bar. Keep.
+
+Need maybe mention read engine only got truncated at line 49; not enough. In Completed: "read first ~49 lines; not sufficient". Fine.
+
+Let's final.
+</think>
+
+## Objective
+- Audit the copied OpenTrader codebase at `/tmp/opencode/bb-sandbox` using source inspection only to locate the two re-introduced historical bugs, `rank-dead` and `future-bar`, plus any other clear real bugs.
+- Report each confirmed bug in the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- The report must be based only on source inspection and reasoning.
+- If no additional clear bugs are found beyond the two likely ones, state that explicitly.
+- The codebase is a Python trading system with exchange adapters, risk logic, state management, sidecars, scripts, arena/training modules, and strategy code.
+- `rank-dead` evidence so far:
+  - `grep` found `rank_on` in:
+    - `/tmp/opencode/bb-sandbox/setup_search/engine.py` at lines `84`, `127`, and `177`.
+    - `/tmp/opencode/bb-sandbox/setup_search/core.py` at lines `24`, `68`, and `102`.
+    - `/tmp/opencode/bb-sandbox/setup_search/loop.py` at lines `55` and `77`.
+  - `engine.py` uses `cfg["rank_on"]` to decide whether rank is consumed or populated, suggesting a dead/disabled rank path needs confirmation.
+  - `core.py` shows a spec entry `"rank_on": (0, 1)` and a default `"rank_on": 0`, which may make rank disabled by default or wired incorrectly.
+- `future-bar` evidence so far:
+  - `/tmp/opencode/bb-sandbox/harness.py` contains `_daily_bars` near line `2602` whose docstring explicitly says it returns bars `UNFILTERED` and warns that the stock waterfall can emit a next-UTC-midnight placeholder bar that may key lookups on a future date.
+  - A caller near line `1869` in `harness.py` uses `self._daily_bars(sym, 30)` to compute daily RSI/SMA without apparent filtering, supporting the historical future-bar bug.
+- No confirmed additional real bugs have been found yet beyond the two likely historical bugs.
+
+## Work State
+### Completed
+- Started source-only inspection of `/tmp/opencode/bb-sandbox`.
+- Confirmed top-level candidate directories exist, including `exchange/`, `exchange-engine/python/`, `risk/`, `state/`, `scripts/`, and `arena/`.
+- Ran targeted searches for rank-related code and found relevant hits in `setup_search/engine.py`, `setup_search/core.py`, and `setup_search/loop.py`; `unsloth_compiled_cache/` hits appear unrelated to the audit.
+- Ran targeted searches for cross-sectional / percentile / quantile logic and found mostly strategy, arena, and agent-tooling references; the strongest `rank-dead` signal remains in `setup_search/`.
+- Ran targeted searches for `daily` and found strong `future-bar` evidence in `harness.py`, centered on `_daily_bars` and callers that consume daily bars without filtering.
+- Ran targeted searches for lookahead / cutoff / future-bar terminology and found general no-lookahead documentation, but the concrete risk remains centered on `harness.py` daily-bar handling.
+- Read the beginning of `/tmp/opencode/bb-sandbox/setup_search/engine.py` and confirmed imports, fee helpers, RSI helper, and feature construction context, though the read was truncated before the rank-specific functions.
+- Read `/tmp/opencode/bb-sandbox/harness.py` around `_hold_exit_date` and `_daily_bars`, confirming `_daily_bars` returns unfiltered daily bars and explicitly warns about possible next-UTC-midnight placeholder future bars.
+- Read `/tmp/opencode/bb-sandbox/harness.py` around line `1850`, confirming a multi-timeframe context builder calls `_daily_bars(sym, 30)` and uses the unfiltered result for daily RSI/SMA calculations.
+
+### Active
+- Need to inspect `setup_search/engine.py` around the `rank_on` usage lines `84`, `127`, and `177`, plus nearby `_score_at` / `_cross_sectional_rank` logic, to identify the exact root cause of `rank-dead`.
+- Need to inspect `setup_search/core.py` and `setup_search/loop.py` around the `rank_on` entries to determine whether rank is disabled by default, never enabled, or otherwise dead in the scoring path.
+- Need to finalize the exact `file:function` attribution for `future-bar`; current strongest attribution is `harness.py:_daily_bars`, with caller context confirming unfiltered future-date risk.
+- Need to determine whether any other clear real bug was found during source inspection.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` around lines `70` through `200` to inspect `_score_at`, `_cross_sectional_rank`, and the exact `rank_on` consumption/population logic.
+2. Read `/tmp/opencode/bb-sandbox/setup_search/core.py` around lines `20` through `110` and `/tmp/opencode/bb-sandbox/setup_search/loop.py` around lines `40` through `90` to confirm how `rank_on` is defaulted, searched, and applied.
+3. If both root causes are confirmed, emit the required `FOUNDBUG rank-dead:` and `FOUNDBUG future-bar:` lines; otherwise continue inspecting nearby config wiring, bar filtering, or score-consumption logic before deciding.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: target codebase to audit.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: leading candidate for `rank-dead`; contains rank consumption at lines `84` and `177` and rank population at line `127` using `cfg["rank_on"]`.
+- `/tmp/opencode/bb-sandbox/setup_search/core.py`: config source for `rank_on`; line `24` defines a `(0, 1)` search space, line `68` appears to default it to `0`, and line `102` lists it in a parameter/search configuration.
+- `/tmp/opencode/bb-sandbox/setup_search/loop.py`: search/optimization wiring referencing `rank_on` at lines `55` and `77`, likely relevant to whether the flag is actually exercised.
+- `/tmp/opencode/bb-sandbox/harness.py`: leading candidate for `future-bar`; `_daily_bars` near line `2602` returns unfiltered daily bars and may include a future-dated placeholder, and caller code near line `1869` uses those bars for daily indicators.
+- `/tmp/opencode/bb-sandbox/tests/break_deep.py`: possible historical note or regression clue about daily bars not having arrived and screen logic iterating stale/incomplete features.
+- `/tmp/opencode/bb-sandbox/strategies/experts.py`, `/tmp/opencode/bb-sandbox/strategies/lanes.py`, `/tmp/opencode/bb-sandbox/strategies/__init__.py`: useful context for daily-bar strategy assumptions and no-same-bar-lookahead contracts.
+- `/tmp/opencode/bb-sandbox/exchange/`: secondary candidate area if `future-bar` originates upstream in data ingestion or normalization rather than `harness.py`.
+- `/tmp/opencode/bb-sandbox/risk/`: secondary candidate area if rank scoring or disabled rank behavior is consumed by allocator/optimizer logic.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py[90m [offset=70, limit=160][0m
+[0m→ [0mRead setup_search/core.py[90m [offset=1, limit=140][0m
+[0m→ [0mRead setup_search/loop.py[90m [offset=1, limit=120][0m
+. Need maybe default rank_on? It likely in DEFAULT_CONFIG. If default 0, rank disabled by default but search can enable; is that "dead"? Maybe bug is rank_on not in DEFAULT_CONFIG? Prior said default 0. But bug hint rank-dead maybe rank score computed but never used? Let's inspect visible _score_at: it uses cfg["rank_on"] and w_rank. If rank_on true, uses rank. Need see rank dict passed. If run_backtest constructs rank by _cross_sectional_rank of features? Maybe bug: it calls _cross_sectional_rank(feat? maybe mom only) and then score_at uses rank.get(sym, 0.0); if rank dict contains arrays, OK? But _score_at loops over feat items; if rank values are arrays length len(idx), scores become arrays? Maybe later used per time? Hmm.
+
+Could be _cross_sectional_rank takes mom dict but inside run_backtest maybe passes {sym: f["mom"]} but f["mom"] is scalar? Wait features may be per symbol full series? In feature builder out[sym]=f where f has series? _score_at may be called for each timestamp? It may index f["mom"][t]. But _score_at as shown receives feat dict and rank dict; it doesn't index t. Maybe it is called inside loop with feat_at time? Could be feat is per-time dict of floats. Then rank.get(sym, 0.0) is float if rank dict at time? But _cross_sectional_rank returns arrays. Maybe there is another rank construction per timestamp? Need line 127/177.
+
+Maybe the bug is simpler: _cross_sectional_rank returns arrays, but _score_at uses rank.get(sym, 0.0) without indexing current time; if rank_on enabled, v becomes array (broadcast) and backtest broken or rank dead? Or run_backtest may call _cross_sectional_rank but then ignore result, passing empty dict to _score_at? Need line 127/177.
+
+Could search from prior: engine.py line 127 and 177 use rank_on. Line 127 likely `rank = _cross_sectional_rank(...) if cfg["rank_on"] else {}`? Line 177 maybe in summary metrics? Or maybe in `run_backtest` there is `rank = _cross_sectional_rank(mom, idx) if cfg.get("rank_on") else None`, then `_score_at(..., rank or {})`. If rank_on default 0, dead default. But historical bug likely not just default off; it's re-introduced dead rank: cross-sectional rank computed but score ignores it because `_score_at` uses `rank.get(sym, 0.0) if cfg["rank_on"] else 0.0` but `rank` dict keys are symbol -> array, and `rank.get` returns array not float; maybe they need `rank[sym][t]`. If they forgot index, then if rank_on true and rank dict non-empty, score is vectorized? But maybe `feat` is per-time scalar and `rank` is dict of arrays, so `w_rank * r` array, `scores[sym]` array. Then later maybe `np.argmax(scores)`? Could still work? But if score array length different? Hmm.
+
+Let's infer from _score_at signature: `def _score_at(feat: dict, cfg: dict, rank: dict) -> dict`. It iterates feat items and returns scores per symbol. It does not have timestamp. If rank is dict symbol->array, scores values are arrays. That seems odd for a function named _score_at (at time). Maybe rank should be dict symbol->float for current bar. Maybe there is a helper to extract `rank_at(t)`. Maybe bug: rank passed as arrays but not sliced, making rank dead/incorrect? However if cfg rank_on false, r=0.0. If true, bug manifests.
+
+Maybe line 127: `rank = {s: (rank[s][t] if isinstance(rank[s], (np.ndarray, pd.Series)) else rank[s]) for s in ...}`? Not sure.
+
+Need maybe in final summary not overclaim. Need active: inspect engine.py 120-220 to see rank population and exact dead path. But user asks continue or stop? The summary should reflect next moves. Since we are summarizing, not answering final. Need include new completed reads.
+
+Let's parse conversation: Assistant reasoning: user wants continue. Has next step read engine rank sections, core, loop. Did reads. Results truncated. Now summary must combine. We should mark completed: read engine 70-121, core 1-49, loop 1-57? Actually loop read 1-120 truncated at line 57 in displayed result. Need note truncated. It shows core truncated at line 49 due output? Actually core result content ends line 49: `"rsi` then [truncated]. So only first 49 lines. Loop result ends line 57: `        "regime_filter",`? Let's see:
+53         cur = out[k]
+54         if isinstance(cur, int) or k in (
+55             "rank_on",
+56             "regime_filter",
+57       
+[truncated]
+So read loop 1-57 visible. Need not pretend read all 120.
+
+Need update Work State:
+Completed:
+- prior items.
+- Read engine.py lines 70-121: confirmed `_score_at` uses `cfg["rank_on"]` to gate rank contribution; `_cross_sectional_rank` returns normalized rank arrays per symbol over index; `run_backtest` starts with `closes, highs, lows, vols = data` and `cfg = clamp_config` (truncated before rank construction).
+- Read core.py lines 1-49: `CONFIG_BOUNDS` includes `rank_on:(0,1)` and `w_rank:(0,3)`, but default config/truncated; prior evidence still needed.
+- Read loop.py lines 1-57: imports, OBJECTIVE_NOTE, jitter uses CONFIG_BOUNDS and treats `rank_on` among keys in jitter condition (truncated). It calls scientist, run_backtest, objective.
+Active:
+- Confirm exact rank-dead root cause by reading engine.py around 120-220 (rank construction/passing to _score_at, lines 127 and 177) and core.py default config around 60-110 and loop.py around 70-90 for rank_on wiring.
+- Finalize future-bar exact attribution (harness.py:_daily_bars) and one-line root cause.
+- Look for other clear real bugs.
+Blocked: none.
+
+Important details:
+- constraints source-only, no modify, no full harness, report FOUNDBUG format.
+- objective two bugs plus other clear bugs, state none if none.
+- evidence rank-dead: visible `_score_at` line 84 uses `r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0`; `_cross_sectional_rank` lines 97-109 returns dict of arrays. Need confirm how run_backtest populates rank and whether `_score_at` receives sliced per-time rank or arrays. Previous grep lines: engine 84,127,177; core 24,68,102; loop 55,77.
+- evidence future-bar: harness.py `_daily_bars` near 2602 unfiltered, docstring warns next-UTC-midnight placeholder, caller near 1869 uses _daily_bars(sym,30) for RSI/SMA without filtering.
+- No additional confirmed bugs yet.
+
+Next Move:
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` offset ~120 limit 120 to inspect `run_backtest` rank construction and `_score_at` call, especially lines 127 and 177.
+2. Read `/tmp/opencode/bb-sandbox/setup_search/core.py` offset ~50 limit 80 and `/tmp/opencode/bb-sandbox/setup_search/loop.py` offset ~57 limit 80 to see `DEFAULT_CONFIG rank_on`, jitter/search handling, and whether rank_on can become active.
+3. If root causes confirmed, emit FOUNDBUG lines: likely `FOUNDBUG rank-dead: /tmp/opencode/bb-sandbox/setup_search/engine.py:run_backtest or _score_at? - ...` and `FOUNDBUG future-bar: /tmp/opencode/bb-sandbox/harness.py:_daily_bars - returns unfiltered daily bars that can include future UTC placeholder, causing lookahead in daily RSI/SMA caller`. But final answer not yet.
+
+Need be careful: user says final report exact format? In summary, can include expected. But don't output final report yet.
+
+Potential need to update objective: still audit. Maybe "continue source inspection".
+
+Need exact template. Section order. Terse bullets.
+
+Need not mention summary process.
+
+Let's draft.
+
+Potential issue: Should we include "rank-dead" root cause maybe now can state? Let's see if enough to emit? Need exact function. Could be `engine.py:_score_at` or `run_backtest`. Which is root? If rank dead due to `rank` not populated? Need not finalize. Active.
+
+But maybe we can infer from code visible: In `_score_at`, rank is used if `cfg["rank_on"]`. If run_backtest passes `rank` from `_cross_sectional_rank`, but `_cross_sectional_rank` expects `mom: dict` (symbol -> series). It returns rank arrays. In `_score_at`, `rank.get(sym, 0.0)` returns array. If score is used for entry/exit per bar, arrays would cause all future ranks? Wait if rank arrays are full length and scores arrays, maybe later they compare scores? This could cause lookahead? But bug rank-dead not future.
+
+Maybe historical bug: `_cross_sectional_rank` computes rank on `mom` dict where values are numpy arrays, but `pd.DataFrame(mom).dropna(axis=1)` drops columns with any NaN. At early times, many dropped. It fills missing ranks with 0.0 because initial rank dict zeros. That's okay. But `_score_at` uses `rank.get(sym, 0.0)`: if rank dict has arrays, no indexing. But maybe `_score_at` is not per-bar; perhaps `feat` contains full arrays and scores are arrays; then later vectorized selection can work. But then `rank.get(sym, 0.0)` array and `0.0` when off; fine. If rank_on on, scores arrays. Could be intended vectorized. So not dead.
+
+Need line 177 maybe where `rank` is computed. Let's think of likely engine structure:
+- features builder returns dict sym -> DataFrame? Actually f contains series for each feature. `run_backtest` could vectorize: for each sym f arrays, score_at returns array scores. Then loop over bars? It might call `_score_at(feat, cfg, rank)` once with full series. `rank` dict sym -> array. That's intended. Then no dead. But if rank_on default 0, no rank. Search may vary rank_on.
+
+Could rank-dead be because `_score_at` uses `cfg["rank_on"]` but `cfg` after `clamp_config` may convert `rank_on` to float? It checks truthy, okay.
+
+Maybe bug: `CONFIG_BOUNDS["rank_on"] = (0,1)` but default `rank_on` is boolean? Jitter handles ints. If rank_on is 0/1.
+
+Maybe line 127 in engine: `rank = _cross_sectional_rank(feat, idx) if cfg["rank_on"] else {}` but `_cross_sectional_rank` signature expects `mom: dict`, not `feat: dict`. If called with `feat`, DataFrame from dict of dicts? Let's see: `_cross_sectional_rank(mom: dict, idx: pd.Index)` does `pd.DataFrame(mom).dropna(axis=1)`. If `mom` maps symbol -> pd.Series, OK. If called with `feat` mapping symbol -> dict of features, DataFrame becomes nested? Maybe error. But line 127 could be `mom = {s: f["mom"] for s,f in feat.items()}` then rank. If bug re-introduced, maybe they call `_cross_sectional_rank(feat, idx)` instead of mom, causing rank all zeros? But no error? DataFrame of dicts may create columns? Hard.
+
+Maybe line 177: `rank = {s: rank[s][t] for s in rank}`? Could be.
+
+Need maybe not overthink; summary can state need inspect remaining engine lines.
+
+Could there be a clear other bug visible? In `_cross_sectional_rank`: `frame = pd.DataFrame(mom).dropna(axis=1)`. It drops any symbol with any NaN across entire index. For early NaNs, drops symbols entirely for all times, maybe not ideal but maybe intended? `rank = {s: np.zeros(len(idx)) for s in mom}` then loop `for t in range(len(frame))`, assign only non-dropped columns at times where frame has rows. If frame shorter? If any row all NaN? `dropna(axis=1)` only columns, not rows. If some symbols NaN at specific times, columns dropped entirely. This could be a bug? But not one of two? It could be real but maybe intentional conservative. Need not include unless clear.
+
+`_score_at`: if `cfg["rank_on"]` false, r=0.0. If `rank_on` true but `rank` dict values are arrays, v can be array. If `feat` values are scalars? Then bug. But unknown.
+
+Future-bar: root cause likely `_daily_bars` returns unfiltered future placeholder. Need one line: "harness.py:_daily_bars - returns unfiltered daily bars that may include a next-UTC-midnight placeholder, letting callers compute daily RSI/SMA on a future date." Function maybe `Harness._daily_bars`? Need exact? file:function. Could be `_daily_bars` (method). We'll state `harness.py:_daily_bars`. If method belongs to class, maybe `Harness._daily_bars`, but unknown. Use `_daily_bars`.
+
+Need maybe include "If no additional bugs found state explicitly". In Important Details.
+
+Need ensure final only markdown with sections. No extra. Let's craft concise but detailed.
+
+Potential issue: The final answer should be summary, not final report. Yes.
+
+Let's produce.
+</think>
+
+## Objective
+- Continue source-only audit of the copied OpenTrader codebase at `/tmp/opencode/bb-sandbox` to identify the two re-introduced historical bugs, `rank-dead` and `future-bar`, plus any other clear real bugs.
+- Report each confirmed bug exactly as: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Do not run the full harness because it requires live exchanges.
+- Do not modify any files.
+- The report must be based only on source inspection and reasoning.
+- If no additional clear bugs are found beyond the two likely historical bugs, state that explicitly.
+- The codebase is a Python trading system with exchange adapters, risk logic, state management, sidecars, scripts, arena/training modules, and strategy code.
+- `rank-dead` evidence so far:
+  - `grep` found `rank_on` in:
+    - `/tmp/opencode/bb-sandbox/setup_search/engine.py` at lines `84`, `127`, and `177`.
+    - `/tmp/opencode/bb-sandbox/setup_search/core.py` at lines `24`, `68`, and `102`.
+    - `/tmp/opencode/bb-sandbox/setup_search/loop.py` at lines `55` and `77`.
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py` line `84` in `_score_at` uses:
+    - `r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0`.
+  - `_score_at` then adds `w["w_rank"] * r` to the composite score, so rank is only live if `cfg["rank_on"]` is truthy and `rank` contains a usable per-symbol value.
+  - `_cross_sectional_rank` in `engine.py` lines `97` through `109` returns a dict of per-symbol `np.ndarray` rank values normalized to approximately `[-1, 1]`.
+  - The exact root cause is still not confirmed because the `run_backtest` section where `rank` is constructed and passed to `_score_at` was truncated before lines `127` and `177`.
+  - `core.py` line `24` defines `"rank_on": (0, 1)` in `CONFIG_BOUNDS`; prior context says `core.py` line `68` appears to default it to `0`, but the read in this conversation was truncated before that line.
+- `future-bar` evidence so far:
+  - `/tmp/opencode/bb-sandbox/harness.py` contains `_daily_bars` near line `2602`.
+  - Its docstring explicitly says it returns bars `UNFILTERED` and warns that the stock waterfall can emit a next-UTC-midnight placeholder bar that may key lookups on a future date.
+  - A caller near line `1869` in `harness.py` uses `self._daily_bars(sym, 30)` to compute daily RSI/SMA without apparent filtering, supporting the historical future-bar bug.
+- No confirmed additional real bugs have been found yet beyond the two likely historical bugs.
+
+## Work State
+### Completed
+- Started source-only inspection of `/tmp/opencode/bb-sandbox`.
+- Confirmed top-level candidate directories exist, including `exchange/`, `exchange-engine/python/`, `risk/`, `state/`, `scripts/`, and `arena/`.
+- Ran targeted searches for rank-related code and found relevant hits in `setup_search/engine.py`, `setup_search/core.py`, and `setup_search/loop.py`; `unsloth_compiled_cache/` hits appear unrelated to the audit.
+- Ran targeted searches for cross-sectional / percentile / quantile logic and found mostly strategy, arena, and agent-tooling references; the strongest `rank-dead` signal remains in `setup_search/`.
+- Ran targeted searches for `daily` and found strong `future-bar` evidence in `harness.py`, centered on `_daily_bars` and callers that consume daily bars without filtering.
+- Ran targeted searches for lookahead / cutoff / future-bar terminology and found general no-lookahead documentation, but the concrete risk remains centered on `harness.py` daily-bar handling.
+- Read the beginning of `/tmp/opencode/bb-sandbox/setup_search/engine.py` and confirmed imports, fee helpers, RSI helper, and feature construction context.
+- Read `/tmp/opencode/bb-sandbox/harness.py` around `_hold_exit_date` and `_daily_bars`, confirming `_daily_bars` returns unfiltered daily bars and explicitly warns about possible next-UTC-midnight placeholder future bars.
+- Read `/tmp/opencode/bb-sandbox/harness.py` around line `1850`, confirming a multi-timeframe context builder calls `_daily_bars(sym, 30)` and uses the unfiltered result for daily RSI/SMA calculations.
+- Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` lines `70` through `121`, confirming:
+  - feature construction ends with `out[sym] = f` and `return out`.
+  - `_score_at` gates rank usage with `cfg["rank_on"]` and adds `w["w_rank"] * r`.
+  - `_cross_sectional_rank` returns per-symbol arrays and returns all-zero arrays if fewer than two symbols have data.
+  - `run_backtest` begins with `closes, highs, lows, vols = data` and `cfg = clamp_config`, but the read truncated before the rank construction/usage lines.
+- Read `/tmp/opencode/bb-sandbox/setup_search/core.py` lines `1` through `49`, confirming:
+  - `CONFIG_BOUNDS` includes `"rank_on": (0, 1)` and `"w_rank": (0.0, 3.0)`.
+  - `CONFIG_BOUNDS` also defines research-feature gates such as `ma_reject_n`, `vol_spike_n`, `vol_reduce_n`, `impact_cap_pct`, and `rsi_filter_n`.
+  - The read truncated before `DEFAULT_CONFIG`, so the live default for `rank_on` was not re-confirmed in this read.
+- Read `/tmp/opencode/bb-sandbox/setup_search/loop.py` lines `1` through `57`, confirming:
+  - `loop.py` imports `CONFIG_BOUNDS`, `DEFAULT_CONFIG`, `clamp_config`, `objective`, `summary_bundle`, `load_ohlcv`, `align`, `slice_aligned`, `run_backtest`, `propose_configs`, `build_wide_aligned`, and `wide_metrics`.
+  - `OBJECTIVE_NOTE` states the objective penalizes fee bleed and drawdown heavily.
+  - `jitter` mutates a random subset of `CONFIG_BOUNDS` keys and treats `rank_on` as one of the integer-like keys in a condition that was truncated.
+  - The read truncated before the main iteration logic and before the `rank_on` reference at line `77`.
+
+### Active
+- Need to inspect `/tmp/opencode/bb-sandbox/setup_search/engine.py` around lines `120` through `220` to see how `run_backtest` constructs the `rank` dict and passes it to `_score_at`, especially the `rank_on` references at lines `127` and `177`.
+- Need to determine the exact `rank-dead` mechanism: rank disabled by default, rank never populated, rank populated but not sliced/consumed correctly, or rank ignored in the actual signal path.
+- Need to re-confirm `/tmp/opencode/bb-sandbox/setup_search/core.py` `DEFAULT_CONFIG` around lines `50` through `120`, especially whether `rank_on` defaults to `0` and whether `w_rank` is included in the searched/applied parameter set.
+- Need to inspect `/tmp/opencode/bb-sandbox/setup_search/loop.py` around lines `57` through `140` to see whether `rank_on` is searched, passed to candidates, and actually exercised by the loop.
+- Need to finalize the exact `file:function` attribution for `future-bar`; current strongest attribution is `harness.py:_daily_bars`, with caller context confirming unfiltered future-date risk.
+- Need to determine whether any other clear real bug was found during source inspection.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` offset around `120`, limit around `120`, to inspect `run_backtest` rank construction, the `_score_at` call, and the `rank_on` references at lines `127` and `177`.
+2. Read `/tmp/opencode/bb-sandbox/setup_search/core.py` offset around `50`, limit around `80`, and `/tmp/opencode/bb-sandbox/setup_search/loop.py` offset around `57`, limit around `80`, to confirm `DEFAULT_CONFIG["rank_on"]`, `w_rank` wiring, and whether the search loop can activate rank.
+3. If both root causes are confirmed, emit the required `FOUNDBUG rank-dead:` and `FOUNDBUG future-bar:` lines; otherwise continue inspecting nearby config wiring, bar filtering, or score-consumption logic before deciding.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: target codebase to audit.
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: leading candidate for `rank-dead`; contains `_score_at`, `_cross_sectional_rank`, and `run_backtest` with `rank_on` usage at lines `84`, `127`, and `177`.
+- `/tmp/opencode/bb-sandbox/setup_search/core.py`: config source for `rank_on` and `w_rank`; line `24` defines `rank_on` search space, line `25` defines `w_rank` search space, and later default/search config lines need confirmation.
+- `/tmp/opencode/bb-sandbox/setup_search/loop.py`: search/optimization wiring referencing `rank_on` at lines `55` and `77`; relevant to whether the flag is actually searched and applied.
+- `/tmp/opencode/bb-sandbox/harness.py`: leading candidate for `future-bar`; `_daily_bars` near line `2602` returns unfiltered daily bars and may include a future-dated placeholder, and caller code near line `1869` uses those bars for daily indicators.
+- `/tmp/opencode/bb-sandbox/tests/break_deep.py`: possible historical note or regression clue about daily bars not having arrived and screen logic iterating stale/incomplete features.
+- `/tmp/opencode/bb-sandbox/strategies/experts.py`, `/tmp/opencode/bb-sandbox/strategies/lanes.py`, `/tmp/opencode/bb-sandbox/strategies/__init__.py`: useful context for daily-bar strategy assumptions and no-same-bar-lookahead contracts.
+- `/tmp/opencode/bb-sandbox/exchange/`: secondary candidate area if `future-bar` originates upstream in data ingestion or normalization rather than `harness.py`.
+- `/tmp/opencode/bb-sandbox/risk/`: secondary candidate area if rank scoring or disabled rank behavior is consumed by allocator/optimizer logic.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.

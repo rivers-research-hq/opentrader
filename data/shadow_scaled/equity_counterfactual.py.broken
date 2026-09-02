@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Equity-sleeve counterfactual: what did the 16 large caps do while we were flat?
+
+The paper book has held ZERO stock positions the whole time (only crypto). This
+answers the standing-order question "what the equity sleeve's absence cost or
+saved" by computing the PASSIVE equal-weight return of the 16 large caps over a
+window. Positive = the absence COST us that return; negative = it SAVED us.
+
+Data: /tmp/ot_breadth_data.pkl (2y daily). Reusable for Monday's resolution
+report via --start/--end.
+
+Run:
+  equity_counterfactual.py                 # last 1/2/4/12 weeks
+  equity_counterfactual.py --start 2026-08-24 --end 2026-08-28
+"""
+import sys
+import pickle
+import argparse
+import warnings
+
+warnings.filterwarnings("ignore")
+import pandas as pd  # noqa: E402
+
+LARGE = ["AAPL", "MSFT", "NVDA", "AMD", "AMZN", "GOOGL", "META", "JPM",
+         "XOM", "JNJ", "PG", "KO", "DIS", "CSCO", "WMT", "NFLX"]
+CACHE = "/tmp/ot_breadth_data.pkl"
+BOOK = 500.0  # paper book size
+
+
+def load():
+        raw = pickle.load(f)
+    master = raw["SPY"]["close"].dropna().index
+    closes = {}
+    for s in LARGE:
+        c = raw[s]["close"].reindex(master).ffill(limit=5).dropna()
+        closes[s] = c
+    return closes
+
+
+def window_report(closes, start, end, label):
+    start_ts, end_ts = pd.Timestamp(start), pd.Timestamp(end)
+    per, frames = {}, {}
+    for s in LARGE:
+        cw = closes[s].loc[(closes[s].index >= start_ts) & (closes[s].index <= end_ts)]
+        if len(cw) >= 2:
+            per[s] = float(cw.iloc[-1] / cw.iloc[0] - 1.0)
+            frames[s] = cw
+    if not per:
+        print(f"  {label}: no data")
+        return
+    r = pd.Series(per)
+    ew = float(r.mean())
+    # equal-weight basket max drawdown (daily, over the window)
+    mat = pd.DataFrame(frames)
+    basket = mat.div(mat.iloc[0]).mean(axis=1)
+    mdd = float(-(basket / basket.cummax() - 1.0).min())
+    n_days = len(basket)  # trading days in the window (not symbol count)
+    ann = (1 + ew) ** (252 / max(n_days, 1)) - 1
+    print(f"\n=== {label}  ({n_days} trading days) ===")
+    print(f"  equal-weight 16-cap return: {ew:+.2%}   (ann. {ann:+.1%}, MDD {mdd:.2%})")
+    print(f"  best: {r.idxmax()} {r.max():+.2%}   worst: {r.idxmin()} {r.min():+.2%}")
+    print(f"  up {int((r > 0).sum())}/16, down {int((r < 0).sum())}/16")
+    verdict = "COST us (stocks rose while flat)" if ew > 0 else "SAVED us (stocks fell while flat)"
+    print(f"  -> absence {verdict}")
+    for alloc in (0.25, 0.50, 0.75):
+        dollar = BOOK * alloc * ew
+        print(f"    if {alloc:.0%} of ${BOOK:.0f} had been in the sleeve: ${dollar:+.2f}")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--start", default=None)
+    ap.add_argument("--end", default=None)
+    args = ap.parse_args()
+    closes = load()
+    last = closes["SPY"].index[-1] if "SPY" in closes else max(c.index[-1] for c in closes.values())
+    print(f"equity-sleeve counterfactual | data through {pd.Timestamp(last).date()}")
+    if args.start and args.end:
+        window_report(closes, args.start, args.end, f"custom {args.start}..{args.end}")
+        return
+    for weeks, label in [(1, "last 1 week"), (2, "last 2 weeks"),
+                         (4, "last 1 month"), (12, "last 3 months")]:
+        start = pd.Timestamp(last) - pd.Timedelta(weeks=weeks)
+        window_report(closes, start, last, label)
+    print("\nNOTE: passive equal-weight hold. The ACTIVE strategy's stock-sleeve")
+    print("return over 2y is the scaleup_bt.py arm-A result (see that run).")
+
+
+if __name__ == "__main__":
+    main()

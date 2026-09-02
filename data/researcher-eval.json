@@ -1,0 +1,42 @@
+{
+  "passed": 5,
+  "total": 6,
+  "results": [
+    {
+      "task": "code_exp_fib",
+      "tier": "fast",
+      "pass": true,
+      "out": "def fib(n):\n    if n <= 1:\n        return n\n    return fib(n - 1) + fib(n - 2)"
+    },
+    {
+      "task": "code_exp_sort",
+      "tier": "fast",
+      "pass": true,
+      "out": "def sort_desc(xs):\n    return sorted(xs, reverse=True)"
+    },
+    {
+      "task": "lookup_extract",
+      "tier": "deep",
+      "pass": true,
+      "out": "(555) 123-4567"
+    },
+    {
+      "task": "reasoning_logic",
+      "tier": "deep",
+      "pass": false,
+      "out": ""
+    },
+    {
+      "task": "dataset_count",
+      "tier": "deep",
+      "pass": true,
+      "out": "2"
+    },
+    {
+      "task": "tool_call_shape",
+      "tier": "fast",
+      "pass": true,
+      "out": "{\"tool\":\"get_weather\",\"args\":{\"city\":\"Boston\"}}"
+    }
+  ]
+}

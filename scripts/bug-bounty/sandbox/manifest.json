@@ -1,0 +1,37 @@
+{
+  "bugs": [
+    {
+      "id": "future-bar",
+      "file": "harness.py",
+      "function": "_daily_bars",
+      "severity": "critical",
+      "detectable_by": "harness",
+      "keywords": [
+        "_daily_bars",
+        "cutoff",
+        "future-dated",
+        "next-UTC-midnight",
+        "placeholder bar",
+        "crash-loop",
+        "KeyError(Timestamp)",
+        "waterfall"
+      ]
+    },
+    {
+      "id": "rank-dead",
+      "file": "setup_search/engine.py",
+      "function": "_cross_sectional_rank",
+      "severity": "high",
+      "detectable_by": "engine",
+      "keywords": [
+        "_cross_sectional_rank",
+        "dropna(axis=1)",
+        "frame.columns",
+        "rank signal",
+        "rank_on",
+        "valid.index",
+        "leading nan"
+      ]
+    }
+  ]
+}

@@ -29,6 +29,8 @@ applies to the live file; it never writes the live file itself.
 
 Usage: python -m strategies.seed_router [--state-dir /home/mrc/opentrader/data]
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import json
 import os
@@ -77,7 +79,6 @@ def seed(state_dir: str, emit: bool = True) -> dict:
         os.makedirs(state_dir, exist_ok=True)
         # Single-writer contract (#155): the harness owns live_router_state.json;
         # the seed is an artifact for a human to apply, not a direct write.
-        p = os.path.join(state_dir, "live_router_state_seed.json")
         with open(p, "w") as f:
             json.dump(state, f, indent=1)
         print(f"seeded {p}")

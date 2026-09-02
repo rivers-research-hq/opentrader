@@ -1,0 +1,364 @@
+{
+ "meta": {
+  "run": "v0-llm-smoke",
+  "template": "agent-gym-state-v0.1",
+  "episodes": [
+   [
+    85,
+    145
+   ]
+  ],
+  "cash0": 100000.0,
+  "notional": 10000,
+  "atr": [
+   1.5,
+   2.5
+  ],
+  "hold": 14,
+  "max_positions": 3,
+  "max_open_per_day": 1,
+  "spread": 0.0001,
+  "window": [
+   1727211600,
+   1787864400
+  ],
+  "policies": [
+   "llm"
+  ]
+ },
+ "scoreboard": {
+  "llm(qwen38-4b)": {
+   "episodes": [
+    {
+     "n": 14,
+     "wr": 42.9,
+     "pf": 1.51,
+     "pnl": 302.31,
+     "ret_pct": 0.3,
+     "maxdd_pct": 0.48
+    }
+   ],
+   "pooled": {
+    "n": 14,
+    "wr": 42.9,
+    "pf": 1.51,
+    "pnl": 302.31,
+    "ret_pct": 0.3,
+    "maxdd_pct": 0.48
+   },
+   "violations": 0,
+   "tokens": 54100,
+   "parse_failures": 0
+  }
+ },
+ "fills": [
+  {
+   "ts": 1737669600,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.04953,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1738274400,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.03606,
+   "reason": "stop",
+   "pnl": -129.29,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1738274400,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.03606,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1738533600,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.03428,
+   "reason": "stop",
+   "pnl": -18.14,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1738792800,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.0383,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1739138400,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.0307,
+   "reason": "policy-close",
+   "pnl": -74.16,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1739224800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 152.501,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 149.616,
+   "reason": "stop",
+   "pnl": -187.53,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.26696,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1741298400,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.29217,
+   "reason": "target",
+   "pnl": 198.17,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1741298400,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.08334,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1741813200,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.08524,
+   "reason": "policy-close",
+   "pnl": 16.61,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1741899600,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.08789,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1742245200,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.30016,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1742418000,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.08534,
+   "reason": "policy-close",
+   "pnl": -24.36,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1742418000,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.2967,
+   "reason": "policy-close",
+   "pnl": -27.38,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1742763600,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.08012,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1743627600,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.10514,
+   "reason": "target",
+   "pnl": 230.71,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1743627600,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.10514,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1743973200,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.09066,
+   "reason": "stop",
+   "pnl": -131.92,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1743973200,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.09066,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744232400,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.12019,
+   "reason": "target",
+   "pnl": 269.81,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744232400,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.12019,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744664400,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.32319,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744750800,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.13986,
+   "reason": "policy-close",
+   "pnl": 174.7,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744750800,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.32408,
+   "reason": "policy-close",
+   "pnl": 5.97,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "EUR_USD",
+   "side": "BUY",
+   "price": 1.13646,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "EUR_USD",
+   "side": "SELL",
+   "price": 1.13646,
+   "reason": "episode-end",
+   "pnl": -0.88,
+   "paper": true,
+   "ep": 0,
+   "policy": "llm(qwen38-4b)"
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+{
+  "grade": "F",
+  "grade_reason": "100% stop-loss hit rate with no profitable trades indicates a complete strategy failure; the agent consistently exits before profit targets are reached.",
+  "winning_patterns": [],
+  "failure_patterns": [
+    "Stop-loss triggered on every single trade across all three symbols",
+    "No trades reached profit target despite stop-loss being hit",
+    "All three asset classes (BTC, ETH, SOL) lost money simultaneously in the same regime"
+  ],
+  "symbol_advice": {
+    "BTC/USDT": "neutral",
+    "ETH/USDT": "cold",
+    "SOL/USDT": "cold"
+  },
+  "position_sizing": "decrease - with 100% loss rate, any position size compounds losses; reduce to 50% until a winning pattern is identified",
+  "retrain_recommended": true,
+  "retrain_focus": "Train on high-probability entry signals that allow trades to reach profit targets before stop-loss. Focus on trend-following entries with confirmed momentum rather than mean-reversion strategies.",
+  "data_curation_advice": "Exclude all past stop-loss exits from training data. Include only trades that reached profit targets. Add data on confirmed breakouts, trend continuation, and momentum-based entries with proper risk-reward ratios.",
+  "confidence": 0.95,
+  "cycle": 10952,
+  "trades_reviewed": 9,
+  "win_rate": 0.0,
+  "symbol_stats": {
+    "BTC/USDT": {
+      "pnl": -123.27000000000001,
+      "wins": 0,
+      "count": 3
+    },
+    "ETH/USDT": {
+      "pnl": -124.16999999999999,
+      "wins": 0,
+      "count": 3
+    },
+    "SOL/USDT": {
+      "pnl": -199.48000000000002,
+      "wins": 0,
+      "count": 3
+    }
+  },
+  "regime_counts": {
+    "unknown": 9
+  },
+  "timestamp": "2026-09-02T00:22:33.432957"
+}

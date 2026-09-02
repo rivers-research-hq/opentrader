@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Arena handoff: score the 8 verified strategies, build the MoT router state.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 This is the canonical bridge from tournament evidence to the MoT layer:
   - runs each verified strategy on the US tournament data (R1) and the intl
     OOS data (R2) through the honest scorers
@@ -23,6 +25,8 @@ Usage:
   python -m strategies.handoff              # full run + emit router state
   python -m strategies.handoff --verify-only
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import json
 import os

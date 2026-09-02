@@ -1,0 +1,25 @@
+{
+  "filter": {
+    "n_markets_total": 345,
+    "n_markets_after_candle_filter": 127,
+    "n_markets_after_vol_filter": 75,
+    "min_candles": 10,
+    "n_candles_total": 14091
+  },
+  "verdict": "GO",
+  "reasons": [],
+  "tick": 0.01,
+  "nboot": 4000,
+  "seed": 42,
+  "min_candles": 10,
+  "strategy": "single-entry at first-real, hold to settlement (V03-comparable)",
+  "assumptions": [
+    "tick size $0.01 (unverified, V12 explore)",
+    "zero maker fee (VERIFIED Q02: fee_type=quadratic, no maker fee)",
+    "1-min resolution, no intra-candle queue position (V10 unknowable)",
+    "touch-and-hold is conservative proxy, not true queue sim",
+    "single entry only - no re-quoting (V03-comparable)"
+  ],
+  "ts": 1787763007,
+  "elapsed_s": 0.5
+}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """LoRA adapter loader for llama-server — hot-loads trained adapters.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
+open = guarded_open  # hardening shadow
 Two strategies:
   1. Hot-load via llama-server /lora-adapters API (if available, v2.0+)
   2. Graceful restart with --lora flag (fallback)
@@ -22,6 +25,9 @@ Usage:
   # Unload all adapters
   python3 scripts/load_adapter.py --unload
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
+open = guarded_open  # hardening shadow
 
 import json
 import logging

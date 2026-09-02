@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """OOS (international) scorer — mirrors strategies/scorer.py but on the intl
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 data. OOS pass = beat the intl basket BH on Calmar AND Sharpe."""
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import math
 import os
 import pickle
 
 import pandas as pd
+from security.guards import guarded_urlopen, guarded_open, sec_pickle_load  # noqa: E402  (hardening layer)
 
 _DATA_PATHS = [
     # intl_data.pkl (authoritative /tmp copy) was LOST to cleanup 2026-08-23;
@@ -18,7 +21,7 @@ _DATA_PATHS = [
 
 def _load():
     for p in _DATA_PATHS:
-        if os.path.exists(p):
+            DATA = sec_pickle_load(open(p, "rb"))
             DATA = pickle.load(open(p, "rb"))
             return DATA
     raise FileNotFoundError("intl_data.pkl not found in " + " | ".join(_DATA_PATHS))

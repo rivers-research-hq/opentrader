@@ -1,0 +1,204 @@
+[0m
+> builder · qwen38-agentic
+[0m
+I'll do a read-only audit: list files, find the harness entrypoint, and inspect its main loop. No edits.
+[0m$ [0mls -la /home/mrc/opentrader
+total 712
+drwxr-xr-x  30 mrc mrc   4096 Aug 15 12:19 .
+drwxr-xr-x 200 mrc mrc  20480 Aug 16 09:48 ..
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:35 agent
+-rw-r--r--   1 mrc mrc   9430 Aug 14 13:35 AGENTS.md
+-rw-r--r--   1 mrc mrc  17924 Aug  7 16:36 alpaca_paper.py
+drwxr-xr-x   2 mrc mrc   4096 Aug 12 21:15 arena
+-rw-r--r--   1 mrc mrc  10343 Jul  6 07:56 benchmark_models.py
+drwxr-xr-x   2 mrc mrc   4096 Jul 29 22:29 charts
+drwxr-xr-x   4 mrc mrc   4096 Aug 16 15:08 .codesage
+drwxr-xr-x   2 mrc mrc   4096 Aug 13 03:14 config
+-rw-r--r--   1 mrc mrc  13880 Aug 12 23:50 connections.py
+-rw-r--r--   1 mrc mrc   8804 Jul  4 11:02 coordinator.py
+-rw-r--r--   1 mrc mrc  88603 Aug 14 15:20 dashboard.html
+-rw-r--r--   1 mrc mrc  16883 Aug 14 15:20 dashboard.py
+drwxr-xr-x  22 mrc mrc   4096 Aug 16 16:51 data
+-rw-r--r--   1 mrc mrc  10067 Jul 10 14:02 data_mgmt.py
+drwxr-xr-x   9 mrc mrc   4096 Aug 14 14:18 docs
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 exchange
+drwxr-xr-x   5 mrc mrc   4096 Jul 28 20:21 exchange-engine
+drwxr-xr-x   7 mrc mrc   4096 Aug 16 15:07 .git
+-rw-r--r--   1 mrc mrc   2536 Aug  7 16:36 .gitignore
+-rw-r--r--   1 mrc mrc  16952 Aug 12 23:07 gpu_sync.py
+-rw-r--r--   1 mrc mrc 215597 Aug 15 12:16 harness.py
+-rw-r--r--   1 mrc mrc      0 Jul  2 11:20 __init__.py
+-rw-r--r--   1 mrc mrc  46832 Jul 30 10:02 mcp_server.py
+-rw-r--r--   1 mrc mrc  25884 Jul 30 14:07 model_manager.py
+drwxr-xr-x   5 mrc mrc   4096 Jul 27 17:15 models
+drwxr-xr-x   4 mrc mrc   4096 Aug 15 12:20 mot
+-rw-r--r--   1 mrc mrc   5168 Jul  8 21:30 onchain.py
+-rw-r--r--   1 mrc mrc  10182 Jul  4 16:22 onchain_web3.py
+drwxr-xr-x   7 mrc mrc   4096 Aug 10 03:31 .opencode
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 __pycache__
+-rw-r--r--   1 mrc mrc   3621 Aug 13 00:18 README.md
+-rwxr-xr-x   1 mrc mrc   1584 Jul  9 14:29 report_risk.py
+-rw-r--r--   1 mrc mrc   2281 Jul 29 11:33 repro_volatility.py
+-rw-r--r--   1 mrc mrc    880 Jul 30 10:03 requirements.txt
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 risk
+drwxr-xr-x   4 mrc mrc   4096 Aug  1 07:49 .ruff_cache
+drwxr-xr-x   2 mrc mrc   4096 Aug 11 14:43 scenarios
+drwxr-xr-x   3 mrc mrc   4096 Aug 16 16:23 scripts
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:22 setup_search
+drwxr-xr-x   2 mrc mrc   4096 Aug  7 17:44 showcase
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:35 state
+drwxr-xr-x   2 mrc mrc   4096 Aug 14 15:00 static
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:12 strategies
+drwxr-xr-x   2 mrc mrc   4096 Aug  7 16:36 tests
+drwxr-xr-x   3 mrc mrc   4096 Aug 13 11:43 tools
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:20 training
+-rwxr-xr-x   1 mrc mrc  28082 Jul 29 22:01 tui_dashboard.py
+drwxr-xr-x   3 mrc mrc   4096 Aug 13 11:43 unsloth_compiled_cache
+drwxr-xr-x   2 mrc mrc   4096 Jul 27 02:00 _unsloth_sentencepiece_temp
+[0m
+[0m$ [0mgrep -n -E "def main|if __name__|while |def run|argparse|def main_loop|def run_harness" /home/mrc/opentrader/harness.py | head -80
+10:import argparse
+2594:            while n < 14:
+2766:    def run_cycle(self) -> dict:
+2907:        # validated symbol list (it capped stage-1 paper at 8 symbols while 19
+2940:        #    while training.lock was held — stops/trims never fired in live trading) ──
+4129:    def run(self):
+4181:        while self.running:
+4332:def main():
+4340:    parser = argparse.ArgumentParser(description="OpenTrader Harness — event loop")
+4643:if __name__ == "__main__":
+[0m
+[0m$ [0mwc -l /home/mrc/opentrader/harness.py
+4644 /home/mrc/opentrader/harness.py
+[0m
+`harness.py` is the entrypoint (215KB). Let me locate its main loop and `__main__` block.
+The main loop is at line 4181 (`while self.running:`) inside `run()` at line 4129. Let me read that section and the `run_cycle` it calls.
+[0m→ [0mRead harness.py[90m [offset=4129, limit=220][0m
+[0m→ [0mRead harness.py[90m [offset=2766, limit=200][0m
+Now let me read `run_cycle()` (the per-iteration work) to describe the loop accurately.
+[0m
+[0m$ [0msed -n '2966,3120p' /home/mrc/opentrader/harness.py | grep -n -E "──|═══|Phase|def |Kelly|execute|record|reflection|flash|adapter|state" | head -40
+116:        # ── Merge per-symbol optimized params into risk overrides ──
+129:        # ═══════════════════════════════════════════════════════
+130:        # Phase 1.5: Record ALL symbol signals to history
+131:        # ═══════════════════════════════════════════════════════
+153:        # ═══════════════════════════════════════════════════════
+154:        # Phase 1.6: Asset Class Allocation (multi-asset stages)
+155:        # ═══════════════════════════════════════════════════════
+[0m
+I have the loop structure. Let me quickly scan the rest of `run_cycle` (portfolio optimization → execution → state) to make the report accurate.
+## Objective
+- Perform a SAFE READ-ONLY audit of `/home/mrc/opentrader`: list files, identify the harness entrypoint, and report in 3 sentences what its main loop does.
+- Make no edits or writes.
+
+## Important Details
+- Constraint: read-only only; no file changes, no state changes, no training locks, no trading actions.
+- Final answer must be exactly 3 sentences describing the main loop.
+- Harness entrypoint identified: `/home/mrc/opentrader/harness.py`.
+- `harness.py` is 4644 lines long.
+- Key locations found by grep:
+  - `4332:def main():`
+  - `4340: parser = argparse.ArgumentParser(description="OpenTrader Harness — event loop")`
+  - `4643:if __name__ == "__main__":`
+  - `4129: def run(self):`
+  - `4181: while self.running:`
+  - `2766: def run_cycle(self) -> dict:`
+- `run(self)` is the main event loop; it initializes stage symbols from `STAGES[self.stage]["symbols"]`, logs stage/timeframe/cash/agent, warns if the Llama/model endpoint is unavailable, and applies MoT force risk-config overrides at startup when set.
+- `run_cycle(self)` is the per-iteration cycle routine. Its docstring states it: pushes new bars, checks SL/TP guardrails, gathers debate signals in parallel for all symbols, performs correlation-aware Kelly portfolio optimization, executes trades, then records state and performs flash train/reflection/adapter tracking.
+- Partial read of `run_cycle` confirmed it increments `self.cycle`, optionally pushes synthetic bars for paper exchange, and checks `training.lock`, removing stale locks older than 6 hours.
+- The exact body of the `while self.running:` loop around line `4181` was not fully read yet because prior reads were truncated before that section.
+
+## Work State
+### Completed
+- Listed `/home/mrc/opentrader` with `ls -la /home/mrc/opentrader`.
+- Identified `harness.py` as the harness entrypoint.
+- Located `main()`, `argparse`, `__main__`, `run()`, the main `while` loop, and `run_cycle()` in `/home/mrc/opentrader/harness.py`.
+- Read the beginning of `run()` and the beginning of `run_cycle()`.
+
+### Active
+- Need to confirm the exact per-iteration body of the main loop around `/home/mrc/opentrader/harness.py:4181`.
+- Need to deliver the final user-facing report as exactly 3 sentences.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/home/mrc/opentrader/harness.py` around lines `4164` to `4260` to confirm what the `while self.running:` loop does each iteration, especially calls to `run_cycle()` and any sleep/error handling.
+2. Provide the final read-only audit report in exactly 3 sentences about the main loop, with no file edits.
+
+## Relevant Files
+- `/home/mrc/opentrader`: root directory audited; contains many trading/dashboard/model files and the harness.
+- `/home/mrc/opentrader/harness.py`: harness entrypoint and main event loop; contains `main()`, `run()`, `while self.running:` at line `4181`, and `run_cycle()` at line `2766`.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0msed -n '2766,3900p' /home/mrc/opentrader/harness.py | grep -n -E "# ═|Phase|Kelly|portfolio|optimize|execute_trade|place_order|record_cycle|flash|reflection|adapter|self\.state|json.dump" | head -60
+4:        Phase 7 Multi-Symbol Flow:
+6:          2. Phase 1: Gather debate signals in parallel for ALL symbols
+7:          3. Phase 2: Portfolio optimization (correlation-aware Kelly allocation)
+8:          4. Phase 3: Execute trades based on optimized allocation
+9:          5. Record state, flash train, reflection, adapter tracking
+27:        _training_lock = _Path(self.state_dir) / "training.lock"
+51:                    _ack = _Path(self.state_dir) / "training_hold_ack"
+60:        # Periodic param re-optimization (every 100 cycles, or when portfolio moves)
+157:                    f"{self.risk.config.portfolio_stop_pct * 100:.0f}%"
+178:        # ═══════════════════════════════════════════════════════
+316:        # ── Merge per-symbol optimized params into risk overrides ──
+329:        # ═══════════════════════════════════════════════════════
+330:        # Phase 1.5: Record ALL symbol signals to history
+331:        # ═══════════════════════════════════════════════════════
+353:        # ═══════════════════════════════════════════════════════
+354:        # Phase 1.6: Asset Class Allocation (multi-asset stages)
+355:        # ═══════════════════════════════════════════════════════
+358:        # pcts so the portfolio optimizer respects class budgets.
+379:                    portfolio_value=bal.total_value,
+405:        # ═══════════════════════════════════════════════════════
+406:        # Phase 2: Portfolio Optimization (multi-symbol)
+407:        # ═══════════════════════════════════════════════════════
+408:        portfolio_result = None
+420:        # DBG: log all signals pre-optimizer
+455:                portfolio_dict = {
+461:                # ── Deferred optimizer: run every 3 cycles, reuse cached weights ──
+471:                    or not hasattr(self, "_cached_portfolio_result")
+473:                    portfolio_result = self.risk.allocate_portfolio(
+475:                        portfolio=portfolio_dict,
+480:                    self._cached_portfolio_result = portfolio_result
+483:                    portfolio_result = self._cached_portfolio_result
+485:                if portfolio_result:
+487:                        f"  Portfolio: {len(portfolio_result.allocations)} allocations, "
+488:                        f"VaR=${portfolio_result.portfolio_var:,.0f}, "
+489:                        f"div_ratio={portfolio_result.diversification_ratio:.2f}, "
+490:                        f"exposure={portfolio_result.total_exposure_pct:.1%}"
+494:                portfolio_result = None
+496:        # ═══════════════════════════════════════════════════════
+497:        # Phase 3: Execute trades per symbol
+498:        # ═══════════════════════════════════════════════════════
+501:        # Build allocation map from portfolio optimization
+503:        if portfolio_result:
+504:            for a in portfolio_result.allocations:
+505:                # ── Weight floor for low-conviction BUYs (Kelly near-zero recovery) ──
+512:                    and portfolio_dict.get("total_value", 0) > 0
+537:            # Override with portfolio optimizer allocation if available
+569:                # Swarm veto (#56 Phase 3): gates SPECIALIST entries only —
+601:            # Optimizer-driven SELL (trim of above-Kelly position) should NOT
+629:                            pos_qty = portfolio_dict.get("positions", {}).get(sym, 0)
+678:                    portfolio = {
+684:                    # Use portfolio-optimized position_pct if available
+689:                        portfolio,
+716:                        # If signal is HOLD but portfolio optimizer wants action, use alloc direction
+744:                            order = self.exchange.place_order(
+762:                                "portfolio_weight": effective_position_pct,
+764:                            # Calculate actual fill size as % of portfolio (may differ from risk cap)
+833:                                        "portfolio_weight": effective_position_pct,
+906:                                                "override_source": "portfolio_optimizer"
+917:                                        # Use effective_action (may differ from signal.action due to portfolio optimizer override)
+930:                                    # Resolve reflection on close
+[0m
+Let me get the full phase structure of `run_cycle` to finish the report.
+[0m→ [0mRead harness.py[90m [offset=4181, limit=120][0m
+I have the full picture of the loop. Let me confirm the actual `while` body in `run()` to nail down the iteration cadence.
+Done — read-only audit complete, no files modified. Final report (3 sentences):
+
+1. The harness is `harness.py` (entry `main()` → `Harness.run()`), whose main loop is a `while self.running` cycle that calls `self.run_cycle()` once per iteration, sleeps `cycle_interval`, then runs housekeeping steps (flash-training during HOLD streaks, periodic coach review + ensemble voting, ATDL lifecycle step, auto fine-tune check, adapter lifecycle check) — with crash accounting that saves state on error and exits after 10 consecutive crashes so systemd can relaunch.
+
+2. Each `run_cycle()` is a full multi-symbol trading tick: it checks the training lock / does periodic param re-optimization, gathers debate signals in parallel for all stage symbols (Phases 1/1.5/1.6, including asset-class allocation budgets), runs the correlation-aware Kelly portfolio optimizer (Phase 2, deferred and cached every 3 cycles), executes the resulting orders via `self.exchange.place_order()` (Phase 3, with swarm veto and optimizer-driven trims), then records state, flash training, reflection resolution, and adapter tracking.
+
+3. In short, the main loop is a recurring observe→signal→optimize→trade→learn cadence: every tick it trades the stage's symbol list per portfolio-optimized Kelly allocations while continuously self-improving through coach reviews, flash learning, fine-tuning, and adapter lifecycle management.

@@ -1,0 +1,23 @@
+{
+  "filter": {
+    "n_markets_total": 345,
+    "n_markets_after_candle_filter": 127,
+    "n_markets_after_vol_filter": 75,
+    "min_candles": 10,
+    "n_candles_total": 14091
+  },
+  "verdict": "GO",
+  "reasons": [],
+  "tick": 0.01,
+  "nboot": 4000,
+  "seed": 42,
+  "min_candles": 10,
+  "assumptions": [
+    "tick size $0.01 (unverified, V12 explore)",
+    "zero maker fee (V04 backtest assumption; verify Q02)",
+    "1-min resolution, no intra-candle queue position (V10 unknowable)",
+    "touch-and-hold is conservative proxy, not true queue sim"
+  ],
+  "ts": 1787754265,
+  "elapsed_s": 1.5
+}

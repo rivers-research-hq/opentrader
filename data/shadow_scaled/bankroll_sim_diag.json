@@ -1,0 +1,27 @@
+{
+  "strategy": "0.95-0.99 maker lane, re-quoting, 1% risk per fill",
+  "n_fills_observed": 22,
+  "n_clusters": 5,
+  "fills_per_day": 46.0,
+  "n_sims": 10000,
+  "days": 30,
+  "risk_alpha": 0.01,
+  "seed": 42,
+  "assumptions": [
+    "Fill PnL resampled with replacement from observed 0.95-0.99 bin fills",
+    "All observed fills won (160/160) - no loss scenario in base sample",
+    "Fill rate: 70.1% in-bin (V09), re-quoting strategy",
+    "Sizing: N = floor(1% * bankroll / entry_price), min 1 contract",
+    "No fees (maker fee = 0, V04)",
+    "No slippage (fill at quote price)",
+    "30-day horizon"
+  ],
+  "caveats": [
+    "All observed fills won - loss scenario NOT in the sample",
+    "Fill rate may be lower in production (V10 queue dynamics)",
+    "Month-scale persistence unproven (V11)",
+    "1-min candle proxy, no intra-bar path"
+  ],
+  "ts": 1787872543,
+  "elapsed_s": 19.6
+}

@@ -1,0 +1,72 @@
+{
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_rows": 7668,
+      "holdout_rows": 7871,
+      "gate_pass": false,
+      "gate_results": [
+        {
+          "window": "554-754",
+          "n": 3169,
+          "kept": 429,
+          "kept_mean": 0.022791752667987646,
+          "all_mean": 0.014426369307897693,
+          "margin": 0.008365383360089953
+        },
+        {
+          "window": "954-1054",
+          "n": 1600,
+          "kept": 207,
+          "kept_mean": 0.034476840112417216,
+          "all_mean": 0.01695659694226367,
+          "margin": 0.017520243170153545
+        }
+      ],
+      "own_margin": 0.00945,
+      "baseline_margin": 0.0195,
+      "beats_baseline": false,
+      "erosion_deltas": {},
+      "erosion_ok": true,
+      "PASS": false
+    },
+    {
+      "epoch": 2,
+      "train_rows": 15539,
+      "holdout_rows": 2991,
+      "gate_pass": false,
+      "gate_results": [
+        {
+          "window": "1054-1130",
+          "n": 1193,
+          "kept": 81,
+          "kept_mean": 0.0016942406572777499,
+          "all_mean": 0.006388891110047329,
+          "margin": -0.004694650452769579
+        },
+        {
+          "window": "1206-1245",
+          "n": 608,
+          "kept": 60,
+          "kept_mean": -0.00013305961954966915,
+          "all_mean": -0.0038855092112851,
+          "margin": 0.003752449591735431
+        }
+      ],
+      "own_margin": 0.00533,
+      "baseline_margin": 0.00533,
+      "beats_baseline": true,
+      "erosion_deltas": {
+        "epoch1": 0.01006
+      },
+      "erosion_ok": false,
+      "PASS": false
+    }
+  ],
+  "n_epochs": 2,
+  "bars": [
+    54,
+    1245
+  ],
+  "verdict": "no-promotion (log for review, retry next epoch)"
+}

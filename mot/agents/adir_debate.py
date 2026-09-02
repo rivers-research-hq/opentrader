@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """ADIR: Adversarial Deliberation with Independent Reasoning.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Research-grounded multi-agent debate engine. Key innovations over the baseline
 fast_debate composite call:
 
@@ -33,6 +35,8 @@ Based on:
   - FinCom (arXiv:2606.00939)
   - Preserving Disagreement (arXiv:2604.26561)
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

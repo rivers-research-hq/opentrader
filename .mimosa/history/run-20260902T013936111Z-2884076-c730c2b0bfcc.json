@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260902T013936111Z-2884076-c730c2b0bfcc",
+  "runStatus": "inconclusive",
+  "errors": [
+    "candidate-select:scripts/hf_download.py: candidate_limit_exceeded: 31 changed reviewable file(s) were not scanned because the limit is 20",
+    "scan:alpaca_paper.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:benchmark_models.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:connections.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:dashboard.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:harness.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:model_manager.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/evaluate.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/handoff.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/lanes.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/router_state.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/scorer.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/scorer_intl.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/seed_router.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/shadow.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/shadow_current_alloc.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:strategies/verify.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:state/manager.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:scripts/agent_gym.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:scripts/fetch_exog.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT",
+    "scan:scripts/fetch_rates.py: scanner_failed: spawnSync /usr/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "e84d1ac659dc8aa4c505145fee64c64a5f3f8c87",
+  "diffHash": "e93a098f1f7abbe3cac3867eb2ca882eb549f3402a1226b42a2ba4e434f533a6",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-02T01:39:36.111Z",
+  "timing": {
+    "startedAt": "2026-09-02T01:39:33.676Z",
+    "completedAt": "2026-09-02T01:39:36.111Z",
+    "durationMs": 2435
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "candidate_limit_exceeded": 1,
+      "scanner_failed": 20,
+      "project_check_failed": 21
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_72b04307-5c6b-42b8-926a-546f7e4ee943-20260902T013936111Z-2884076-c730c2b0bfcc.json"
+}

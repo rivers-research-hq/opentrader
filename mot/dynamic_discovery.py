@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Dynamic symbol discovery — the agent can expand its tradable universe.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 When the scout finds weak signals, the agent triggers discovery mode to
 research and add new tickers.  Supports SEC EDGAR lookups and sector
 expansion.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """fetch_rates — central-bank policy/overnight rates into the gym's exogenous
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 cache (data/exog_cache.json), same point-in-time discipline as COT.
 
 Sources (probed 2026-09-01, all free, no keys):
@@ -21,6 +23,8 @@ Publication-lag handling: each daily series is shifted so value[D] was public
 knowledge on day D — DFF and SONIA by one day, ECB/BoC policy rates by zero
 (decision-day announcements).
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import urllib.request

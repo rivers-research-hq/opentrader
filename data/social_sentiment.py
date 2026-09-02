@@ -8,6 +8,8 @@ Provides per-symbol sentiment scores by pulling from free public APIs:
 
 Cache TTL: 15 minutes. All fetches are wrapped in try/except — never raises.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 import re
@@ -88,7 +90,6 @@ def _fetch_fear_greed() -> Optional[float]:
     url = "https://api.alternative.me/fng/?limit=1"
     try:
         req = Request(url, method="GET")
-        req.add_header("User-Agent", "OpenTrader/1.0")
         with urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
             data = json.loads(resp.read().decode())
             value = int(data["data"][0]["value"])

@@ -1,0 +1,88 @@
+"""
+pm4: Favorite-longshot bias test on resolved Kalshi binary markets, net of taker fees.
+Side-symmetric: for each market, the FAVORITE = higher-priced side, LONGSHOT = lower.
+H0 (efficient): empirical win rate of a side == its price.
+Favorite-longshot bias: favorites underpriced (win rate > price), longshots overpriced (win rate < price).
+Edge per contract (USD) = win_rate - price - 0.07*price*(1-price)   [Kalshi taker fee]
+"""
+import pickle, os
+import pandas as pd
+import numpy as np
+
+OUT = "/home/mrc/opentrader/data/shadow_scaled"
+FEE = 0.07  # Kalshi taker fee coefficient: fee = FEE * P * (1-P) per contract
+
+def load(name):
+    p = f"{OUT}/{name}"
+    if not os.path.exists(p):
+    return pd.DataFrame(pickle.load(open(p, "rb")))
+
+def fee(p):
+    return FEE * p * (1 - p)
+
+def main():
+    frames = []
+    for name in ("pm_kalshi_live_features.pkl", "pm_kalshi_hist_features.pkl"):
+        df = load(name)
+        if df is not None and len(df):
+            frames.append(df)
+    if not frames:
+        print("no feature files found"); return
+    d = pd.concat(frames, ignore_index=True)
+    # keep only sane prices
+    d = d[(d.p_pre > 0.001) & (d.p_pre < 0.999)].copy()
+    print(f"combined N = {len(d)}  (live={ (d.source=='live').sum() }, hist={ (d.source=='hist').sum() })")
+
+    # side-symmetric features
+    d["fav_price"] = d.p_pre.clip(0.5, 1.0)              # max(p, 1-p)
+    d["fav_win"] = np.where(d.p_pre >= 0.5, d.result, 1 - d.result)
+    d["long_price"] = 1 - d.fav_price                     # min(p, 1-p)
+    d["long_win"] = 1 - d.fav_win
+
+    def report(sub, label):
+        print(f"\n{'='*72}\n{label}  (N={len(sub)})\n{'='*72}")
+        # FAVORITE side: bin by fav_price
+        print("\n[FAVORITE side]  bin by favorite price -> empirical win rate vs price")
+        print(f"  {'fav_price':>10} {'n':>5} {'avg_price':>10} {'win_rate':>9} {'raw_edge':>9} {'fee':>7} {'net_edge':>9}")
+        bins = [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1.0]
+        for lo, hi in zip(bins[:-1], bins[1:]):
+            b = sub[(sub.fav_price > lo) & (sub.fav_price <= hi)]
+            if len(b) < 5:
+                continue
+            ap = b.fav_price.mean(); wr = b.fav_win.mean()
+            print(f"  {lo:>4.2f}-{hi:<4.2f} {len(b):>5} {ap:>10.4f} {wr:>9.4f} {wr-ap:>+9.4f} {fee(ap):>7.4f} {wr-ap-fee(ap):>+9.4f}")
+        # LONGSHOT side: bin by long_price
+        print("\n[LONGSHOT side]  bin by longshot price -> empirical win rate vs price")
+        print(f"  {'long_price':>10} {'n':>5} {'avg_price':>10} {'win_rate':>9} {'raw_edge':>9} {'fee':>7} {'net_edge':>9}")
+        bins = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+        for lo, hi in zip(bins[:-1], bins[1:]):
+            b = sub[(sub.long_price > lo) & (sub.long_price <= hi)]
+            if len(b) < 5:
+                continue
+            ap = b.long_price.mean(); wr = b.long_win.mean()
+            print(f"  {lo:>4.2f}-{hi:<4.2f} {len(b):>5} {ap:>10.4f} {wr:>9.4f} {wr-ap:>+9.4f} {fee(ap):>7.4f} {wr-ap-fee(ap):>+9.4f}")
+        # aggregate: buy-the-favorite strategy P&L
+        fav_edge = (d_fav_edge(sub))
+        print(f"\n  [AGGREGATE] buy-FAVORITE avg net edge/contract = {fav_edge:+.4f} USD  "
+              f"(= {fav_edge*100:+.3f}c);  wins {sub.fav_win.mean():.3f} of the time at avg price {sub.fav_price.mean():.3f}")
+        long_edge = d_long_edge(sub)
+        print(f"  [AGGREGATE] buy-LONGSHOT avg net edge/contract = {long_edge:+.4f} USD  "
+              f"(= {long_edge*100:+.3f}c);  wins {sub.long_win.mean():.3f} of the time at avg price {sub.long_price.mean():.3f}")
+
+    def d_fav_edge(sub):
+        return (sub.fav_win - sub.fav_price - fee(sub.fav_price)).mean()
+    def d_long_edge(sub):
+        return (sub.long_win - sub.long_price - fee(sub.long_price)).mean()
+
+    report(d, "COMBINED (live + hist)")
+    if (d.source == "live").sum() > 20:
+        report(d[d.source == "live"], "LIVE only (Aug 21-25)")
+    if (d.source == "hist").sum() > 20:
+        report(d[d.source == "hist"], "HIST only (Jun 25 slice)")
+
+    # save combined
+    d.to_pickle(f"{OUT}/pm_kalshi_combined.pkl")
+    print(f"\nsaved combined -> {OUT}/pm_kalshi_combined.pkl")
+
+if __name__ == "__main__":
+    main()

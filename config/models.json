@@ -1,0 +1,16 @@
+{
+  "serving": {
+    "name": "DeepSeek-V4-Pro-Qwen3.5-9B-MTP",
+    "model_path": "/home/mrc/models/deepseek-v4-pro-qwen3.5-9b/DeepSeek-V4-Pro-Qwen3.5-9B-MTP-Q8_0.gguf",
+    "alias": "deepseek-v4-pro-qwen3.5-9b",
+    "aliases": ["qwythos-9b-mtp", "deepseek-v4-pro-qwen3.5-9b"],
+    "port": 5802,
+    "ctx_size": 16384,
+    "n_predict": 2048
+  },
+  "train_base": {
+    "huggingface": "Qwen/Qwen2.5-7B-Instruct",
+    "gguf": "/home/mrc/models/qwen2.5-7b-instruct/Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+    "note": "Trainable LoRA base. Currently Qwen2.5-7B, a DIFFERENT architecture from serving (Qwen3.5-9B): adapters cannot be promoted until this is re-pointed at a Qwen3.5-9B (or future Qwen3.8) base. Drop-in swap = edit this file's serving + train_base together."
+  }
+}

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """OpenTrader Model Manager — discovers, downloads, and launches models.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Three model origins:
   - llama-swap:   Models registered in the local llama-swap instance
   - huggingface:  Models downloaded from HF, organized under models/hf/<category>/
@@ -14,6 +16,8 @@ API exposed to dashboard:
   POST /api/models/download      → download from HF
   GET  /api/models/status        → running model + VRAM info
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

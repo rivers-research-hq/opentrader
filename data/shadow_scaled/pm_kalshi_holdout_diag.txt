@@ -1,0 +1,57 @@
+fetching closed markets Aug 26 00:00Z -> 2026-08-27 05:02Z ...
+  total closed: 1495  resolved binary: 556
+  pulled 20/556 (feats 20)
+  pulled 40/556 (feats 40)
+  pulled 60/556 (feats 60)
+  pulled 80/556 (feats 80)
+  pulled 100/556 (feats 100)
+  pulled 120/556 (feats 120)
+  pulled 140/556 (feats 140)
+  pulled 160/556 (feats 160)
+  pulled 180/556 (feats 180)
+  pulled 200/556 (feats 200)
+  pulled 220/556 (feats 220)
+  pulled 240/556 (feats 240)
+  pulled 260/556 (feats 260)
+  pulled 280/556 (feats 280)
+  pulled 300/556 (feats 300)
+  pulled 320/556 (feats 320)
+  pulled 340/556 (feats 340)
+  pulled 360/556 (feats 360)
+  pulled 380/556 (feats 380)
+  pulled 400/556 (feats 400)
+  pulled 420/556 (feats 420)
+  pulled 440/556 (feats 440)
+  pulled 460/556 (feats 460)
+  pulled 480/556 (feats 480)
+  pulled 500/556 (feats 500)
+  pulled 520/556 (feats 520)
+  pulled 540/556 (feats 540)
+  pulled 556/556 (feats 556)
+
+Saved 556 features -> /home/mrc/opentrader/data/shadow_scaled/pm_kalshi_holdout_features.pkl
+
+=== HOLDOUT DIAGNOSTIC (tradeable: 471) ===
+N=471  fav wins=465/471  avg fav_price=0.9802
+avg spread=2.39c
+MAKER aggregate edge = +1.90c  CI[+1.12,+2.63]
+MID   aggregate edge = +0.59c  CI[-0.19,+1.28]
+  0.90-0.95  n= 14  wins=13/14  mid=-1.40  maker=+1.93   (avg spread 5.9c)
+  0.95-0.99  n=111  wins=111/111  mid=+2.72  maker=+5.76   (avg spread 5.7c)
+  0.99-1.00  n=335  wins=335/335  mid=+0.47  maker=+1.00   (avg spread 1.0c)
+
+0.95-0.99 cluster view: n=111 clusters=11 max_cluster=31
+                   n  mean_c   maker_c
+series                                
+KXWTIH-26AUG2700  31     1.0  5.483871
+KXSILVERH-26AUG2  19     1.0  5.894737
+KXGOLDH-26AUG270  16     1.0  6.812500
+KXLEAGUESCUPSCOR  15     1.0  3.600000
+KXPALLADIUMH-26A  10     1.0  9.000000
+KXDOGED-26AUG270   6     1.0  3.166667
+KXTEMPMIAH-26AUG   5     1.0  4.200000
+KXPLATINUMH-26AU   5     1.0  9.000000
+KXXRP-26AUG2701    2     1.0  3.000000
+KXDOGE-26AUG2701   1     1.0  9.000000
+KXLEAGUESCUPTOTA   1     1.0  4.000000
+EXIT:0

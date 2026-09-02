@@ -1,0 +1,28 @@
+{
+ "meta": {
+  "worlds": 20,
+  "block_mean": 21,
+  "seed": 20260901,
+  "window": [
+   1727211600,
+   1787864400
+  ]
+ },
+ "candidates": {
+  "c08_mr_fade_cot": {
+   "real_oos": {
+    "n": 22,
+    "wr": 54.54545454545454,
+    "pf": 2.53937432407112,
+    "pl": 1101.2299164285746
+   },
+   "worlds_pf_mean": 2.724,
+   "worlds_pf_p5": 1.468,
+   "worlds_pf_median": 2.264,
+   "worlds_pf_pct_gt1": 100.0,
+   "worlds_pnl_pct_pos": 100.0,
+   "worlds_mean_n": 36.4,
+   "real_pf_percentile": 60.0
+  }
+ }
+}

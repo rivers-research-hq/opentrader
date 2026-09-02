@@ -15,6 +15,8 @@ days; enforced in the gym's Ctx.exog).
 
 Usage:   python3 scripts/fetch_exog.py   (idempotent; rewrites the cache)
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import statistics

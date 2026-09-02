@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """SEC EDGAR fundamentals ingestion — financial statements from 10-K/10-Q filings.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Parses the SEC XBRL Company Facts API to extract income statement, balance sheet,
 and cash flow data: revenue, earnings, assets, liabilities, equity, margins, etc.
 
@@ -8,6 +10,8 @@ Caches results in data/fundamentals_cache.db with configurable TTL.
 
 API reference: https://www.sec.gov/files/companyfacts-example.json
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

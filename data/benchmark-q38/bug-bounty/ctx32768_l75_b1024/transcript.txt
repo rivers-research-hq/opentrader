@@ -1,0 +1,699 @@
+[0m
+> build · qwen38-agentic
+[0m
+[0m$ [0mfind /tmp/opencode/bb-sandbox -type f -name "*.py" | head -50 && echo "---" && ls /tmp/opencode/bb-sandbox
+/tmp/opencode/bb-sandbox/.opencode/tools/_subagent_watch.py
+/tmp/opencode/bb-sandbox/.opencode/tools/_project_context.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/__init__.py
+/tmp/opencode/bb-sandbox/risk/param_optimizer.py
+/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py
+/tmp/opencode/bb-sandbox/risk/regime_adaptation.py
+/tmp/opencode/bb-sandbox/risk/performance_analytics.py
+/tmp/opencode/bb-sandbox/risk/manager.py
+/tmp/opencode/bb-sandbox/risk/asset_allocator.py
+/tmp/opencode/bb-sandbox/risk/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/risk/__init__.py
+/tmp/opencode/bb-sandbox/exchange/base.py
+/tmp/opencode/bb-sandbox/exchange/ibkr.py
+/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/multi_router.py
+/tmp/opencode/bb-sandbox/exchange/paper.py
+/tmp/opencode/bb-sandbox/exchange/realtime.py
+/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py
+/tmp/opencode/bb-sandbox/exchange/live.py
+/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/exchange/__init__.py
+/tmp/opencode/bb-sandbox/state/context.py
+/tmp/opencode/bb-sandbox/state/manager.py
+/tmp/opencode/bb-sandbox/state/__init__.py
+/tmp/opencode/bb-sandbox/scripts/hf_download.py
+/tmp/opencode/bb-sandbox/scripts/load_adapter.py
+/tmp/opencode/bb-sandbox/scripts/service_mgr.py
+/tmp/opencode/bb-sandbox/scripts/rtx3070-bench.py
+/tmp/opencode/bb-sandbox/scripts/hf_search.py
+/tmp/opencode/bb-sandbox/scripts/hf_library.py
+/tmp/opencode/bb-sandbox/scripts/hf_models.py
+/tmp/opencode/bb-sandbox/scripts/__init__.py
+/tmp/opencode/bb-sandbox/arena/train.py
+/tmp/opencode/bb-sandbox/arena/tech.py
+/tmp/opencode/bb-sandbox/arena/curriculum.py
+/tmp/opencode/bb-sandbox/arena/loop.py
+/tmp/opencode/bb-sandbox/arena/opponents.py
+/tmp/opencode/bb-sandbox/arena/export.py
+/tmp/opencode/bb-sandbox/arena/architect.py
+/tmp/opencode/bb-sandbox/arena/agent.py
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/build_architect_dataset.py
+/tmp/opencode/bb-sandbox/arena/battle.py
+/tmp/opencode/bb-sandbox/arena/epoch_engine.py
+/tmp/opencode/bb-sandbox/arena/view.py
+/tmp/opencode/bb-sandbox/arena/candidates_fullcross.py
+/tmp/opencode/bb-sandbox/arena/candidates.py
+/tmp/opencode/bb-sandbox/arena/war.py
+---
+agent
+alpaca_paper.py
+arena
+benchmark_models.py
+connections.py
+coordinator.py
+dashboard.py
+data
+data_mgmt.py
+exchange
+exchange-engine
+gpu_sync.py
+harness.py
+hunt_output
+__init__.py
+mcp_server.py
+model_manager.py
+mot
+onchain.py
+onchain_web3.py
+__pycache__
+report_risk.py
+repro_volatility.py
+risk
+scenarios
+scripts
+setup_search
+state
+strategies
+tests
+tools
+training
+tui_dashboard.py
+unsloth_compiled_cache
+[0m
+## Objective
+- Audit the read-only copy of the opentrader system at `/tmp/opencode/bb-sandbox` for real defects, especially two re-introduced historical bugs hinted as `rank-dead` and `future-bar`.
+- Report confirmed bugs using the exact line format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Work is source-reading and reasoning only; do not run the full harness because it requires live exchanges.
+- Do not modify any file.
+- Candidate bug IDs to infer:
+  - `rank-dead`: cross-sectional rank silently disabled.
+  - `future-bar`: future-dated daily bar not filtered, creating crash-loop risk.
+- Other real bugs may also be reported if clearly supported by source evidence.
+- If nothing clearly qualifies, state that explicitly.
+
+## Work State
+### Completed
+- Confirmed repo root is `/tmp/opencode/bb-sandbox`.
+- Listed many Python files and package areas:
+  - `/tmp/opencode/bb-sandbox/exchange-engine/python/`
+  - `/tmp/opencode/bb-sandbox/risk/`
+  - `/tmp/opencode/bb-sandbox/exchange/`
+  - `/tmp/opencode/bb-sandbox/state/`
+  - `/tmp/opencode/bb-sandbox/scripts/`
+  - `/tmp/opencode/bb-sandbox/arena/`
+- No source files have been read in depth yet.
+- No files have been modified.
+
+### Active
+- Need to inspect likely ranking, scoring, normalization, and market-data date-filtering code.
+- Need to identify the exact file and function for each confirmed bug.
+- Need to separate the two hinted historical defects from any additional real bugs.
+
+### Blocked
+- None.
+
+## Next Move
+1. Search targeted code for ranking defects, e.g. `rg -n "rank|cross.section|percentile|quantile|normaliz" /tmp/opencode/bb-sandbox`, prioritizing `/tmp/opencode/bb-sandbox/risk/` and related strategy/manager modules.
+2. Search for daily bar date handling, e.g. `rg -n "daily|bar|date|timestamp|future" /tmp/opencode/bb-sandbox`, prioritizing `/tmp/opencode/bb-sandbox/exchange/`, `/tmp/opencode/bb-sandbox/state/`, and data pipeline modules, then produce the required `FOUNDBUG` lines for confirmed issues.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root copy under audit; all findings must reference files here.
+- `/tmp/opencode/bb-sandbox/risk/`: likely location for cross-sectional ranking, portfolio scoring, or strategy ranking logic.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: candidate for rank-related or regime/risk management logic.
+- `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py`: candidate for scoring, normalization, or ranking behavior.
+- `/tmp/opencode/bb-sandbox/exchange/`: likely location for market data handling and daily bar filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: candidate for real-time bar/date filtering logic.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: candidate for data/state pipeline that may consume daily bars or ranked signals.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mpwd && ls -la /tmp/opencode/bb-sandbox
+/tmp/opencode/bb-sandbox
+total 456
+drwxr-xr-x 21 mrc mrc    740 Aug 18 12:01 .
+drwxr-xr-x  6 mrc mrc    200 Aug 18 12:01 ..
+drwxr-xr-x  3 mrc mrc    140 Aug 18 12:01 agent
+-rw-r--r--  1 mrc mrc  17924 Aug  7 16:36 alpaca_paper.py
+drwxr-xr-x  2 mrc mrc    440 Aug 18 12:01 arena
+-rw-r--r--  1 mrc mrc  10343 Jul  6 07:56 benchmark_models.py
+-rw-r--r--  1 mrc mrc  13880 Aug 12 23:50 connections.py
+-rw-r--r--  1 mrc mrc   8804 Jul  4 11:02 coordinator.py
+-rw-r--r--  1 mrc mrc  16883 Aug 14 15:20 dashboard.py
+drwxr-xr-x  4 mrc mrc    580 Aug 18 12:01 data
+-rw-r--r--  1 mrc mrc  10067 Jul 10 14:02 data_mgmt.py
+drwxr-xr-x  3 mrc mrc    280 Aug 18 12:01 exchange
+drwxr-xr-x  3 mrc mrc     80 Aug 18 12:01 exchange-engine
+-rw-r--r--  1 mrc mrc  16952 Aug 12 23:07 gpu_sync.py
+-rw-r--r--  1 mrc mrc 215170 Aug 18 12:01 harness.py
+drwxr-xr-x  2 mrc mrc     60 Aug 18 12:01 hunt_output
+-rw-r--r--  1 mrc mrc      0 Jul  2 11:20 __init__.py
+-rw-r--r--  1 mrc mrc  46832 Jul 30 10:02 mcp_server.py
+-rw-r--r--  1 mrc mrc  25884 Jul 30 14:07 model_manager.py
+drwxr-xr-x  4 mrc mrc    460 Aug 18 12:01 mot
+-rw-r--r--  1 mrc mrc   5168 Jul  8 21:30 onchain.py
+-rw-r--r--  1 mrc mrc  10182 Jul  4 16:22 onchain_web3.py
+drwxr-xr-x  4 mrc mrc    140 Aug 18 12:01 .opencode
+drwxr-xr-x  2 mrc mrc     60 Aug 18 12:01 __pycache__
+-rwxr-xr-x  1 mrc mrc   1584 Jul  9 14:29 report_risk.py
+-rw-r--r--  1 mrc mrc   2281 Jul 29 11:33 repro_volatility.py
+drwxr-xr-x  3 mrc mrc    220 Aug 18 12:01 risk
+drwxr-xr-x  2 mrc mrc    220 Aug 18 12:01 scenarios
+drwxr-xr-x  2 mrc mrc    480 Aug 18 12:01 scripts
+drwxr-xr-x  3 mrc mrc    920 Aug 18 12:01 setup_search
+drwxr-xr-x  3 mrc mrc    120 Aug 18 12:01 state
+drwxr-xr-x  2 mrc mrc    460 Aug 18 12:01 strategies
+drwxr-xr-x  2 mrc mrc    120 Aug 18 12:01 tests
+drwxr-xr-x  3 mrc mrc    200 Aug 18 12:01 tools
+drwxr-xr-x  3 mrc mrc    860 Aug 18 12:01 training
+-rwxr-xr-x  1 mrc mrc  28082 Jul 29 22:01 tui_dashboard.py
+drwxr-xr-x  2 mrc mrc    360 Aug 18 12:01 unsloth_compiled_cache
+[0m
+## Objective
+- Audit the read-only copy of the opentrader system at `/tmp/opencode/bb-sandbox` for real defects, especially the re-introduced historical bugs hinted as `rank-dead` and `future-bar`.
+- Report confirmed bugs using the exact line format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Work is source-reading and reasoning only; do not modify any file.
+- Do not run the full harness because it requires live exchange dependencies.
+- Candidate bug IDs to infer:
+  - `rank-dead`: cross-sectional rank silently disabled.
+  - `future-bar`: future-dated daily bar not filtered, creating crash-loop risk.
+- Other clearly source-supported bugs may also be reported.
+- If nothing clearly qualifies, state that explicitly.
+
+## Work State
+### Completed
+- Confirmed repo root is `/tmp/opencode/bb-sandbox`.
+- Listed root and confirmed relevant top-level areas: `risk/`, `exchange/`, `state/`, `arena/`, `scripts/`, `agent/`, `mot/`, `data/`, `scenarios/`, `strategies/`, `tools/`, `training/`, `tests/`, `setup_search/`.
+- Noted relevant top-level modules: `harness.py`, `data_mgmt.py`, `model_manager.py`, `connections.py`, `coordinator.py`, `dashboard.py`, `mcp_server.py`, `alpaca_paper.py`, `benchmark_models.py`, `gpu_sync.py`, `onchain.py`, `onchain_web3.py`, `report_risk.py`, `repro_volatility.py`, `tui_dashboard.py`.
+- No source files have been read in depth yet.
+- No files have been modified.
+
+### Active
+- Need inspect ranking, scoring, normalization, and cross-sectional logic for `rank-dead`, especially under `risk/`, `strategies/`, `arena/`, `state/`, and `scripts/`.
+- Need inspect market-data ingestion, daily-bar date handling, and timestamp filtering for `future-bar`, especially under `exchange/`, `data_mgmt.py`, `state/`, `connections.py`, and possibly `harness.py`.
+- Need map each confirmed bug to the exact file and function.
+
+### Blocked
+- None.
+
+## Next Move
+1. Run targeted read-only searches for rank-related code, e.g. `rg -n "rank|cross.section|percentile|quantile|normaliz" /tmp/opencode/bb-sandbox`, prioritizing `/tmp/opencode/bb-sandbox/risk/`, `/tmp/opencode/bb-sandbox/strategies/`, `/tmp/opencode/bb-sandbox/arena/`, `/tmp/opencode/bb-sandbox/state/`, and `/tmp/opencode/bb-sandbox/scripts/`.
+2. Run targeted read-only searches for daily-bar/date filtering, e.g. `rg -n "daily|bar|date|timestamp|future" /tmp/opencode/bb-sandbox`, prioritizing `/tmp/opencode/bb-sandbox/exchange/`, `/tmp/opencode/bb-sandbox/data_mgmt.py`, `/tmp/opencode/bb-sandbox/state/`, and `/tmp/opencode/bb-sandbox/connections.py`; then read candidate functions and emit `FOUNDBUG` lines only where the source clearly confirms the defect.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root copy under audit; all findings must reference files here.
+- `/tmp/opencode/bb-sandbox/risk/`: likely location for cross-sectional ranking, portfolio scoring, or risk/regime logic.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: candidate for rank-related or risk-management logic.
+- `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py`: candidate for scoring, normalization, or ranking behavior.
+- `/tmp/opencode/bb-sandbox/exchange/`: likely location for market-data handling and daily-bar filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: candidate for real-time bar/date filtering logic.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: candidate state/data pipeline that may consume daily bars or ranked signals.
+- `/tmp/opencode/bb-sandbox/data_mgmt.py`: candidate for daily-bar ingestion, date validation, or data normalization.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m✱ [0mGrep "rank|cross.section|percentile|quantile"[90m in . · 100 matches[0m
+[0m✱ [0mGrep "daily|future|timestamp|date"[90m in . · 100 matches[0m
+[0m✱ [0mGlob "**/*.py"[90m in . · 100 matches[0m
+## Objective
+- Audit the read-only opentrader sandbox at `/tmp/opencode/bb-sandbox` for real source-level defects, especially the hinted historical bugs `rank-dead` and `future-bar`.
+- Report confirmed defects using the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Source-reading and reasoning only; do not modify any file.
+- Do not run the full harness because it depends on live exchange/runtime components.
+- `rank-dead` likely means cross-sectional ranking is silently disabled, bypassed, or normalized to a dead/no-op value.
+- `future-bar` likely means a future-dated daily bar is not filtered or adjusted, creating lookahead or crash-loop risk.
+- Only emit `FOUNDBUG` when source clearly confirms the defect; otherwise state that no clear bug was confirmed.
+- Prior broad greps were noisy: `rank|cross.section|percentile|quantile` and `daily|future|timestamp|date` each returned 100+ truncated matches, so follow-up work should be narrower and function-focused.
+
+## Work State
+### Completed
+- Confirmed audit root is `/tmp/opencode/bb-sandbox`.
+- Confirmed relevant top-level directories and modules exist, including `harness.py`, `data_mgmt.py`, `model_manager.py`, `connections.py`, `coordinator.py`, `dashboard.py`, `mcp_server.py`, `alpaca_paper.py`, `benchmark_models.py`, `gpu_sync.py`, `onchain.py`, `onchain_web3.py`, `report_risk.py`, `repro_volatility.py`, `tui_dashboard.py`, `risk/`, `exchange/`, `state/`, `arena/`, `scripts/`, `agent/`, `mot/`, `data/`, `scenarios/`, `strategies/`, `tools/`, `training/`, `tests/`, `setup_search/`.
+- Ran read-only `*.py` grep for `rank|cross.section|percentile|quantile`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/harness.py:2308` — comment about simplified Tier 2 ranking by radar momentum score.
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py:154` — rank-based Gaussianization logic.
+  - `/tmp/opencode/bb-sandbox/strategies/entropy.py:31` — `np.percentile` clipping.
+  - Several tool-description references to `percentile` in `mcp_server.py` and `agent/trading_agent.py`.
+- Ran read-only `*.py` grep for `daily|future|timestamp|date`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py` — synthetic OHLCV bar timestamp handling, including epoch-second note at lines 22–29, timestamp construction at 323, and fallback timestamp extraction at 341, 357, 366, 425.
+  - `/tmp/opencode/bb-sandbox/model_manager.py` — `datetime`/`timestamp` usage around model/role state.
+- Ran `glob **/*.py`; output was truncated but confirmed many Python files across root, `strategies/`, `tests/`, `training/`, `scenarios/`, and `unsloth_compiled_cache/`.
+- No files have been modified.
+
+### Active
+- Inspect ranking/scoring/normalization logic to identify `rank-dead`, prioritizing:
+  - `/tmp/opencode/bb-sandbox/harness.py` around line 2308.
+  - `/tmp/opencode/bb-sandbox/risk/` and likely `risk/manager.py` / `risk/regime_adaptation.py`.
+  - `/tmp/opencode/bb-sandbox/strategies/`, `/tmp/opencode/bb-sandbox/arena/`, `/tmp/opencode/bb-sandbox/state/`, `/tmp/opencode/bb-sandbox/scripts/`.
+- Inspect daily-bar/timestamp handling to identify `future-bar`, prioritizing:
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py`.
+  - `/tmp/opencode/bb-sandbox/data_mgmt.py`.
+  - `/tmp/opencode/bb-sandbox/exchange/`, especially `exchange/realtime.py` if present.
+  - `/tmp/opencode/bb-sandbox/state/manager.py`.
+  - `/tmp/opencode/bb-sandbox/connections.py`.
+- Narrow noisy searches from whole-repo broad terms to specific files/functions and date-filtering expressions.
+- Map each confirmed defect to the exact file and function before emitting `FOUNDBUG`.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read candidate rank logic in `/tmp/opencode/bb-sandbox/harness.py` near line 2308 and adjacent scoring/ranking functions, then inspect `/tmp/opencode/bb-sandbox/risk/` for cross-sectional rank normalization or disabled-rank behavior.
+2. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` bar/timestamp construction and `/tmp/opencode/bb-sandbox/data_mgmt.py` plus `/tmp/opencode/bb-sandbox/exchange/` to check whether future-dated daily bars are filtered; then emit `FOUNDBUG` lines only for confirmed defects.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root audit copy; all reported findings must use paths under this root.
+- `/tmp/opencode/bb-sandbox/harness.py`: candidate for `rank-dead`; line 2308 mentions simplified Tier 2 ranking by radar momentum score.
+- `/tmp/opencode/bb-sandbox/risk/`: likely location for cross-sectional ranking, portfolio scoring, risk regime, or normalization logic.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: candidate for rank-related risk-management logic.
+- `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py`: candidate for scoring, normalization, or ranking behavior.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: candidate for `future-bar`; contains synthetic OHLCV bar timestamp generation and epoch-second timestamp handling.
+- `/tmp/opencode/bb-sandbox/data_mgmt.py`: candidate for daily-bar ingestion, timestamp validation, or data normalization.
+- `/tmp/opencode/bb-sandbox/exchange/`: likely location for market-data handling, bar receipt, and daily-bar date filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: candidate for real-time bar/date filtering logic.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: candidate state/data pipeline that may consume daily bars or ranked signals.
+- `/tmp/opencode/bb-sandbox/connections.py`: candidate for exchange/data feed timestamp handling.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: surfaced in rank search; contains rank-based Gaussianization and may be relevant context but not yet confirmed as a bug.
+- `/tmp/opencode/bb-sandbox/strategies/entropy.py`: surfaced in percentile search; contains percentile clipping and may be a candidate normalization path.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead harness.py[90m [offset=2250, limit=140][0m
+[0m→ [0mRead alpaca_paper.py[90m [offset=1, limit=120][0m
+I'll continue with the next steps. Let me read the candidate rank logic and daily-bar/timestamp code in parallel.
+## Objective
+- Audit the read-only opentrader sandbox at `/tmp/opencode/bb-sandbox` for confirmed source-level defects, especially the hinted historical bugs `rank-dead` and `future-bar`.
+- Report only confirmed defects using the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit is source-reading and reasoning only; do not modify any file.
+- Do not run the full harness because it depends on live exchange/runtime components.
+- `rank-dead` likely means cross-sectional ranking is silently disabled, bypassed, or normalized to a dead/no-op value.
+- `future-bar` likely means a future-dated daily bar is not filtered or adjusted, creating lookahead or crash-loop risk.
+- Only emit `FOUNDBUG` when source clearly confirms the defect; otherwise state that no clear bug was confirmed.
+- Prior broad greps were noisy: `rank|cross.section|percentile|quantile` and `daily|future|timestamp|date` each returned 100+ truncated matches, so follow-up work should be narrower and function-focused.
+
+## Work State
+### Completed
+- Confirmed audit root is `/tmp/opencode/bb-sandbox`.
+- Confirmed relevant top-level directories and modules exist, including `harness.py`, `data_mgmt.py`, `model_manager.py`, `connections.py`, `coordinator.py`, `dashboard.py`, `mcp_server.py`, `alpaca_paper.py`, `benchmark_models.py`, `gpu_sync.py`, `onchain.py`, `onchain_web3.py`, `report_risk.py`, `repro_volatility.py`, `tui_dashboard.py`, `risk/`, `exchange/`, `state/`, `arena/`, `scripts/`, `agent/`, `mot/`, `data/`, `scenarios/`, `strategies/`, `tools/`, `training/`, `tests/`, and `setup_search/`.
+- Ran read-only `*.py` grep for `rank|cross.section|percentile|quantile`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/harness.py:2308` — candidate simplified Tier 2 ranking by radar momentum score.
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py:154` — rank-based Gaussianization logic.
+  - `/tmp/opencode/bb-sandbox/strategies/entropy.py:31` — `np.percentile` clipping.
+  - Several tool-description references to `percentile` in `mcp_server.py` and `agent/trading_agent.py`.
+- Ran read-only `*.py` grep for `daily|future|timestamp|date`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py` — synthetic OHLCV bar timestamp handling, including epoch-second note at lines 22–29, timestamp construction around 323, and fallback timestamp extraction around 341, 357, 366, and 425.
+  - `/tmp/opencode/bb-sandbox/model_manager.py` — `datetime`/`timestamp` usage around model/role state.
+- Ran `glob **/*.py`; output was truncated but confirmed many Python files across root, `strategies/`, `tests/`, `training/`, `scenarios/`, and `unsloth_compiled_cache/`.
+- Read `/tmp/opencode/bb-sandbox/harness.py` from offset 2250, limit 140; visible portion covered lines 2250–2287 and confirmed a Tier 1 radar/universe path using `INDUSTRY_REGISTRY`, `price_batch`, per-industry price sorting, and an LLM prompt requesting the top 20 tickers. The exact line 2308 region was not yet fully inspected in the visible result.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from offset 1, limit 120; confirmed `SimpleBar` stores `timestamp` as epoch seconds for harness compatibility, and confirmed file-level constants `PROJECT`, `CACHE_DB`, `CONFIG`, plus the start of `INDUSTRY_MEDIAN`.
+- No files have been modified.
+- No `FOUNDBUG` line has been emitted yet because no defect has been confirmed in source.
+
+### Active
+- Inspect ranking/scoring/normalization logic to identify `rank-dead`, prioritizing:
+  - `/tmp/opencode/bb-sandbox/harness.py` around line 2308 and the continuation of the section read from line 2250.
+  - `/tmp/opencode/bb-sandbox/risk/`, especially `risk/manager.py` and `risk/regime_adaptation.py`.
+  - `/tmp/opencode/bb-sandbox/strategies/`, `/tmp/opencode/bb-sandbox/arena/`, `/tmp/opencode/bb-sandbox/state/`, and `/tmp/opencode/bb-sandbox/scripts/` if rank output is consumed there.
+- Inspect daily-bar/timestamp handling to identify `future-bar`, prioritizing:
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py`, especially timestamp construction around line 323 and fallback extraction around lines 341, 357, 366, and 425.
+  - `/tmp/opencode/bb-sandbox/data_mgmt.py`.
+  - `/tmp/opencode/bb-sandbox/exchange/`, especially `exchange/realtime.py` if present.
+  - `/tmp/opencode/bb-sandbox/state/manager.py`.
+  - `/tmp/opencode/bb-sandbox/connections.py`.
+- Map each confirmed defect to the exact file and function before emitting `FOUNDBUG`.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/harness.py` around offset 2288–2420 to inspect line 2308 and adjacent Tier 2/radar momentum ranking logic, then check `/tmp/opencode/bb-sandbox/risk/` for rank normalization or disabled-rank behavior.
+2. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` around lines 300–450, plus `/tmp/opencode/bb-sandbox/data_mgmt.py` and `/tmp/opencode/bb-sandbox/exchange/`, to determine whether future-dated daily bars are filtered; emit `FOUNDBUG` lines only for source-confirmed defects.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root audit copy; all reported findings must use paths under this root.
+- `/tmp/opencode/bb-sandbox/harness.py`: candidate for `rank-dead`; lines 2250–2287 show Tier 1 radar/universe selection, and line 2308 is the unresolved ranking candidate.
+- `/tmp/opencode/bb-sandbox/risk/`: likely location for cross-sectional ranking, portfolio scoring, risk regime, or normalization logic.
+- `/tmp/opencode/bb-sandbox/risk/manager.py`: candidate for rank-related risk-management logic.
+- `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py`: candidate for scoring, normalization, or ranking behavior.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: candidate for `future-bar`; lines 1–120 confirm `SimpleBar.timestamp` is epoch seconds, with further timestamp construction to inspect near line 323 and fallbacks near 341, 357, 366, and 425.
+- `/tmp/opencode/bb-sandbox/data_mgmt.py`: candidate for daily-bar ingestion, timestamp validation, or data normalization.
+- `/tmp/opencode/bb-sandbox/exchange/`: likely location for market-data handling, bar receipt, and daily-bar date filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: candidate for real-time bar/date filtering logic.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: candidate state/data pipeline that may consume daily bars or ranked signals.
+- `/tmp/opencode/bb-sandbox/connections.py`: candidate for exchange/data feed timestamp handling.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: surfaced in rank search; contains rank-based Gaussianization and may be relevant context but is not yet confirmed as a bug.
+- `/tmp/opencode/bb-sandbox/strategies/entropy.py`: surfaced in percentile search; contains percentile clipping and may be a candidate normalization path.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead harness.py[90m [offset=2288, limit=220][0m
+[0m→ [0mRead alpaca_paper.py[90m [offset=280, limit=220][0m
+[0m→ [0mRead risk
+[0m→ [0mRead exchange
+[0m✱ [0mGrep "def |timestamp|daily|future|date"[90m in . · 8 matches[0m
+? If timestamp = now + i*3600, then includes future bars (future relative to now) maybe bug. Need see line 323. We need read continuation.
+
+Need maybe update relevant files: data_mgmt.py now less relevant; exchange directory file list; risk directory file list. Keep exact paths.
+
+Need output exact sections.
+
+Let's draft.
+
+Objective:
+- Audit read-only sandbox /tmp/opencode/bb-sandbox for confirmed source-level defects, especially hints rank-dead and future-bar.
+- Report only confirmed defects in exact format FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>.
+
+Important Details:
+- Source-reading only; no modifications; do not run full harness.
+- rank-dead likely disabled/no-op cross-sectional rank; future-bar likely future-dated daily bar not filtered/adjusted.
+- Broad greps were noisy; use narrower function-focused reads/greps.
+- No FOUNDBUG emitted yet.
+- Prior broad greps surfaced candidate locations.
+- New: data_mgmt.py grep suggests it manages cycle files, not bar timestamps, lowering priority.
+
+Work State Completed:
+- Carry previous: root, top-level directories, greps, initial reads.
+- Read harness.py offset 2288 limit 220, visible 2288-2335: confirmed Tier 2 simplified path around 2308 uses top20 LLM picks, top6 = top20[:focus], fallback to _scout_flat if len(top20) < 3; no confirmed rank-dead yet; _llm_json_array partially visible through line 2335.
+- Read alpaca_paper.py offset 280 limit 220, visible 280-322: get_bars uses synthetic GBM anchored by cached/INDUSTRY_MEDIAN price, now = time.time(), but timestamp assignment after line 322 not yet visible; future-bar not confirmed.
+- Listed risk directory: entries ...
+- Listed exchange directory: entries ...
+- Grepped data_mgmt.py for def|timestamp|daily|future|date; only function names and __future__ import, no timestamp/daily bar functions surfaced, so future-bar likely not in data_mgmt.py.
+- No files modified; no FOUNDBUG.
+
+Active:
+- Complete inspection of harness around Tier 2/radar and _llm_json_array/_scout_flat to rule out rank-dead; check risk manager/regime for rank normalization.
+- Complete alpaca_paper get_bars timestamp construction and fallbacks around 323, 341, 357, 366, 425; determine if future-dated bars are generated/filtered; check exchange/realtime.py and paper.py maybe.
+- Maybe inspect exchange/realtime.py and exchange/paper.py / base.py for timestamp filtering.
+- Check risk/manager.py and regime_adaptation.py if ranking consumed.
+- Map exact function before FOUNDBUG.
+
+Blocked: none.
+
+Next Move:
+1. Read /tmp/opencode/bb-sandbox/alpaca_paper.py from offset 320 limit 160 or 320-480 to inspect timestamp construction at 323 and fallbacks 341/357/366/425, and determine future-bar.
+2. Read /tmp/opencode/bb-sandbox/harness.py from offset 2335 limit 220 to finish _llm_json_array/_scout_flat/Tier 2 ranking and check for rank-dead; then inspect /tmp/opencode/bb-sandbox/risk/manager.py and risk/regime_adaptation.py if needed.
+
+Relevant Files:
+- root...
+- harness.py: line 2308 etc; Tier 2 simplified; top20/top6/focus; _scout_flat; _llm_json_array partial.
+- alpaca_paper.py: get_bars synthetic, timestamp candidate; lines 280-322 visible, need 320-450; fallback lines.
+- risk directory and files: list; candidates manager.py, regime_adaptation.py, portfolio_optimizer.py, asset_allocator.py? 
+- exchange directory and files: list; candidates realtime.py, paper.py, base.py, multi_router.py.
+- data_mgmt.py: grep results show cycle-file management only; lower priority for future-bar.
+- scenarios/neural.py and strategies/entropy.py still candidates/context for rank/percentile but not confirmed.
+Maybe include state/manager.py connections.py as prior. Need maybe include if still relevant? Prior had them. Carry forward if still possible. But new evidence suggests exchange realtime, not state/connections maybe still. Keep but lower.
+
+Need ensure exact format for Relevant Files bullets: path: why.
+
+Potential issue: "Do not mention summary process". Fine.
+
+Need maybe mention tool results truncated? We can say visible portion. Good.
+
+Need maybe include exact line numbers from data_mgmt grep. Good.
+
+Need final answer only summary. Ensure no template tags.
+
+Double-check user asked: "Here is the conversation so far... Construct a new summary that combines both." Output exactly Markdown structure. Yes.
+
+Need maybe include "Continue if you have next steps" no, that's original user not in summary.
+
+Let's ensure all sections. Use terse bullets.
+
+Could there be need to include "User: Continue if you have next steps..."? No.
+
+Let's final.
+</think>
+
+## Objective
+- Audit the read-only opentrader sandbox at `/tmp/opencode/bb-sandbox` for confirmed source-level defects, especially the hinted historical bugs `rank-dead` and `future-bar`.
+- Report only confirmed defects using the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit is source-reading and reasoning only; do not modify any file.
+- Do not run the full harness because it depends on live exchange/runtime components.
+- `rank-dead` likely means cross-sectional ranking is silently disabled, bypassed, or normalized to a dead/no-op value.
+- `future-bar` likely means a future-dated daily bar is not filtered or adjusted, creating lookahead or crash-loop risk.
+- Only emit `FOUNDBUG` when source clearly confirms the defect; otherwise continue investigating.
+- Prior broad greps were noisy, so follow-up work should stay narrow and function-focused.
+- No `FOUNDBUG` line has been emitted yet.
+
+## Work State
+### Completed
+- Confirmed audit root is `/tmp/opencode/bb-sandbox`.
+- Confirmed relevant top-level directories and modules exist, including `harness.py`, `data_mgmt.py`, `model_manager.py`, `connections.py`, `coordinator.py`, `dashboard.py`, `mcp_server.py`, `alpaca_paper.py`, `benchmark_models.py`, `gpu_sync.py`, `onchain.py`, `onchain_web3.py`, `report_risk.py`, `repro_volatility.py`, `tui_dashboard.py`, `risk/`, `exchange/`, `state/`, `arena/`, `scripts/`, `agent/`, `mot/`, `data/`, `scenarios/`, `strategies/`, `tools/`, `training/`, `tests/`, and `setup_search/`.
+- Ran read-only `*.py` grep for `rank|cross.section|percentile|quantile`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/harness.py:2308` — candidate simplified Tier 2 ranking by radar momentum score.
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py:154` — rank-based Gaussianization logic.
+  - `/tmp/opencode/bb-sandbox/strategies/entropy.py:31` — `np.percentile` clipping.
+  - Several tool-description references to `percentile` in `mcp_server.py` and `agent/trading_agent.py`.
+- Ran read-only `*.py` grep for `daily|future|timestamp|date`; result was truncated at 100 matches but surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py` — synthetic OHLCV bar timestamp handling, including epoch-second note at lines 22–29, timestamp construction around 323, and fallback timestamp extraction around 341, 357, 366, and 425.
+  - `/tmp/opencode/bb-sandbox/model_manager.py` — `datetime`/`timestamp` usage around model/role state.
+- Read `/tmp/opencode/bb-sandbox/harness.py` from offset 2250, limit 140; visible portion covered lines 2250–2287 and confirmed a Tier 1 radar/universe path using `INDUSTRY_REGISTRY`, `price_batch`, per-industry price sorting, and an LLM prompt requesting the top 20 tickers.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from offset 1, limit 120; confirmed `SimpleBar` stores `timestamp` as epoch seconds for harness compatibility, and confirmed file-level constants `PROJECT`, `CACHE_DB`, `CONFIG`, plus the start of `INDUSTRY_MEDIAN`.
+- Read `/tmp/opencode/bb-sandbox/harness.py` from offset 2288, limit 220; visible portion covered at least lines 2288–2335 and confirmed:
+  - `top20` is built from `self._llm_json_array(...)` and sorted by `score`.
+  - If `len(top20) < 3`, code falls back to `self._scout_flat(focus)`.
+  - Tier 2 simplified path at line 2308 sets `top6 = top20[:focus]`.
+  - Return is `(top20, (top6 or top20[:focus]))`.
+  - `_llm_json_array` begins around line 2318 and was partially visible through line 2335, but the remainder and `_scout_flat` are not yet inspected.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from offset 280, limit 220; visible portion covered at least lines 280–322 and confirmed:
+  - Remaining symbols fall back to `_fetch_yfinance`, then `INDUSTRY_MEDIAN`.
+  - `get_bars` uses synthetic GBM anchored by `self._cached_price(symbol)` or `INDUSTRY_MEDIAN.get(symbol.upper(), 100.0)`.
+  - It captures `now = _time.time()` and begins a loop over `range(limit)`, but the actual `timestamp` assignment after line 322 was not yet visible.
+- Listed `/tmp/opencode/bb-sandbox/risk`; entries are `__init__.py`, `__pycache__/`, `asset_allocator.py`, `manager.py`, `param_optimizer.py`, `performance_analytics.py`, `portfolio_optimizer.py`, `regime_adaptation.py`, and `sidecar_adapter.py`.
+- Listed `/tmp/opencode/bb-sandbox/exchange`; entries are `__init__.py`, `__pycache__/`, `alpaca_paper.py`, `base.py`, `ibkr.py`, `live.py`, `multi_router.py`, `paper.py`, `realtime_finnhub.py`, `realtime.py`, `sidecar_adapter.py`, and `stock_finnhub.py`.
+- Ran read-only grep for `def |timestamp|daily|future|date` in `/tmp/opencode/bb-sandbox/data_mgmt.py`; found 8 matches:
+  - `data_mgmt.py:17` — `from __future__ import annotations`
+  - `data_mgmt.py:31` — `state_key`
+  - `data_mgmt.py:61` — `list_cycle_files`
+  - `data_mgmt.py:73` — `is_dead_cycle`
+  - `data_mgmt.py:99` — `prune_dead_cycles`
+  - `data_mgmt.py:131` — `archive_before`
+  - `data_mgmt.py:157` — `print_stats`
+  - `data_mgmt.py:216` — `main`
+- No files have been modified.
+- No `FOUNDBUG` line has been emitted yet.
+
+### Active
+- Determine whether `rank-dead` is present by completing inspection of the Tier 2/radar ranking path:
+  - Finish reading `/tmp/opencode/bb-sandbox/harness.py` after line 2335 to inspect the rest of `_llm_json_array`, the definition of `_scout_flat`, and any rank/normalization behavior around the simplified Tier 2 path.
+  - If needed, inspect `/tmp/opencode/bb-sandbox/risk/manager.py` and `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py` for rank normalization or disabled-rank behavior.
+- Determine whether `future-bar` is present by completing inspection of timestamp/bar-date handling:
+  - Read the continuation of `/tmp/opencode/bb-sandbox/alpaca_paper.py` around lines 320–450 to see the exact `timestamp` assignment in `get_bars` and the fallback timestamp logic near lines 341, 357, 366, and 425.
+  - Inspect `/tmp/opencode/bb-sandbox/exchange/realtime.py`, `/tmp/opencode/bb-sandbox/exchange/paper.py`, and `/tmp/opencode/bb-sandbox/exchange/base.py` to see whether future-dated bars are filtered or allowed.
+  - Keep `/tmp/opencode/bb-sandbox/state/manager.py` and `/tmp/opencode/bb-sandbox/connections.py` as secondary candidates, though the newest evidence points more strongly to `alpaca_paper.py` and `exchange/`.
+- Map each confirmed defect to the exact file and function before emitting `FOUNDBUG`.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from around offset 320 through the rest of `get_bars` and the fallback timestamp logic to determine whether future-dated bars are generated or accepted.
+2. Read `/tmp/opencode/bb-sandbox/harness.py` from around offset 2335 onward to finish `_llm_json_array`, inspect `_scout_flat`, and complete the Tier 2 ranking review; then check `/tmp/opencode/bb-sandbox/risk/manager.py` and `/tmp/opencode/bb-sandbox/risk/regime_adaptation.py` if rank-related behavior is still unresolved.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root audit copy; all reported findings must use paths under this root.
+- `/tmp/opencode/bb-sandbox/harness.py`: primary `rank-dead` candidate; lines 2308–2314 show the simplified Tier 2 path, `top20`/`top6` handling, and fallback to `_scout_flat`, while the remaining helper code after line 2335 still needs inspection.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: primary `future-bar` candidate; lines 280–322 show synthetic bar generation in `get_bars`, and the timestamp assignment after line 322 plus fallback logic near 341, 357, 366, and 425 still need inspection.
+- `/tmp/opencode/bb-sandbox/risk/`: candidate directory for rank normalization, scoring, or risk-regime behavior; relevant files include `manager.py`, `regime_adaptation.py`, `portfolio_optimizer.py`, and `asset_allocator.py`.
+- `/tmp/opencode/bb-sandbox/exchange/`: candidate directory for market-data and bar-receipt logic; relevant files include `realtime.py`, `paper.py`, `base.py`, and `multi_router.py`.
+- `/tmp/opencode/bb-sandbox/data_mgmt.py`: lower-priority `future-bar` candidate; grep shows it mostly manages cycle files and state rather than market-data timestamps.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: earlier rank-related candidate containing rank-based Gaussianization; still unconfirmed.
+- `/tmp/opencode/bb-sandbox/strategies/entropy.py`: earlier percentile-related candidate containing percentile clipping; still unconfirmed.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: secondary candidate for data/state consumption that may use ranked signals or bars.
+- `/tmp/opencode/bb-sandbox/connections.py`: secondary candidate for feed/timestamp handling, but less directly implicated than `alpaca_paper.py` and `exchange/` so far.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead alpaca_paper.py[90m [offset=320, limit=180][0m
+[0m→ [0mRead harness.py[90m [offset=2335, limit=220][0m
+[0m✱ [0mGrep "def .*rank|rank.*=|cross.section|percentile|quantile"[90m in risk · 1 match[0m
+[0m✱ [0mGrep "timestamp|future|daily|now"[90m in exchange · 69 matches[0m
+details. Need only final summary.
+
+Potential nuance: The conversation includes tool results but no user new instructions. We need summarize. Need include "No FOUNDBUG emitted yet" still. Need state "future-bar not confirmed; get_bars appears to generate non-future timestamps because timestamp=int(now)-(limit-i)*3600, but other ingestion paths remain unconfirmed." That is a verified fact from new read.
+
+Need move active to completed:
+- Read alpaca_paper.py offset 320 limit 180; visible 320-360; confirmed get_bars timestamp formula and no future-dated synthetic bars in that branch; push_bar/load_bars accept incoming timestamp fields; need rest 360-449.
+- Read harness.py offset 2335 limit 220; visible 2335-2373; confirmed end of LLM JSON parse, _get_cached_price_batch, start _scout_flat; need rest 2373+.
+- Grepped risk ... found only param_optimizer comment; lowered priority for rank-dead in risk.
+- Grepped exchange ... 69 matches; surfaced stock_finnhub, realtime, alpaca_paper, paper.
+Need update active:
+- Finish harness _scout_flat from 2373 to check fallback ranking/rank-dead.
+- Investigate future-bar candidates in exchange: stock_finnhub around 190-210, realtime around 200-220, paper maybe, alpaca_paper 360-450; check filtering of bars with timestamp > now/daily bar cutoff.
+- Maybe inspect harness Tier 2 rank? The top20 score sort is not necessarily cross-sectional rank. Need check if any rank normalization missing? Maybe rank-dead hint means cross-sectional rank is dead because _scout_flat fallback doesn't rank? Need inspect.
+- Check scenarios/neural and strategies/entropy maybe lower.
+Blocked none.
+Next Move immediate: read harness.py offset 2373 limit 220? Maybe because last visible 2373. Or read from 2365? To avoid overlap, 2373. But maybe include 2335? No, immediate: read /tmp/opencode/bb-sandbox/harness.py offset 2373 limit 220 to complete _scout_flat and any rank logic.
+Next: read /tmp/opencode/bb-sandbox/exchange/stock_finnhub.py offset 160 limit 120 and exchange/realtime.py offset 180 limit 120? But Next Move should two actions. Could say 1. Finish harness _scout_flat. 2. Inspect stock_finnhub/realtime for future-bar.
+Need Relevant Files update:
+- harness.py: now has _get_cached_price_batch and _scout_flat start; need rest.
+- alpaca_paper.py: get_bars timestamp formula at 323; push_bar/load_bars from 328-359 visible; need rest; future-bar not confirmed in synthetic branch.
+- exchange/stock_finnhub.py: new candidate lines 193-198 timestamp conversion.
+- exchange/realtime.py: line 206 ts newest price; candidate future-bar.
+- exchange/paper.py: timestamp now usage lines 93,127,147,179,191; candidate fill/timestamp handling.
+- risk/param_optimizer.py: only percentile comment; rank-dead unlikely there.
+- Keep root, risk directory, exchange directory, data_mgmt lower, scenarios/entropy lower, state/connections secondary.
+Need exact format bullets. Keep concise.
+
+Need be careful: The final answer should only markdown template, no template tags. Need include all sections. No extra commentary.
+
+Double-check "Relevant Files" bullets: path: why. Use absolute paths.
+
+Let's draft.
+
+Objective:
+- Audit read-only sandbox for confirmed source-level defects, hints rank-dead and future-bar.
+- Report only confirmed in exact format.
+
+Important Details:
+- source reading only, no modifications, no full harness.
+- FOUNDBUG exact format.
+- rank-dead definition.
+- future-bar definition.
+- Only confirmed.
+- No FOUNDBUG yet.
+- New evidence: alpaca_paper synthetic get_bars timestamps are past relative to now (line 323), so future-bar not confirmed there; but external bar ingestion may accept future timestamps.
+- Risk grep only one percentile comment; lower risk directory for rank-dead.
+- Exchange grep surfaced stock_finnhub/realtime/paper/alpaca_paper timestamp handling.
+
+Work State Completed:
+Carry prior completed? The prior summary had long completed. We can condense but include key. Need maybe not include every top-level directory? But prior had many. User says combine; can drop finished no longer needed. But keep important exact paths. Could be somewhat long but okay. Need not list all root top-level files? Maybe keep high-level: root confirmed. But prior summary included many files; if not needed can drop. The final summary should be usable. Keep relevant files and prior broad greps. Maybe condense prior to necessary.
+
+Completed bullets:
+- Confirmed root etc and relevant directories.
+- Prior broad greps surfaced candidates (harness 2308, neural 154, entropy 31; alpaca_paper etc)
+- Read harness 2250-2287, 2288-2335, 2335-2373; Tier 1/2, top20/top6, fallback, _llm_json_array tail, _get_cached_price_batch, start _scout_flat.
+- Read alpaca_paper 1-120, 280-322, 320-360; SimpleBar epoch seconds, synthetic get_bars timestamp formula, push_bar/load_bars partial.
+- Listed risk and exchange directories.
+- Grepped data_mgmt, lower priority.
+- Grepped risk rank... one match.
+- Grepped exchange timestamp... 69 matches.
+- No modifications/no FOUNDBUG.
+
+Active:
+- Complete harness _scout_flat 2373 onward, check rank-dead.
+- Investigate future-bar in exchange ingestion: stock_finnhub 190-210, realtime 200-220, paper 80-200 maybe, alpaca_paper 360-450.
+- If unresolved, inspect harness Tier2/radar for rank normalization and risk manager/regime maybe but lower.
+
+Blocked none.
+
+Next Move:
+1. read harness 2373 limit 220.
+2. read exchange/stock_finnhub.py around 160 limit 120 and exchange/realtime.py around 180 limit 120? The template allows two bullets; can include multiple commands in one bullet? It says immediate concrete action. Could: 1. Read harness.py offset 2373 limit 220... 2. Read exchange/stock_finnhub.py offset 160 limit 120 and exchange/realtime.py offset 180 limit 120 to check future-dated bar filtering. That's okay.
+
+Relevant Files:
+- /tmp/opencode/bb-sandbox: root.
+- /tmp/opencode/bb-sandbox/harness.py: rank-dead primary; lines 2308 Tier2, 2335-2373 partial, _scout_flat start; need rest.
+- /tmp/opencode/bb-sandbox/alpaca_paper.py: future-bar candidate; line 323 synthetic timestamp non-future; lines 328-359 push/load partial; need 360-449.
+- /tmp/opencode/bb-sandbox/exchange/stock_finnhub.py: new future-bar candidate lines 193-198 timestamp conversion.
+- /tmp/opencode/bb-sandbox/exchange/realtime.py: candidate line 206 newest price timestamp.
+- /tmp/opencode/bb-sandbox/exchange/paper.py: candidate timestamp now usage lines 93,127,147,179,191.
+- /tmp/opencode/bb-sandbox/risk/: lower priority; grep only param_optimizer comment.
+- /tmp/opencode/bb-sandbox/exchange/: candidate directory.
+- /tmp/opencode/bb-sandbox/data_mgmt.py: lower priority cycle files.
+- /tmp/opencode/bb-sandbox/scenarios/neural.py: earlier rank candidate unconfirmed.
+- /tmp/opencode/bb-sandbox/strategies/entropy.py: earlier percentile candidate unconfirmed.
+- /tmp/opencode/bb-sandbox/state/manager.py and connections.py: secondary lower.
+
+Need maybe mention exact bug hint format: FOUNDBUG rank-dead? The objective says hints rank-dead and future-bar. Use those.
+
+Ensure no mention summary process. Good.
+
+Need final with sections. Use terse bullets. No code fences.
+</think>
+
+## Objective
+- Audit the read-only opentrader sandbox at `/tmp/opencode/bb-sandbox` for confirmed source-level defects, especially the hinted historical bugs `rank-dead` and `future-bar`.
+- Report only confirmed defects using the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit is source-reading and reasoning only; do not modify any file.
+- Do not run the full harness because it depends on live exchange/runtime components.
+- `rank-dead` likely means cross-sectional ranking is silently disabled, bypassed, or normalized to a dead/no-op value.
+- `future-bar` likely means a future-dated daily bar is not filtered or adjusted, creating lookahead or crash-loop risk.
+- Only emit `FOUNDBUG` when source clearly confirms the defect; otherwise continue investigating.
+- No `FOUNDBUG` line has been emitted yet.
+- New evidence shows the synthetic `get_bars` path in `alpaca_paper.py` uses `timestamp=int(now) - (limit - i) * 3600`, so that branch does not appear to generate future-dated bars.
+- New evidence lowers the likelihood that `rank-dead` is in `risk/` because a narrow grep there found only a percentile comment in `param_optimizer.py`.
+- New evidence points more strongly to `exchange/stock_finnhub.py`, `exchange/realtime.py`, `exchange/paper.py`, and the rest of `alpaca_paper.py` for `future-bar` investigation.
+
+## Work State
+### Completed
+- Confirmed audit root is `/tmp/opencode/bb-sandbox` and that the relevant top-level modules and directories exist, including `harness.py`, `data_mgmt.py`, `alpaca_paper.py`, `risk/`, `exchange/`, `state/`, `scenarios/`, and `strategies/`.
+- Prior broad greps surfaced candidate locations:
+  - `/tmp/opencode/bb-sandbox/harness.py:2308` — simplified Tier 2 ranking candidate.
+  - `/tmp/opencode/bb-sandbox/scenarios/neural.py:154` — rank-based Gaussianization candidate.
+  - `/tmp/opencode/bb-sandbox/strategies/entropy.py:31` — percentile clipping candidate.
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py` — timestamp/bar-handling candidate.
+- Read `/tmp/opencode/bb-sandbox/harness.py` around lines 2250–2335 and confirmed:
+  - Tier 1 radar/universe path uses `INDUSTRY_REGISTRY`, `price_batch`, industry sorting, and an LLM prompt for top 20 tickers.
+  - `top20` is built from `_llm_json_array(...)` and sorted by `score`.
+  - If `len(top20) < 3`, code falls back to `self._scout_flat(focus)`.
+  - Tier 2 simplified path at line 2308 sets `top6 = top20[:focus]`.
+- Read `/tmp/opencode/bb-sandbox/harness.py` from offset 2335 and observed through line 2373:
+  - End of `_llm_json_array` parsing logic, including JSON array extraction and `score >= min_score` filtering.
+  - `_get_cached_price_batch` with TTL 1800s and `exchange.get_prices_batch(...)`.
+  - Start of `_scout_flat`, including the comment that the radar fallback should use the full curated universe, not the crypto-only discovered set.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from offset 1, lines 1–120, and confirmed:
+  - `SimpleBar` stores `timestamp` as epoch seconds for harness compatibility.
+  - File-level constants and the start of `INDUSTRY_MEDIAN` are present.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from offset 280 and observed through line 360:
+  - `get_bars` falls back to `_fetch_yfinance`, then `INDUSTRY_MEDIAN`.
+  - Synthetic bars are generated with `now = _time.time()`.
+  - Line 323 confirms `timestamp=int(now) - (limit - i) * 3600`, meaning the visible synthetic branch generates past-dated bars, not future-dated bars.
+  - `push_bar` and `load_bars` are visible in part and accept caller-provided `timestamp` or `t` values, so external ingestion remains a possible `future-bar` vector.
+- Listed `/tmp/opencode/bb-sandbox/risk`; relevant entries include `asset_allocator.py`, `manager.py`, `param_optimizer.py`, `performance_analytics.py`, `portfolio_optimizer.py`, `regime_adaptation.py`, and `sidecar_adapter.py`.
+- Listed `/tmp/opencode/bb-sandbox/exchange`; relevant entries include `alpaca_paper.py`, `base.py`, `ibkr.py`, `live.py`, `multi_router.py`, `paper.py`, `realtime_finnhub.py`, `realtime.py`, `sidecar_adapter.py`, and `stock_finnhub.py`.
+- Grepped `/tmp/opencode/bb-sandbox/data_mgmt.py` for timestamp/daily/future/date-related functions and found mostly cycle-file management functions, lowering its priority for `future-bar`.
+- Grepped `/tmp/opencode/bb-sandbox/risk` for rank/cross-section/percentile/quantile patterns and found only:
+  - `/tmp/opencode/bb-sandbox/risk/param_optimizer.py:62` — comment about 75th percentile of losses.
+- Grepped `/tmp/opencode/bb-sandbox/exchange` for `timestamp|future|daily|now` and found 69 matches, including:
+  - `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py:193` and `:198` — ISO timestamp conversion and `SimpleBar` construction.
+  - `/tmp/opencode/bb-sandbox/exchange/realtime.py:206` — comment that `ts` is a unix timestamp and only the newest price is used.
+  - `/tmp/opencode/bb-sandbox/exchange/paper.py` — multiple `datetime.now(timezone.utc).isoformat()` timestamp assignments.
+  - `/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py` — synthetic and caller-supplied timestamp handling.
+- No files have been modified.
+- No `FOUNDBUG` line has been emitted yet.
+
+### Active
+- Finish inspecting `/tmp/opencode/bb-sandbox/harness.py` after line 2373 to complete `_scout_flat` and determine whether `rank-dead` is present in the fallback or Tier 2 path.
+- Investigate the strongest remaining `future-bar` candidates:
+  - `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py` around the timestamp-conversion and bar-construction code.
+  - `/tmp/opencode/bb-sandbox/exchange/realtime.py` around the newest-price/timestamp handling.
+  - `/tmp/opencode/bb-sandbox/exchange/paper.py` for timestamp assignment and possible future-date acceptance.
+  - The remainder of `/tmp/opencode/bb-sandbox/alpaca_paper.py` around lines 360–449 for `load_bars`, `_known_symbols`, and other timestamp usage.
+- If still unresolved, re-examine rank-related behavior in `/tmp/opencode/bb-sandbox/scenarios/neural.py` and `/tmp/opencode/bb-sandbox/strategies/entropy.py`, though both are lower priority than the current harness/exchange candidates.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/harness.py` from offset 2373 onward to finish `_scout_flat` and complete the `rank-dead` review.
+2. Read `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py` and `/tmp/opencode/bb-sandbox/exchange/realtime.py` around the timestamp/bar-ingestion areas to determine whether future-dated bars are filtered or accepted.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root audit copy; all reported findings must use paths under this root.
+- `/tmp/opencode/bb-sandbox/harness.py`: primary `rank-dead` candidate; lines 2308–2335 show the simplified Tier 2 path, and lines 2335–2373 show the tail of `_llm_json_array`, `_get_cached_price_batch`, and the start of `_scout_flat`, but the rest of `_scout_flat` still needs inspection.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: `future-bar` candidate; line 323 confirms the visible synthetic `get_bars` branch uses past-dated timestamps, while `push_bar`/`load_bars` and the remainder around lines 360–449 still need inspection.
+- `/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py`: new `future-bar` candidate; lines 193–198 convert ISO timestamps and construct bars, making it a likely place to check for future-dated bar filtering.
+- `/tmp/opencode/bb-sandbox/exchange/realtime.py`: new `future-bar` candidate; line 206 references newest-price timestamp handling and needs inspection for future-date acceptance.
+- `/tmp/opencode/bb-sandbox/exchange/paper.py`: secondary `future-bar` candidate; grep shows multiple `datetime.now(timezone.utc).isoformat()` timestamp assignments that may need review.
+- `/tmp/opencode/bb-sandbox/risk/`: lower-priority `rank-dead` candidate; narrow grep found only a percentile comment in `param_optimizer.py`, making rank-related defects here less likely.
+- `/tmp/opencode/bb-sandbox/exchange/`: candidate directory for market-data and bar-receipt logic; relevant files include `stock_finnhub.py`, `realtime.py`, `paper.py`, `base.py`, and `multi_router.py`.
+- `/tmp/opencode/bb-sandbox/data_mgmt.py`: lower-priority `future-bar` candidate; evidence indicates it mostly manages cycle files and state rather than market-data timestamps.
+- `/tmp/opencode/bb-sandbox/scenarios/neural.py`: earlier rank-related candidate containing rank-based Gaussianization; still unconfirmed.
+- `/tmp/opencode/bb-sandbox/strategies/entropy.py`: earlier percentile-related candidate containing percentile clipping; still unconfirmed.
+- `/tmp/opencode/bb-sandbox/state/manager.py`: secondary candidate for data/state consumption that may use ranked signals or bars.
+- `/tmp/opencode/bb-sandbox/connections.py`: secondary candidate for feed/timestamp handling, but less directly implicated than `harness.py`, `alpaca_paper.py`, and `exchange/` so far.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead harness.py[90m [offset=2373, limit=220][0m
+[0m→ [0mRead exchange/stock_finnhub.py[90m [offset=150, limit=160][0m
+[0m→ [0mRead exchange/realtime.py[90m [offset=150, limit=160][0m
+[0m→ [0mRead alpaca_paper.py[90m [offset=360, limit=120][0m

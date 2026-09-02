@@ -1,0 +1,41 @@
+{
+  "run": "v1-tiers",
+  "template": "agent-gym-state-v0.1",
+  "episodes": [
+    [
+      85,
+      145
+    ],
+    [
+      235,
+      295
+    ],
+    [
+      385,
+      445
+    ]
+  ],
+  "cash0": 100000.0,
+  "notional": 10000,
+  "atr": [
+    1.5,
+    2.5
+  ],
+  "hold": 14,
+  "max_positions": 3,
+  "max_open_per_day": 1,
+  "spread": 0.0001,
+  "window": [
+    1727211600,
+    1787864400
+  ],
+  "policies": [
+    "buy_hold",
+    "random",
+    "mom_k5",
+    "c08_mr_fade_cot",
+    "llm:free",
+    "llm:flash",
+    "llm:pro"
+  ]
+}

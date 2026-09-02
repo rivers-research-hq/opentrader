@@ -31,6 +31,8 @@ Usage:
       --policies buy_hold,random,mom_k5,c08_mr_fade_cot,llm:free,llm:flash,llm:pro \
       --run-label v1-tiers
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import os
@@ -345,7 +347,6 @@ class LLM(Policy):
             data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json",
                      **({"Authorization": f"Bearer {self.api_key}"} if self.api_key else {})})
-        t0 = time.time()
         with urllib.request.urlopen(req, timeout=120) as r:
             resp = json.load(r)
         msg = (resp.get("choices") or [{}])[0].get("message", {}).get("content", "")

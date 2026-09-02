@@ -7,6 +7,8 @@ Adds 5 REST endpoints to mcp_server.py on port :8092.
 Tools:  weather  |  drought  |  crop_progress  |  eia_inventory  |  minerals
 TTL:    6h         |  24h       |  24h            |  24h             |  24h
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import hashlib
 import json

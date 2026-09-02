@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """arXiv research paper feed — surfaces latest quant-finance papers as trading context.
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 Categories queried (11 in total):
   q-fin:  TR (Trading/Market Microstructure), CP (Computational Finance),
           PM (Portfolio Management), ST (Statistical Finance),
@@ -14,6 +16,8 @@ Cache TTL: 24 hours (papers published daily). Fetch 15 candidates, keyword-filte
 Also provides extract_features() — periodically asks the LLM to extract
 actionable trading rules from unextracted cached papers, producing a feature backlog.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 import time

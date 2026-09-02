@@ -10,6 +10,8 @@ OANDA is netted per instrument: long/short is expressed via signed units
 harness can restore state across restarts (restore_ledger, lesson from
 continuity-2: every child must have it).
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import json
 import logging

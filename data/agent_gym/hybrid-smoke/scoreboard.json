@@ -1,0 +1,356 @@
+{
+ "meta": {
+  "run": "hybrid-smoke",
+  "template": "agent-gym-state-v0.2",
+  "episodes": [
+   [
+    85,
+    145
+   ]
+  ],
+  "cash0": 100000.0,
+  "notional": 10000,
+  "atr": [
+   1.5,
+   2.5
+  ],
+  "hold": 14,
+  "max_positions": 3,
+  "max_open_per_day": 1,
+  "spread": 0.0001,
+  "window": [
+   1727211600,
+   1787864400
+  ],
+  "policies": [
+   "c08_mr_fade_cot",
+   "hybrid:c08_mr_fade_cot:free"
+  ]
+ },
+ "scoreboard": {
+  "mr_fade_ma20_cot": {
+   "episodes": [
+    {
+     "n": 12,
+     "wr": 58.3,
+     "pf": 1.95,
+     "pnl": 637.49,
+     "ret_pct": 0.64,
+     "maxdd_pct": 0.42
+    }
+   ],
+   "pooled": {
+    "n": 12,
+    "wr": 58.3,
+    "pf": 1.95,
+    "pnl": 637.49,
+    "ret_pct": 0.64,
+    "maxdd_pct": 0.42
+   },
+   "violations": 0,
+   "tokens": 0,
+   "prompt_tokens": 0,
+   "completion_tokens": 0,
+   "declared_cost_usd": 0.0,
+   "request_extras": null,
+   "approved": null,
+   "vetoed": null,
+   "parse_failures": 0
+  },
+  "hybrid:c08_mr_fade_cot:free": {
+   "episodes": [
+    {
+     "n": 0,
+     "wr": null,
+     "pf": null,
+     "pnl": 0,
+     "ret_pct": 0.0,
+     "maxdd_pct": 0.0
+    }
+   ],
+   "pooled": {
+    "n": 0,
+    "wr": null,
+    "pf": null,
+    "pnl": 0,
+    "ret_pct": 0.0,
+    "maxdd_pct": 0.0
+   },
+   "violations": 0,
+   "tokens": 20608,
+   "prompt_tokens": 19776.0,
+   "completion_tokens": 832.0,
+   "declared_cost_usd": 0.0,
+   "request_extras": {},
+   "approved": 0,
+   "vetoed": 32,
+   "parse_failures": 0
+  }
+ },
+ "fills": [
+  {
+   "ts": 1737928800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 154.516,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1738706400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 152.588,
+   "reason": "stop",
+   "pnl": -123.4,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1738706400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 152.588,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 149.616,
+   "reason": "stop",
+   "pnl": -193.19,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740002400,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 149.616,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1740693600,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.62094,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741125600,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.63352,
+   "reason": "target",
+   "pnl": 200.98,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741212000,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 147.986,
+   "reason": "stop",
+   "pnl": -107.59,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741212000,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 147.986,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1741298400,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.87985,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1742936400,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 150.587,
+   "reason": "hold",
+   "pnl": 174.26,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743022800,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8817,
+   "reason": "hold",
+   "pnl": 19.89,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743627600,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 146.071,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743714000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.60401,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1743973200,
+   "symbol": "GBP_USD",
+   "side": "BUY",
+   "price": 1.27238,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.61545,
+   "reason": "stop",
+   "pnl": 187.75,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744146000,
+   "symbol": "AUD_USD",
+   "side": "BUY",
+   "price": 0.61545,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 143.472,
+   "reason": "stop",
+   "pnl": -176.74,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "GBP_USD",
+   "side": "SELL",
+   "price": 1.30887,
+   "reason": "target",
+   "pnl": 285.99,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744318800,
+   "symbol": "USD_JPY",
+   "side": "BUY",
+   "price": 143.472,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744578000,
+   "symbol": "USD_CHF",
+   "side": "BUY",
+   "price": 0.81489,
+   "reason": "policy-open",
+   "pnl": null,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "AUD_USD",
+   "side": "SELL",
+   "price": 0.63916,
+   "reason": "episode-end",
+   "pnl": 383.62,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_JPY",
+   "side": "SELL",
+   "price": 142.466,
+   "reason": "episode-end",
+   "pnl": -69.42,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  },
+  {
+   "ts": 1744837200,
+   "symbol": "USD_CHF",
+   "side": "SELL",
+   "price": 0.8195,
+   "reason": "episode-end",
+   "pnl": 55.34,
+   "paper": true,
+   "ep": 0,
+   "policy": "mr_fade_ma20_cot"
+  }
+ ]
+}

@@ -31,6 +31,7 @@ from pathlib import Path
 import torch
 
 from mot.hive import SwarmRegistry
+from security.guards import guarded_urlopen, guarded_open, sec_pickle_load  # noqa: E402  (hardening layer)
 
 PROJECT = Path(__file__).resolve().parent.parent
 HIVE = PROJECT / "data" / "hive"
@@ -85,7 +86,7 @@ def main() -> None:
                   f"min_kept {rep.get('min_kept')}) — not promoted")
             continue
         # theta from the artifact itself, not the report's gene (which the
-        # fit overrides with its val-tuned value).
+        art = torch.load(ckpt, weights_only=True)
         art = torch.load(ckpt, weights_only=False)
         theta = float(art.get("theta", 0.0))
         slot = reg.register(ckpt, market, "both", horizon, margins, theta=theta)

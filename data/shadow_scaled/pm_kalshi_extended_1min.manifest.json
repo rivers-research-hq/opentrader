@@ -1,0 +1,11 @@
+{
+  "n_markets_expected": 512,
+  "n_markets_with_candles": 8,
+  "coverage_pct": 1.6,
+  "n_candles": 715,
+  "date_range": "2026-08-17 to 2026-08-24",
+  "set": "extended",
+  "source": "pm_pull_extended.py",
+  "pull_ts": 1787883539,
+  "elapsed_s": 263.1
+}

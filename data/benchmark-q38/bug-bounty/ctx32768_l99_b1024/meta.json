@@ -1,0 +1,17 @@
+{
+  "ctx": 32768,
+  "layers": 99,
+  "budget": 1024,
+  "rc": -15,
+  "seconds": 2195.5,
+  "reason": "found-all",
+  "found": {
+    "future-bar": "report",
+    "rank-dead": "report"
+  },
+  "n_found": 2,
+  "n_ground": 2,
+  "fp": 0,
+  "vram_free_before_gib": 2.72,
+  "vram_free_after_gib": 1.29
+}

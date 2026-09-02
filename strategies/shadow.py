@@ -26,6 +26,8 @@ OWN archives — NOT live order flow, NOT the harness's 19-symbol universe.
 Usage:
   python -m strategies.shadow [--state-dir /home/mrc/opentrader/data] [--dry]
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+open = guarded_open  # hardening shadow
 
 import argparse
 import json
@@ -67,7 +69,6 @@ def shadow(state_dir: str, dry: bool = True) -> dict:
         # shadow_mot.py convention: live_router_state_{universe}.json), NOT
         # the harness's live_router_state.json — avoids clobbering the
         # harness's live attribution (audit: single writer per path).
-        p = os.path.join(state_dir, "live_router_state_strategies.json")
         with open(p, "w") as f:
             json.dump(state, f, indent=1)
         print(f"[shadow] wrote {p}")

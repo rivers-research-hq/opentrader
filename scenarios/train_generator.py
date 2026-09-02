@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Train the neural multiverse generator (conditional DoppelGANger-style GAN).
 
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 Runs on GPU1 (RX 7900) during idle windows per the VRAM-lock discipline — do NOT
 run while the trading harness is live. Output: data/scenarios/neural_gen.pt.
 
@@ -9,6 +10,7 @@ Usage:
       --data data/setup_search/ohlcv_5y.pkl --epochs 50 \
       --out data/scenarios/neural_gen.pt [--device cuda]
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
 
 import argparse

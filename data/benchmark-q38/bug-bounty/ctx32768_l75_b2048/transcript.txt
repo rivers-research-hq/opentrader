@@ -1,0 +1,1046 @@
+[0m
+> build · qwen38-agentic
+[0m
+[0m$ [0mfind /tmp/opencode/bb-sandbox -type f -name "*.py" | head -50 && echo "---" && ls /tmp/opencode/bb-sandbox
+/tmp/opencode/bb-sandbox/.opencode/tools/_subagent_watch.py
+/tmp/opencode/bb-sandbox/.opencode/tools/_project_context.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/__init__.py
+/tmp/opencode/bb-sandbox/risk/param_optimizer.py
+/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py
+/tmp/opencode/bb-sandbox/risk/regime_adaptation.py
+/tmp/opencode/bb-sandbox/risk/performance_analytics.py
+/tmp/opencode/bb-sandbox/risk/manager.py
+/tmp/opencode/bb-sandbox/risk/asset_allocator.py
+/tmp/opencode/bb-sandbox/risk/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/risk/__init__.py
+/tmp/opencode/bb-sandbox/exchange/base.py
+/tmp/opencode/bb-sandbox/exchange/ibkr.py
+/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/multi_router.py
+/tmp/opencode/bb-sandbox/exchange/paper.py
+/tmp/opencode/bb-sandbox/exchange/realtime.py
+/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py
+/tmp/opencode/bb-sandbox/exchange/live.py
+/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/exchange/__init__.py
+/tmp/opencode/bb-sandbox/state/context.py
+/tmp/opencode/bb-sandbox/state/manager.py
+/tmp/opencode/bb-sandbox/state/__init__.py
+/tmp/opencode/bb-sandbox/scripts/hf_download.py
+/tmp/opencode/bb-sandbox/scripts/load_adapter.py
+/tmp/opencode/bb-sandbox/scripts/service_mgr.py
+/tmp/opencode/bb-sandbox/scripts/rtx3070-bench.py
+/tmp/opencode/bb-sandbox/scripts/hf_search.py
+/tmp/opencode/bb-sandbox/scripts/hf_library.py
+/tmp/opencode/bb-sandbox/scripts/hf_models.py
+/tmp/opencode/bb-sandbox/scripts/__init__.py
+/tmp/opencode/bb-sandbox/arena/train.py
+/tmp/opencode/bb-sandbox/arena/tech.py
+/tmp/opencode/bb-sandbox/arena/curriculum.py
+/tmp/opencode/bb-sandbox/arena/loop.py
+/tmp/opencode/bb-sandbox/arena/opponents.py
+/tmp/opencode/bb-sandbox/arena/export.py
+/tmp/opencode/bb-sandbox/arena/architect.py
+/tmp/opencode/bb-sandbox/arena/agent.py
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/build_architect_dataset.py
+/tmp/opencode/bb-sandbox/arena/battle.py
+/tmp/opencode/bb-sandbox/arena/epoch_engine.py
+/tmp/opencode/bb-sandbox/arena/view.py
+/tmp/opencode/bb-sandbox/arena/candidates_fullcross.py
+/tmp/opencode/bb-sandbox/arena/candidates.py
+/tmp/opencode/bb-sandbox/arena/war.py
+---
+agent
+alpaca_paper.py
+arena
+benchmark_models.py
+connections.py
+coordinator.py
+dashboard.py
+data
+data_mgmt.py
+exchange
+exchange-engine
+gpu_sync.py
+harness.py
+hunt_output
+__init__.py
+mcp_server.py
+model_manager.py
+mot
+onchain.py
+onchain_web3.py
+__pycache__
+report_risk.py
+repro_volatility.py
+risk
+scenarios
+scripts
+setup_search
+state
+strategies
+tests
+tools
+training
+tui_dashboard.py
+unsloth_compiled_cache
+[0m
+## Objective
+- Hunt for real re-introduced bugs in the local copy of the opentrader trading system at `/tmp/opencode/bb-sandbox`.
+- Identify at least the likely historical defects `rank-dead` and `future-bar`, then report any other clearly qualifying bugs without modifying files.
+
+## Important Details
+- Search target is `/tmp/opencode/bb-sandbox` only.
+- Do not run the full live exchange harness; rely on source reading and reasoning.
+- For each confirmed bug, output exactly: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+- Likely bug ids to consider:
+  - `rank-dead`: cross-sectional rank silently disabled.
+  - `future-bar`: future-dated daily bar not filtered, creating crash-loop risk.
+- If additional real bugs are found, include them using the same format when possible.
+- No files have been modified.
+
+## Work State
+### Completed
+- Started exploration of `/tmp/opencode/bb-sandbox`.
+- Ran a file discovery command listing Python files and top-level contents.
+- Identified relevant package areas: `exchange/`, `exchange-engine/`, `risk/`, `state/`, `scripts/`, and `arena/`.
+
+### Active
+- Need to inspect source files for cross-sectional ranking logic and daily-bar date filtering.
+- Need determine exact file and function locations for `rank-dead` and `future-bar`.
+
+### Blocked
+- None.
+
+## Next Move
+1. Search `/tmp/opencode/bb-sandbox` for rank/cross-sectional logic, e.g. terms like `rank`, `cross_section`, `cross-sectional`, `pct_change`, `zscore`, `quantile`, and `fillna`.
+2. Search for daily bar ingestion/filtering logic, e.g. terms like `daily`, `bar`, `date`, `timestamp`, `future`, `now`, `as_of`, and exchange data normalization.
+3. Read the candidate functions and verify root causes before emitting `FOUNDBUG` lines.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox`: root copy to audit.
+- `/tmp/opencode/bb-sandbox/risk/`: likely location for risk scoring, ranking, optimizer, and regime logic.
+- `/tmp/opencode/bb-sandbox/exchange/`: likely location for market data normalization and daily-bar filtering.
+- `/tmp/opencode/bb-sandbox/exchange-engine/python/`: exchange engine sidecar and adapters that may touch bar data.
+- `/tmp/opencode/bb-sandbox/state/`: likely stores market context and may expose bar/rank state.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m✱ [0mGrep "rank|cross.?section|pct_change|quantile|zscore|fillna"[90m in . · 100 matches[0m
+[0m✱ [0mGrep "daily|future|timestamp|date|as_of|bar"[90m in . · 100 matches[0m
+[0m✱ [0mGlob "**/*.py"[90m in . · 100 matches[0m
+## Objective
+- Hunt for real re-introduced bugs (especially `rank-dead` and `future-bar`) in `/tmp/opencode/bb-sandbox` and report any other qualifying bugs without modifying files.
+- Output confirmed bugs in the exact format: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Search target is `/tmp/opencode/bb-sandbox` only; do not run the live exchange harness.
+- Likely bug ids: `rank-dead` (cross-sectional rank silently disabled) and `future-bar` (future-dated daily bar not filtered, crash-loop risk).
+- No files have been modified.
+- Grep for rank/cross-section patterns surfaced `/tmp/opencode/bb-sandbox/setup_search/engine.py` as the primary cross-sectional ranking module (functions `_cross_sectional_rank` at line 97, `_score_at` at line 80, `rank_on` config flag at lines 84/127/177).
+- Grep for daily/future/timestamp/bar patterns surfaced `/tmp/opencode/bb-sandbox/alpaca_paper.py` (bar timestamp handling, epoch-seconds, `datetime.fromtimestamp`) and `/tmp/opencode/bb-sandbox/harness.py` (line 2308: "rank by the radar momentum score").
+- The prior summary's directories `risk/`, `exchange/`, `exchange-engine/`, `state/`, `scripts/` were not visible in the truncated glob output; they may exist beyond the truncation point or the codebase layout differs from initial assumptions.
+
+## Work State
+### Completed
+- Initial file discovery via `glob **/*.py` under `/tmp/opencode/bb-sandbox` (truncated at ~50 files).
+- Grep for `rank|cross.?section|pct_change|quantile|zscore|fillna` across all `.py` files (100+ matches; key hits in `setup_search/engine.py`, `strategies/scorer_intl.py`, `strategies/bayes.py`, `harness.py`).
+- Grep for `daily|future|timestamp|date|as_of|bar` across all `.py` files (100+ matches; key hits in `alpaca_paper.py`, `model_manager.py`, `gpu_sync.py`, `dashboard.py`, `training/legacy_data_builder.py`).
+
+### Active
+- Need to read `/tmp/opencode/bb-sandbox/setup_search/engine.py` in full to verify the `rank-dead` bug: check whether `_cross_sectional_rank` is correctly wired to the scoring path and whether `rank_on` can silently be `False` or the rank dict is empty/mis-indexed.
+- Need to read `/tmp/opencode/bb-sandbox/alpaca_paper.py` to verify the `future-bar` bug: check whether daily bars with future timestamps are filtered or pass through unfiltered.
+- Need to read `/tmp/opencode/bb-sandbox/harness.py` around line 2308 for the "Tier 2 simplified" rank-by-momentum-score path and any bar-ingestion logic.
+- Need to check for additional files beyond the truncated glob (the directory listing cut off mid-list).
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` in full (especially `_cross_sectional_rank`, `_score_at`, and the main scoring loop around lines 80–180) to confirm or rule out the `rank-dead` bug.
+2. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` in full to inspect bar timestamp handling and look for missing future-bar filtering for the `future-bar` bug.
+3. Read `/tmp/opencode/bb-sandbox/harness.py` around line 2308 and any bar-ingestion/normalization functions to check for additional rank or date-filtering issues.
+4. Re-run the file glob (or list subdirectories) to capture files beyond the truncation point, especially under `risk/`, `exchange/`, `exchange-engine/`, `state/`, `scripts/` if they exist.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: Primary cross-sectional ranking module; contains `_cross_sectional_rank` (line 97), `_score_at` (line 80), `rank_on` config; top suspect for `rank-dead`.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: Bar/timestamp handling with epoch-seconds and `datetime.fromtimestamp`; top suspect for `future-bar`.
+- `/tmp/opencode/bb-sandbox/harness.py`: Line 2308 references "Tier 2 simplified" rank-by-momentum; may contain bar ingestion or additional rank logic.
+- `/tmp/opencode/bb-sandbox/strategies/scorer_intl.py`: Uses `pct_change().dropna()` on equity/bench/SPY returns; secondary rank/scoring area.
+- `/tmp/opencode/bb-sandbox/strategies/bayes.py`: Uses `pct_change`, `fillna(0.0)` on proxy returns; possible secondary bug area.
+- `/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py`: Line 94 references DXY regime proxy and cross-sectional mean; may interact with ranking.
+- `/tmp/opencode/bb-sandbox`: Root directory to audit; file list truncated, full inventory incomplete.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py
+[0m
+[0m$ [0mls -la /tmp/opencode/bb-sandbox/ && echo "---" && find /tmp/opencode/bb-sandbox -name "*.py" | wc -l && echo "---" && find /tmp/opencode/bb-sandbox -type d
+...output truncated...
+
+Full output saved to: /home/mrc/.local/share/opencode/tool-output/tool_01614ebc70019hPeNHYudjW31C
+
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@standard-schema/spec/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/video-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/video-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/transcription-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/transcription-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/transcription-model/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/speech-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/speech-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/speech-model/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/shared
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/shared/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/shared/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/reranking-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/reranking-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/provider
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/provider/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/provider/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model-middleware
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model-middleware/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/language-model-middleware/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/json-value
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/image-model-middleware
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/image-model-middleware/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/image-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/image-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/image-model/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/embedding-model-middleware
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/embedding-model-middleware/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/embedding-model
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/embedding-model/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/embedding-model/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/src/errors
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@ai-sdk/provider/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/plugin
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/plugin/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/plugin/dist/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/plugin/dist/v2/promise
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/plugin/dist/v2/effect
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/v2
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/gen
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/gen/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/@opencode-ai/sdk/dist/gen/client
+/tmp/opencode/bb-sandbox/.opencode/node_modules/isexe
+/tmp/opencode/bb-sandbox/.opencode/node_modules/isexe/test
+/tmp/opencode/bb-sandbox/.opencode/node_modules/node-gyp-build-optional-packages
+/tmp/opencode/bb-sandbox/.opencode/node_modules/shebang-regex
+/tmp/opencode/bb-sandbox/.opencode/node_modules/detect-libc
+/tmp/opencode/bb-sandbox/.opencode/node_modules/detect-libc/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/src/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/dts
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/dts/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/esm
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/esm/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/cjs
+/tmp/opencode/bb-sandbox/.opencode/node_modules/multipasta/dist/cjs/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/msgpackr-extract
+/tmp/opencode/bb-sandbox/.opencode/node_modules/msgpackr-extract/bin
+/tmp/opencode/bb-sandbox/.opencode/node_modules/msgpackr-extract/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/distribution
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/types
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/utils
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/generator
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/esm
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/esm/distribution
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/esm/types
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/esm/utils
+/tmp/opencode/bb-sandbox/.opencode/node_modules/pure-rand/lib/esm/generator
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/stringify
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/parse
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/compose
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/schema/json
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/schema/common
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/schema/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/schema/yaml-1.1
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/doc
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/dist/nodes
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/stringify
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/parse
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/compose
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/schema/json
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/schema/common
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/schema/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/schema/yaml-1.1
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/doc
+/tmp/opencode/bb-sandbox/.opencode/node_modules/yaml/browser/dist/nodes
+/tmp/opencode/bb-sandbox/.opencode/node_modules/toml
+/tmp/opencode/bb-sandbox/.opencode/node_modules/toml/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/uuid
+/tmp/opencode/bb-sandbox/.opencode/node_modules/uuid/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/uuid/dist-node
+/tmp/opencode/bb-sandbox/.opencode/node_modules/uuid/dist-node/bin
+/tmp/opencode/bb-sandbox/.opencode/node_modules/msgpackr
+/tmp/opencode/bb-sandbox/.opencode/node_modules/msgpackr/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/resource
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/storagemigration
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/apiserverinternal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/storage
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/scheduling
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/rbac
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/policy
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/node
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/networking
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/meta
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/flowcontrol
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/events
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/discovery
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/coordination
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/certificates
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/batch
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/autoscaling
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/authorization
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/authentication
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/apps
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/apiextensions
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/admissionregistration
+/tmp/opencode/bb-sandbox/.opencode/node_modules/kubernetes-types/api
+/tmp/opencode/bb-sandbox/.opencode/node_modules/ini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/ini/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/src/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/QueryString
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/dts
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/dts/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/esm
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/esm/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/cjs
+/tmp/opencode/bb-sandbox/.opencode/node_modules/find-my-way-ts/dist/cjs/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/fast-check
+/tmp/opencode/bb-sandbox/.opencode/node_modules/fast-check/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/fast-check/lib/types57
+/tmp/opencode/bb-sandbox/.opencode/node_modules/fast-check/lib/cjs
+/tmp/opencode/bb-sandbox/.opencode/node_modules/fast-check/lib/cjs/types57
+/tmp/opencode/bb-sandbox/.opencode/node_modules/which
+/tmp/opencode/bb-sandbox/.opencode/node_modules/which/bin
+/tmp/opencode/bb-sandbox/.opencode/node_modules/path-key
+/tmp/opencode/bb-sandbox/.opencode/node_modules/shebang-command
+/tmp/opencode/bb-sandbox/.opencode/node_modules/cross-spawn
+/tmp/opencode/bb-sandbox/.opencode/node_modules/cross-spawn/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/cross-spawn/lib/util
+/tmp/opencode/bb-sandbox/.opencode/node_modules/json-schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/json-schema/lib
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4-mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/mini/tests
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/core/tests
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/core/tests/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/classic
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v4/classic/tests
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v3/helpers
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v3/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v3/benchmarks
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/src/v3/tests
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4-mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v3
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v3/helpers
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v3/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4/mini
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4/classic
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4/locales
+/tmp/opencode/bb-sandbox/.opencode/node_modules/zod/v4/core
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/testing
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/internal/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/workers
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/sql
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/socket
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/rpc
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/persistence
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/observability
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/observability/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/encoding
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/httpapi
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/httpapi/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/eventlog
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/eventlog/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/devtools
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/http
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/http/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/http/Multipasta
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/cluster
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/cluster/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/process
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/reactivity
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/cli
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/cli/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/cli/internal/completions
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/ai
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/ai/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/workflow
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/src/unstable/workflow/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/testing
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/internal/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/workers
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/sql
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/socket
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/schema
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/rpc
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/persistence
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/observability
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/observability/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/encoding
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/httpapi
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/httpapi/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/eventlog
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/eventlog/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/devtools
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/http
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/http/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/http/Multipasta
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/cluster
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/cluster/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/process
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/reactivity
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/cli
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/cli/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/cli/internal/completions
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/ai
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/ai/internal
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/workflow
+/tmp/opencode/bb-sandbox/.opencode/node_modules/effect/dist/unstable/workflow/internal
+/tmp/opencode/bb-sandbox/.opencode/tools
+/tmp/opencode/bb-sandbox/exchange-engine
+/tmp/opencode/bb-sandbox/exchange-engine/python
+/tmp/opencode/bb-sandbox/risk
+/tmp/opencode/bb-sandbox/risk/__pycache__
+/tmp/opencode/bb-sandbox/exchange
+/tmp/opencode/bb-sandbox/exchange/__pycache__
+/tmp/opencode/bb-sandbox/state
+/tmp/opencode/bb-sandbox/state/__pycache__
+/tmp/opencode/bb-sandbox/scripts
+/tmp/opencode/bb-sandbox/arena
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache
+/tmp/opencode/bb-sandbox/tools
+/tmp/opencode/bb-sandbox/tools/hugginghack
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/tests
+/tmp/opencode/bb-sandbox/data
+/tmp/opencode/bb-sandbox/data/__pycache__
+/tmp/opencode/bb-sandbox/data/research
+/tmp/opencode/bb-sandbox/data/research/eval_transforms
+/tmp/opencode/bb-sandbox/setup_search
+/tmp/opencode/bb-sandbox/setup_search/__pycache__
+/tmp/opencode/bb-sandbox/mot
+/tmp/opencode/bb-sandbox/mot/__pycache__
+/tmp/opencode/bb-sandbox/mot/agents
+/tmp/opencode/bb-sandbox/mot/agents/__pycache__
+/tmp/opencode/bb-sandbox/scenarios
+/tmp/opencode/bb-sandbox/agent
+/tmp/opencode/bb-sandbox/agent/__pycache__
+/tmp/opencode/bb-sandbox/training
+/tmp/opencode/bb-sandbox/training/__pycache__
+/tmp/opencode/bb-sandbox/strategies
+/tmp/opencode/bb-sandbox/tests
+[0m
+Continuing the bug hunt. Reading the top suspect files now.
+## Objective
+- Hunt for real re-introduced bugs in `/tmp/opencode/bb-sandbox`, prioritizing `rank-dead` and `future-bar`, and report confirmed qualifying bugs without modifying files.
+- Output confirmed bugs exactly as: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit target is `/tmp/opencode/bb-sandbox` only; do not run the live exchange harness.
+- No files have been modified.
+- Likely bug ids:
+  - `rank-dead`: cross-sectional rank silently disabled or unwired.
+  - `future-bar`: future-dated daily bar not filtered, potentially causing crash-loop risk.
+- Primary suspect files:
+  - `/tmp/opencode/bb-sandbox/setup_search/engine.py` for rank/cross-sectional scoring.
+  - `/tmp/opencode/bb-sandbox/alpaca_paper.py` for bar/timestamp handling.
+  - `/tmp/opencode/bb-sandbox/harness.py` for rank-by-momentum and possible bar-ingestion logic.
+- Partial read of `/tmp/opencode/bb-sandbox/setup_search/engine.py` covered lines 1-48 only; it confirmed imports, `_fee_amt`, `_rsi`, and the start of `_features`, but did not reach `_score_at`, `_cross_sectional_rank`, or the main scoring loop.
+- Directory/file inventory command output was truncated; full output saved to `/home/mrc/.local/share/opencode/tool-output/tool_01614ebc70019hPeNHYudjW31C`.
+- Visible inventory output was dominated by `.opencode/node_modules` paths, so the project-level file/subdirectory inventory is still incomplete.
+- Avoid scanning `.opencode/node_modules` deeply; focus on project-owned Python files.
+
+## Work State
+### Completed
+- Initial file discovery and broad grep passes for rank/cross-sectional and daily/timestamp/bar patterns.
+- Started reading `/tmp/opencode/bb-sandbox/setup_search/engine.py`.
+- Ran a combined `ls -la`, `find ... -name "*.py" | wc -l`, and `find ... -type d` inventory command; output truncated and saved to the tool-output path.
+- Identified secondary suspect files from earlier grep results: `strategies/scorer_intl.py`, `strategies/bayes.py`, `setup_search/ftmo_universe.py`.
+
+### Active
+- Confirm or rule out `rank-dead` in `/tmp/opencode/bb-sandbox/setup_search/engine.py`, especially `_score_at`, `_cross_sectional_rank`, `rank_on`, and the main scoring loop.
+- Confirm or rule out `future-bar` in `/tmp/opencode/bb-sandbox/alpaca_paper.py` and any bar-ingestion/normalization path in `/tmp/opencode/bb-sandbox/harness.py`.
+- Recover or rerun a clean project file/subdirectory inventory without being drowned by `.opencode/node_modules`.
+- Check secondary scoring and timestamp-related files for additional qualifying bugs.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` from line 48 to end, focusing on `_score_at`, `_cross_sectional_rank`, `rank_on`, and the scoring loop.
+2. Read `/home/mrc/.local/share/opencode/tool-output/tool_01614ebc70019hPeNHYudjW31C` or rerun a narrower inventory command excluding `.opencode` to complete the project file list.
+3. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` for future-bar filtering, timestamp normalization, and epoch/`datetime.fromtimestamp` handling.
+4. Read `/tmp/opencode/bb-sandbox/harness.py` around line 2308 and nearby bar-ingestion or scoring functions for additional rank or date-filtering issues.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: top suspect for `rank-dead`; partial read confirmed `_fee_amt`, `_rsi`, and start of `_features`; still need `_score_at`, `_cross_sectional_rank`, and `rank_on` behavior.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: top suspect for `future-bar`; handles bar timestamps, epoch seconds, and `datetime.fromtimestamp`.
+- `/tmp/opencode/bb-sandbox/harness.py`: line 2308 references "rank by the radar momentum score"; possible rank or bar-ingestion path.
+- `/home/mrc/.local/share/opencode/tool-output/tool_01614ebc70019hPeNHYudjW31C`: saved full output of the truncated inventory command.
+- `/tmp/opencode/bb-sandbox/strategies/scorer_intl.py`: secondary scoring area using `pct_change().dropna()`.
+- `/tmp/opencode/bb-sandbox/strategies/bayes.py`: secondary returns handling with `pct_change` and `fillna(0.0)`.
+- `/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py`: DXY regime proxy and cross-sectional mean; may interact with ranking.
+- `/tmp/opencode/bb-sandbox`: audit root; complete project inventory still needed.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mfind /tmp/opencode/bb-sandbox -name '*.py' -not -path '*/.opencode/*' | sort
+/tmp/opencode/bb-sandbox/agent/base.py
+/tmp/opencode/bb-sandbox/agent/__init__.py
+/tmp/opencode/bb-sandbox/agent/mcp_client.py
+/tmp/opencode/bb-sandbox/agent/trading_agent.py
+/tmp/opencode/bb-sandbox/alpaca_paper.py
+/tmp/opencode/bb-sandbox/arena/agent.py
+/tmp/opencode/bb-sandbox/arena/architect_probe.py
+/tmp/opencode/bb-sandbox/arena/architect.py
+/tmp/opencode/bb-sandbox/arena/battle.py
+/tmp/opencode/bb-sandbox/arena/build_architect_dataset.py
+/tmp/opencode/bb-sandbox/arena/candidates_fullcross.py
+/tmp/opencode/bb-sandbox/arena/candidates_international.py
+/tmp/opencode/bb-sandbox/arena/candidates_macro.py
+/tmp/opencode/bb-sandbox/arena/candidates.py
+/tmp/opencode/bb-sandbox/arena/curriculum.py
+/tmp/opencode/bb-sandbox/arena/epoch_engine.py
+/tmp/opencode/bb-sandbox/arena/export.py
+/tmp/opencode/bb-sandbox/arena/grpo.py
+/tmp/opencode/bb-sandbox/arena/__init__.py
+/tmp/opencode/bb-sandbox/arena/loop.py
+/tmp/opencode/bb-sandbox/arena/opponents.py
+/tmp/opencode/bb-sandbox/arena/tech.py
+/tmp/opencode/bb-sandbox/arena/train.py
+/tmp/opencode/bb-sandbox/arena/view.py
+/tmp/opencode/bb-sandbox/arena/war.py
+/tmp/opencode/bb-sandbox/benchmark_models.py
+/tmp/opencode/bb-sandbox/connections.py
+/tmp/opencode/bb-sandbox/coordinator.py
+/tmp/opencode/bb-sandbox/dashboard.py
+/tmp/opencode/bb-sandbox/data/accumulator.py
+/tmp/opencode/bb-sandbox/data/acquire.py
+/tmp/opencode/bb-sandbox/data/alt_data_mcp.py
+/tmp/opencode/bb-sandbox/data/arxiv.py
+/tmp/opencode/bb-sandbox/data/economic_calendar.py
+/tmp/opencode/bb-sandbox/data/economics.py
+/tmp/opencode/bb-sandbox/data/falsify.py
+/tmp/opencode/bb-sandbox/data/feature_integrator.py
+/tmp/opencode/bb-sandbox/data/fundamentals.py
+/tmp/opencode/bb-sandbox/data/gpu_bootstrap.py
+/tmp/opencode/bb-sandbox/data/gpu_falsify.py
+/tmp/opencode/bb-sandbox/data/gpu_monitor.py
+/tmp/opencode/bb-sandbox/data/__init__.py
+/tmp/opencode/bb-sandbox/data/market_ctx.py
+/tmp/opencode/bb-sandbox/data_mgmt.py
+/tmp/opencode/bb-sandbox/data/multi_tf.py
+/tmp/opencode/bb-sandbox/data/news.py
+/tmp/opencode/bb-sandbox/data/paper_deck.py
+/tmp/opencode/bb-sandbox/data/refresh.py
+/tmp/opencode/bb-sandbox/data/regime_classifier.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/data_augmentation.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/eval_methodology.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/inference_efficiency.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/multi_step_reasoning.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/regime_detection.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/risk_management.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/sentiment_analysis.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/trade_signal.py
+/tmp/opencode/bb-sandbox/data/research/eval_transforms/training_technique.py
+/tmp/opencode/bb-sandbox/data/social_sentiment.py
+/tmp/opencode/bb-sandbox/data/synthetic.py
+/tmp/opencode/bb-sandbox/data/valuation.py
+/tmp/opencode/bb-sandbox/data/vix_gate.py
+/tmp/opencode/bb-sandbox/data/world_bank.py
+/tmp/opencode/bb-sandbox/exchange/alpaca_paper.py
+/tmp/opencode/bb-sandbox/exchange/base.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/__init__.py
+/tmp/opencode/bb-sandbox/exchange-engine/python/sidecar.py
+/tmp/opencode/bb-sandbox/exchange/ibkr.py
+/tmp/opencode/bb-sandbox/exchange/__init__.py
+/tmp/opencode/bb-sandbox/exchange/live.py
+/tmp/opencode/bb-sandbox/exchange/multi_router.py
+/tmp/opencode/bb-sandbox/exchange/paper.py
+/tmp/opencode/bb-sandbox/exchange/realtime_finnhub.py
+/tmp/opencode/bb-sandbox/exchange/realtime.py
+/tmp/opencode/bb-sandbox/exchange/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/exchange/stock_finnhub.py
+/tmp/opencode/bb-sandbox/gpu_sync.py
+/tmp/opencode/bb-sandbox/harness.py
+/tmp/opencode/bb-sandbox/__init__.py
+/tmp/opencode/bb-sandbox/mcp_server.py
+/tmp/opencode/bb-sandbox/model_manager.py
+/tmp/opencode/bb-sandbox/mot/adapter_registry.py
+/tmp/opencode/bb-sandbox/mot/agents/adir_debate.py
+/tmp/opencode/bb-sandbox/mot/agents/debate.py
+/tmp/opencode/bb-sandbox/mot/agents/__init__.py
+/tmp/opencode/bb-sandbox/mot/coach.py
+/tmp/opencode/bb-sandbox/mot/coordinator.py
+/tmp/opencode/bb-sandbox/mot/dynamic_discovery.py
+/tmp/opencode/bb-sandbox/mot/ensemble.py
+/tmp/opencode/bb-sandbox/mot/experts.py
+/tmp/opencode/bb-sandbox/mot/finetuned_agent.py
+/tmp/opencode/bb-sandbox/mot/hive.py
+/tmp/opencode/bb-sandbox/mot/industry_map.py
+/tmp/opencode/bb-sandbox/mot/__init__.py
+/tmp/opencode/bb-sandbox/mot/lifecycle.py
+/tmp/opencode/bb-sandbox/mot/mixture.py
+/tmp/opencode/bb-sandbox/mot/monitors.py
+/tmp/opencode/bb-sandbox/mot/pool.py
+/tmp/opencode/bb-sandbox/mot/reflection.py
+/tmp/opencode/bb-sandbox/mot/roster.py
+/tmp/opencode/bb-sandbox/mot/scoring.py
+/tmp/opencode/bb-sandbox/mot/tradable_universe.py
+/tmp/opencode/bb-sandbox/mot/trader_md.py
+/tmp/opencode/bb-sandbox/onchain.py
+/tmp/opencode/bb-sandbox/onchain_web3.py
+/tmp/opencode/bb-sandbox/report_risk.py
+/tmp/opencode/bb-sandbox/repro_volatility.py
+/tmp/opencode/bb-sandbox/risk/asset_allocator.py
+/tmp/opencode/bb-sandbox/risk/__init__.py
+/tmp/opencode/bb-sandbox/risk/manager.py
+/tmp/opencode/bb-sandbox/risk/param_optimizer.py
+/tmp/opencode/bb-sandbox/risk/performance_analytics.py
+/tmp/opencode/bb-sandbox/risk/portfolio_optimizer.py
+/tmp/opencode/bb-sandbox/risk/regime_adaptation.py
+/tmp/opencode/bb-sandbox/risk/sidecar_adapter.py
+/tmp/opencode/bb-sandbox/scenarios/evaluate.py
+/tmp/opencode/bb-sandbox/scenarios/generator.py
+/tmp/opencode/bb-sandbox/scenarios/__init__.py
+/tmp/opencode/bb-sandbox/scenarios/neural.py
+/tmp/opencode/bb-sandbox/scenarios/parametric.py
+/tmp/opencode/bb-sandbox/scenarios/resources.py
+/tmp/opencode/bb-sandbox/scenarios/spec.py
+/tmp/opencode/bb-sandbox/scenarios/tail_library.py
+/tmp/opencode/bb-sandbox/scenarios/train_generator.py
+/tmp/opencode/bb-sandbox/scripts/hf_download.py
+/tmp/opencode/bb-sandbox/scripts/hf_library.py
+/tmp/opencode/bb-sandbox/scripts/hf_models.py
+/tmp/opencode/bb-sandbox/scripts/hf_search.py
+/tmp/opencode/bb-sandbox/scripts/__init__.py
+/tmp/opencode/bb-sandbox/scripts/load_adapter.py
+/tmp/opencode/bb-sandbox/scripts/rtx3070-bench.py
+/tmp/opencode/bb-sandbox/scripts/service_mgr.py
+/tmp/opencode/bb-sandbox/setup_search/core.py
+/tmp/opencode/bb-sandbox/setup_search/crypto_leg.py
+/tmp/opencode/bb-sandbox/setup_search/data.py
+/tmp/opencode/bb-sandbox/setup_search/engine.py
+/tmp/opencode/bb-sandbox/setup_search/evolution.py
+/tmp/opencode/bb-sandbox/setup_search/feature_eval.py
+/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py
+/tmp/opencode/bb-sandbox/setup_search/gpu_activity.py
+/tmp/opencode/bb-sandbox/setup_search/gpu_scheduler.py
+/tmp/opencode/bb-sandbox/setup_search/__init__.py
+/tmp/opencode/bb-sandbox/setup_search/loop.py
+/tmp/opencode/bb-sandbox/setup_search/mother_trader.py
+/tmp/opencode/bb-sandbox/setup_search/mot_router.py
+/tmp/opencode/bb-sandbox/setup_search/prop_challenge_sim.py
+/tmp/opencode/bb-sandbox/setup_search/prop_entry_gate.py
+/tmp/opencode/bb-sandbox/setup_search/prototype_shadow.py
+/tmp/opencode/bb-sandbox/setup_search/research_export.py
+/tmp/opencode/bb-sandbox/setup_search/research_gate.py
+/tmp/opencode/bb-sandbox/setup_search/research_probe.py
+/tmp/opencode/bb-sandbox/setup_search/rule_gate_ab.py
+/tmp/opencode/bb-sandbox/setup_search/rule_gate.py
+/tmp/opencode/bb-sandbox/setup_search/scientist.py
+/tmp/opencode/bb-sandbox/setup_search/sentiment_value.py
+/tmp/opencode/bb-sandbox/setup_search/shadow_live.py
+/tmp/opencode/bb-sandbox/setup_search/shadow_mot.py
+/tmp/opencode/bb-sandbox/setup_search/task_gpu0_finetune.py
+/tmp/opencode/bb-sandbox/setup_search/task_hive_breed.py
+/tmp/opencode/bb-sandbox/setup_search/task_ptolemy_train.py
+/tmp/opencode/bb-sandbox/setup_search/task_self_test.py
+/tmp/opencode/bb-sandbox/setup_search/task_sentiment_expert.py
+/tmp/opencode/bb-sandbox/setup_search/task_sentiment_holdout.py
+/tmp/opencode/bb-sandbox/setup_search/task_value_push.py
+/tmp/opencode/bb-sandbox/setup_search/teach_trades.py
+/tmp/opencode/bb-sandbox/setup_search/train_momentum_agent.py
+/tmp/opencode/bb-sandbox/setup_search/trap_holdout.py
+/tmp/opencode/bb-sandbox/setup_search/trap_test.py
+/tmp/opencode/bb-sandbox/setup_search/validate_momentum_agent.py
+/tmp/opencode/bb-sandbox/setup_search/value_head_1m.py
+/tmp/opencode/bb-sandbox/setup_search/value_head.py
+/tmp/opencode/bb-sandbox/setup_search/walkforward.py
+/tmp/opencode/bb-sandbox/setup_search/wide.py
+/tmp/opencode/bb-sandbox/state/context.py
+/tmp/opencode/bb-sandbox/state/__init__.py
+/tmp/opencode/bb-sandbox/state/manager.py
+/tmp/opencode/bb-sandbox/strategies/bayes.py
+/tmp/opencode/bb-sandbox/strategies/entropy.py
+/tmp/opencode/bb-sandbox/strategies/evaluate.py
+/tmp/opencode/bb-sandbox/strategies/evolve_weights.py
+/tmp/opencode/bb-sandbox/strategies/experts.py
+/tmp/opencode/bb-sandbox/strategies/handoff.py
+/tmp/opencode/bb-sandbox/strategies/hurst.py
+/tmp/opencode/bb-sandbox/strategies/__init__.py
+/tmp/opencode/bb-sandbox/strategies/kalman.py
+/tmp/opencode/bb-sandbox/strategies/laggard.py
+/tmp/opencode/bb-sandbox/strategies/lanes.py
+/tmp/opencode/bb-sandbox/strategies/macro_features.py
+/tmp/opencode/bb-sandbox/strategies/momtrend.py
+/tmp/opencode/bb-sandbox/strategies/multiasset.py
+/tmp/opencode/bb-sandbox/strategies/scorer_intl.py
+/tmp/opencode/bb-sandbox/strategies/scorer.py
+/tmp/opencode/bb-sandbox/strategies/seed_router.py
+/tmp/opencode/bb-sandbox/strategies/shadow.py
+/tmp/opencode/bb-sandbox/strategies/spectral.py
+/tmp/opencode/bb-sandbox/strategies/verify.py
+/tmp/opencode/bb-sandbox/strategies/wavelet.py
+/tmp/opencode/bb-sandbox/tests/break_deep.py
+/tmp/opencode/bb-sandbox/tests/break_scenarios.py
+/tmp/opencode/bb-sandbox/tests/smoke_multi_gpu.py
+/tmp/opencode/bb-sandbox/tests/test_prop_gate.py
+/tmp/opencode/bb-sandbox/tools/ab_debate_test.py
+/tmp/opencode/bb-sandbox/tools/c2_platform_transmit.py
+/tmp/opencode/bb-sandbox/tools/dev_reload.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/config.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/database.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/downloads.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/download_worker.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/hub_service.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/indexer.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/__init__.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/app/main.py
+/tmp/opencode/bb-sandbox/tools/hugginghack/backend/tests/test_core.py
+/tmp/opencode/bb-sandbox/tools/molecule_model.py
+/tmp/opencode/bb-sandbox/tools/qmath.py
+/tmp/opencode/bb-sandbox/tools/runway_review.py
+/tmp/opencode/bb-sandbox/tools/weekly_review.py
+/tmp/opencode/bb-sandbox/training/adir_data_builder.py
+/tmp/opencode/bb-sandbox/training/capability_distiller.py
+/tmp/opencode/bb-sandbox/training/coding_reward_builder.py
+/tmp/opencode/bb-sandbox/training/controller.py
+/tmp/opencode/bb-sandbox/training/custom_train.py
+/tmp/opencode/bb-sandbox/training/data_builder.py
+/tmp/opencode/bb-sandbox/training/deep_eval.py
+/tmp/opencode/bb-sandbox/training/dpo_builder.py
+/tmp/opencode/bb-sandbox/training/dpo_trainer.py
+/tmp/opencode/bb-sandbox/training/eval_deploy.py
+/tmp/opencode/bb-sandbox/training/finetune_cycle.py
+/tmp/opencode/bb-sandbox/training/flash_train.py
+/tmp/opencode/bb-sandbox/training/gen_synthetic.py
+/tmp/opencode/bb-sandbox/training/harness_scheduler.py
+/tmp/opencode/bb-sandbox/training/idle_trainer.py
+/tmp/opencode/bb-sandbox/training/__init__.py
+/tmp/opencode/bb-sandbox/training/legacy_data_builder.py
+/tmp/opencode/bb-sandbox/training/model_config.py
+/tmp/opencode/bb-sandbox/training/opencode_episode_recorder.py
+/tmp/opencode/bb-sandbox/training/ops_watchdog.py
+/tmp/opencode/bb-sandbox/training/programmatic_teacher.py
+/tmp/opencode/bb-sandbox/training/real_pattern_bank.py
+/tmp/opencode/bb-sandbox/training/research_model.py
+/tmp/opencode/bb-sandbox/training/research_runner.py
+/tmp/opencode/bb-sandbox/training/reward_builder.py
+/tmp/opencode/bb-sandbox/training/rl_trainer.py
+/tmp/opencode/bb-sandbox/training/run_training.py
+/tmp/opencode/bb-sandbox/training/signal_backtester.py
+/tmp/opencode/bb-sandbox/training/signal_quality_test.py
+/tmp/opencode/bb-sandbox/training/teacher_student.py
+/tmp/opencode/bb-sandbox/training/tool_dot.py
+/tmp/opencode/bb-sandbox/training/torch_guard.py
+/tmp/opencode/bb-sandbox/training/traderbench.py
+/tmp/opencode/bb-sandbox/training/train_rocm.py
+/tmp/opencode/bb-sandbox/training/train_scheduler.py
+/tmp/opencode/bb-sandbox/training/watchdog.py
+/tmp/opencode/bb-sandbox/tui_dashboard.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/moe_utils.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothBCOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothCPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothDPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGKDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothGRPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothKTOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothNashMDTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothOnlineDPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothORPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPPOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothPRMTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRewardTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothRLOOTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothSFTTrainer.py
+/tmp/opencode/bb-sandbox/unsloth_compiled_cache/UnslothXPOTrainer.py
+[0m
+[0m→ [0mRead setup_search/engine.py
+[0m✱ [0mGrep "cross_sectional|rank_on|_score_at|rank"[90m in . · 100 matches[0m
+[0m✱ [0mGrep "fromtimestamp|today\(\)|datetime\.|timestamp\(\)|future"[90m in . · 100 matches[0m
+## Objective
+- Hunt for real re-introduced bugs in `/tmp/opencode/bb-sandbox`, prioritizing `rank-dead` and `future-bar`, and report confirmed qualifying bugs without modifying files.
+- Output confirmed bugs exactly as: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit root is `/tmp/opencode/bb-sandbox`; do not modify files and do not run the live exchange harness.
+- Likely bug ids:
+  - `rank-dead`: cross-sectional rank silently disabled, mis-indexed, or unwired.
+  - `future-bar`: future-dated daily bar not filtered, causing lookahead or crash-loop risk.
+- No files have been modified.
+- Newer `find /tmp/opencode/bb-sandbox -name '*.py' -not -path '*/.opencode/*' | sort` avoided `.opencode` noise but was truncated after `/tmp/opencode/bb-sandbox/data/multi_tf.py`.
+- `setup_search/engine.py` rank wiring is visible in grep:
+  - `engine.py:80` defines `_score_at(feat: dict, cfg: dict, rank: dict)`.
+  - `engine.py:84` uses `r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0`.
+  - `engine.py:91` adds `w["w_rank"] * r`.
+  - `engine.py:97` defines `_cross_sectional_rank(mom: dict, idx: pd.Index)`.
+  - `engine.py:127` builds `rank = _cross_sectional_rank(mom_frame, master) if cfg["rank_on"] else {}`.
+  - `engine.py:175-177` scoring loop passes `{s: rank[s][sig_t] if cfg["rank_on"] else 0.0 for s in ...}` to `_score_at`.
+- `setup_search/prototype_shadow.py:22` imports `_features, _score_at` from `setup_search.engine`.
+- `harness.py:2308` contains a Tier 2 comment: “rank by the radar momentum score, skipping the...”.
+- Broad timestamp/grep pass found many generic `datetime`/`fromtimestamp` hits, but no focused `alpaca_paper.py` or `harness.py` future-bar evidence has been extracted yet.
+- Secondary scoring/timestamp suspects remain: `strategies/scorer_intl.py`, `strategies/bayes.py`, `setup_search/ftmo_universe.py`.
+
+## Work State
+### Completed
+- Ran narrower project Python inventory excluding `.opencode`; confirmed many project files and avoided `node_modules`, though output was truncated.
+- Attempted full read of `/tmp/opencode/bb-sandbox/setup_search/engine.py`; visible content stopped at line 48, confirming imports, `_fee_amt`, `_rsi`, and start of `_features`.
+- Ran targeted grep for `cross_sectional|rank_on|_score_at|rank`; identified the rank implementation and scoring-call locations in `setup_search/engine.py`.
+- Ran broad grep for `fromtimestamp|today\(\)|datetime\.\|timestamp\(\)|future`; identified many timestamp usages but not yet a confirmed future-bar bug.
+- Re-identified `harness.py:2308` as a rank/momentum scoring area needing inspection.
+
+### Active
+- Confirm or rule out `rank-dead` by inspecting `setup_search/engine.py` lines around `80-200`, especially `_score_at`, `_cross_sectional_rank`, `rank_on`, `sig_t`, and the scoring loop.
+- Confirm or rule out `future-bar` by inspecting `/tmp/opencode/bb-sandbox/alpaca_paper.py` for timestamp normalization, epoch handling, and future-dated bar filtering.
+- Inspect `/tmp/opencode/bb-sandbox/harness.py` around line 2308 and nearby bar-ingestion/scoring functions.
+- Check secondary files for related rank or timestamp defects if the primary suspects are not confirmed.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` from around line 48 to line 200, focusing on `_score_at`, `_cross_sectional_rank`, `rank_on`, `sig_t`, and the main scoring loop.
+2. Grep or read `/tmp/opencode/bb-sandbox/alpaca_paper.py` for `fromtimestamp`, `timestamp`, `future`, `date`, `bar`, and normalization/filtering logic.
+3. Read `/tmp/opencode/bb-sandbox/harness.py` around line 2308 and nearby bar ingestion or scoring functions.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: primary `rank-dead` suspect; rank helpers and scoring call sites are partially mapped but not yet verified.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: primary `future-bar` suspect for bar timestamp handling and future-date filtering.
+- `/tmp/opencode/bb-sandbox/harness.py`: line 2308 references ranking by radar momentum; also possible bar-ingestion path.
+- `/tmp/opencode/bb-sandbox/setup_search/prototype_shadow.py`: line 22 imports `_features, _score_at`; useful for confirming rank consumers.
+- `/tmp/opencode/bb-sandbox/strategies/scorer_intl.py`: secondary scoring area using `pct_change().dropna()`.
+- `/tmp/opencode/bb-sandbox/strategies/bayes.py`: secondary returns handling with `pct_change` and `fillna(0.0)`.
+- `/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py`: DXY regime proxy and cross-sectional mean; may interact with ranking.
+- `/tmp/opencode/bb-sandbox`: audit root; narrower project inventory still needs completion if broader context is required.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py[90m [offset=48, limit=160][0m
+[0m
+[0m$ [0mgrep -n "fromtimestamp\|timestamp\|future\|date\|bar\|normalize\|today\|datetime\|utcnow\|now(" /tmp/opencode/bb-sandbox/alpaca_paper.py 2>/dev/null | head -80
+16:from datetime import datetime, timezone
+22:    """Anchored-synthetic OHLCV bar. timestamp is epoch SECONDS so harness
+23:    bar consumers (which use datetime.fromtimestamp(ts)) work unchanged."""
+29:    timestamp: int = 0
+140:        self._bars: Dict[str, list] = {}
+295:    def get_bars(self, symbol: str, timeframe: str = "1h", limit: int = 80,
+297:        """Return OHLCV bars. Uses synthetic GBM anchored by real price."""
+299:        if seed_offset == 0 and key in self._bars and len(self._bars[key]) >= limit:
+300:            return self._bars[key][-limit:]
+310:        bars = []
+322:            bars.append(SimpleBar(open=o, high=h, low=l, close=c, volume=v,
+323:                                  timestamp=int(now) - (limit - i) * 3600))
+325:        self._bars[key] = bars
+326:        return bars[-limit:]
+328:    def push_bar(self, symbol: str, bar: dict):
+329:        """Push a new OHLCV bar (called per-cycle by harness)."""
+331:        if key not in self._bars:
+332:            self._bars[key] = []
+333:        b = bar[0] if isinstance(bar, list) else bar
+335:        self._bars[key].append(SimpleBar(
+341:            timestamp=int(b.get("timestamp", b.get("t", _time.time()))),
+344:    def load_bars(self, symbol: str, bars: list):
+346:        if key not in self._bars:
+347:            self._bars[key] = []
+348:        for b in bars:
+351:                self._bars[key].append(SimpleBar(
+357:                    timestamp=int(b.get("timestamp", b.get("t", _time.time()))),
+360:                self._bars[key].append(SimpleBar(
+366:                    timestamp=int(getattr(b, "timestamp", getattr(b, "t", _time.time()))),
+425:            timestamp=datetime.now(timezone.utc).isoformat(),
+433:        self._bars.clear()
+436:        """Return known symbols from loaded bars, cache, and defaults."""
+438:        for key in self._bars:
+442:        symbols.update(INDUSTRY_MEDIAN.keys())
+446:            symbols.update(r[0] for r in rows if r[0])
+[0m
+## Objective
+- Hunt for real re-introduced bugs in `/tmp/opencode/bb-sandbox`, prioritizing `rank-dead` and `future-bar`, without modifying files or running the live exchange harness.
+- Report only confirmed qualifying bugs exactly as: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit root is `/tmp/opencode/bb-sandbox`; do not modify files and do not run the live exchange harness.
+- Likely bug ids:
+  - `rank-dead`: cross-sectional rank silently disabled, mis-indexed, unwired, or scoring not actually using rank.
+  - `future-bar`: future-dated bar not filtered, causing lookahead or crash-loop risk.
+- No files have been modified.
+- `setup_search/engine.py` rank-related code is partially verified:
+  - `_features` builds per-symbol feature frames including research-gate columns `ma_dist`, `vol_spike`, `vol_level`, `momfilt`.
+  - `_score_at(feat, cfg, rank)` uses `r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0` and adds `w["w_rank"] * r`, so it expects `rank` to map symbols to scalar rank values at the scoring point.
+  - `_cross_sectional_rank(mom, idx)` begins with `rank = {s: np.zeros(len(idx)) for s in mom}`, `frame = pd.DataFrame(mom).dropna(axis=1)`, returns zeros if `frame.shape[1] < 2`, then starts a time loop at a truncated line.
+  - Prior grep indicates line 127 builds `rank = _cross_sectional_rank(mom_frame, master) if cfg["rank_on"] else {}` and lines 175-177 may pass scalarized ranks `{s: rank[s][sig_t] ...}` into `_score_at`; this still needs direct verification.
+- `alpaca_paper.py` timestamp handling evidence from targeted grep:
+  - `SimpleBar.timestamp` is documented as epoch SECONDS and defaults to `0`.
+  - `get_bars()` caches and synthesizes GBM bars, appending timestamps `timestamp=int(now) - (limit - i) * 3600`.
+  - `push_bar()` and `load_bars()` accept incoming bars and coerce timestamp with `int(b.get("timestamp", b.get("t", _time.time())))`; no visible future-dated filtering in grep snippets.
+  - A separate method near line 425 sets `timestamp=datetime.now(timezone.utc).isoformat()`, which may be non-bar state and needs context.
+- Secondary scoring/timestamp suspects remain: `strategies/scorer_intl.py`, `strategies/bayes.py`, `setup_search/ftmo_universe.py`.
+
+## Work State
+### Completed
+- Re-established the bug-hunt state from prior summary and resumed investigation with parallel reads/greps.
+- Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` offset `48`, limit `160`; confirmed feature assembly, `_score_at`, and the beginning of `_cross_sectional_rank` up to the truncated time-loop line.
+- Ran targeted grep on `/tmp/opencode/bb-sandbox/alpaca_paper.py` for timestamp/bar-related identifiers and mapped `get_bars`, `push_bar`, `load_bars`, and timestamp coercion behavior, but did not yet confirm a `future-bar` defect.
+- Confirmed no confirmed qualifying bug has yet been reported.
+
+### Active
+- Verify `rank-dead` by reading `setup_search/engine.py` around lines `100-220`, especially the rest of `_cross_sectional_rank`, `rank_on`, `sig_t`, rank construction at line ~127, and scoring loop lines ~175-177.
+- Verify `future-bar` by reading `alpaca_paper.py` around `get_bars` (`~295-326`), `push_bar` (`~328-343`), `load_bars` (`~344-367`), and line ~425 to determine whether future-dated bars are accepted, filtered, normalized, or misdated.
+- Inspect `/tmp/opencode/bb-sandbox/harness.py` around line `2308` and nearby bar-ingestion/scoring/ranking code.
+- Check secondary files only if the primary rank and future-bar suspects are ruled out or insufficient.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` from around line `100` to line `220` to confirm or rule out `rank-dead` in `_cross_sectional_rank`, rank construction, and scoring-loop indexing.
+2. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` around lines `280-430` to inspect `get_bars`, `push_bar`, `load_bars`, `now` definition, and future-bar filtering for a confirmed `future-bar` bug.
+3. Read `/tmp/opencode/bb-sandbox/harness.py` around line `2308` and adjacent bar ingestion/scoring functions to connect rank or future-bar behavior to the harness.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: primary `rank-dead` suspect; `_score_at` and `_cross_sectional_rank` partially verified, rank construction/scoring call still needs direct read.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: primary `future-bar` suspect; `get_bars`, `push_bar`, `load_bars`, and timestamp coercion are mapped but not yet confirmed as buggy.
+- `/tmp/opencode/bb-sandbox/harness.py`: line `2308` references ranking by radar momentum and is a likely integration point for rank or bar-ingestion behavior.
+- `/tmp/opencode/bb-sandbox/setup_search/prototype_shadow.py`: line `22` imports `_features, _score_at`; useful for confirming rank consumers.
+- `/tmp/opencode/bb-sandbox/strategies/scorer_intl.py`: secondary scoring area using `pct_change().dropna()`.
+- `/tmp/opencode/bb-sandbox/strategies/bayes.py`: secondary returns handling with `pct_change` and `fillna(0.0)`.
+- `/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py`: DXY regime proxy and cross-sectional mean; may interact with ranking.
+- `/tmp/opencode/bb-sandbox`: audit root; broader project inventory may be needed if primary suspects fail.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py[90m [offset=100, limit=130][0m
+[0m→ [0mRead alpaca_paper.py[90m [offset=280, limit=150][0m
+[0m→ [0mRead harness.py[90m [offset=2280, limit=90][0m
+## Objective
+- Hunt for real re-introduced bugs in `/tmp/opencode/bb-sandbox`, prioritizing `rank-dead` and `future-bar`, without modifying files or running the live exchange harness.
+- Report only confirmed qualifying bugs exactly as: `FOUNDBUG <bug-id-hint>: <file>:<function> - <one-line root cause>`.
+
+## Important Details
+- Audit root is `/tmp/opencode/bb-sandbox`; do not modify files and do not run the live exchange harness.
+- Likely bug ids:
+  - `rank-dead`: cross-sectional rank silently disabled, mis-indexed, unwired, or scoring not actually using rank.
+  - `future-bar`: future-dated bar not filtered, causing lookahead or crash-loop risk.
+- No files have been modified.
+- `setup_search/engine.py` rank-related evidence:
+  - `_features` builds per-symbol feature frames including research-gate columns `ma_dist`, `vol_spike`, `vol_level`, `momfilt`.
+  - `_score_at(feat, cfg, rank)` uses `r = rank.get(sym, 0.0) if cfg["rank_on"] else 0.0` and adds `w["w_rank"] * r`, so it expects `rank` to map symbols to scalar rank values at the scoring point.
+  - `_cross_sectional_rank(mom, idx)` was read through lines `100-109`: it returns zeros if `frame.shape[1] < 2`, then for each row computes `order = vals.argsort().argsort()`, `norm = (order / max(len(vals) - 1, 1)) * 2 - 1`, and assigns `rank[s][t] = norm[j]`.
+  - `run_backtest` was read through line `147`:
+    - line `127`: `rank = _cross_sectional_rank(mom_frame, master) if cfg["rank_on"] else {}`
+    - line `129`: `spy = closes.get("SPY")`
+    - lines `130-134`: regime filter uses SPY > rolling mean if `cfg["regime_filter"]`
+    - lines `136-144`: `start = int(max(cfg["mom_lb"], cfg["rev_lb"], cfg["rsi_period"], cfg["breakout_lb"], cfg["z_period"]))`
+    - line `145+`: comment about starting one bar later so first signal bar is warmed up
+  - Still needs direct verification of lines `148+` to confirm how `rank` is indexed into scalar values for `_score_at`, especially `sig_t` or similar, and whether the rank path can actually affect scores.
+- `alpaca_paper.py` timestamp/bar evidence:
+  - `SimpleBar.timestamp` is documented as epoch SECONDS and defaults to `0`.
+  - `get_bars()` caches and synthesizes GBM bars anchored by real price.
+  - Lines `295-321` were read:
+    - `key = f"{symbol}:{timeframe}"`
+    - cached price or `INDUSTRY_MEDIAN.get(symbol.upper(), 100.0)` anchors price
+    - deterministic seed from `hash(key)` and optional `seed_offset`
+    - loop generates synthetic OHLCV and begins `bars.append(SimpleBar(open=o, high=h, low=l,` but the timestamp assignment was not visible in the returned snippet
+  - Prior grep indicated timestamp formula may be `timestamp=int(now) - (limit - i) * 3600`, but this still needs direct read.
+  - `push_bar()` and `load_bars()` accept incoming bars and coerce timestamp with `int(b.get("timestamp", b.get("t", _time.time())))`; no visible future-dated filtering was seen in grep snippets.
+  - A separate method near line `425` sets `timestamp=datetime.now(timezone.utc).isoformat()`, which may be non-bar state and needs context.
+- `harness.py` evidence:
+  - Lines `2280-2314` show a Scout universe-selection path:
+    - if `len(radar) < 10`, returns `self._scout_flat(focus)`
+    - builds a prompt asking LLM for top 20 tickers from radar
+    - parses via `self._llm_json_array(prompt, key="symbol", max_n=20, min_score=1)`
+    - sorts by `score`
+    - `top6 = top20[:focus]`
+    - comment says “Tier 2 (simplified): rank by the radar momentum score, skipping the two serial LLM bull/bear rating calls”, but visible code uses the LLM `top20` ordering, not an explicit radar momentum re-rank.
+  - This may be relevant if `rank-dead` is about scout ranking, but primary engine rank verification is still more direct.
+- Secondary scoring/timestamp suspects remain: `strategies/scorer_intl.py`, `strategies/bayes.py`, `setup_search/ftmo_universe.py`.
+
+## Work State
+### Completed
+- Re-established bug-hunt state and resumed targeted reads.
+- Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` lines `100-147`, confirming the tail of `_cross_sectional_rank` and the beginning of `run_backtest` through rank construction and warmup start.
+- Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` lines `280-321`, confirming `get_bars` synthetic GBM generation setup and cache/seed logic, but not the exact timestamp assignment.
+- Read `/tmp/opencode/bb-sandbox/harness.py` lines `2280-2322`, confirming Scout LLM top-20 selection and simplified top-6 path.
+- Confirmed no qualifying bug has yet been reported.
+
+### Active
+- Verify `rank-dead` by reading `/tmp/opencode/bb-sandbox/setup_search/engine.py` from around line `148` onward to inspect:
+  - signal index construction, e.g. `sig_t = t - 1`
+  - how `rank[s][sig_t]` or scalarized rank dict is passed to `_score_at`
+  - whether `macro_gate`, `regime`, and scoring loop use the rank consistently
+- Verify `future-bar` by reading `/tmp/opencode/bb-sandbox/alpaca_paper.py` around lines `320-450` to inspect:
+  - exact `get_bars` timestamp assignment
+  - `push_bar`
+  - `load_bars`
+  - whether timestamps are clamped, filtered, or allowed to be future-dated
+  - the line ~425 ISO timestamp context
+- Inspect `/tmp/opencode/bb-sandbox/harness.py` around Scout helpers and bar-ingestion/scoring code if primary suspects remain ambiguous:
+  - `_scout_flat`
+  - radar momentum scoring
+  - how `top20`/`top6` are consumed downstream
+- Check secondary files only if primary rank and future-bar suspects are ruled out or insufficient.
+
+### Blocked
+- None.
+
+## Next Move
+1. Read `/tmp/opencode/bb-sandbox/setup_search/engine.py` from around line `148` to line `270` to confirm or rule out `rank-dead` in the `run_backtest` scoring loop.
+2. Read `/tmp/opencode/bb-sandbox/alpaca_paper.py` from around line `320` to line `450` to confirm or rule out `future-bar` in `get_bars`, `push_bar`, and `load_bars`.
+3. If either primary suspect is ambiguous, read `/tmp/opencode/bb-sandbox/harness.py` around Scout helpers and adjacent bar/scoring functions to trace integration.
+
+## Relevant Files
+- `/tmp/opencode/bb-sandbox/setup_search/engine.py`: primary `rank-dead` suspect; `_cross_sectional_rank` and rank construction partially verified, but scoring-loop indexing still needs direct read.
+- `/tmp/opencode/bb-sandbox/alpaca_paper.py`: primary `future-bar` suspect; synthetic bar generation, timestamp coercion, and absence/presence of future filtering still need confirmation.
+- `/tmp/opencode/bb-sandbox/harness.py`: Scout top-20/top-6 logic and possible rank integration point; may clarify whether `rank-dead` manifests in universe selection.
+- `/tmp/opencode/bb-sandbox/setup_search/prototype_shadow.py`: line `22` imports `_features, _score_at`; useful for confirming rank consumers.
+- `/tmp/opencode/bb-sandbox/strategies/scorer_intl.py`: secondary scoring area using `pct_change().dropna()`.
+- `/tmp/opencode/bb-sandbox/strategies/bayes.py`: secondary returns handling with `pct_change` and `fillna(0.0)`.
+- `/tmp/opencode/bb-sandbox/setup_search/ftmo_universe.py`: DXY regime proxy and cross-sectional mean; may interact with ranking.
+- `/tmp/opencode/bb-sandbox`: audit root; broader project inventory may be needed if primary suspects fail.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead setup_search/engine.py[90m [offset=148, limit=130][0m
+[0m→ [0mRead alpaca_paper.py[90m [offset=320, limit=140][0m

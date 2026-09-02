@@ -1,0 +1,488 @@
+[0m
+> supervisor · qwen38-agentic
+[0m
+[0m→ [0mRead data/paper_state.json
+[0m
+[0m$ [0mls -la --time-style=full-iso /home/mrc/opentrader/data/paper_state.json /home/mrc/opentrader/data/agent_state.json 2>&1; date
+-rw-r--r-- 1 mrc mrc 102737 2026-08-15 12:43:07.153275510 -0500 /home/mrc/opentrader/data/agent_state.json
+-rw-r--r-- 1 mrc mrc 103522 2026-08-15 12:43:07.146275549 -0500 /home/mrc/opentrader/data/paper_state.json
+Sun Aug 16 05:01:29 PM CDT 2026
+[0m
+[0m$ [0mtail -c 4000 /home/mrc/opentrader/data/paper_state.json
+re=-0.040",
+      "timestamp": "2026-08-15T17:39:49+00:00"
+    },
+    {
+      "symbol": "CAKE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.042",
+      "timestamp": "2026-08-15T17:39:49+00:00"
+    },
+    {
+      "symbol": "BBY",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.034",
+      "timestamp": "2026-08-15T17:39:49+00:00"
+    },
+    {
+      "symbol": "ADI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.127",
+      "timestamp": "2026-08-15T17:39:49+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.029",
+      "timestamp": "2026-08-15T17:41:43+00:00"
+    },
+    {
+      "symbol": "ARRY",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.078",
+      "timestamp": "2026-08-15T17:41:43+00:00"
+    },
+    {
+      "symbol": "BE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.083",
+      "timestamp": "2026-08-15T17:41:43+00:00"
+    },
+    {
+      "symbol": "BURBY",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.046",
+      "timestamp": "2026-08-15T17:41:43+00:00"
+    },
+    {
+      "symbol": "BALY",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.040",
+      "timestamp": "2026-08-15T17:41:43+00:00"
+    },
+    {
+      "symbol": "AMD",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.029",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    },
+    {
+      "symbol": "ASML",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.129",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    },
+    {
+      "symbol": "BALY",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.040",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    },
+    {
+      "symbol": "CAKE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.042",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    },
+    {
+      "symbol": "ADI",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=-0.127",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    },
+    {
+      "symbol": "BE",
+      "action": "HOLD",
+      "confidence": 0.0,
+      "position_pct": 0.0,
+      "reason": "rule-primary score=0.083",
+      "timestamp": "2026-08-15T17:43:06+00:00"
+    }
+  ],
+  "models": {
+    "agent": "trading_agent",
+    "stage": 3,
+    "symbols": [
+      "AMD",
+      "ASML",
+      "BALY",
+      "CAKE",
+      "ADI",
+      "BE"
+    ],
+    "llama_available": true,
+    "llama_host": "http://127.0.0.1:5801",
+    "debate_model": "qwythos-9b-mtp"
+  },
+  "metrics": {
+    "cycle_time_s": 54.502,
+    "total_cycles": 4205,
+    "total_fills": 0,
+    "drawdown_pct": 0.0,
+    "peak_value": 500.0,
+    "stage": 3,
+    "symbol_count": 6,
+    "fear_greed": {
+      "value": 50,
+      "classification": "unknown"
+    },
+    "signal_accuracy": {
+      "overall_accuracy_pct": 0.0,
+      "total_predictions": 0,
+      "total_correct": 0,
+      "by_action": {}
+    }
+  },
+  "portfolio_optimization": {},
+  "trades": [],
+  "alerts": [],
+  "hodl_benchmark": {
+    "enabled": true,
+    "value": 0,
+    "return_pct": 0,
+    "outperform_pct": 3.6,
+    "hodl_return_pct": -3.6,
+    "bot_return_pct": 0.0
+  },
+  "Committee": {
+    "accuracy": {},
+    "risk_limits": {
+      "max_position_pct": 0.2,
+      "max_total_exposure": 0.7
+    }
+  },
+  "symbol_regimes": {}
+}
+[0m
+[0m$ [0mpython3 - <<'EOF'
+import json
+s = json.load(open('/home/mrc/opentrader/data/agent_state.json'))
+def prune(d, depth=0):
+    if depth > 2: return str(d)[:200]
+    if isinstance(d, dict):
+        return {k: prune(v, depth+1) for k, v in d.items()}
+    if isinstance(d, list):
+        return f"[list len={len(d)}] last={prune(d[-1], depth+1) if d else None}"
+    return d
+print(json.dumps(prune(s), indent=1, default=str)[:6000])
+EOF
+{
+ "name": "trading_agent",
+ "cycle_count": 24648,
+ "history": "[list len=0] last=None",
+ "thinking_history": "[list len=0] last=None",
+ "config": {
+  "model": "hermes-3-llama-3.1-8b",
+  "llama_host": "http://127.0.0.1:5801",
+  "use_model": true,
+  "initial_cash": 500.0,
+  "max_tool_calls": 5
+ },
+ "_cycle": 4205,
+ "_signal_count": 500,
+ "_peak_value": 500.0,
+ "_stage": 3,
+ "_stage_start": 1786814400.2017133,
+ "_initial_cash": 500.0,
+ "_trade_journal": "[list len=0] last=None",
+ "_signal_history": "[list len=500] last={'symbol': 'BE', 'action': 'HOLD', 'confidence': '0.0', 'reason': 'rule-primary score=0.083', 'position_pct': '0.0', 'timestamp': '2026-08-15T17:43:06+00:00'}",
+ "_committee": {
+  "accuracy": {},
+  "risk_limits": {
+   "max_position_pct": "0.2",
+   "max_total_exposure": "0.7"
+  }
+ },
+ "_signal_scores": {},
+ "_accuracy_total": 0,
+ "_accuracy_correct": 0,
+ "_sl_tp_levels": {},
+ "_symbol_regimes": {}
+}
+[0m
+[0m$ [0mps aux | grep -iE "harness|opentrader" | grep -v grep; echo "---"; ps aux | grep -iE "mcp_server|record_cycle" | grep -v grep
+mrc          913  0.0  0.0 1024824 4500 ?        SNsl Aug15   1:26 /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/mcp_server.py --host 127.0.0.1 --port 8092 --exchange paper
+mrc          916  0.0  0.0  61644  5048 ?        Ss   Aug15   1:25 /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/dashboard.py --port 8097
+mrc       155769  0.0  0.0  45020 16156 ?        Ss   Aug15   0:01 /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/tools/c2_platform_transmit.py
+mrc       852964  0.0  0.0   7924  5548 ?        S    16:51   0:00 /bin/bash /home/mrc/opentrader/scripts/benchmark-q38.sh
+mrc      1031862  0.0  0.0   5772  3772 ?        SN   17:00   0:00 timeout 600 opencode run --agent supervisor --auto Portfolio risk check (READ-ONLY): read /home/mrc/opentrader/data/paper_state.json. Report cash, positions, portfolio_value, cycle, and whether the timestamp looks stale vs today 2026-08-16. Flag red flags. Do not modify anything.
+mrc      1031863 22.7  1.4 76245312 484392 ?     SNl  17:00   0:47 opencode run --agent supervisor --auto Portfolio risk check (READ-ONLY): read /home/mrc/opentrader/data/paper_state.json. Report cash, positions, portfolio_value, cycle, and whether the timestamp looks stale vs today 2026-08-16. Flag red flags. Do not modify anything.
+mrc      1032323  0.4  0.1 232972 57756 ?        Sl   17:01   0:00 /home/mrc/.local/share/pipx/venvs/pycodesage/bin/python /home/mrc/.local/bin/codesage mcp serve /home/mrc/opentrader
+mrc      3435409  0.0  0.0 232964  5384 ?        SNl  11:47   0:00 /home/mrc/.local/share/pipx/venvs/pycodesage/bin/python /home/mrc/.local/bin/codesage mcp serve /home/mrc/opentrader
+mrc      3614651  0.0  0.0 8620375900 6032 pts/2 Sl+  12:41   0:02 /home/mrc/.local/share/pipx/venvs/pycodesage/bin/python /home/mrc/.local/bin/codesage mcp serve /home/mrc/opentrader
+---
+mrc          913  0.0  0.0 1024824 4500 ?        SNsl Aug15   1:26 /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/mcp_server.py --host 127.0.0.1 --port 8092 --exchange paper
+mrc      1032321  0.7  0.1 235832 56892 ?        SNl  17:01   0:01 /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+mrc      3435407  0.0  0.0 235840  5188 ?        SNl  11:47   0:01 /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+mrc      3614649  0.0  0.0 244076  5236 pts/2    SNl+ 12:41   0:01 /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+[0m
+File read (first 2000 of 4072 lines). Key facts so far: cycle 4205, internal timestamp 2026-08-15T17:43:07Z, mtime 2026-08-15 12:43:07 CDT (=17:43:07.146Z — matches internal timestamp to ~2ms, so no writer regression/clobber). Now checking the tail of the file, agent_state.json, and whether a harness process is alive — all read-only.
+## Objective
+- Perform a read-only portfolio risk check of `/home/mrc/opentrader/data/paper_state.json` as of `2026-08-16`.
+- Report cash, positions, `portfolio_value`, cycle, timestamp staleness, and red flags without modifying anything.
+
+## Important Details
+- Constraint: READ-ONLY; do not modify state files or run mutating commands.
+- Reference current time observed from `date`: `Sun Aug 16 05:01:29 PM CDT 2026`, equivalent to `2026-08-16T22:01:29Z`.
+- `/home/mrc/opentrader/data/paper_state.json` key values:
+  - `cycle`: `4205`
+  - `timestamp`: `2026-08-15T17:43:07.144394+00:00`
+  - `initial_cash`: `500.0`
+  - `cash`: `500.0`
+  - `portfolio_value`: `500.0`
+  - `positions`: `[]`
+  - `prices`: `{}`
+  - `fills`: `[]`
+  - `data_provenance`: `mode=live`, `exchange=multi`, `synthetic_data=false`
+- File mtime for `/home/mrc/opentrader/data/paper_state.json`: `2026-08-15 12:43:07.146275549 -0500`, matching the internal timestamp to about `2 ms`, so no obvious rollback or clobber.
+- `/home/mrc/opentrader/data/agent_state.json` mtime: `2026-08-15 12:43:07.153275510 -0500`.
+- Relevant `agent_state.json` fields:
+  - `_cycle`: `4205`
+  - `cycle_count`: `24648`
+  - `_signal_count`: `500`
+  - `_peak_value`: `500.0`
+  - `_trade_journal`: `[]`
+  - last `_signal_history` entry: `BE`, `HOLD`, `confidence=0.0`, `timestamp=2026-08-15T17:43:06+00:00`
+- Staleness assessment: last state write was roughly `28h 18m` before the observed current time, so the state is stale relative to `2026-08-16`.
+- Recent visible `paper_state.json` signals are all `HOLD` with `confidence=0.0` and `position_pct=0.0`; last visible signal timestamps are around `2026-08-15T17:41:43+00:00` through `2026-08-15T17:43:06+00:00`.
+- Process check showed `/home/mrc/opentrader/mcp_server.py` PID `913` and `/home/mrc/opentrader/dashboard.py` PID `916` still running since `Aug15`, but no newer paper-state writes were observed.
+- Possible red flag noted during reasoning: an `AZUL` signal with `score=nan`; verify in full signal list/logs before finalizing.
+- Current interpretation: portfolio is flat at `$500.0` with no positions or fills, but the trading loop appears stalled.
+
+## Work State
+### Completed
+- Read key top-level fields from `/home/mrc/opentrader/data/paper_state.json`.
+- Read the tail of `/home/mrc/opentrader/data/paper_state.json` to inspect the latest signals.
+- Captured mtimes for `/home/mrc/opentrader/data/paper_state.json` and `/home/mrc/opentrader/data/agent_state.json`.
+- Extracted relevant `/home/mrc/opentrader/data/agent_state.json` fields with a read-only Python one-shot.
+- Checked running processes for `mcp_server.py`, `dashboard.py`, and related `opentrader` processes.
+
+### Active
+- Synthesize the final read-only risk report.
+- Optionally confirm the stall cause using recent harness/debate/error logs around `2026-08-15T17:43Z`.
+- Current risk picture: flat portfolio, no P&L, no drawdown, but stale state and no cycle progression.
+
+### Blocked
+- Nothing prevents producing the final report.
+- `/home/mrc/opentrader/data/paper_state.json` output was truncated in one tool result, but the required top-level fields and tail were captured.
+- Exact harness log path has not yet been confirmed if deeper diagnosis is needed.
+
+## Next Move
+1. If needed, inspect recent read-only logs or debate output around `2026-08-15T17:43Z` to identify why cycle `4205` stopped.
+2. Deliver the final report: `cash=500.0`, `positions=[]`, `portfolio_value=500.0`, `cycle=4205`, timestamp stale by about `28h 18m` vs `2026-08-16`, and red flags including stalled state, all recent `HOLD` signals with zero confidence, empty `fills`, and possible `NaN` scoring.
+
+## Relevant Files
+- `/home/mrc/opentrader/data/paper_state.json`: primary paper-trading state; source for cash, positions, `portfolio_value`, cycle, timestamp, signals, fills, and prices.
+- `/home/mrc/opentrader/data/agent_state.json`: cross-reference for agent cycle, signal history, peak value, trade journal, and committee/risk metadata.
+- `/home/mrc/opentrader/mcp_server.py`: observed running process; likely relevant to harness/state service behavior if diagnosing the stall.
+- `/home/mrc/opentrader/dashboard.py`: observed running dashboard process; useful context for service uptime but not required for the portfolio snapshot.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mls -la /home/mrc/opentrader
+total 712
+drwxr-xr-x  30 mrc mrc   4096 Aug 15 12:19 .
+drwxr-xr-x 200 mrc mrc  20480 Aug 16 09:48 ..
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:35 agent
+-rw-r--r--   1 mrc mrc   9430 Aug 14 13:35 AGENTS.md
+-rw-r--r--   1 mrc mrc  17924 Aug  7 16:36 alpaca_paper.py
+drwxr-xr-x   2 mrc mrc   4096 Aug 12 21:15 arena
+-rw-r--r--   1 mrc mrc  10343 Jul  6 07:56 benchmark_models.py
+drwxr-xr-x   2 mrc mrc   4096 Jul 29 22:29 charts
+drwxr-xr-x   4 mrc mrc   4096 Aug 16 15:08 .codesage
+drwxr-xr-x   2 mrc mrc   4096 Aug 13 03:14 config
+-rw-r--r--   1 mrc mrc  13880 Aug 12 23:50 connections.py
+-rw-r--r--   1 mrc mrc   8804 Jul  4 11:02 coordinator.py
+-rw-r--r--   1 mrc mrc  88603 Aug 14 15:20 dashboard.html
+-rw-r--r--   1 mrc mrc  16883 Aug 14 15:20 dashboard.py
+drwxr-xr-x  22 mrc mrc   4096 Aug 16 17:10 data
+-rw-r--r--   1 mrc mrc  10067 Jul 10 14:02 data_mgmt.py
+drwxr-xr-x   9 mrc mrc   4096 Aug 14 14:18 docs
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 exchange
+drwxr-xr-x   5 mrc mrc   4096 Jul 28 20:21 exchange-engine
+drwxr-xr-x   7 mrc mrc   4096 Aug 16 15:07 .git
+-rw-r--r--   1 mrc mrc   2536 Aug  7 16:36 .gitignore
+-rw-r--r--   1 mrc mrc  16952 Aug 12 23:07 gpu_sync.py
+-rw-r--r--   1 mrc mrc 215597 Aug 15 12:16 harness.py
+-rw-r--r--   1 mrc mrc      0 Jul  2 11:20 __init__.py
+-rw-r--r--   1 mrc mrc  46832 Jul 30 10:02 mcp_server.py
+-rw-r--r--   1 mrc mrc  25884 Jul 30 14:07 model_manager.py
+drwxr-xr-x   5 mrc mrc   4096 Jul 27 17:15 models
+drwxr-xr-x   4 mrc mrc   4096 Aug 15 12:20 mot
+-rw-r--r--   1 mrc mrc   5168 Jul  8 21:30 onchain.py
+-rw-r--r--   1 mrc mrc  10182 Jul  4 16:22 onchain_web3.py
+drwxr-xr-x   7 mrc mrc   4096 Aug 10 03:31 .opencode
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 __pycache__
+-rw-r--r--   1 mrc mrc   3621 Aug 13 00:18 README.md
+-rwxr-xr-x   1 mrc mrc   1584 Jul  9 14:29 report_risk.py
+-rw-r--r--   1 mrc mrc   2281 Jul 29 11:33 repro_volatility.py
+-rw-r--r--   1 mrc mrc    880 Jul 30 10:03 requirements.txt
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:19 risk
+drwxr-xr-x   4 mrc mrc   4096 Aug  1 07:49 .ruff_cache
+drwxr-xr-x   2 mrc mrc   4096 Aug 11 14:43 scenarios
+drwxr-xr-x   3 mrc mrc   4096 Aug 16 16:23 scripts
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:22 setup_search
+drwxr-xr-x   2 mrc mrc   4096 Aug  7 17:44 showcase
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:35 state
+drwxr-xr-x   2 mrc mrc   4096 Aug 14 15:00 static
+drwxr-xr-x   2 mrc mrc   4096 Aug 15 12:12 strategies
+drwxr-xr-x   2 mrc mrc   4096 Aug  7 16:36 tests
+drwxr-xr-x   3 mrc mrc   4096 Aug 13 11:43 tools
+drwxr-xr-x   3 mrc mrc   4096 Aug 15 12:20 training
+-rwxr-xr-x   1 mrc mrc  28082 Jul 29 22:01 tui_dashboard.py
+drwxr-xr-x   3 mrc mrc   4096 Aug 13 11:43 unsloth_compiled_cache
+drwxr-xr-x   2 mrc mrc   4096 Jul 27 02:00 _unsloth_sentencepiece_temp
+[0m
+[0m$ [0mls -la /home/mrc/opentrader/data
+total 232580
+drwxr-xr-x 22 mrc mrc      4096 Aug 16 17:10 .
+drwxr-xr-x 30 mrc mrc      4096 Aug 15 12:19 ..
+drwxr-xr-x  4 mrc mrc      4096 Aug 14 14:30 accumulator
+-rw-r--r--  1 mrc mrc      4827 Aug  9 13:46 accumulator.py
+-rwxr-xr-x  1 mrc mrc      1699 Aug  9 19:00 accumulator_run.sh
+-rw-r--r--  1 mrc mrc      6266 Aug  9 14:05 acquire.py
+-rw-r--r--  1 mrc mrc      1305 Aug 15 12:43 adapter_registry.json
+-rw-r--r--  1 mrc mrc    102737 Aug 15 12:43 agent_state.json
+-rw-r--r--  1 mrc mrc    145533 Jul 28 02:24 agent_state.json.bak.20260728_022454
+-rw-r--r--  1 mrc mrc     12288 Aug  9 11:32 alt_data_cache.db
+-rw-r--r--  1 mrc mrc     12544 Jul 16 15:35 alt_data_mcp.py
+drwxr-xr-x  2 mrc mrc      4096 Aug 10 04:12 arena
+-rw-r--r--  1 mrc mrc        18 Aug  1 22:20 arxiv_cross_cache.json
+-rw-r--r--  1 mrc mrc    144081 Aug  2 07:51 arxiv_library.json
+-rw-r--r--  1 mrc mrc     26578 Aug  1 22:09 arxiv.py
+-rw-r--r--  1 mrc mrc      3688 Aug 15 12:24 atdl_state.json
+-rw-r--r--  1 mrc mrc      2717 Aug 10 12:01 autonomous_loop.jsonl
+-rw-r--r--  1 mrc mrc      4092 Aug 10 12:01 autonomous_loop.log
+-rw-r--r--  1 mrc mrc       192 Aug 10 12:01 autonomous_loop_state.json
+drwxr-xr-x  3 mrc mrc      4096 Jul 30 10:42 backups
+drwxr-xr-x  2 mrc mrc      4096 Aug 16 17:01 benchmark-q38
+-rw-r--r--  1 mrc mrc     82186 Aug 10 22:33 c2_transmit.log
+drwxr-xr-x  2 mrc mrc      4096 Jul  2 11:59 charts
+-rw-r--r--  1 mrc mrc      1939 Aug 13 01:19 codebase_molecule_recipe.md
+-rw-r--r--  1 mrc mrc       570 Jul 24 15:49 coding_rl_training_data.jsonl
+-rw-r--r--  1 mrc mrc      2868 Aug 12 23:51 connections.json
+lrwxrwxrwx  1 mrc mrc        51 Aug 11 03:16 current_adapter -> /home/mrc/opentrader/data/models/finetune/Ptolemy-1
+-rw-r--r--  1 mrc mrc      1519 Aug  9 20:00 defect_log.json
+-rw-r--r--  1 mrc mrc      6326 Aug 14 13:00 economic_calendar.py
+-rw-r--r--  1 mrc mrc     10727 Aug  1 18:15 economics.py
+-rw-r--r--  1 mrc mrc   2802280 Aug  9 13:40 etf_factors.pkl
+-rw-r--r--  1 mrc mrc         0 Aug  9 14:58 evidence.db
+-rw-r--r--  1 mrc mrc      6331 Aug  9 14:12 falsify.py
+-rw-r--r--  1 mrc mrc     13779 Jul 28 17:05 fast_debug.log
+drwxr-xr-x  3 mrc mrc      4096 Jul 28 18:04 fast_test
+-rw-r--r--  1 mrc mrc     16219 Jul 10 11:51 feature_integrator.py
+-rw-r--r--  1 mrc mrc 179765248 Aug  2 07:22 fundamentals_cache.db
+-rw-r--r--  1 mrc mrc     25572 Jul 29 14:46 fundamentals.py
+-rw-r--r--  1 mrc mrc      6563 Aug 10 23:59 gate-test-harness3.log
+-rw-r--r--  1 mrc mrc     21383 Aug 10 23:53 gate-test-harness.log
+-rw-r--r--  1 mrc mrc     15488 Aug 11 03:30 gpu1-serving.log
+-rw-r--r--  1 mrc mrc      2916 Aug  9 14:12 gpu_bootstrap.py
+-rw-r--r--  1 mrc mrc      6894 Aug  9 14:54 gpu_falsify.py
+-rw-r--r--  1 mrc mrc      4373 Aug  9 14:30 gpu_monitor.py
+drwxr-xr-x  3 mrc mrc      4096 Aug 11 04:11 gpu_scheduler
+-rw-r--r--  1 mrc mrc  34765360 Aug 15 12:45 gpu_sync.log
+-rw-r--r--  1 mrc mrc   3728077 Jul 31 10:01 harness.log
+-rw-r--r--  1 mrc mrc       274 Aug 16 17:10 health.json
+-rw-r--r--  1 mrc mrc       214 Aug 15 12:43 high_level_state.json
+drwxr-xr-x  2 mrc mrc     12288 Aug 15 12:22 history
+drwxr-xr-x  2 mrc mrc      4096 Aug 11 15:44 hive
+-rw-r--r--  1 mrc mrc         0 Jul  2 11:20 __init__.py
+-rw-r--r--  1 mrc mrc    133960 Aug 14 15:19 lanes_basket.json
+-rw-r--r--  1 mrc mrc    102399 Aug 14 15:19 lanes_intl.json
+-rw-r--r--  1 mrc mrc      1375 Aug 14 20:50 lanes_state.json
+-rw-r--r--  1 mrc mrc       183 Aug  6 02:03 live_router_state_international.json
+-rw-r--r--  1 mrc mrc      2072 Aug 14 20:50 live_router_state.json
+-rw-r--r--  1 mrc mrc       175 Aug  6 02:02 live_router_state_macro.json
+-rw-r--r--  1 mrc mrc      1386 Aug 14 11:39 live_router_state_strategies.json
+-rw-r--r--  1 mrc mrc       173 Aug  6 02:02 live_router_state_us.json
+drwxr-xr-x  2 mrc mrc      4096 Aug 10 12:01 loop-runs
+-rw-r--r--  1 mrc mrc      4402 Aug  1 18:02 market_ctx.py
+-rw-r--r--  1 mrc mrc     11050 Aug 13 02:42 model-catalog-2026.md
+drwxr-xr-x  3 mrc mrc      4096 Jul 27 02:00 models
+-rw-r--r--  1 mrc mrc       499 Aug  6 02:39 mot_router_state.json
+-rw-r--r--  1 mrc mrc       767 Aug 11 05:49 mot_state.json
+-rw-r--r--  1 mrc mrc      6685 Jul 23 19:44 multi_tf.py
+-rw-r--r--  1 mrc mrc     10746 Jul 17 13:26 news.py
+-rw-r--r--  1 mrc mrc      8571 Jul  9 21:10 paper_deck.py
+-rw-r--r--  1 mrc mrc    103522 Aug 15 12:43 paper_state.json
+-rw-r--r--  1 mrc mrc    106075 Jul 16 13:36 paper_state.json.bak-1784226987
+-rw-r--r--  1 mrc mrc    107751 Jul 16 15:02 paper_state.json.bak-1784232129
+-rw-r--r--  1 mrc mrc    153062 Jul 28 02:24 paper_state.json.bak.20260728_022459
+-rw-r--r--  1 mrc mrc    194356 Jul 31 09:31 paper_state.json.synthetic-era-bak
+-rw-r--r--  1 mrc mrc     55860 Aug 16 17:00 pipeline_eval.log
+-rw-r--r--  1 mrc mrc      5649 Aug 16 02:00 pipeline_train.log
+drwxr-xr-x  2 mrc mrc      4096 Aug 15 12:22 __pycache__
+-rw-r--r--  1 mrc mrc    173425 Aug 16 17:10 qwen38-agentic.log
+-rw-r--r--  1 mrc mrc    130502 Aug 15 12:43 reflection_log.json
+-rw-r--r--  1 mrc mrc      5369 Aug  9 14:12 refresh.py
+-rw-r--r--  1 mrc mrc     11607 Jul  5 23:39 regime_classifier.py
+drwxr-xr-x  6 mrc mrc      4096 Aug 16 12:45 research
+-rw-r--r--  1 mrc mrc    620811 Aug 16 10:41 researcher-deep.log
+-rw-r--r--  1 mrc mrc       875 Aug 10 03:42 researcher-eval.json
+-rw-r--r--  1 mrc mrc     66260 Aug 15 14:15 researcher-fast.log
+-rw-r--r--  1 mrc mrc       703 Aug 10 04:38 researcher-flip.log
+-rw-r--r--  1 mrc mrc    565280 Aug 16 10:41 researcher-router.log
+drwxr-xr-x  2 mrc mrc      4096 Aug 11 03:07 research_gate
+drwxr-xr-x  2 mrc mrc      4096 Aug  9 20:00 reviews
+drwxr-xr-x  2 mrc mrc      4096 Aug  5 02:09 scenarios
+-rw-r--r--  1 mrc mrc     37329 Aug 16 12:00 scheduler_cron.log
+-rw-r--r--  1 mrc mrc    115415 Aug 16 12:45 scheduler.log
+-rw-r--r--  1 mrc mrc       336 Aug 16 12:45 scheduler_state.json
+drwxr-xr-x  2 mrc mrc      4096 Aug 13 11:37 setup_search
+drwxr-xr-x  2 mrc mrc      4096 Aug  1 12:50 shadow_aab
+-rw-r--r--  1 mrc mrc      9999 Jul  9 13:57 social_sentiment.py
+-rw-r--r--  1 mrc mrc      5963 Jul  4 11:43 synthetic.py
+drwxr-xr-x  2 mrc mrc      4096 Aug  7 16:36 teacher_student
+-rw-r--r--  1 mrc mrc      5908 Aug  7 16:36 TRADER.md
+drwxr-xr-x  2 mrc mrc      4096 Aug 13 02:00 training
+-rw-r--r--  1 mrc mrc       548 Aug 15 12:22 train_schedule.json
+-rw-r--r--  1 mrc mrc    705154 Aug 15 12:43 ui_feed.jsonl
+-rw-r--r--  1 mrc mrc     13149 Jul 29 14:09 valuation.py
+-rw-r--r--  1 mrc mrc    222829 Aug  9 13:29 vix_daily.pkl
+-rw-r--r--  1 mrc mrc      5052 Aug 12 23:06 vix_gate.py
+-rw-r--r--  1 mrc mrc      3256 Jul 28 17:36 watchdog_fast_test.log
+-rw-r--r--  1 mrc mrc     65065 Jul 28 18:10 watchdog_harness_fast_test.log.bak
+-rw-r--r--  1 mrc mrc   6182141 Jul 29 12:04 watchdog_harness.log
+-rw-r--r--  1 mrc mrc   5899372 Aug 16 17:10 watchdog.log
+-rw-r--r--  1 mrc mrc    158298 Aug 14 12:59 world_bank_cache.json
+-rw-r--r--  1 mrc mrc      5497 Aug 14 12:58 world_bank.py
+[0m
+[0m$ [0mls -la /home/mrc/opentrader/logs 2>/dev/null || true
+(no output)
+[0m
+[0m$ [0mps -eo pid,ppid,etime,stat,cmd | grep -E "[h]arness|[m]cp_server|[d]ashboard|[p]aper"
+913     825  1-04:56:32 SNsl /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/mcp_server.py --host 127.0.0.1 --port 8092 --exchange paper
+    916     825  1-04:56:32 Ss   /home/mrc/rocm_venv/bin/python3 /home/mrc/opentrader/dashboard.py --port 8097
+   1267    1077  1-04:56:31 Ssl  node /home/mrc/moonberg-work/dashboard.js
+1031862  852964       09:24 SN   timeout 600 opencode run --agent supervisor --auto Portfolio risk check (READ-ONLY): read /home/mrc/opentrader/data/paper_state.json. Report cash, positions, portfolio_value, cycle, and whether the timestamp looks stale vs today 2026-08-16. Flag red flags. Do not modify anything.
+1031863 1031862       09:24 SNl  opencode run --agent supervisor --auto Portfolio risk check (READ-ONLY): read /home/mrc/opentrader/data/paper_state.json. Report cash, positions, portfolio_value, cycle, and whether the timestamp looks stale vs today 2026-08-16. Flag red flags. Do not modify anything.
+1032321 1031863       09:21 SNl  /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+3435407 2209629    05:22:57 SNl  /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+3614649 3614569    04:28:47 SNl+ /home/mrc/rcheck/.venv/bin/python3 -m rcheck.mcp_server
+[0m
+[0m→ [0mRead data/health.json
+[0m→ [0mRead data/high_level_state.json

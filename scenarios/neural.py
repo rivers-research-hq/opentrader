@@ -19,6 +19,7 @@ CONDITIONAL on a regime + event one-hot.
 
 torch is imported lazily so the rest of the scenarios package works without it.
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
 
 import math
@@ -298,7 +299,7 @@ class NeuralMarketGenerator:
         """Load a checkpoint; returns True on success, False (without raising)
         on corrupt/missing-key checkpoints so callers degrade gracefully."""
         try:
-            ck = torch.load(path, map_location=self.device, weights_only=False)
+            ck = torch.load(path, map_location=self.device, weights_only=True)
             if "gen" not in ck or "norm_std" not in ck:
                 print(f"[neural] checkpoint {path} missing keys; ignoring")
                 return False

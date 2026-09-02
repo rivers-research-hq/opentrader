@@ -4,6 +4,8 @@
 Replaces the broken PVA-only helper. Serves portfolio state, PVA history,
 and a lightweight dashboard page. Run: python3 dashboard.py --port 8097
 """
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
+urlopen = guarded_urlopen  # hardening shadow
 
 import argparse
 import asyncio

@@ -7,7 +7,6 @@
 import React, { useEffect, useState } from "react";
 import { render, Box, Text, useInput, useApp } from "ink";
 import { readFileSync, readdirSync } from "node:fs";
-import { execSync } from "node:child_process";
 import cliBoxes from "cli-boxes";
 
 const boxes = cliBoxes.round;
@@ -115,21 +114,6 @@ export function laneStats() {
     out[lane] = { realized, rounds, winrate: rounds ? (100 * wins) / rounds : null };
   }
   return out;
-}
-
-// next central-bank decisions (single cached python call — the calendar moves slowly)
-function nextEvents() {
-  try {
-    return execSync(
-      `/home/mrc/opentrader/.venv/bin/python3 -c "` +
-      `import sys; sys.path.insert(0,'/home/mrc/opentrader'); ` +
-      `from data.economic_calendar import bank_dates; ` +
-      `now=dt.date.today() if (dt:=__import__('datetime')) else None; ` +
-      `ev=[]; [ev.extend([(d,b) for d in sorted(bank_dates(b)) if d>=now]) ` +
-      `for b in ['FED','ECB','BOE','BOJ','SNB','BOC','RBA','RBNZ']]; ` +
-      `ev.sort(); print(' | '.join(f'{b} {d}' for d,b in ev[:4]))"`,
-      { timeout: 8000 }).toString().trim() || "—";
-  } catch { return "—"; }
 }
 
 function proposals() {
@@ -347,11 +331,14 @@ const dayKey = (d) => d.getFullYear() + "-" +
   String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const localTime = (d) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
-function buildCalendar(state, fx, cal) {
+export function buildCalendar(state, fx, cal) {
   // FITS THE TERMINAL: left grid (3 compact months) + right agenda, zipped,
   // total capped to stdout.rows. Forecasts and in-house state live INLINE in
   // the agenda — no detail boxes below to push content off-screen.
   const ROWS = Math.max((process.stdout.rows || 40) - 3, 20);
+  const decCount = ((cal && cal.decisions) || []).length;
+  const ffCount = ((cal && cal.ff_events) || []).length;
+  const diag = { text: ` data: generated ${(cal && cal.generated) || "—"} · decisions ${decCount} · releases ${ffCount}${(cal && cal.error) ? " · ERROR: " + cal.error : ""}`, dim: true };
   if (cal && cal.error) {
     return [
       { text: ` CALENDAR — data source error: ${cal.error}`, color: "red", bold: true },
@@ -434,6 +421,7 @@ function buildCalendar(state, fx, cal) {
     return rows;
   }
 
+  L.push({ segments: [diag] });
   const left = [];
   for (const m0 of [new Date(now.getFullYear(), now.getMonth() - 1, 1),
                     new Date(now.getFullYear(), now.getMonth(), 1),
@@ -485,10 +473,13 @@ function buildCalendar(state, fx, cal) {
 
   // zip, capping the agenda to the grid height
   const LW = 31;
+  const toSegs = (row) => !row ? [{ text: "" }]
+    : row.segments ? row.segments
+    : [{ text: row.text || "", color: row.color, dim: !!row.dim, bold: !!row.bold }];  // plain {text} lines (agenda events) were silently blanked by the .segments-only zip — the empty-agenda bug
   const n = Math.min(Math.max(left.length, right.length), ROWS);
   for (let i = 0; i < n; i++) {
-    const lft = (left[i] && left[i].segments) || [{ text: "" }];
-    const rgt = (right[i] && right[i].segments) || [{ text: "" }];
+    const lft = toSegs(left[i]);
+    const rgt = toSegs(right[i]);
     const lftWidth = lft.reduce((a, s) => a + s.text.length, 0);
     L.push({ segments: [...lft, { text: " ".repeat(Math.max(1, LW - lftWidth)) }, ...rgt] });
   }
@@ -503,7 +494,7 @@ function App() {
   const [state, setState] = useState(loadState);
   const [fx, setFx] = useState(null);
   const [cal, setCal] = useState(null);
-  const [events] = useState(nextEvents);
+
 
   useInput((input) => {
     if (input === "q") exit();
@@ -522,6 +513,8 @@ function App() {
   }, []);
 
   const lanes = laneStats();
+  const events = ((cal && cal.decisions) || []).slice(0, 4)
+    .map((d) => `${d.bank} ${d.date}`).join("  ·  ");
   const withAll = { ...state, lanes, events, proposals: proposals() };
   const lines = page === "home" ? buildHome(withAll, fx)
     : page === "forex" ? buildForex(withAll, fx)
