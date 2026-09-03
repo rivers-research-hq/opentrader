@@ -78,6 +78,11 @@ export function laneStats() {
   if (!raw) return {};
   const rows = raw.trim().split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
   rows.sort((a, b) => String(a.timestamp) < String(b.timestamp) ? -1 : 1);
+  // append-only ledger corrections (map #158 #171): a "phantom-void" row
+  // lists the timestamps of fills the venue never executed — skip the void
+  // rows themselves and every row they void
+  const voided = new Set(rows.filter((r) => r.reason === "phantom-void").flatMap((r) => r.voids || []));
+  const live = rows.filter((r) => r.reason !== "phantom-void" && !voided.has(r.timestamp));
   const laneOf = (r) => {
     const reason = r.reason || "";
     if (reason.startsWith("c08") || reason.startsWith("mr-fade")) return "c08-fade";
@@ -85,10 +90,21 @@ export function laneStats() {
     if (reason.startsWith("watchdog")) return "watchdog";
     if (reason.startsWith("crash")) return "crash";
     if (["momentum-entry", "out-of-target", "max-hold"].includes(reason)) return "mom-k5";
+    if (reason.startsWith("venue-reconciliation")) {
+      // SL/TP closes never pass through our code, so they arrive tagless —
+      // but the lanes trade distinct sizes (mom-k5/c08 100u, h1-mom 2000u,
+      // crash 5000u), so the fill size attributes them to their origin lane
+      // instead of a junk "reconciled" bucket that hid every server-side
+      // close from the lane scoreboard.
+      const q = Number(r.quantity || 0);
+      if (q >= 5000) return "crash";
+      if (q >= 2000) return "h1-mom";
+      if (q > 0) return "mom-k5";
+    }
     return "reconciled";
   };
   const books = {};
-  for (const r of rows) {
+  for (const r of live) {
     const lane = laneOf(r), sym = r.symbol;
     if (!sym || sym === "-") continue;
     const side = (r.side || "").toUpperCase();
@@ -157,10 +173,11 @@ function sparkline(series, width = 46) {
   return vals.map((v) => chars[Math.min(7, Math.max(0, Math.floor(((v - min) / span) * 7)))]).join("");
 }
 
-function laneRow(tag, s, note) {
+function laneRow(tag, s, note, open) {
   const sign = (s.realized || 0) >= 0 ? "+" : "";
   const wr = s.winrate == null ? "—" : s.winrate.toFixed(0) + "%";
-  return { text: ` ● ${tag.padEnd(10)} realized ${sign}${(s.realized || 0).toFixed(2)}  ·  ${s.rounds || 0} RT  ·  WR ${wr}   ${note || ""}`, color: laneColor(tag) };
+  const openTxt = open ? `  ·  ${open.n} open ${open.pl >= 0 ? "+" : ""}${open.pl.toFixed(2)}` : "";
+  return { text: ` ● ${tag.padEnd(10)} realized ${sign}${(s.realized || 0).toFixed(2)}  ·  ${s.rounds || 0} RT  ·  WR ${wr}${openTxt}   ${note || ""}`, color: laneColor(tag) };
 }
 
 export function buildHome(state, fx) {
@@ -190,7 +207,8 @@ export function buildHome(state, fx) {
     ["watchdog", "shock response", `checked ${String(watchdog.checked || "—").slice(0, 19)}`],
   ];
   for (const [tag, kind, note] of laneMeta) {
-    const s = lanes[tag] || {};
+    let s = lanes[tag] || {};
+    if (tag === "crash" && crash.realized != null) s = { ...s, realized: Number(crash.realized) };
     agentLines.push({ text: ` ● ${tag.padEnd(22)} ${kind.padEnd(26)} ${s.rounds || 0} RT · WR ${s.winrate == null ? "—" : s.winrate.toFixed(0) + "%"} · realized ${(s.realized || 0) >= 0 ? "+" : ""}${(s.realized || 0).toFixed(2)}`, color: laneColor(tag) });
   }
   agentLines.push({ text: ` ◇ proposal_loop   discovery          ${proposals.survivors || 0} survivor(s) / ${proposals.batches || 0} batches · ~$0.01/batch  (${proposals.last || "—"})`, dim: true });
@@ -277,9 +295,21 @@ export function buildForex(state, fx) {
   const laneLines = [];
   const flat = (fx && fx.flat) || {};
   const laneOwners = new Set(book.map((t) => t.owner));
+  const openByLane = {};
+  for (const t of book) {
+    const owner = t.owner || "unknown";
+    const o = openByLane[owner] = openByLane[owner] || { n: 0, pl: 0 };
+    o.n += 1; o.pl += Number(t.pl || 0);
+  }
   for (const tag of ["mom-k5", "c08-fade", "h1-mom", "crash", "watchdog"]) {
-    const row = laneRow(tag, lanes[tag] || {});
-    laneLines.push(row);
+    let s = lanes[tag] || {};
+    if (tag === "crash" && crash.realized != null) {
+      // venue-derived tracker (fx_crashtest.json) is authoritative for this
+      // lane — ledger FIFO pairs closes to the oldest open buy while the
+      // venue closes the newest position (SL/TP), so per-pair totals diverge
+      s = { ...s, realized: Number(crash.realized) };
+    }
+    laneLines.push(laneRow(tag, s, null, openByLane[tag]));
     const isFlat = !laneOwners.has(tag);  // no open position carries this tag
     if (tag === "watchdog" || isFlat) {
       const why = tag === "watchdog"
@@ -301,11 +331,14 @@ export function buildForex(state, fx) {
   if (!fills.length) fillLines.push({ text: "  (no fills yet)", dim: true });
   for (const f of fills.slice(0, 12)) {
     const reason = f.reason || "";
+    const rq = Number(f.quantity || 0);
     const lane = reason.startsWith("c08") || reason.startsWith("mr-fade") ? "c08-fade"
       : reason.startsWith("intraday") ? "h1-mom"
       : reason.startsWith("watchdog") ? "watchdog"
       : reason.startsWith("crash") ? "crash"
-      : ["momentum-entry", "out-of-target", "max-hold"].includes(reason) ? "mom-k5" : "reconciled";
+      : ["momentum-entry", "out-of-target", "max-hold"].includes(reason) ? "mom-k5"
+      : reason.startsWith("venue-reconciliation") ? (rq >= 5000 ? "crash" : rq >= 2000 ? "h1-mom" : rq > 0 ? "mom-k5" : "reconciled")
+      : "reconciled";
     fillLines.push({ text: ` ${String(f.timestamp).slice(0, 19)}  ${String(f.symbol).padEnd(9)} ${String(f.side).padEnd(4)} ${String(f.quantity).padStart(6)} @ ${String(f.price).padEnd(9)} [${lane}] ${reason}`, dim: lane === "reconciled" });
   }
   L.push(...box("FILL STREAM — newest first", fillLines, "cyan"));

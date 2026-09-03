@@ -332,8 +332,43 @@ use the term below; don't drift to synonyms the glossary avoids.
   strategy exactly (same exits, sizing, risk contract) or live-vs-backtest
   comparisons are meaningless.
 
+## The FX arm (OANDA practice — the active focus as of 2026-09-02)
+
+- **Venue is authoritative** — OANDA's openTrades/transactions are the truth
+  for FX positions, balances and PnL. `fx_state.json`, `fx_crashtest.json`,
+  `fx_intraday.json` are write-through caches and say so in-file. Say
+  "venue-reconciled" for numbers read off the venue; never present a cache
+  number as account state.
+- **Lanes** — the five strategies sharing one OANDA practice account,
+  distinguished by owner tag: `mom-k5` (daily 17:10 UTC, 100u momentum
+  top-2), `c08-fade` (daily 17:25, armed, 100u), `h1-mom` (hourly :00, 2000u
+  H1 momentum), `crash` (hourly :30, 5000u max-margin $300-equivalent gap
+  experiment, unprotected by design), `watchdog` (15-min shock response,
+  never opens). Sizes matter: tagless `venue-reconciliation` fills
+  (server-side SL/TP closes) are attributed to their lane by fill size
+  (100u→mom-k5, 2000u→h1-mom, 5000u→crash). If a lane changes size, the
+  attribution in `fx_crashtest.py` and `tui/index.js` must change too.
+- **The fills ledger** (`data/fx_ledger.jsonl`) — append-only record of FX
+  fills. It is the fills truth but NOT the realized-PnL truth for the crash
+  lane (venue `pl` is — FIFO pairs closes to the oldest open buy while the
+  venue closes the newest position).
+- **The crash-test $300 account** — the max-margin book's hypothetical
+  equity/peak/max-DD tracker. Since 2026-09-02 its realized is recomputed
+  from venue ORDER_FILL `pl` over the full lane epoch and its unrealized
+  comes from venue `unrealizedPL`. Pre-2026-09-02 figures (max DD $572,
+  realized $0.00) are quarantined artifacts of a stale mark and unbooked
+  closes — do not quote them.
+- **TUI** — the human's terminal client is the npm/Ink app `tui/index.js`
+  (`npm start` in `tui/`). `tui.py` (Textual) is a legacy replacement
+  artifact, not the human's client. See `docs/agents/tui.md`.
+
 ## Avoid
 
 - "The AI trading model" — say which expert.
 - "More data" — say which model consumes which feature space.
 - "Validated" — only for things that passed the gate or walkforward.
+- "The TUI" without saying which client — the human runs the npm/Ink one
+  (`tui/index.js`); `tui.py` is a legacy artifact. Two sessions have fixed
+  the wrong one.
+- "The tracker says" for FX PnL without saying whether the number is
+  venue-reconciled or a cache/FIFO artifact.

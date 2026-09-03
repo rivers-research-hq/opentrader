@@ -1,10 +1,11 @@
 # AGENTS — OpenTrader
 
 OpenTrader is a self-improving trading system: a Mixture of Traders (rule floor +
-value-head experts) trained by an adversarial arena. Read `ARCHITECTURE.md` and
-`CONTEXT.md` before working — they are the single sources of truth for design and
+value-head experts) trained by an adversarial arena. Read `docs/ARCHITECTURE.md` and
+`docs/CONTEXT.md` before working — they are the single sources of truth for design and
 language. All changes are proven in the sandbox (`opentrader-sandbox`) first; the
-live tree and the GPU stay untouched until validated.
+live tree and the GPU stay untouched until validated. **Active focus (human,
+2026-09-02): the FX arm — OANDA practice. Crypto paper-lane work is out of scope.**
 
 ## Role division — binding (2026-08-29; amended 2026-08-31; Qwen roles revoked 2026-08-31 postmortem)
 
@@ -53,8 +54,66 @@ Five canonical roles, labels equal to their names: `needs-triage`, `needs-info`,
 
 ### Domain docs
 
-Single-context: `CONTEXT.md` (glossary) + `docs/adr/` at the repo root, with
-`ARCHITECTURE.md` as the canonical design doc. See `docs/agents/domain.md`.
+Single-context: `docs/CONTEXT.md` (glossary) + `docs/adr/`, with
+`docs/ARCHITECTURE.md` as the canonical design doc. See `docs/agents/domain.md`.
+
+## The FX arm — OANDA practice (binding, 2026-09-02)
+
+**Scope (human decision 2026-09-02): the FX arm is the only active focus.**
+Crypto paper-lane work (data/paper_state.json, coach reports, harness marking)
+is out of scope until the human re-opens it. Known crypto-lane defects are
+recorded in map #159/#160 (closed out-of-scope) — do not restart that work.
+
+- **Venue is authoritative.** `data/fx_state.json`, `data/fx_crashtest.json`,
+  `data/fx_intraday.json` are write-through caches ("cache only" in-file).
+  Positions/balance/PnL questions are answered from OANDA (openTrades,
+  transactions), never from a cache. The dashboard `/api/fx` (FastAPI :8097)
+  already reads the venue live — the TUIs render it.
+- **Lanes** (one account, owner tags via clientExtensions): `mom-k5` (daily
+  17:10 UTC, 100u momentum top-2), `c08-fade` (daily 17:25, armed), `h1-mom`
+  (hourly :00, 2000u H1 momentum), `crash` (hourly :30, 5000u max-margin
+  $300-model, unprotected by design), `watchdog` (15 min, response-only).
+  **Cron contract: `--once` means REAL mode; no flag = dry.** Never pass
+  `--once` to "test".
+- **Ledger**: `data/fx_ledger.jsonl` is append-only. Server-side SL/TP closes
+  never produce runner rows — they arrive as tagless `venue-reconciliation`
+  rows and are attributed to lanes **by fill size** (100u→mom-k5/c08,
+  2000u→h1-mom, 5000u→crash). If a lane ever changes size, that matcher
+  breaks (documented in `fx_crashtest.py` and `tui/index.js`). The crash
+  lane's realized comes from the venue journal `pl` (full-lane-epoch recompute
+  in `fx_crashtest.py`), NOT ledger FIFO — FIFO pairs closes to the oldest
+  open buy while the venue closes the newest.
+- **Adapter rules (exchange/oanda.py)**: `place_order` is truthful — no
+  `orderFillTransaction` in the response means REJECTED (venue cancels on
+  STOP_LOSS_ON_FILL_LOSS instead of filling into a guaranteed stop-out);
+  never assume a POST succeeded = filled. `get_current_price` always fetches
+  fresh (a written-once never-expiring price cache caused the 2026-09-02
+  phantom entries and stale-stop cancellations — the same no-TTL cache-first
+  disease as the crypto lane's #159).
+- **Adapter fork (ToC Q04, unresolved)**: live `exchange/oanda.py` has the
+  security guards (`security/guards.py`) + `tag` kwarg; the sandbox copy has a
+  server-truth `get_balance` the live tree lacks. Do not blind-sync either
+  direction — merging them is a human-gated decision.
+- **Defect log**: FX defects live in `data/defect_log.json` under
+  `fx_defects` (separate from the harness crash-episode schema).
+
+## TUI clients — the human runs the npm/Ink one (binding, 2026-09-02)
+
+- **The human's TUI is `tui/index.js`** (Ink/React, plain JS, zero-build),
+  launched with the npm command in `tui/` (`npm start`; also `--forex`,
+  `--calendar`). It renders from `data/*` files + the dashboard `/api/fx` and
+  `/api/calendar` (polls 2s files / 5s venue / 20s calendar). Per-lane colors,
+  sizes and attribution live in `tui/index.js` (`laneStats`, `buildForex`).
+- **`tui.py` (Textual, repo root) is NOT the human's client.** It is a
+  replacement artifact from a prior session, restored over once already
+  (commit ab66167: "restored from git history after being wrongly replaced").
+  Editing `tui.py` and reporting "the TUI is fixed" is a repeat of the
+  2026-09-02 wrong-client mistake — both incidents are on record (#166,
+  #167 amendment).
+- Before claiming any UI fix is landed, **confirm which artifact the human
+  actually runs**. When in doubt: ask, or check for a running process.
+- Do not delete, replace, or rename the npm client. Improvements go into
+  `tui/index.js`. Full detail: `docs/agents/tui.md`.
 
 ## Quantitative claims — verify before repeating (binding)
 

@@ -246,6 +246,12 @@ def _compute_fx() -> dict:
     ledger = DATA / "fx_ledger.jsonl"
     if ledger.exists():
         rows = [json.loads(l) for l in ledger.read_text().splitlines() if l.strip()]
+        # append-only ledger corrections (map #158 #171): hide void rows and
+        # the phantom rows they void — the venue never executed those fills
+        voided = {ts for r in rows if r.get("reason") == "phantom-void"
+                  for ts in (r.get("voids") or [])}
+        rows = [r for r in rows if r.get("reason") != "phantom-void"
+                and r.get("timestamp") not in voided]
         out["fills"] = rows[-25:][::-1]
     reg = DATA / "epoch_registry.json"
     if reg.exists():

@@ -1,0 +1,231 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260902T154626522Z-3827218-1a6fa821ffaa",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "baseline",
+      "target": ".",
+      "reason": "baseline_partial: baseline capture had enumeration or snapshot errors"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": false,
+      "captured_files": 710,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 7,
+      "compensated_target_count": 3
+    },
+    "change_tracking": {
+      "touched_observed": 3,
+      "touched_retained": 3,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 3,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 3,
+      "selected_files": 3,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 3,
+      "scanned_files": 3,
+      "skipped_files": 0,
+      "failed_files": 0,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "baseline_partial": 1,
+      "project_check_failed": 1
+    },
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-02T15:46:26.522Z",
+  "session_id": "sess_9063ba24-c093-47d6-b97d-3fd5a545b5f7",
+  "target": ".",
+  "revision": "2c730847595c437e298b6a63eef988453046e499",
+  "rules_version": "unavailable",
+  "diff_hash": "042c5e35aaabcf080839090cd04ba89d3deeed1a68861fb5628bca1dc296c459",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 3,
+    "changed_files": [
+      {
+        "file": "strategies/fx_crashtest.py",
+        "ranges": [
+          {
+            "start": 19,
+            "end": 28
+          },
+          {
+            "start": 44,
+            "end": 45
+          },
+          {
+            "start": 55,
+            "end": 55
+          },
+          {
+            "start": 60,
+            "end": 68
+          },
+          {
+            "start": 70,
+            "end": 105
+          },
+          {
+            "start": 122,
+            "end": 132
+          },
+          {
+            "start": 135,
+            "end": 139
+          },
+          {
+            "start": 146,
+            "end": 146
+          },
+          {
+            "start": 148,
+            "end": 148
+          },
+          {
+            "start": 160,
+            "end": 162
+          },
+          {
+            "start": 200,
+            "end": 207
+          },
+          {
+            "start": 210,
+            "end": 213
+          },
+          {
+            "start": 227,
+            "end": 227
+          }
+        ],
+        "before_hash": "5f44ff8344979f5f4ff4998178f009b110dce348c168119abe33d7a02aa61815",
+        "after_hash": "f562190ac1b3de2213cb410ccb7709343e2e8f15dcd735993735dd0ac6ea1951"
+      },
+      {
+        "file": "strategies/fx_runner.py",
+        "ranges": [
+          {
+            "start": 76,
+            "end": 89
+          },
+          {
+            "start": 271,
+            "end": 277
+          },
+          {
+            "start": 372,
+            "end": 378
+          },
+          {
+            "start": 423,
+            "end": 424
+          }
+        ],
+        "before_hash": "b1d64837e6db94dda65533948b93fe270de729bcbe7d2462a46a19e9ebb7ceb4",
+        "after_hash": "2d430924c7271b73b1e8db3f83809460a8ce86276761ad9b10ec95d61f3d97cb"
+      },
+      {
+        "file": "tui.py",
+        "ranges": [
+          {
+            "start": 28,
+            "end": 28
+          }
+        ],
+        "before_hash": "931811a76d771608780d7a6c364e3f8386c5fd95f9c86aadd21ba8313eec8aa2",
+        "after_hash": "f9818227f63f91c404838f5a379ecb2650ee4cd6359b072b69a3f02013d0c27c"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-02T15:46:25.097Z",
+    "completed_at": "2026-09-02T15:46:26.522Z",
+    "duration_ms": 1425,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 1425,
+    "peakMemoryBytes": 185008128,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 3,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_9063ba24-c093-47d6-b97d-3fd5a545b5f7-20260902T154626522Z-3827218-1a6fa821ffaa.json",
+    "latest_report": ".mimosa/reports/task-review-sess_9063ba24-c093-47d6-b97d-3fd5a545b5f7.json",
+    "history_summary": ".mimosa/history/run-20260902T154626522Z-3827218-1a6fa821ffaa.json"
+  }
+}

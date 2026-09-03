@@ -92,6 +92,12 @@ Seams a, b, d, e are closed. Seam c (checkpoint reconciliation + the expert
 | `data/research_gate/` | Gate verdicts (`value_head_report.json`, `trap_holdout.json`). |
 | `data/history/cycle_*.json` | Live cycle snapshots (harness dead → stale). |
 | `data/models/finetune/` | LoRA adapters. `current_adapter` symlink → opentrader-data. |
+| `data/fx_ledger.jsonl` | FX fills, append-only (composite-key dedup). SL/TP closes arrive as tagless `venue-reconciliation` rows via the daily runner's reconcile pass. |
+| `data/fx_state.json` | mom-k5 book cache. **Cache only — venue (OANDA) is authoritative.** |
+| `data/fx_crashtest.json` | Crash-lane $300-equivalent tracker. realized recomputed from venue ORDER_FILL `pl` each run (full lane epoch); unrealized from venue `unrealizedPL`. |
+| `data/fx_intraday.json`, `data/fx_watchdog_state.json` | h1-mom lane cache; watchdog status cache. Venue authoritative. |
+| `tui/` | The human's terminal client (npm/Ink, `tui/index.js`, `npm start`). `tui.py` at repo root is a legacy Textual artifact, NOT the human's client — see `docs/agents/tui.md`. |
+| `data/defect_log.json` | Harness crash episodes (`defects`) + FX lane defects (`fx_defects`, 2026-09-02). |
 
 ## 7. Known broken/messy items (fix list)
 
@@ -102,3 +108,7 @@ Seams a, b, d, e are closed. Seam c (checkpoint reconciliation + the expert
 5. `data/health.json` `eval_lock: held_no_holder` — stale `/tmp/opentrader_eval_gate.lock` (>2h old); `ops_watchdog.py` auto-clears.
 6. `harness.py` is 4260 lines — the biggest maintainability debt (deferred split).
 7. Duplicate code: `onchain.py` vs `onchain_web3.py` (only `harness.py` imports `onchain`); `report_overnight.*`; `repro_volatility.py`.
+8. **`exchange/oanda.py` is forked between the live tree and `opentrader-sandbox`**: live has the security guards (`security/guards.py`) + `tag` kwarg; the sandbox copy has a server-truth `get_balance` the live tree lacks (ToC Q04). Merge is a human-gated decision — do not blind-sync.
+9. **Two TUI clients** (`tui/index.js` npm/Ink = the human's; `tui.py` Textual = legacy replacement artifact). Fixed twice for the wrong one — see `docs/agents/tui.md`. Candidate for deletion after human sign-off.
+10. **Price-feed caches**: any cache-first price read must carry a TTL — the never-expiring pattern caused phantom entries in both the crypto lane (#159) and the OANDA adapter (#167). `exchange/live.py` `_price_cache` still has no TTL on its single-symbol path (crypto lane, out of scope until re-opened).
+11. **FX lane-size attribution**: venue-reconciliation closes attribute to lanes by fill size (100/2000/5000u). If a lane changes size or a new lane trades an existing size, the matchers in `fx_crashtest.py` and `tui/index.js` silently mis-attribute. Long-term fix: stamp the originating tag onto reconciliation rows from the venue txn's `clientExtensions` (ToC Q05).

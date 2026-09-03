@@ -29,6 +29,7 @@ from data.economic_calendar import blackout as econ_blackout  # noqa: E402
 PROJECT = Path(__file__).resolve().parent.parent
 STATE = PROJECT / "data" / "fx_state.json"
 LEDGER = PROJECT / "data" / "fx_ledger.jsonl"
+CURSOR = PROJECT / "data" / "fx_reconcile_cursor.json"
 
 TOP_N = 2          # long the top-2 majors by momentum
 K = 5              # momentum lookback (days)
@@ -73,6 +74,20 @@ def atr14(bars):
     return sum(trs) / len(trs) if trs else 0.0
 
 
+def _parse_opened(raw):
+    """Defensive parse of a book 'opened' stamp. A venue trade missing
+    openTime (or a foreign-writer clobber of the state cache) produced an
+    empty/garbage string and killed the whole run 2026-09-01 17:10
+    (KeyError/ValueError at the fromisoformat call — ticket #162). Returns
+    None when unparseable; callers treat None as 'age unknown' and degrade
+    to out-of-target logic instead of crashing."""
+    try:
+        dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00")[:19])
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
 def _venue_book(ex):
     """Rebuild the book from venue openTrades — venue is authoritative.
     fx_state.json is a write-through cache, NEVER a source of truth: a
@@ -97,7 +112,10 @@ def _venue_book(ex):
 
 
 def _venue_net(ex, sym):
-    acc = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
+    # .get with fallback: an error-shaped venue payload (no "account" key)
+    # crashed the watchdog 2026-09-02 (documented as fx_defect). Net 0 from a
+    # bad payload is safe here — callers defer closes on net==0/ambiguity.
+    acc = ex._request("GET", f"/v3/accounts/{ex._account_id}").get("account") or {}
     for p in acc.get("positions", []):
         if p.get("instrument") == sym:
             lu = float(p.get("long", {}).get("units", 0))
@@ -146,19 +164,33 @@ def _txns_since(ex, iso_from):
     return out
 
 
+def _txns_since_id(ex, since_id):
+    """Venue transactions with id > since_id (monotonic journal cursor)."""
+    r = ex._request(
+        "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id={int(since_id)}"
+    )
+    return r.get("transactions", [])
+
+
 def _reconcile(ex, dry=False):
     """Server-side SL/TP fills never produce ledger rows — replay them from
-    the venue transaction journal. Dedup is tolerance-based (same symbol,
-    side, quantity, price within 5s) because the runner's own rows carry
-    Python isoformat timestamps while the venue journal uses OANDA format —
-    exact-string dedup double-counted every strategy fill (fixed 2026-09-01)."""
+    the venue transaction journal. Cursor is the venue's own monotonic
+    transaction id (data/fx_reconcile_cursor.json), NOT a timestamp in
+    fx_state.json: run()'s state-cache write used to clobber last_reconciled
+    every day, forcing a full-journal rescan. A missing/corrupt cursor falls
+    back to id 0 (full rescan) — the tolerance-based dedup below makes that
+    idempotent, so cursor loss is self-healing. Dedup is tolerance-based
+    (same symbol, side, quantity, price within 5s) because the runner's own
+    rows carry Python isoformat timestamps while the venue journal uses
+    OANDA format — exact-string dedup double-counted every strategy fill
+    (fixed 2026-09-01)."""
     from datetime import datetime as _dt
-    since = "2026-08-31T00:00:00Z"
-    if STATE.exists():
+    since_id = 0
+    if CURSOR.exists():
         try:
-            since = json.loads(STATE.read_text()).get("last_reconciled", since)
+            since_id = int(json.loads(CURSOR.read_text()).get("last_id", 0))
         except Exception:
-            pass
+            since_id = 0
     existing = []
     if LEDGER.exists():
         for line in LEDGER.read_text().splitlines():
@@ -178,7 +210,10 @@ def _reconcile(ex, dry=False):
 
     fills = []
     syms = set(ex.discover_symbols())
-    for t in _txns_since(ex, since):
+    last_id = since_id
+    for t in _txns_since_id(ex, since_id):
+        tid = int(t.get("id", 0) or 0)
+        last_id = max(last_id, tid)
         if t.get("type") != "ORDER_FILL" or t.get("instrument") not in syms:
             continue
         units = float(t.get("units", 0))
@@ -196,9 +231,9 @@ def _reconcile(ex, dry=False):
     if fills:
         print(f"[fx] reconciled {len(fills)} venue fill(s) into the ledger")
     if not dry:
-        cache = json.loads(STATE.read_text()) if STATE.exists() else {}
-        cache["last_reconciled"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        STATE.write_text(json.dumps(cache, indent=2))
+        CURSOR.write_text(json.dumps({"last_id": last_id,
+                                      "updated": datetime.now(timezone.utc).strftime(
+                                          "%Y-%m-%dT%H:%M:%SZ")}))
 
 
 def run(dry=False):
@@ -254,10 +289,13 @@ def run(dry=False):
     # the venue net is EXACTLY ours (never touch netting-ambiguous positions)
     today = datetime.now(timezone.utc)
     for sym in list(book):
-        opened = datetime.fromisoformat(book[sym]["opened"])
-        if opened.tzinfo is None:
-            opened = opened.replace(tzinfo=timezone.utc)
-        age_days = (today - opened).days
+        opened = _parse_opened(book[sym].get("opened"))
+        if opened is None:
+            print(f"[fx] !! {sym} unparseable opened stamp "
+                  f"{book[sym].get('opened')!r} — age logic skipped this run")
+            age_days = 0
+        else:
+            age_days = (today - opened).days
         if sym in target and age_days < MAX_HOLD_DAYS:
             continue
         reason = "max-hold" if age_days >= MAX_HOLD_DAYS else "out-of-target"
@@ -308,8 +346,11 @@ def run(dry=False):
         fills.append({"timestamp": r.timestamp, "symbol": sym, "side": "BUY",
                       "quantity": UNITS, "price": r.price, "order_id": r.order_id,
                       "reason": "momentum-entry", "sl": sl, "tp": tp})
+        opened_info = _venue_book(ex).get(sym) or {}
         book[sym] = {"units": UNITS, "opened": today.isoformat(), "entry": r.price,
-                     "sl": sl, "tp": tp}
+                     "sl": sl, "tp": tp,
+                     "trade_id": opened_info.get("trade_id"),
+                     "protected": opened_info.get("protected", False)}
         print(f"[fx] OPEN  {sym} 100 units -> {r.status} @ {r.price:.5f} "
               f"SL {sl and round(sl, 5)} TP {tp and round(tp, 5)}")
 
@@ -317,8 +358,8 @@ def run(dry=False):
     _append_ledger(fills)
     if not dry:
         cache = {sym: {"units": info["units"], "opened": info["opened"],
-                       "entry": info["entry"], "trade_id": info["trade_id"],
-                       "protected": info["protected"]}
+                       "entry": info["entry"], "trade_id": info.get("trade_id"),
+                       "protected": info.get("protected", False)}
                  for sym, info in book.items()}
         STATE.write_text(json.dumps({"positions": cache, "updated": today.isoformat(),
                                      "note": "cache only — venue is authoritative"}, indent=2))
@@ -340,6 +381,8 @@ def run_intraday(dry=False):
     if not ex.connect():
         raise SystemExit("[fx-id] connect failed")
     # venue-authoritative: this lane owns only positions tagged h1-mom
+    if not dry:
+        _reconcile(ex)  # hourly catch-up: the ≤1h ledger-lag bound (map #158)
     book_all = _venue_book(ex)
     held = set(book_all)
     pool = [s for s in ex.discover_symbols() if s not in held]
@@ -352,10 +395,13 @@ def run_intraday(dry=False):
 
     # close: stale holds (12h) or any with SL/TP already consumed (venue closed)
     for sym in list(book):
-        opened = datetime.fromisoformat(book[sym]["opened"])
-        if opened.tzinfo is None:
-            opened = opened.replace(tzinfo=timezone.utc)
-        age_h = (now - opened).total_seconds() / 3600
+        opened = _parse_opened(book[sym].get("opened"))
+        if opened is None:
+            print(f"[fx-id] !! {sym} unparseable opened stamp "
+                  f"{book[sym].get('opened')!r} — hold-age logic skipped this run")
+            age_h = 0.0
+        else:
+            age_h = (now - opened).total_seconds() / 3600
         net = _venue_net(ex, sym)
         if age_h >= 12 or not net or abs(net - 2000) > 1e-9:
             if abs(net - 2000) > 1e-9 and net:
@@ -371,6 +417,9 @@ def run_intraday(dry=False):
                 print(f"[fx-id] (dry) would CLOSE {sym} ({reason})")
                 continue
             r = ex.place_order(sym, close_side, abs(net), "market")
+            if r.status != "filled":
+                print(f"[fx-id] CLOSE {sym} REJECTED ({r.status}) — retried next run")
+                continue
             fills.append({"timestamp": r.timestamp, "symbol": sym, "side": close_side,
                           "quantity": abs(net), "price": r.price, "order_id": r.order_id,
                           "reason": f"intraday-{reason}"})
@@ -400,8 +449,11 @@ def run_intraday(dry=False):
         if dry:
             print(f"[fx-id] (dry) would OPEN {sym} 2000 units SL {sl:.5f} TP {tp:.5f}")
             continue
-            r = ex.place_order(sym, "BUY", 2000, "market", stop_loss=sl, take_profit=tp,
-                               tag="h1-mom")
+        r = ex.place_order(sym, "BUY", 2000, "market", stop_loss=sl, take_profit=tp,
+                           tag="h1-mom")
+        if r.status != "filled":
+            print(f"[fx-id] OPEN {sym} REJECTED ({r.status}) — retried next run")
+            continue
         fills.append({"timestamp": r.timestamp, "symbol": sym, "side": "BUY",
                       "quantity": 2000, "price": r.price, "order_id": r.order_id,
                       "reason": "intraday-momentum", "sl": sl, "tp": tp})

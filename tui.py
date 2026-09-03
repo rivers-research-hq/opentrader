@@ -25,7 +25,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-PROJECT = Path(__file__).resolve().parent.parent
+PROJECT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT))
 
 from textual.app import App, ComposeResult  # noqa: E402
@@ -53,8 +53,12 @@ def _read_json(path, default=None):
         return default
 
 
-def attribute_lane(reason, symbol):
-    """Map a ledger row's reason to a lane tag."""
+def attribute_lane(reason, symbol, qty=None):
+    """Map a ledger row's reason to a lane tag. Venue SL/TP closes arrive as
+    'venue-reconciliation' rows carrying no tag — the lanes trade distinct
+    sizes (mom-k5/c08 100u, h1-mom 2000u, crash 5000u), so the fill size
+    attributes them to their origin lane instead of a junk 'reconciled'
+    bucket that hid every server-side close from the lane panels."""
     r = reason or ""
     if r.startswith("c08"):
         return "c08-fade"
@@ -65,6 +69,17 @@ def attribute_lane(reason, symbol):
     if r.startswith("crash"):
         return "crash"
     if r.startswith("venue-reconciliation"):
+        try:
+            q = float(qty) if qty is not None else None
+        except (TypeError, ValueError):
+            q = None
+        if q is not None:
+            if q >= 5000:
+                return "crash"
+            if q >= 2000:
+                return "h1-mom"
+            if q > 0:
+                return "mom-k5"
         return "reconciled"
     if r in ("momentum-entry", "out-of-target", "max-hold"):
         return "mom-k5"
@@ -84,9 +99,15 @@ def ledger_performance():
     except Exception:
         return {}
     rows.sort(key=lambda r: str(r.get("timestamp")))
+    # append-only ledger corrections (map #158 #171): skip void rows and the
+    # phantom fills they void — the venue never executed them
+    _voided = {ts for r in rows if r.get("reason") == "phantom-void"
+               for ts in (r.get("voids") or [])}
+    rows = [r for r in rows if r.get("reason") != "phantom-void"
+            and r.get("timestamp") not in _voided]
     lanes = {}
     for r in rows:
-        lane = attribute_lane(r.get("reason"), r.get("symbol"))
+        lane = attribute_lane(r.get("reason"), r.get("symbol"), r.get("quantity"))
         sym = r.get("symbol")
         side = (r.get("side") or "").upper()
         qty = float(r.get("quantity") or 0)
@@ -338,13 +359,32 @@ class MissionScreen(Screen):
                           str(t.get("units")), str(t.get("price")),
                           str(t.get("opened")), f"[{color}]{t.get('owner')}[/{color}]",
                           f"[{pnl_color(pl)}]{pl:+.2f}[/]", prot)
+        open_by_lane = {}
+        for t in book:
+            owner = t.get("owner") or "unknown"
+            open_by_lane.setdefault(owner, {"n": 0, "pl": 0.0})
+            open_by_lane[owner]["n"] += 1
+            open_by_lane[owner]["pl"] += float(t.get("pl") or 0)
         lane_rows = []
         for tag in ("mom-k5", "c08-fade", "h1-mom", "crash", "watchdog"):
             l = ledger.get(tag, {})
             color = LANE_COLOR.get(tag, "grey")
+            o = open_by_lane.get(tag)
+            open_txt = (f" · [b]{o['n']} open[/b] [{pnl_color(o['pl'])}]{o['pl']:+.2f}[/]"
+                        if o else "")
+            realized = l.get("realized", 0)
+            if tag == "crash" and crash.get("realized") is not None:
+                # venue-derived tracker (fx_crashtest.json) is authoritative
+                # for this lane — ledger FIFO pairs closes to the oldest open
+                # buy, while the venue closes the newest position (SL/TP),
+                # so per-pair totals diverge; the venue pl sum does not.
+                realized = crash.get("realized", 0)
+            else:
+                realized = l.get("realized", 0)
             lane_rows.append(f"[{color}]●[/{color}] [{color}]{tag:<10}[/{color}] "
-                             f"realized [{pnl_color(l.get('realized'))}]{l.get('realized', 0):+.2f}[/] · "
-                             f"{l.get('rounds', 0)} RT · WR {(l.get('winrate') or 0):.0f}%")
+                             f"realized [{pnl_color(realized)}]{realized:+.2f}[/] · "
+                             f"{l.get('rounds', 0)} RT · WR {(l.get('winrate') or 0):.0f}%"
+                             + open_txt)
         cal2 = "\n".join(f"  {bank:<5} {d}" for d, bank in upcoming) or "  —"
         gate = ("[red]BLACKOUT: " + " · ".join(blocked) + "[/red]") if blocked \
             else "[green]clear — entries permitted[/green]"
@@ -354,7 +394,7 @@ class MissionScreen(Screen):
         fills_t = self.query_one("#fills", DataTable)
         fills_t.clear()
         for f in fx.get("fills", [])[:14]:
-            lane = attribute_lane(f.get("reason"), f.get("symbol"))
+            lane = attribute_lane(f.get("reason"), f.get("symbol"), f.get("quantity"))
             color = LANE_COLOR.get(lane, "grey")
             fills_t.add_row(str(f.get("timestamp"))[:19], f.get("symbol"), f.get("side"),
                             str(f.get("quantity")), str(f.get("price")),

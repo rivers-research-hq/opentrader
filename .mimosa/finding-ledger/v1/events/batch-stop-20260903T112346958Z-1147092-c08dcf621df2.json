@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260903T112346958Z-1147092-c08dcf621df2",
+  "runId": "20260903T112346958Z-1147092-c08dcf621df2",
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "2c730847595c437e298b6a63eef988453046e499",
+  "diffHash": "d0145220fadc4d550df95b08a83f698e3b6191e04cbf8789b151d232601ca158",
+  "rulesVersion": "unavailable",
+  "sessionHash": "d1a2c2c81a882092a96a7b0ad8f8eceaade6974364f95714db69a6d00def127a",
+  "reportRef": ".mimosa/reports/task-review-sess_0f77572b-72ca-488e-b1c9-0327e5b9390e-20260903T112346958Z-1147092-c08dcf621df2.json",
+  "events": [],
+  "observedFindingIds": [
+    "mimosa-04edb674770692902a95e513",
+    "mimosa-147b66133da3402d666e1b51",
+    "mimosa-f610418463d327ea8e4eceb7",
+    "mimosa-52fdcf951e5dcdead034ea28"
+  ],
+  "verifiedFiles": [
+    {
+      "file": "exchange/oanda.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tests/test_oanda_price_precision.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "strategies/fx_runner.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tests/test_fx_runner_reconcile.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tui/index.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "dashboard.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tui.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "strategies/fx_review.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-03T11:23:47.345Z"
+}

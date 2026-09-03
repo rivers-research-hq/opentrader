@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import time
+from decimal import ROUND_HALF_UP, Decimal
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -77,6 +78,10 @@ class OandaExchange(ExchangeBase):
         self._cost_basis: Dict[str, float] = {}
         self._fills: List[dict] = []
         self._order_counter: int = 1
+
+        # Per-instrument displayPrecision from /instruments (connect); the
+        # suffix heuristic covers calls made before connect populated it.
+        self._precision: Dict[str, int] = {}
 
         # Cache
         self._bar_cache: Dict[str, List[OHLCV]] = {}
@@ -148,7 +153,12 @@ class OandaExchange(ExchangeBase):
         insts = self._request(
             "GET", f"/v3/accounts/{self._account_id}/instruments?state=ENABLED"
         )
-        enabled = [i.get("name", "") for i in insts.get("instruments", [])]
+        enabled = []
+        for i in insts.get("instruments", []):
+            name = i.get("name", "")
+            enabled.append(name)
+            if i.get("displayPrecision"):
+                self._precision[name] = int(i["displayPrecision"])
         if enabled:
             self._instruments = [m for m in FX_MAJORS if m in enabled]
         self._connected = True
@@ -231,14 +241,19 @@ class OandaExchange(ExchangeBase):
         return out
 
     def get_current_price(self, symbol: str) -> Optional[float]:
-        if symbol in self._price_cache:
-            return self._price_cache[symbol]
+        # Always fetch fresh: this cache was written once and never expired
+        # (the _cache_ttl field only guards bars), so a long-lived process
+        # quoted USD_JPY 160.198 twice while the venue traded at 158.82 —
+        # the runner then set stops off a stale mark and OANDA cancelled the
+        # fills (STOP_LOSS_ON_FILL_LOSS). The pricing endpoint is one cheap
+        # call; the rate limiter in _request governs cadence.
         data = self._request("GET", f"/v3/accounts/{self._account_id}/pricing?instruments={symbol}")
         prices = self._parse_pricing(data)
         if symbol in prices:
             self._price_cache[symbol] = prices[symbol]
             return prices[symbol]
-        return None
+        # fall back to the last good mark only when the venue gives nothing
+        return self._price_cache.get(symbol)
 
     def get_prices_batch(self, symbols: list) -> dict:
         """Batch quotes via the account pricing endpoint (one call, up to 50 instruments)."""
@@ -256,6 +271,23 @@ class OandaExchange(ExchangeBase):
         return result
 
     # ── Orders ───────────────────────────────────────────────
+
+    def _price_digits(self, symbol: str) -> int:
+        """displayPrecision for this instrument (JPY-quote pairs 3, other
+        majors 5 until connect() provides the venue's own metadata)."""
+        d = self._precision.get(symbol)
+        if d:
+            return d
+        return 3 if symbol.endswith("_JPY") else 5
+
+    def _fmt_price(self, symbol: str, price: float) -> str:
+        """Format a price at the instrument's displayPrecision, as a clean
+        string. Raw floats and hardcoded :.5f strings are venue rejections
+        waiting to happen: TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED
+        killed every h1-mom USD_JPY entry on 09-02/03 (txns 158/159/160) —
+        the adapter sent 5-decimal strings on a 3-decimal instrument."""
+        q = Decimal(1).scaleb(-self._price_digits(symbol))
+        return str(Decimal(str(price)).quantize(q, rounding=ROUND_HALF_UP))
 
     def place_order(
         self,
@@ -301,9 +333,11 @@ class OandaExchange(ExchangeBase):
                 order["tradeClientExtensions"] = {"id": f"{tag}-{symbol}", "tag": tag,
                                                   "comment": tag}
             if stop_loss:
-                order["stopLossOnFill"] = {"price": f"{stop_loss:.5f}", "timeInForce": "GTC"}
+                order["stopLossOnFill"] = {
+                    "price": self._fmt_price(symbol, stop_loss), "timeInForce": "GTC"}
             if take_profit:
-                order["takeProfitOnFill"] = {"price": f"{take_profit:.5f}", "timeInForce": "GTC"}
+                order["takeProfitOnFill"] = {
+                    "price": self._fmt_price(symbol, take_profit), "timeInForce": "GTC"}
             body = {"order": order}
         elif order_type == "limit":
             if not price:
@@ -318,7 +352,7 @@ class OandaExchange(ExchangeBase):
                     "type": "LIMIT",
                     "instrument": symbol,
                     "units": str(units),
-                    "price": str(price),
+                    "price": self._fmt_price(symbol, price),
                     "timeInForce": "GTC",
                     "positionFill": "DEFAULT",
                 }
@@ -336,7 +370,7 @@ class OandaExchange(ExchangeBase):
                     "type": "MARKET_IF_TOUCHED",
                     "instrument": symbol,
                     "units": str(units),
-                    "price": str(price),
+                    "price": self._fmt_price(symbol, price),
                     "timeInForce": "GTC",
                     "positionFill": "DEFAULT",
                 }
@@ -362,7 +396,26 @@ class OandaExchange(ExchangeBase):
 
         # OANDA returns orderCreateTransaction + orderFillTransaction (no
         # orderFill wrapper). The fill transaction carries the unique IDs the
-        # continuity ledger dedups on.
+        # continuity ledger dedups on. A POST can also come back with an
+        # orderCancelTransaction (e.g. STOP_LOSS_ON_FILL_LOSS: the attached
+        # stop would trigger instantly on fill — the venue refuses instead of
+        # filling into a guaranteed stop-out) or an orderRejectTransaction.
+        # Those are NOT fills: assuming "filled" wrote phantom rows into the
+        # FX ledger and a phantom position into the state cache on
+        # 2026-09-02 (two USD_JPY entries during a fast JPY drop). No fill
+        # transaction on the venue = no fill; venue is authoritative.
+        if not data.get("orderFillTransaction"):
+            cancel = data.get("orderCancelTransaction") or {}
+            reject = data.get("orderRejectTransaction") or {}
+            reason = cancel.get("reason") or reject.get("rejectedReason") or "no fill"
+            return OrderResult(
+                order_id=str(data.get("lastTransactionID") or ""),
+                symbol=symbol, side=side, quantity=quantity,
+                price=0, status="rejected",
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                raw={"reason": reason,
+                     "lastTransactionID": data.get("lastTransactionID")},
+            )
         fill_tx = data.get("orderFillTransaction") or {}
         order_id = str(fill_tx.get("orderID") or data.get("lastTransactionID") or "")
         fill_price = float(fill_tx.get("price") or 0)

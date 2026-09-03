@@ -33,6 +33,20 @@ STORE = PROJECT / "data" / "fx_review.jsonl"
 
 def load_events():
     events = {}
+    # append-only ledger corrections (map #158 #171): a phantom-void row lists
+    # the timestamps of fills the venue never executed — skip voids and voided
+    _voided = set()
+    _fx = LEDGERS.get("fx")
+    if _fx and _fx.exists():
+        for line in _fx.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                _r = json.loads(line)
+            except Exception:
+                continue
+            if _r.get("reason") == "phantom-void":
+                _voided.update(_r.get("voids") or [])
     for lane, path in LEDGERS.items():
         if not path.exists():
             continue
@@ -42,6 +56,9 @@ def load_events():
             try:
                 r = json.loads(line)
             except Exception:
+                continue
+            if lane == "fx" and (r.get("reason") == "phantom-void"
+                                 or r.get("timestamp") in _voided):
                 continue
             if lane == "fire":
                 key = f"fire:{r.get('ts')}:{r.get('symbol')}:SIGNAL:fade"
