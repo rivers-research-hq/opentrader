@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# opentrader — launcher for the FX practice book GUI.
+# The dashboard binds 127.0.0.1 ONLY (never exposed to the network — the
+# 0.0.0.0 default was a real security flaw, fixed 2026-09-04). This script
+# starts it if needed and opens the GUI in the default browser, like any
+# CLI-launched app (zcode/opencode style).
+set -u
+OP="/home/mrc/opentrader"
+PY="$OP/.venv/bin/python3"
+LOG="$OP/data/logs/dashboard.log"
+PORT="${OPENTRADER_PORT:-8097}"
+URL="http://127.0.0.1:$PORT"
+
+is_up() { curl -sf --max-time 2 "$URL/health" >/dev/null 2>&1; }
+
+case "${1:-}" in
+  stop)
+    p=$(pgrep -f "dashboard.py --host 127.0.0.1 --port $PORT" || true)
+    if [ -n "$p" ]; then kill $p 2>/dev/null && echo "● dashboard stopped"; else echo "● dashboard not running"; fi
+    exit 0 ;;
+  restart) $0 stop >/dev/null 2>&1; sleep 1 ;;
+  help|-h)
+    echo "usage: opentrader [start|stop|restart]"
+    echo "  (no arg) start if needed + open the GUI in your browser"
+    exit 0 ;;
+esac
+
+if ! is_up; then
+  echo "● starting dashboard — bound to 127.0.0.1 (loopback only, never network-exposed)"
+  nohup "$PY" "$OP/dashboard.py" --host 127.0.0.1 --port "$PORT" >> "$LOG" 2>&1 &
+  for _ in $(seq 1 40); do is_up && break; sleep 0.25; done
+fi
+
+if is_up; then
+  echo "● FX practice book live at $URL — opening GUI…"
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$URL" >/dev/null 2>&1 || echo "  (browser didn't open — visit $URL)"
+  else
+    echo "  open $URL in your browser"
+  fi
+else
+  echo "✗ dashboard failed to start — see $LOG"
+  exit 1
+fi

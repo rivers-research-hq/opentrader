@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260904T013255772Z-2401046-e16e41adc0f4",
+  "runId": "20260904T013255772Z-2401046-e16e41adc0f4",
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "1fe326c405fce35b0fb7b958dc10a2d7150a8547",
+  "diffHash": "c196b94ab83ffbeede9dd22912b8ef38f8d96acb007bee22e886ae908566bc8c",
+  "rulesVersion": "unavailable",
+  "sessionHash": "698a203a3af7a8cb8734e6b2e69771391ace154aab952bef65b871e5a48cef7e",
+  "reportRef": ".mimosa/reports/task-review-sess_3875dacf-4ecf-4f2e-a642-fd8334e631cf-20260904T013255772Z-2401046-e16e41adc0f4.json",
+  "events": [
+    {
+      "eventId": "hook-df414953256efcceef094668f9d47b38",
+      "findingId": "mimosa-52fdcf951e5dcdead034ea28",
+      "type": "finding_blocked",
+      "at": "2026-09-04T01:18:17.715Z",
+      "identity": {
+        "projectRelativeFile": "dashboard.py",
+        "ruleId": "security",
+        "codeEvidenceHash": "36f95d38f1737664173694e5a795fefa19d02edb463258f69a49ec0ee58575f9",
+        "confidence": "stable"
+      },
+      "scope": "direct",
+      "line": 451,
+      "endLine": 451,
+      "reasonCode": "deny",
+      "reportedToAgent": true,
+      "evidence": {
+        "kind": "source",
+        "boundary": "candidate",
+        "producer": "deterministic",
+        "evidenceHash": "36f95d38f1737664173694e5a795fefa19d02edb463258f69a49ec0ee58575f9"
+      },
+      "sequence": 0
+    },
+    {
+      "eventId": "hook-1e53f75844433b2e1a0e53eb9e5dce73",
+      "findingId": "mimosa-52fdcf951e5dcdead034ea28",
+      "type": "static_fix_verified",
+      "at": "2026-09-04T01:18:31.371Z",
+      "identity": {
+        "projectRelativeFile": "dashboard.py",
+        "ruleId": "security",
+        "codeEvidenceHash": "36f95d38f1737664173694e5a795fefa19d02edb463258f69a49ec0ee58575f9",
+        "confidence": "stable"
+      },
+      "scope": "direct",
+      "line": 451,
+      "endLine": 451,
+      "reasonCode": "static_rescan_passed",
+      "reportedToAgent": false,
+      "evidence": {
+        "kind": "static_scan",
+        "boundary": "observed",
+        "producer": "deterministic",
+        "evidenceHash": "36f95d38f1737664173694e5a795fefa19d02edb463258f69a49ec0ee58575f9"
+      },
+      "sequence": 1
+    }
+  ],
+  "observedFindingIds": [],
+  "verifiedFiles": [
+    {
+      "file": "dashboard.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-04T01:32:56.157Z"
+}

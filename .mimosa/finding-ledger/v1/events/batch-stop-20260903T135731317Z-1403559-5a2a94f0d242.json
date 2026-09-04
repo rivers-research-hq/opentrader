@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260903T135731317Z-1403559-5a2a94f0d242",
+  "runId": "20260903T135731317Z-1403559-5a2a94f0d242",
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "1fe326c405fce35b0fb7b958dc10a2d7150a8547",
+  "diffHash": "b544364a104dad76d3239435d7cbafcb5b57651761a2108f7f6bf598d6f92031",
+  "rulesVersion": "unavailable",
+  "sessionHash": "99acb4494befa7bda08f539588588c92f5a121250259109ee729d0f5387ab8be",
+  "reportRef": ".mimosa/reports/task-review-sess_2b2a0880-c308-4072-a34f-537cdad7da75-20260903T135731317Z-1403559-5a2a94f0d242.json",
+  "events": [],
+  "observedFindingIds": [
+    "mimosa-147b66133da3402d666e1b51",
+    "mimosa-f610418463d327ea8e4eceb7"
+  ],
+  "verifiedFiles": [
+    {
+      "file": "strategies/fx_runner.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tui.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tui/index.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tests/test_fx_runner_reconcile.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "strategies/fx_challenger.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-03T13:57:31.749Z"
+}

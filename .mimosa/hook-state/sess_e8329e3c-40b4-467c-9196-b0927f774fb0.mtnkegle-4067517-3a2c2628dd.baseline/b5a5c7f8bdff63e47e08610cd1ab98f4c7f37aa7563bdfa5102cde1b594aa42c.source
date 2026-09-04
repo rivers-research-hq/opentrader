@@ -1,0 +1,63 @@
+import { tool } from "@opencode-ai/plugin"
+import { join } from "path"
+import { mkdirSync, writeFileSync } from "fs"
+
+const LOG_DIR = "/tmp/opencode/subagents"
+
+export default tool({
+  description:
+    "Spawn an opencode background subagent with stall detection, or check/kill one. A subagent STALLS when its process stays alive but its log stops growing (e.g. a local model server is contended or hung) - the monitor flags and kills it, so you never babysit a dead run. Use spawn for research/parallel work, status to poll, kill to stop early.",
+  args: {
+    action: tool.schema
+      .string()
+      .describe("spawn (launch + monitor), status (poll state file + live process), or kill"),
+    label: tool.schema
+      .string()
+      .describe("subagent label - used as session title, state file name, and log file name"),
+    prompt: tool.schema
+      .string()
+      .optional()
+      .describe("full instruction prompt for the subagent (required for spawn)"),
+    model: tool.schema
+      .string()
+      .optional()
+      .describe("opencode model id in provider/model form (default: the configured default)"),
+    stall_seconds: tool.schema
+      .number()
+      .optional()
+      .describe("seconds of log silence before the subagent is declared stalled (default 180)"),
+    kill_on_stall: tool.schema
+      .boolean()
+      .optional()
+      .describe("kill the subagent when it stalls (default true; set false to inspect the log first)"),
+  },
+  async execute(args, context) {
+    const script = join(context.worktree, ".opencode/tools/_subagent_watch.py")
+    const label = args.label
+    const base = [script, "--label", label, "--cwd", context.worktree]
+
+    if (args.action === "spawn") {
+      if (!args.prompt) return "prompt is required for spawn"
+      const dir = `${LOG_DIR}/${label}`
+      mkdirSync(dir, { recursive: true })
+      const promptFile = `${dir}/prompt.txt`
+      writeFileSync(promptFile, args.prompt)
+      const spawnArgs = [
+        ...base,
+        "--action",
+        "spawn",
+        "--prompt-file",
+        promptFile,
+        "--stall-seconds",
+        String(args.stall_seconds ?? 180),
+        ...(args.model ? ["--model", args.model] : []),
+        ...(args.kill_on_stall === false ? ["--no-kill"] : []),
+      ]
+      const spawnResult = await Bun.$`python3 ${spawnArgs}`.text()
+      return spawnResult.trim()
+    }
+
+    const result = await Bun.$`python3 ${base} --action ${args.action}`.text()
+    return result.trim()
+  },
+})

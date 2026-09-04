@@ -59,6 +59,66 @@
       },
       "promotion_bar": ">=30 closed shadow round trips, PF>1 over the shadow window, reconciliation clean, then HUMAN signoff at shadow->live boundary (ADR-0009 #4)",
       "notes": "WORLDS-ROBUST (2026-09-01, 1000 block-bootstrap realities, protocol \u00a75d): OOS PF mean 2.52, p5 1.16, PF>1 in 98.1% of worlds, real path at p60.8 (inside distribution, not a lucky draw); block-63 sensitivity 95.6% PF>1 p5 1.03. Control (mom_k5_pos) fails as designed at 42.8%. Edge is not a path artifact. Combined with the regime-bound caveat (BM2: worlds inherit the 2024-26 golden mix \u2014 novel-regime risk stays with forward accrual), the sleeve proceeds toward the Sep 7-14 review."
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx_h1_rev_rsi2",
+      "kind": "challenger",
+      "family": "mean_reversion",
+      "venue": "oanda_practice",
+      "universe": "fx_majors",
+      "status": "accruing",
+      "registered": "2026-09-03T15:32:20.694293+00:00",
+      "registered_by": "agent",
+      "source": null,
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_ledger.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": null,
+      "notes": "RSI(2) H1 fade, long-only v1, 2000u, tag h1-rev (map #174 #179)"
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx_h4_donchian20",
+      "kind": "challenger",
+      "family": "breakout",
+      "venue": "oanda_practice",
+      "universe": "fx_majors",
+      "status": "accruing",
+      "registered": "2026-09-03T15:32:20.695817+00:00",
+      "registered_by": "agent",
+      "source": null,
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_ledger.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": null,
+      "notes": "H4 Donchian-20 breakout, long-only, no TP (opposite-channel exit), 2000u, tag h4-brk (map #174 #180)"
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx_mom_k10_top2",
+      "kind": "challenger",
+      "family": "momentum",
+      "venue": "oanda_practice",
+      "universe": "fx_majors",
+      "status": "accruing",
+      "registered": "2026-09-03T15:32:20.696644+00:00",
+      "registered_by": "agent",
+      "source": null,
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_ledger.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": null,
+      "notes": "D1 momentum K=10 sibling of mom-k5 (A/B, size confound documented), 2000u, tag d1-mom10 (map #174 #181)"
     }
   ]
 }

@@ -1,0 +1,16 @@
+[package]
+name = "exchange-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Paper exchange simulator + risk engine sidecar for OpenTrader"
+
+[[bin]]
+name = "exchange-engine"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rust_decimal = { version = "1", features = ["serde"] }
+rand = "0.8"
+chrono = { version = "0.4", features = ["serde"] }

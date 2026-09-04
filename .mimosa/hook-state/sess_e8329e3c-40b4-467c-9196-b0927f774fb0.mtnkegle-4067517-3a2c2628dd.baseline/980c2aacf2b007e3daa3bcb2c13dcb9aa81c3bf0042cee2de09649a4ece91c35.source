@@ -1,0 +1,42 @@
+{
+  "name": "hugginghack-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "npm@10.9.8",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --experimental-strip-types --test test/modelCard.test.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "5.2.6",
+    "@fontsource/ibm-plex-mono": "5.2.6",
+    "@fontsource/ibm-plex-sans": "5.2.6",
+    "katex": "0.16.21",
+    "lucide-react": "0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-markdown": "9.0.3",
+    "react-router-dom": "7.18.1",
+    "rehype-katex": "7.0.1",
+    "rehype-raw": "7.0.0",
+    "rehype-sanitize": "6.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "6.0.4",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.5.22",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3",
+    "vite": "8.1.5"
+  }
+}

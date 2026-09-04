@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260904T114948406Z-3047029-2dfbe7225cbe",
+  "runId": "20260904T114948406Z-3047029-2dfbe7225cbe",
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "1fe326c405fce35b0fb7b958dc10a2d7150a8547",
+  "diffHash": "f398ee689fa5b23ce91a55dd3106adcbc139d8915733998d2eb92f1e69ef774d",
+  "rulesVersion": "unavailable",
+  "sessionHash": "698a203a3af7a8cb8734e6b2e69771391ace154aab952bef65b871e5a48cef7e",
+  "reportRef": ".mimosa/reports/task-review-sess_3875dacf-4ecf-4f2e-a642-fd8334e631cf-20260904T114948406Z-3047029-2dfbe7225cbe.json",
+  "events": [],
+  "observedFindingIds": [
+    "mimosa-147b66133da3402d666e1b51",
+    "mimosa-f610418463d327ea8e4eceb7"
+  ],
+  "verifiedFiles": [
+    {
+      "file": "tui/index.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "tui.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-04T11:49:48.808Z"
+}

@@ -1,0 +1,29 @@
+{
+  "positions": {
+    "EUR_USD": {
+      "units": 2000.0,
+      "opened": "2026-09-04T19:15:04",
+      "entry": 1.1613,
+      "trade_id": "407",
+      "owner": "h1-rev",
+      "protected": true
+    },
+    "USD_JPY": {
+      "units": 2000.0,
+      "opened": "2026-09-04T17:15:05",
+      "entry": 156.108,
+      "trade_id": "403",
+      "owner": "h1-rev",
+      "protected": true
+    },
+    "GBP_USD": {
+      "units": 2000.0,
+      "opened": "2026-09-04T14:15:05",
+      "entry": 1.35112,
+      "trade_id": "383",
+      "owner": "h1-rev",
+      "protected": true
+    }
+  },
+  "updated": "2026-09-04T21:15:01.303652+00:00"
+}

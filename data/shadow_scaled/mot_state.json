@@ -1,16 +1,16 @@
 {
   "name": "Ptolemy",
-  "generation": 2,
+  "generation": 3,
   "season": 1,
-  "last_review": "2026-09-03T06:28:12.333239+00:00",
-  "total_reviews": 3,
-  "current_score": 0.159,
+  "last_review": "2026-09-04T12:38:07.788222+00:00",
+  "total_reviews": 6,
+  "current_score": 0.169,
   "decision": "reduce",
-  "recommendation": "Ptolemy-2 underperforming. Reduce trading window to 4h max, lower position size to 3%, run training scenario analysis.",
+  "recommendation": "Ptolemy-3 underperforming. Reduce trading window to 4h max, lower position size to 3%, run training scenario analysis.",
   "model_performance": {
     "return_pct": NaN,
     "win_rate": 0.0,
-    "efficiency": 0.79,
+    "efficiency": 0.84,
     "avg_confidence": 0.0
   },
   "schedule_history": [
@@ -31,6 +31,24 @@
       "score": 0.159,
       "decision": "reduce",
       "version": "Ptolemy-2"
+    },
+    {
+      "timestamp": "2026-09-04T00:35:32.138542+00:00",
+      "score": 0.067,
+      "decision": "iterate",
+      "version": "Ptolemy-3"
+    },
+    {
+      "timestamp": "2026-09-04T06:37:05.397044+00:00",
+      "score": 0.147,
+      "decision": "reduce",
+      "version": "Ptolemy-3"
+    },
+    {
+      "timestamp": "2026-09-04T12:38:07.788222+00:00",
+      "score": 0.169,
+      "decision": "reduce",
+      "version": "Ptolemy-3"
     }
   ]
 }

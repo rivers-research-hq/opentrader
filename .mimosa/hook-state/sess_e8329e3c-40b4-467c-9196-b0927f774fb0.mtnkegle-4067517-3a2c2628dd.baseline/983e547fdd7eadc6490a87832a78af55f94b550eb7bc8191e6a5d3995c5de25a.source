@@ -1,0 +1,2 @@
+"""HuggingHack backend package."""
+

@@ -1,68 +1,68 @@
 {
- "asof": "2026-09-02",
+ "asof": "2026-09-03",
  "lanes": {
   "laggard": {
    "expert": "laggard",
-   "equity": 758.12,
-   "latest_1d_ret": 0.0,
+   "equity": 640.03,
+   "latest_1d_ret": -0.002929,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "momtrend": {
    "expert": "momtrend",
-   "equity": 668.02,
-   "latest_1d_ret": 0.0,
+   "equity": 733.36,
+   "latest_1d_ret": -0.004166,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "bayes": {
    "expert": "bayes",
-   "equity": 674.93,
-   "latest_1d_ret": 0.000152,
+   "equity": 678.42,
+   "latest_1d_ret": 0.0,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "spectral": {
    "expert": "spectral",
-   "equity": 500.0,
-   "latest_1d_ret": 0.0,
+   "equity": 498.26,
+   "latest_1d_ret": -0.003488,
    "regime": "down",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "kalman": {
    "expert": "kalman",
-   "equity": 633.76,
-   "latest_1d_ret": 0.0,
+   "equity": 680.88,
+   "latest_1d_ret": -0.00375,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "hurst": {
    "expert": "hurst",
-   "equity": 605.81,
-   "latest_1d_ret": 0.000408,
+   "equity": 595.31,
+   "latest_1d_ret": 0.0,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "wavelet": {
    "expert": "wavelet",
-   "equity": 704.64,
-   "latest_1d_ret": 0.0,
+   "equity": 699.35,
+   "latest_1d_ret": -0.004278,
    "regime": "up",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "entropy": {
    "expert": "entropy",
-   "equity": 500.0,
-   "latest_1d_ret": 0.0,
+   "equity": 498.26,
+   "latest_1d_ret": -0.003488,
    "regime": "down",
-   "asof": "2026-09-02"
+   "asof": "2026-09-04"
   },
   "multiasset": {
    "expert": "multiasset",
-   "equity": 769.45,
-   "latest_1d_ret": -0.003797,
+   "equity": 795.73,
+   "latest_1d_ret": 0.010307,
    "regime": "up",
-   "asof": "2026-09-01"
+   "asof": "2026-09-03"
   }
  },
  "note": "PAPER lanes \u2014 one avenue per expert on its validated universe. NOT live order flow."

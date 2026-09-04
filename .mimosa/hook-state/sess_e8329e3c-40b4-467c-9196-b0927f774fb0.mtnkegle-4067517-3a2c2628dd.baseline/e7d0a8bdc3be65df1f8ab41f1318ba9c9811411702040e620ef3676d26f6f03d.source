@@ -1,0 +1,17 @@
+{
+  "name": "opentrader-tui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only terminal client for the opentrader harness (Claude-Code-style TUI).",
+  "type": "module",
+  "bin": {
+    "opentrader-tui": "./index.js"
+  },
+  "dependencies": {
+    "ink": "^5.0.0",
+    "react": "^18.3.1"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
