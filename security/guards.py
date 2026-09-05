@@ -36,6 +36,11 @@ ALLOWED_HOSTS = {
     "fred.stlouisfed.org", "nfs.faireconomy.media", "api.stlouisfed.org",
     "data.bis.org", "www.bis.org", "api.worldbank.org", "www.worldbank.org",
     "export.arxiv.org", "arxiv.org", "rss.app", "api.github.com",
+    # news / event research feeds (map #187 #203/#204: FF week pages + MOF
+    # intervention CSV — added 2026-09-05, ticket #203/#204)
+    "www.forexfactory.com", "www.mof.go.jp",
+    # Fed comms calendar (map #187 #203: speeches RSS)
+    "www.federalreserve.gov",
     # LLM / infra
     "api.coingecko.com", "api.alternative.me", "api.stlouisfed.org",
     "api.deepseek.com", "api.openai.com", "api.anthropic.com",
@@ -74,7 +79,8 @@ def _host_allowed(host: str) -> bool:
 
 def _reject_private(host: str) -> None:
     try:
-        infos = ipaddress.getaddrinfo(host, None)
+        import socket
+        infos = socket.getaddrinfo(host, None)  # getaddrinfo lives in socket; ipaddress had no such attr (latent bug — any non-loopback host failed DNS)
     except Exception as e:
         raise HardeningError(f"DNS resolution failed for {host!r}: {e}") from e
     for info in infos:

@@ -517,16 +517,42 @@ async def api_calendar():
         pass
     cutoff = now + dt.timedelta(days=14)
     ff = []
-    for e in _ff_events():
+    # Primary source: the week-view scrape (fetch_ff_upcoming, map #187 #204 —
+    # replaces the dead nextweek JSON feed; covers 3 weeks ahead with
+    # forecast fields). UTC normalization: FF renders in America/Chicago with
+    # DST (verified in #195 against NFP/FFR release times).
+    from zoneinfo import ZoneInfo
+    CHICAGO = ZoneInfo("America/Chicago")
+    up_file = Path("/home/mrc/opentrader-data/feeds/ff_upcoming.json")
+    if up_file.exists():
         try:
-            ed = dt.datetime.fromisoformat(e["date"])
-            if ed >= now and ed <= cutoff and e.get("impact") in ("High", "Medium"):
-                ff.append({"date": ed.astimezone(dt.timezone.utc).isoformat(),
-                           "title": e.get("title"), "currency": e.get("country"),
-                           "impact": e.get("impact"), "forecast": e.get("forecast") or "—",
-                           "previous": e.get("previous") or "—"})
+            up = json.loads(up_file.read_text())
+            for e in up.get("events", []):
+                try:
+                    local = dt.datetime.strptime(
+                        f"{e.get('date_label')} {e.get('time_label')}", "%b %d, %Y %I:%M%p")
+                    ed = local.replace(tzinfo=CHICAGO).astimezone(dt.timezone.utc)
+                except Exception:
+                    continue
+                if ed >= now and ed <= cutoff and e.get("impact") in ("high", "medium"):
+                    ff.append({"date": ed.isoformat(),
+                               "title": e.get("name"), "currency": e.get("country"),
+                               "impact": (e.get("impact") or "").capitalize(),
+                               "forecast": e.get("forecast") or "—",
+                               "previous": e.get("previous") or "—"})
         except Exception:
-            continue
+            pass
+    if not ff:  # fallback: the legacy JSON feeds (thisweek/nextweek)
+        for e in _ff_events():
+            try:
+                ed = dt.datetime.fromisoformat(e["date"])
+                if ed >= now and ed <= cutoff and e.get("impact") in ("High", "Medium"):
+                    ff.append({"date": ed.astimezone(dt.timezone.utc).isoformat(),
+                               "title": e.get("title"), "currency": e.get("country"),
+                               "impact": e.get("impact"), "forecast": e.get("forecast") or "—",
+                               "previous": e.get("previous") or "—"})
+            except Exception:
+                continue
     ff.sort(key=lambda x: x["date"])
     return {"decisions": decisions[:20], "ff_events": ff[:25],
             "inhouse": _inhouse_state(), "generated": now.isoformat()}

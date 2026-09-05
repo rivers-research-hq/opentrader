@@ -92,8 +92,10 @@ def build_ledger(con):
                          "tag": r.get("tag"), "voided": r.get("timestamp") in voided_ts})
     con.register("ledger_df", pandas.DataFrame(rows, columns=LEDGER_COLUMNS))
     con.execute("CREATE OR REPLACE TABLE ledger AS SELECT * FROM ledger_df")
+    con.unregister("ledger_df")
     con.register("voids_df", pandas.DataFrame(voids, columns=["ts", "voids", "detail", "ticket"]))
     con.execute("CREATE OR REPLACE TABLE voids AS SELECT * FROM voids_df")
+    con.unregister("voids_df")
     return len(rows), len(voids)
 
 
@@ -134,28 +136,63 @@ def build_journal(con, skip_venue=False):
     con.register("fills_df", pandas.DataFrame(fills, columns=[
         "ts", "txn_id", "instrument", "units", "price", "pl", "reason", "tag"]))
     con.execute("CREATE OR REPLACE TABLE fills AS SELECT * FROM fills_df")
+    con.unregister("fills_df")
     con.register("txns_df", pandas.DataFrame(txns, columns=["id", "ts", "type", "instrument", "time"]))
     con.execute("CREATE OR REPLACE TABLE txns AS SELECT * FROM txns_df")
+    con.unregister("txns_df")
     return len(fills), len(txns)
 
 
 def build_bars(con, ex=None):
-    """OHLCV per major, D1 + H1. Full pull each build (v1): idempotent —
-    incremental windows are a later ticket once the store proves itself."""
+    """OHLCV: D1 via the 5000-candle pull (covers 2008+), H1 via paged fetches
+    (OANDA serves ~2008+ for H1 too; ~5k candles/call, ~21 calls/pair, ~14s).
+    The probe (map #191 #195) needs H1 across the full event span — the old
+    5000-candle cap silently limited H1 to Nov 2025+. H1 fetches are paged
+    with a 0.3s sleep (adapter rate limit 0.25s)."""
     rows = []
     ex = ex or OandaExchange()
     connected = ex.connect()
-    for tf in ("1d", "1h"):
-        for sym in FX_MAJORS:
-            bars = ex.get_bars(sym, tf, 5000) if connected else []
-            for b in bars:
-                rows.append({"symbol": sym, "timeframe": tf,
-                             "ts": datetime.fromtimestamp(b.timestamp, tz=timezone.utc).replace(tzinfo=None),
-                             "open": b.open, "high": b.high, "low": b.low,
-                             "close": b.close, "volume": b.volume})
+    for sym in FX_MAJORS:
+        d1 = ex.get_bars(sym, "1d", 5000) if connected else []
+        for b in d1:
+            rows.append({"symbol": sym, "timeframe": "1d",
+                         "ts": datetime.fromtimestamp(b.timestamp, tz=timezone.utc).replace(tzinfo=None),
+                         "open": b.open, "high": b.high, "low": b.low,
+                         "close": b.close, "volume": b.volume})
+    if not connected:
+        register_df(con, "bars", pandas.DataFrame(rows, columns=[
+            "symbol", "timeframe", "ts", "open", "high", "low", "close", "volume"]))
+        return len(rows)
+    for sym in FX_MAJORS:
+        cursor = datetime(2008, 1, 1, tzinfo=timezone.utc)
+        end = datetime.now(timezone.utc)
+        calls = 0
+        while cursor < end and calls < 40:
+            r = ex._request('GET', f"/v3/instruments/{sym}/candles"
+                            f"?granularity=H1&from={cursor.isoformat()}&count=5000&price=M")
+            calls += 1
+            c = r.get('candles', [])
+            if not c:
+                break
+            for b in c:
+                if not b.get('complete', True):
+                    continue
+                m = b.get('mid') or {}
+                if not m.get('c'):
+                    continue
+                ts = datetime.fromisoformat(b['time'].replace('Z', '+00:00')).replace(tzinfo=None)
+                rows.append({"symbol": sym, "timeframe": "1h", "ts": ts,
+                             "open": float(m['o']), "high": float(m['h']),
+                             "low": float(m['l']), "close": float(m['c']),
+                             "volume": float(b.get('volume', 0))})
+            last = datetime.fromisoformat(c[-1]['time'].replace('Z', '+00:00'))
+            cursor = last
+            time.sleep(0.3)
+        print(f"  [bars] {sym} H1: paged {calls} calls", flush=True)
     con.register("bars_df", pandas.DataFrame(rows, columns=[
         "symbol", "timeframe", "ts", "open", "high", "low", "close", "volume"]))
     con.execute("CREATE OR REPLACE TABLE bars AS SELECT * FROM bars_df")
+    con.unregister("bars_df")
     return len(rows)
 
 
@@ -193,12 +230,72 @@ def build_calendar(con):
             pass
     con.register("releases_df", pandas.DataFrame(releases, columns=["date", "name", "impact"]))
     con.execute("CREATE OR REPLACE TABLE releases AS SELECT * FROM releases_df")
+    con.unregister("releases_df")
     con.register("decisions_df", pandas.DataFrame(decisions, columns=["date", "bank"]))
     con.execute("CREATE OR REPLACE TABLE decisions AS SELECT * FROM decisions_df")
+    con.unregister("decisions_df")
     con.register("events_df", pandas.DataFrame(events, columns=[
         "ts", "currency", "title", "impact", "forecast", "previous"]))
     con.execute("CREATE OR REPLACE TABLE events AS SELECT * FROM events_df")
-    return len(releases), len(decisions), len(events)
+    con.unregister("events_df")
+
+    # releases_history — the FF week-page scrape (surprise dataset, map #191
+    # #194/#195): raw labels preserved. TZ calibration (verified from the
+    # data): FF renders anonymous sessions in America/Chicago WITH DST — all
+    # 225 NFP rows show 7:30am year-round (8:30 ET = 7:30 Central both
+    # seasons) and FFR decisions show 1:00pm (14:00 ET = 13:00 Central, with
+    # pre-2013 1:15pm entries). So parse as America/Chicago, convert to UTC.
+    # Numeric fields parsed ('1371K' -> 1371000); surprise = actual - forecast
+    # per the V32 pre-registration.
+    from zoneinfo import ZoneInfo
+    CHICAGO = ZoneInfo("America/Chicago")
+    ff_hist = PROJECT / "data" / "cache" / "ff_history" / "releases_rows.json"
+    rh_rows = []
+    if ff_hist.exists():
+        for r in json.loads(ff_hist.read_text()):
+            d, tl = r.get("date_label"), r.get("time_label")
+            if not d or not tl:
+                continue
+            try:
+                ts = datetime.strptime(f"{d} {tl}", "%b %d, %Y %I:%M%p")
+            except Exception:
+                continue
+            ts_utc = ts.replace(tzinfo=CHICAGO).astimezone(timezone.utc).replace(tzinfo=None)
+
+            def _num(s):
+                if not isinstance(s, str) or not s.strip():
+                    return None
+                t = s.strip().replace(",", "")
+                mult = 1.0
+                if t.endswith("%"):
+                    t = t[:-1]
+                elif t and t[-1].upper() in ("K", "M", "B"):
+                    mult = {"K": 1e3, "M": 1e6, "B": 1e9}[t[-1].upper()]
+                    t = t[:-1]
+                try:
+                    return float(t) * mult
+                except ValueError:
+                    return None
+
+            actual = _num(r.get("actual"))
+            forecast = _num(r.get("forecast"))
+            surprise = (actual - forecast) if (actual is not None and forecast is not None) else None
+            name = r.get("name") or ""
+            family = ("NFP" if "Non-Farm" in name
+                      else "CPI" if "CPI" in name
+                      else "UNEMP" if name == "Unemployment Rate"
+                      else None)  # v1 scope per V32: numeric families only
+            rh_rows.append({"ts": ts_utc, "currency": r.get("country"),
+                            "name": name, "family": family, "impact": r.get("impact"),
+                            "actual_raw": r.get("actual"), "forecast_raw": r.get("forecast"),
+                            "actual": actual, "forecast": forecast, "surprise": surprise,
+                            "previous": r.get("previous"), "week": r.get("week")})
+    con.register("releases_history_df", pandas.DataFrame(rh_rows, columns=[
+        "ts", "currency", "name", "family", "impact", "actual_raw", "forecast_raw",
+        "actual", "forecast", "surprise", "previous", "week"]))
+    con.execute("CREATE OR REPLACE TABLE releases_history AS SELECT * FROM releases_history_df")
+    con.unregister("releases_history_df")
+    return len(releases), len(decisions), len(events), len(rh_rows)
 
 
 def build_exog(con):
@@ -216,6 +313,7 @@ def build_exog(con):
             pass
     con.register("exog_df", pandas.DataFrame(rows, columns=["series", "date", "value"]))
     con.execute("CREATE OR REPLACE TABLE exog AS SELECT * FROM exog_df")
+    con.unregister("exog_df")
     return len(rows)
 
 
@@ -234,7 +332,7 @@ def main():
     counts["ledger"], counts["voids"] = build_ledger(con)
     counts["fills"], counts["txns"] = build_journal(con, skip_venue=args.skip_venue)
     counts["bars"] = 0 if args.no_bars else build_bars(con)
-    counts["releases"], counts["decisions"], counts["events"] = build_calendar(con)
+    counts["releases"], counts["decisions"], counts["events"], counts["releases_history"] = build_calendar(con)
     counts["exog"] = build_exog(con)
 
     # materialize datasets as zstd parquet (the durable artifacts; the duckdb
@@ -248,6 +346,7 @@ def main():
     con.execute("COPY releases TO 'releases.parquet' (FORMAT PARQUET, COMPRESSION zstd)")
     con.execute("COPY decisions TO 'decisions.parquet' (FORMAT PARQUET, COMPRESSION zstd)")
     con.execute("COPY events TO 'events.parquet' (FORMAT PARQUET, COMPRESSION zstd)")
+    con.execute("COPY releases_history TO 'releases_history.parquet' (FORMAT PARQUET, COMPRESSION zstd)")
     con.execute("COPY exog TO 'exog.parquet' (FORMAT PARQUET, COMPRESSION zstd)")
 
     manifest = {"schema_version": SCHEMA_VERSION,
