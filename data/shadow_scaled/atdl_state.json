@@ -6,24 +6,6 @@
     {
       "from_phase": "MONITOR",
       "to_phase": "PLAN",
-      "cycle": 16072,
-      "timestamp": "2026-09-04T08:15:09.192945"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 16083,
-      "timestamp": "2026-09-04T08:17:33.815314"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 16094,
-      "timestamp": "2026-09-04T08:20:14.672777"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
       "cycle": 16595,
       "timestamp": "2026-09-04T17:10:39.948094"
     },
@@ -302,6 +284,24 @@
       "to_phase": "MONITOR",
       "cycle": 17471,
       "timestamp": "2026-09-05T01:57:07.424863"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17482,
+      "timestamp": "2026-09-05T01:59:52.816786"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17483,
+      "timestamp": "2026-09-05T02:00:55.601205"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17484,
+      "timestamp": "2026-09-05T02:01:58.600930"
     }
   ]
 }

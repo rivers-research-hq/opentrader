@@ -1,6 +1,6 @@
 {
   "name": "trading_agent",
-  "cycle_count": 222348,
+  "cycle_count": 227640,
   "history": [],
   "thinking_history": [],
   "config": {
@@ -10,11 +10,11 @@
     "initial_cash": 500.0,
     "max_tool_calls": 5
   },
-  "_cycle": 17481,
+  "_cycle": 17670,
   "_signal_count": 500,
   "_peak_value": 502.09,
   "_stage": 3,
-  "_stage_start": 1788573341.9500859,
+  "_stage_start": 1788573493.314565,
   "_initial_cash": 500.0,
   "_trade_journal": [
     {
@@ -317,4001 +317,4001 @@
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.419",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.401",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.481",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:13:34+00:00"
+      "timestamp": "2026-09-05T05:00:14+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.418",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.399",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.481",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:16:04+00:00"
+      "timestamp": "2026-09-05T05:01:18+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.417",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.478",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:18:32+00:00"
+      "timestamp": "2026-09-05T05:02:21+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.416",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.478",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:21:02+00:00"
+      "timestamp": "2026-09-05T05:03:23+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.414",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.394",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.473",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:23:31+00:00"
+      "timestamp": "2026-09-05T05:04:26+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.416",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.394",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.473",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:26:00+00:00"
+      "timestamp": "2026-09-05T05:05:29+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.416",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.394",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.473",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:28:30+00:00"
+      "timestamp": "2026-09-05T05:06:32+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.415",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.393",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.473",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:30:59+00:00"
+      "timestamp": "2026-09-05T05:07:35+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.414",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.392",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.473",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:33:30+00:00"
+      "timestamp": "2026-09-05T05:08:38+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.415",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.393",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:36:01+00:00"
+      "timestamp": "2026-09-05T05:09:40+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.415",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.394",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:38:30+00:00"
+      "timestamp": "2026-09-05T05:10:43+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.418",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:41:00+00:00"
+      "timestamp": "2026-09-05T05:11:46+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:43:29+00:00"
+      "timestamp": "2026-09-05T05:12:49+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:45:57+00:00"
+      "timestamp": "2026-09-05T05:13:52+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.397",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.476",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:48:27+00:00"
+      "timestamp": "2026-09-05T05:14:54+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.400",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.481",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:50:59+00:00"
+      "timestamp": "2026-09-05T05:15:57+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.402",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.481",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:53:29+00:00"
+      "timestamp": "2026-09-05T05:17:00+00:00"
     },
     {
       "symbol": "AAPL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.009",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "MSFT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.073",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "NVDA",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.179",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "AMD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.011",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "AMZN",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.049",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "GOOGL",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.016",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "META",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.208",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "JPM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.017",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XOM",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.027",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "JNJ",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.139",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "PG",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.071",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "KO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.034",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "DIS",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "CSCO",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.075",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "WMT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "NFLX",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLF",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.029",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.060",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLI",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.125",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLB",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.039",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLRE",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.199",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLP",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.150",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLV",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.013",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "XLU",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=0.037",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "GLD",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "rule-primary score=nan",
+      "reason": "rule-primary score=-0.114",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "BTC/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.420",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "ETH/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.402",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     },
     {
       "symbol": "SOL/USDT",
       "action": "HOLD",
       "confidence": 0.0,
-      "reason": "crypto-rule sleeve cap (12% of equity)",
+      "reason": "crypto-rule score=0.481",
       "position_pct": 0.0,
-      "timestamp": "2026-09-05T01:56:00+00:00"
+      "timestamp": "2026-09-05T05:18:03+00:00"
     }
   ],
   "_committee": {
@@ -4373,6 +4373,60 @@
       "max_position_cycles": 0,
       "position_stop_pct": 0.05,
       "atr": 0.1529506378080079,
+      "atr_mult": 3.0
+    },
+    "BTC/USDT": {
+      "stop_loss": 69789.76883999999,
+      "take_profit": 93729.28257,
+      "entry_price": 79559.7,
+      "qty": 0.00028682,
+      "highest_price": 79637.5,
+      "entry_expert": "rule",
+      "entry_regime": "bull",
+      "cycle_opened": 17482,
+      "exit_date": "2026-09-24",
+      "trailing_stop_pct": 0.0,
+      "trailing_activation": 0.0,
+      "max_position_cycles": 0,
+      "position_stop_pct": 0.0,
+      "portfolio_weight": 0.0461525209042327,
+      "atr": 394.3415975621739,
+      "atr_mult": 3.0
+    },
+    "ETH/USDT": {
+      "stop_loss": 2151.911952,
+      "take_profit": 2890.067796,
+      "entry_price": 2453.16,
+      "qty": 0.00942139,
+      "highest_price": 2455.44,
+      "entry_expert": "rule",
+      "entry_regime": "bull",
+      "cycle_opened": 17482,
+      "exit_date": "2026-09-24",
+      "trailing_stop_pct": 0.0,
+      "trailing_activation": 0.0,
+      "max_position_cycles": 0,
+      "position_stop_pct": 0.0,
+      "portfolio_weight": 0.04678777574447836,
+      "atr": 15.019970532751652,
+      "atr_mult": 3.0
+    },
+    "SOL/USDT": {
+      "stop_loss": 89.369136,
+      "take_profit": 120.02482799999999,
+      "entry_price": 101.88,
+      "qty": 0.24088499,
+      "highest_price": 102.0,
+      "entry_expert": "rule",
+      "entry_regime": "bull",
+      "cycle_opened": 17482,
+      "exit_date": "2026-09-24",
+      "trailing_stop_pct": 0.0,
+      "trailing_activation": 0.0,
+      "max_position_cycles": 0,
+      "position_stop_pct": 0.0,
+      "portfolio_weight": 0.04972295317537471,
+      "atr": 0.6816497061564986,
       "atr_mult": 3.0
     }
   },

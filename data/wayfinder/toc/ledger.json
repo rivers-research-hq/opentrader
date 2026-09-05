@@ -260,6 +260,12 @@
    "status": "computable",
    "desc": "RAM 32GB with ~5.6GB available (tight) \u2014 data pipelines must STREAM (DuckDB/Arrow), never load full histories. snap IS installed on this Arch box (snapd 12G; disabled revisions prunable) \u2014 snap-retention advice applies despite Arch",
    "bounds": "verified via free -h + snap list --all (2026-09-04, ticket #190)"
+  },
+  {
+   "id": "V32",
+   "status": "computable",
+   "desc": "PRE-REGISTERED (map #191 #193, timestamp 2026-09-05 01:5x UTC, human-witnessed before any full-sample run): news-surprise drift hypothesis \u2014 after a tier-1 release, the affected FX pair drifts exploitably over +1h/+4h/+24h, net of costs, conditioned on regime. Protocol: surprise = actual - forecast, z-scored against trailing 24-month consensus-error std per event family; windows on H1 bars of the currency-mapped pair (c08 EXPOSURE mapping); costs = 1.2 pips round-trip majors / 1.8 pips JPY + crosses; regime conditioning = RATE trend bucket (falling/rising, from exog RATE series) crossed with 20d pair momentum sign; walkforward >= 4 time-ordered folds; a fold passes only if net drift > costs with consistent sign within the fold; minimum sample 30 events per family per fold, below which the fold is UNTESTABLE not failed; PASS bar = OOS median fold net-drift PF > 1.0 AND >= 3/4 folds positive. Dataset = FF week-view scrape (ticket #192 primary source). Any result read before this entry existed is void.",
+   "bounds": "recorded 2026-09-05 pre-results (map #191; witness: human). Engine: setup_search.engine (macro_gate seam precedent); fold sign-consistency prevents single-lucky-fold PASS; FOMC excluded from v1 (statement surprise undefined); FOMC-in-scope is a later ticket if numeric families pass"
   }
  ],
  "openQuestions": [

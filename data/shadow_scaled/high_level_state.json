@@ -1,10 +1,10 @@
 {
   "regime": "HOLD",
   "confidence": 0.0,
-  "thesis": "rule-primary score=nan",
+  "thesis": "rule-primary score=0.009",
   "posture": "defensive",
   "available": true,
-  "updated": "2026-09-05T01:56:00.792888+00:00",
+  "updated": "2026-09-05T05:18:03.374937+00:00",
   "models": {},
   "portfolio": {}
 }
