@@ -138,3 +138,21 @@ data/model_schedule.json
 tui/node_modules/
 data/signal_gym/candles.json
 data/cache/
+
+# Session-hook churn (mimosa) — per-session baselines, never project code.
+# Untracked 2026-09-05: 829 tracked files were polluting every git status.
+.mimosa/
+
+# Paper-lane machine churn
+data/shadow_scaled/history/
+
+# Launcher/ops artifacts
+data/logs/
+data/tmp/
+dashboard_legacy.html
+
+# Prop-firm agreements (proprietary documents — local reference only)
+FTMO/
+
+# TUI resize regression test artifacts
+/tests/pty_resize_test.py

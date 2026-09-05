@@ -4,7 +4,7 @@
 > ATDL lifecycle events capture lessons. It is injected into every debate cycle
 > as institutional memory. Pruned and consolidated automatically.
 
-Last updated: 2026-09-04T22:54:27Z
+Last updated: 2026-09-05T00:39:28Z
 Total entries: 27
 
 ## Patterns — reproducible market behaviors

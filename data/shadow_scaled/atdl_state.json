@@ -4,270 +4,6 @@
   "variants": [],
   "history": [
     {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15588,
-      "timestamp": "2026-09-04T06:28:26.338905"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15599,
-      "timestamp": "2026-09-04T06:30:52.380845"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15610,
-      "timestamp": "2026-09-04T06:33:17.676297"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15621,
-      "timestamp": "2026-09-04T06:35:43.574153"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15632,
-      "timestamp": "2026-09-04T06:38:08.958420"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "MONITOR",
-      "cycle": 15643,
-      "timestamp": "2026-09-04T06:40:34.774262"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15654,
-      "timestamp": "2026-09-04T06:43:00.046856"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15665,
-      "timestamp": "2026-09-04T06:45:25.908664"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15676,
-      "timestamp": "2026-09-04T06:47:51.022171"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15687,
-      "timestamp": "2026-09-04T06:50:17.218353"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15698,
-      "timestamp": "2026-09-04T06:52:41.853994"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15709,
-      "timestamp": "2026-09-04T06:55:07.880312"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15720,
-      "timestamp": "2026-09-04T06:57:33.086429"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15731,
-      "timestamp": "2026-09-04T06:59:58.847138"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15742,
-      "timestamp": "2026-09-04T07:02:24.282010"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15753,
-      "timestamp": "2026-09-04T07:04:50.327556"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "MONITOR",
-      "cycle": 15764,
-      "timestamp": "2026-09-04T07:07:16.107043"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15775,
-      "timestamp": "2026-09-04T07:09:42.143828"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15786,
-      "timestamp": "2026-09-04T07:12:07.185937"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15797,
-      "timestamp": "2026-09-04T07:14:32.902578"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15808,
-      "timestamp": "2026-09-04T07:16:57.407093"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15819,
-      "timestamp": "2026-09-04T07:19:22.436234"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15830,
-      "timestamp": "2026-09-04T07:21:47.270926"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15841,
-      "timestamp": "2026-09-04T07:24:12.702531"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15852,
-      "timestamp": "2026-09-04T07:26:37.551449"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15863,
-      "timestamp": "2026-09-04T07:29:02.721484"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15874,
-      "timestamp": "2026-09-04T07:31:28.604698"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15885,
-      "timestamp": "2026-09-04T07:33:55.040637"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15896,
-      "timestamp": "2026-09-04T07:36:21.149546"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15907,
-      "timestamp": "2026-09-04T07:38:46.713918"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15918,
-      "timestamp": "2026-09-04T07:41:11.995951"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15929,
-      "timestamp": "2026-09-04T07:43:38.074059"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15940,
-      "timestamp": "2026-09-04T07:46:04.243517"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15951,
-      "timestamp": "2026-09-04T07:48:28.387835"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15962,
-      "timestamp": "2026-09-04T07:50:54.089433"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 15973,
-      "timestamp": "2026-09-04T07:53:20.228579"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 15984,
-      "timestamp": "2026-09-04T07:55:45.811152"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 15995,
-      "timestamp": "2026-09-04T07:58:11.127752"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 16006,
-      "timestamp": "2026-09-04T08:00:36.352635"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 16017,
-      "timestamp": "2026-09-04T08:03:00.480154"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 16028,
-      "timestamp": "2026-09-04T08:05:26.754142"
-    },
-    {
-      "from_phase": "MONITOR",
-      "to_phase": "PLAN",
-      "cycle": 16039,
-      "timestamp": "2026-09-04T08:07:52.826294"
-    },
-    {
-      "from_phase": "PLAN",
-      "to_phase": "DEVELOP",
-      "cycle": 16050,
-      "timestamp": "2026-09-04T08:10:18.040736"
-    },
-    {
-      "from_phase": "DEVELOP",
-      "to_phase": "MONITOR",
-      "cycle": 16061,
-      "timestamp": "2026-09-04T08:12:43.589632"
-    },
-    {
       "from_phase": "MONITOR",
       "to_phase": "PLAN",
       "cycle": 16072,
@@ -302,6 +38,270 @@
       "to_phase": "MONITOR",
       "cycle": 16597,
       "timestamp": "2026-09-04T17:12:50.417610"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 16998,
+      "timestamp": "2026-09-05T00:09:53.107544"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17009,
+      "timestamp": "2026-09-05T00:12:23.005527"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17020,
+      "timestamp": "2026-09-05T00:14:53.199081"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17031,
+      "timestamp": "2026-09-05T00:17:21.579716"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17042,
+      "timestamp": "2026-09-05T00:19:51.142479"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17053,
+      "timestamp": "2026-09-05T00:22:20.817262"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17064,
+      "timestamp": "2026-09-05T00:24:48.675651"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17075,
+      "timestamp": "2026-09-05T00:27:16.560340"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17086,
+      "timestamp": "2026-09-05T00:29:45.993199"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17097,
+      "timestamp": "2026-09-05T00:32:15.612969"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17108,
+      "timestamp": "2026-09-05T00:34:45.310996"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17119,
+      "timestamp": "2026-09-05T00:37:15.596710"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17130,
+      "timestamp": "2026-09-05T00:39:46.847171"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17141,
+      "timestamp": "2026-09-05T00:42:17.067013"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17152,
+      "timestamp": "2026-09-05T00:44:46.848242"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17163,
+      "timestamp": "2026-09-05T00:47:15.960141"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17174,
+      "timestamp": "2026-09-05T00:49:45.394291"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17185,
+      "timestamp": "2026-09-05T00:52:14.574845"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17196,
+      "timestamp": "2026-09-05T00:54:43.699110"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17207,
+      "timestamp": "2026-09-05T00:57:13.037025"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17218,
+      "timestamp": "2026-09-05T00:59:42.859805"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17229,
+      "timestamp": "2026-09-05T01:02:11.924767"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17240,
+      "timestamp": "2026-09-05T01:04:42.701620"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17251,
+      "timestamp": "2026-09-05T01:07:11.648794"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17262,
+      "timestamp": "2026-09-05T01:09:41.200363"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17273,
+      "timestamp": "2026-09-05T01:12:11.155459"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17284,
+      "timestamp": "2026-09-05T01:14:41.389748"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17295,
+      "timestamp": "2026-09-05T01:17:09.996630"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17306,
+      "timestamp": "2026-09-05T01:19:39.266764"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17317,
+      "timestamp": "2026-09-05T01:22:08.911594"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17328,
+      "timestamp": "2026-09-05T01:24:37.170404"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17339,
+      "timestamp": "2026-09-05T01:27:06.980200"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17350,
+      "timestamp": "2026-09-05T01:29:37.282241"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17361,
+      "timestamp": "2026-09-05T01:32:06.504413"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17372,
+      "timestamp": "2026-09-05T01:34:36.257979"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17383,
+      "timestamp": "2026-09-05T01:37:07.427780"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17394,
+      "timestamp": "2026-09-05T01:39:37.545782"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17405,
+      "timestamp": "2026-09-05T01:42:06.154513"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "DEVELOP",
+      "cycle": 17416,
+      "timestamp": "2026-09-05T01:44:34.989809"
+    },
+    {
+      "from_phase": "DEVELOP",
+      "to_phase": "MONITOR",
+      "cycle": 17427,
+      "timestamp": "2026-09-05T01:47:05.103457"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17438,
+      "timestamp": "2026-09-05T01:49:35.136403"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17449,
+      "timestamp": "2026-09-05T01:52:06.554422"
+    },
+    {
+      "from_phase": "MONITOR",
+      "to_phase": "PLAN",
+      "cycle": 17460,
+      "timestamp": "2026-09-05T01:54:35.922829"
+    },
+    {
+      "from_phase": "PLAN",
+      "to_phase": "MONITOR",
+      "cycle": 17471,
+      "timestamp": "2026-09-05T01:57:07.424863"
     }
   ]
 }

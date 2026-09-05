@@ -222,8 +222,11 @@ class ConnectionsManager:
     def check_connection(self, service: str) -> dict:
         """Test if a service is reachable."""
         import time
-        from urllib.request import Request, urlopen
+        from urllib.request import Request
         from urllib.error import URLError
+        # NOTE: no local `urlopen` import — the module-level hardening shadow
+        # (urlopen = guarded_urlopen, line 18) is the outbound path; a local
+        # re-import of plain urlopen rebound past the guard (the L3 finding).
 
         cfg = self._data.get(service, {})
         now = time.time()

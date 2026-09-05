@@ -9,105 +9,6 @@
       "error": "no trainable examples after reward filtering",
       "adapter_path": "",
       "duration_s": 0.0,
-      "timestamp": "2026-09-04T21:36:23.533284+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T21:41:38.042135+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T21:47:07.355700+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T21:52:21.889614+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T21:57:36.086080+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T22:02:50.354732+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T22:08:20.753029+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T22:13:34.815767+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
-      "timestamp": "2026-09-04T22:18:48.992984+00:00"
-    },
-    {
-      "version": "RL-V1",
-      "input_trades": 18,
-      "examples_built": 0,
-      "mean_reward": 0.0,
-      "status": "skipped",
-      "error": "no trainable examples after reward filtering",
-      "adapter_path": "",
-      "duration_s": 0.0,
       "timestamp": "2026-09-04T22:24:03.305508+00:00"
     },
     {
@@ -219,6 +120,105 @@
       "adapter_path": "",
       "duration_s": 0.0,
       "timestamp": "2026-09-04T23:17:20.281833+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:22:35.233146+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:28:06.069732+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:33:20.679897+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:38:34.681356+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:43:48.795493+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:49:19.272312+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:54:33.582968+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-04T23:59:48.270944+00:00"
+    },
+    {
+      "version": "RL-V1",
+      "input_trades": 18,
+      "examples_built": 0,
+      "mean_reward": 0.0,
+      "status": "skipped",
+      "error": "no trainable examples after reward filtering",
+      "adapter_path": "",
+      "duration_s": 0.0,
+      "timestamp": "2026-09-05T00:05:02.123174+00:00"
     }
   ]
 }

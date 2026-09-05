@@ -241,7 +241,25 @@
    "id": "V28",
    "status": "computable",
    "desc": "FX lane attribution rule: venue SL/TP closes arrive as tagless venue-reconciliation rows in fx_ledger.jsonl and attribute to lanes by fill size (100u mom-k5, 2000u h1-mom, 5000u crash) in fx_crashtest.py and tui/index.js. Known limit: 100u reconciliation rows are indistinguishable from mom-k5 closes \u2014 mom-k5's RT count includes 3 EUR_USD Aug-31 dust pairs (-0.065)",
-   "bounds": "rule documented 2026-09-02; breaks silently if a lane changes size \u2014 fix-list item 11 in docs/ARCHITECTURE.md"
+   "bounds": "rule documented 2026-09-02; breaks silently if a lane changes size \u2014 fix-list item 11 in docs/ARCHITECTURE.md. SUPERSEDED 2026-09-03: tradeID attribution landed (#175) \u2014 rec rows carry venue tags stamped at write time; size matcher is legacy-fallback only (map #158/#174)"
+  },
+  {
+   "id": "V29",
+   "status": "computable",
+   "desc": "Hardware: TWO GPUs on the box \u2014 RTX 3070 8GB (local-LLM duty, ~3.7GB resident) AND AMD RX 7900 GRE (Navi 31). nvidia-smi-only surveys are structurally blind to the AMD card; GPU inventory requires lspci | grep -iE 'vga|3d' plus nvidia-smi",
+   "bounds": "verified 2026-09-04 via lspci + nvidia-smi (ticket #190; an external research model's survey missed the 7900 GRE, corrected on map #187)"
+  },
+  {
+   "id": "V30",
+   "status": "computable",
+   "desc": "Mount layout: /mnt sits on the ROOT filesystem (nvme0n1p2 \u2014 held 142G during the 93%-full crisis); /home is the data drive (nvme1n1). Any pipeline/workspace/archive path must name /home/... \u2014 never /mnt. Post-cleanup 2026-09-05: root 48%, 457G free",
+   "bounds": "verified via df -h / /home /mnt + du sweep 2026-09-04/05 (tickets #188/#189/#190)"
+  },
+  {
+   "id": "V31",
+   "status": "computable",
+   "desc": "RAM 32GB with ~5.6GB available (tight) \u2014 data pipelines must STREAM (DuckDB/Arrow), never load full histories. snap IS installed on this Arch box (snapd 12G; disabled revisions prunable) \u2014 snap-retention advice applies despite Arch",
+   "bounds": "verified via free -h + snap list --all (2026-09-04, ticket #190)"
   }
  ],
  "openQuestions": [

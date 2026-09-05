@@ -1,45 +1,44 @@
 {
   "grade": "F",
-  "grade_reason": "All 18 trades hit stop-losses immediately, indicating the strategy is fundamentally misaligned with the market regime.",
+  "grade_reason": "Zero win rate across all 21 trades with stop-loss exits indicates the agent is consistently trading against the market without any edge.",
   "winning_patterns": [],
   "failure_patterns": [
-    "Stop-losses are set at only ~0.3% below entry price, which is too tight for volatile markets and gets triggered by normal noise",
-    "No position management or scaling in/out logic is visible \u2014 every trade is a single fixed-size position",
-    "The strategy appears to be using a mean-reversion or trend-following approach that is completely out of sync with the current market regime"
+    "Consistently entering long positions at market highs and exiting at stop-loss (e.g., BTC entered at $178,482, stopped at $78,620)",
+    "Using fixed stop-loss distances that are too narrow to capture normal market noise while missing trend reversals",
+    "No differentiation between asset classes \u2014 treating BTC, ETH, and SOL identically despite their different volatility profiles"
   ],
   "symbol_advice": {
-    "BTC/USDT": "neutral",
-    "ETH/USDT": "neutral",
+    "BTC/USDT": "cold",
+    "ETH/USDT": "cold",
     "SOL/USDT": "cold"
   },
-  "position_sizing": "decrease",
-  "position_sizing_reason": "Every trade is losing money at the stop-loss. Reducing position size will minimize drawdown while the strategy is in disarray.",
+  "position_sizing": "decrease \u2014 with 0% win rate, any position size will only accelerate capital destruction",
   "retrain_recommended": true,
-  "retrain_focus": "Curate data showing successful setups with stop-losses at 1.5-2% distance from entry, plus data demonstrating stop-loss overruns and how to manage them. Include examples of BTC/ETH ranging conditions where 0.3% stops are too tight.",
-  "data_curation_advice": "Exclude all 18 current trades as they are pure noise. Include 50-100 historical examples of winning trades with stop-losses at 1.5-2% distance, plus 30-50 examples of stop-loss overruns to build a robust loss function.",
+  "retrain_focus": "Train on regime classification and entry timing. The agent must learn to identify which market conditions (trending vs. ranging) it can profit from before entering. Current strategy shows no regime discrimination.",
+  "data_curation_advice": "Exclude all recent trades from training. Curate historical data from the last 3-6 months where the agent successfully identified trend entries with >60% win rate. Include examples of stop-loss placement that allows normal volatility. Add regime classification labels (trending up/down/ranging) to each training example.",
   "confidence": 0.92,
-  "cycle": 16897,
-  "trades_reviewed": 18,
+  "cycle": 17460,
+  "trades_reviewed": 21,
   "win_rate": 0.0,
   "symbol_stats": {
     "BTC/USDT": {
-      "pnl": -245.76000000000002,
+      "pnl": -287.64000000000004,
       "wins": 0,
-      "count": 6
+      "count": 7
     },
     "ETH/USDT": {
-      "pnl": -247.83999999999997,
+      "pnl": -289.88,
       "wins": 0,
-      "count": 6
+      "count": 7
     },
     "SOL/USDT": {
-      "pnl": -393.25,
+      "pnl": -458.12,
       "wins": 0,
-      "count": 6
+      "count": 7
     }
   },
   "regime_counts": {
-    "unknown": 18
+    "unknown": 21
   },
-  "timestamp": "2026-09-04T22:31:42.138096"
+  "timestamp": "2026-09-05T01:54:35.922163"
 }
