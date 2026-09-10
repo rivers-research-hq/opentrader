@@ -1,0 +1,58 @@
+{
+ "asof": "2026-09-10T12:48:31.672954+00:00",
+ "account": {
+  "nav": 99633.7944,
+  "balance": 99619.0822,
+  "unrealized": 14.7122,
+  "financing_today": -26.2502
+ },
+ "lanes": {
+  "fxexp-g151": {
+   "lifecycle": "accruing",
+   "notional_cap": 1.0,
+   "realized_all": 0.0,
+   "realized_today": 0.0,
+   "upl": 22.73,
+   "peak_upl": 20.73,
+   "give_back": -0.097,
+   "financing": 0.0,
+   "gross_usd": 22361.0,
+   "positions": 17,
+   "sizing_fidelity_pct": 83.3,
+   "warden_score_pct": -0.005,
+   "warden_miss_pct": -0.005
+  },
+  "fxexp-g138": {
+   "lifecycle": "accruing",
+   "notional_cap": 1.0,
+   "realized_all": 0.0,
+   "realized_today": 0.0,
+   "upl": -27.97,
+   "peak_upl": -26.35,
+   "give_back": 0.0,
+   "financing": 0.0,
+   "gross_usd": 19665.0,
+   "positions": 21,
+   "sizing_fidelity_pct": 86.4,
+   "warden_score_pct": -0.0,
+   "warden_miss_pct": -0.0
+  },
+  "fxexp-g137": {
+   "lifecycle": "accruing",
+   "notional_cap": 1.0,
+   "realized_all": 0.0,
+   "realized_today": 0.0,
+   "upl": 19.75,
+   "peak_upl": 17.97,
+   "give_back": -0.099,
+   "financing": 0.0,
+   "gross_usd": 20810.0,
+   "positions": 19,
+   "sizing_fidelity_pct": 94.4,
+   "warden_score_pct": -0.013,
+   "warden_miss_pct": -0.013
+  }
+ },
+ "total_pnl_all_lanes": 14.51,
+ "note": "venue truth; cut is human-gated (Friday 2026-09-11 close, bottom two)"
+}

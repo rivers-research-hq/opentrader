@@ -1,13 +1,4 @@
 {
-  "positions": {
-    "USD_CAD": {
-      "units": 2000.0,
-      "opened": "2026-09-04T16:00:08",
-      "entry": 1.38369,
-      "trade_id": "395",
-      "owner": "h1-mom",
-      "protected": true
-    }
-  },
-  "updated": "2026-09-05T04:00:02.763899+00:00"
+  "positions": {},
+  "updated": "2026-09-10T13:00:04.685981+00:00"
 }

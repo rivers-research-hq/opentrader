@@ -66,6 +66,8 @@ def attribute_lane(reason, symbol, qty=None, tag=None):
     if tag:
         return tag
     r = reason or ""
+    if r.startswith("h1-rev"):
+        return "h1-rev"
     if r.startswith("c08"):
         return "c08-fade"
     if r.startswith("intraday"):

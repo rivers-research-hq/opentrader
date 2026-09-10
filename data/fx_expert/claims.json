@@ -1,0 +1,237 @@
+{
+ "claims": {
+  "AUD_CAD": {
+   "lane": "fxexp-g151",
+   "score": 0.4138
+  },
+  "AUD_CHF": {
+   "lane": "fxexp-g138",
+   "score": 0.3793
+  },
+  "AUD_JPY": {
+   "lane": "fxexp-g151",
+   "score": 0.7931
+  },
+  "AUD_NZD": {
+   "lane": "fxexp-g137",
+   "score": 0.6207
+  },
+  "AUD_SGD": {
+   "lane": "fxexp-g138",
+   "score": 0.6207
+  },
+  "AUD_USD": {
+   "lane": "fxexp-g138",
+   "score": 0.4828
+  },
+  "CAD_CHF": {
+   "lane": "fxexp-g137",
+   "score": 0.3448
+  },
+  "CAD_JPY": {
+   "lane": "fxexp-g137",
+   "score": 0.9655
+  },
+  "CAD_SGD": {
+   "lane": "fxexp-g137",
+   "score": 0.7931
+  },
+  "CHF_JPY": {
+   "lane": "fxexp-g137",
+   "score": 0.7931
+  },
+  "CHF_ZAR": {
+   "lane": "fxexp-g138",
+   "score": 0.7931
+  },
+  "EUR_AUD": {
+   "lane": "fxexp-g151",
+   "score": 0.8276
+  },
+  "EUR_CAD": {
+   "lane": "fxexp-g137",
+   "score": 0.2759
+  },
+  "EUR_CHF": {
+   "lane": "fxexp-g138",
+   "score": 0.6897
+  },
+  "EUR_CZK": {
+   "lane": "fxexp-g151",
+   "score": 0.8966
+  },
+  "EUR_GBP": {
+   "lane": "fxexp-g137",
+   "score": 0.8966
+  },
+  "EUR_HUF": {
+   "lane": "fxexp-g151",
+   "score": 1.0
+  },
+  "EUR_JPY": {
+   "lane": "fxexp-g151",
+   "score": 0.8966
+  },
+  "EUR_NOK": {
+   "lane": "fxexp-g137",
+   "score": 0.7241
+  },
+  "EUR_NZD": {
+   "lane": "fxexp-g151",
+   "score": 0.3448
+  },
+  "EUR_PLN": {
+   "lane": "fxexp-g137",
+   "score": 0.5517
+  },
+  "EUR_SEK": {
+   "lane": "fxexp-g137",
+   "score": 0.5172
+  },
+  "EUR_SGD": {
+   "lane": "fxexp-g151",
+   "score": 0.2759
+  },
+  "EUR_TRY": {
+   "lane": "fxexp-g151",
+   "score": 0.9655
+  },
+  "EUR_USD": {
+   "lane": "fxexp-g138",
+   "score": 0.3448
+  },
+  "EUR_ZAR": {
+   "lane": "fxexp-g151",
+   "score": 0.7241
+  },
+  "GBP_AUD": {
+   "lane": "fxexp-g151",
+   "score": 0.6552
+  },
+  "GBP_CAD": {
+   "lane": "fxexp-g137",
+   "score": 0.7241
+  },
+  "GBP_CHF": {
+   "lane": "fxexp-g137",
+   "score": 0.4828
+  },
+  "GBP_JPY": {
+   "lane": "fxexp-g151",
+   "score": 0.8621
+  },
+  "GBP_NZD": {
+   "lane": "fxexp-g138",
+   "score": 0.6552
+  },
+  "GBP_PLN": {
+   "lane": "fxexp-g137",
+   "score": 0.2069
+  },
+  "GBP_SGD": {
+   "lane": "fxexp-g137",
+   "score": 0.6552
+  },
+  "GBP_USD": {
+   "lane": "fxexp-g151",
+   "score": 0.3103
+  },
+  "GBP_ZAR": {
+   "lane": "fxexp-g138",
+   "score": 0.5172
+  },
+  "NZD_CAD": {
+   "lane": "fxexp-g138",
+   "score": 0.1724
+  },
+  "NZD_CHF": {
+   "lane": "fxexp-g151",
+   "score": 0.1724
+  },
+  "NZD_JPY": {
+   "lane": "fxexp-g137",
+   "score": 0.3103
+  },
+  "NZD_SGD": {
+   "lane": "fxexp-g138",
+   "score": 0.5517
+  },
+  "NZD_USD": {
+   "lane": "fxexp-g138",
+   "score": 0.4138
+  },
+  "SGD_CHF": {
+   "lane": "fxexp-g138",
+   "score": 0.2414
+  },
+  "SGD_JPY": {
+   "lane": "fxexp-g151",
+   "score": 0.7241
+  },
+  "TRY_JPY": {
+   "lane": "fxexp-g138",
+   "score": 1.0
+  },
+  "USD_CAD": {
+   "lane": "fxexp-g138",
+   "score": 0.6552
+  },
+  "USD_CHF": {
+   "lane": "fxexp-g138",
+   "score": 0.1034
+  },
+  "USD_CNH": {
+   "lane": "fxexp-g137",
+   "score": 0.6552
+  },
+  "USD_CZK": {
+   "lane": "fxexp-g138",
+   "score": 0.4828
+  },
+  "USD_HUF": {
+   "lane": "fxexp-g137",
+   "score": 1.0
+  },
+  "USD_JPY": {
+   "lane": "fxexp-g151",
+   "score": 0.6207
+  },
+  "USD_MXN": {
+   "lane": "fxexp-g138",
+   "score": 0.8276
+  },
+  "USD_NOK": {
+   "lane": "fxexp-g151",
+   "score": 0.5517
+  },
+  "USD_PLN": {
+   "lane": "fxexp-g138",
+   "score": 0.5517
+  },
+  "USD_SEK": {
+   "lane": "fxexp-g138",
+   "score": 0.8966
+  },
+  "USD_SGD": {
+   "lane": "fxexp-g137",
+   "score": 0.8276
+  },
+  "USD_THB": {
+   "lane": "fxexp-g138",
+   "score": 0.2069
+  },
+  "USD_TRY": {
+   "lane": "fxexp-g138",
+   "score": 0.7931
+  },
+  "USD_ZAR": {
+   "lane": "fxexp-g151",
+   "score": 0.5172
+  },
+  "ZAR_JPY": {
+   "lane": "fxexp-g138",
+   "score": 0.931
+  }
+ },
+ "recomputed": 1789014864.1010132
+}

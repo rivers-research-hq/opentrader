@@ -1,0 +1,66 @@
+{
+ "tag": "62",
+ "hp": {
+  "d_model": 64,
+  "n_layers": 2,
+  "n_heads": 4,
+  "dropout": 0.25,
+  "lr": 0.0005,
+  "epochs": 60,
+  "batch": 2048,
+  "T": 10,
+  "q": 0.9,
+  "rule": "xs",
+  "score_l2": 0.05
+ },
+ "device": "cuda",
+ "params": 103297,
+ "horizon": 5,
+ "folds": [
+  {
+   "fold": 0,
+   "horizon": 5,
+   "span": [
+    "2012-06-06",
+    "2017-02-09"
+   ],
+   "n_train": 17225,
+   "n_test": 20295,
+   "val_loss": 0.44754,
+   "ic_oos": 0.00729,
+   "acc_oos": 0.4926
+  },
+  {
+   "fold": 1,
+   "horizon": 5,
+   "span": [
+    "2017-02-12",
+    "2021-10-25"
+   ],
+   "n_train": 35505,
+   "n_test": 19856,
+   "val_loss": 0.47127,
+   "ic_oos": 0.00808,
+   "acc_oos": 0.5071
+  },
+  {
+   "fold": 2,
+   "horizon": 5,
+   "span": [
+    "2021-10-26",
+    "2026-08-27"
+   ],
+   "n_train": 53374,
+   "n_test": 20103,
+   "val_loss": 0.49386,
+   "ic_oos": -0.01749,
+   "acc_oos": 0.504
+  }
+ ],
+ "warm_from": "60",
+ "aggregate": {
+  "ic_mean": -0.00071,
+  "folds_positive": 2,
+  "n_folds": 3
+ }
+}

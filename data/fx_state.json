@@ -1,13 +1,5 @@
 {
-  "positions": {
-    "USD_CHF": {
-      "units": 100.0,
-      "opened": "2026-08-31T18:46:24",
-      "entry": 0.80842,
-      "trade_id": "25",
-      "protected": true
-    }
-  },
-  "updated": "2026-09-03T22:10:06.204261+00:00",
+  "positions": {},
+  "updated": "2026-09-09T22:10:11.691967+00:00",
   "note": "cache only \u2014 venue is authoritative"
 }

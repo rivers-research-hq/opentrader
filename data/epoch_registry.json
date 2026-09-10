@@ -18,7 +18,9 @@
         "last_checked": "2026-09-01T14:14:57.062608+00:00"
       },
       "promotion_bar": "ADR-0002 clause evidence accrues from real venue fills; weight/order-flow changes remain human-gated",
-      "notes": "Expert #0 \u2014 the MoT seam's first entry. Registered as live incumbent; no arena gate claimed (gym mom_k5 family: IS PF 0.91 / OOS PF 1.12, not a survivor) \u2014 its track record is its own forward ledger, seed=null per ADR-0009 honest-seed rule."
+      "notes": "Expert #0 \u2014 the MoT seam's first entry. Registered as live incumbent; no arena gate claimed (gym mom_k5 family: IS PF 0.91 / OOS PF 1.12, not a survivor) \u2014 its track record is its own forward ledger, seed=null per ADR-0009 honest-seed rule.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     },
     {
       "epoch": 1,
@@ -38,7 +40,9 @@
         "last_checked": "2026-08-31T22:04:09.383080+00:00"
       },
       "promotion_bar": ">=30 closed shadow round trips, PF>1 over the shadow window, reconciliation clean, then HUMAN signoff at shadow->live boundary (ADR-0009 #4)",
-      "notes": "SUPERSEDED in shadow lane by sibling c08 (fx_mr_fade_ma20_cot), which dominates it in both gym windows with the same core signal + COT filter. Stays registered; ledger preserved; shadow lane runs candidates directly from the gym so either can be re-pointed with --candidate."
+      "notes": "SUPERSEDED in shadow lane by sibling c08 (fx_mr_fade_ma20_cot), which dominates it in both gym windows with the same core signal + COT filter. Stays registered; ledger preserved; shadow lane runs candidates directly from the gym so either can be re-pointed with --candidate.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     },
     {
       "epoch": 1,
@@ -58,7 +62,9 @@
         "last_checked": "2026-09-01T14:14:57.062864+00:00"
       },
       "promotion_bar": ">=30 closed shadow round trips, PF>1 over the shadow window, reconciliation clean, then HUMAN signoff at shadow->live boundary (ADR-0009 #4)",
-      "notes": "WORLDS-ROBUST (2026-09-01, 1000 block-bootstrap realities, protocol \u00a75d): OOS PF mean 2.52, p5 1.16, PF>1 in 98.1% of worlds, real path at p60.8 (inside distribution, not a lucky draw); block-63 sensitivity 95.6% PF>1 p5 1.03. Control (mom_k5_pos) fails as designed at 42.8%. Edge is not a path artifact. Combined with the regime-bound caveat (BM2: worlds inherit the 2024-26 golden mix \u2014 novel-regime risk stays with forward accrual), the sleeve proceeds toward the Sep 7-14 review."
+      "notes": "WORLDS-ROBUST (2026-09-01, 1000 block-bootstrap realities, protocol \u00a75d): OOS PF mean 2.52, p5 1.16, PF>1 in 98.1% of worlds, real path at p60.8 (inside distribution, not a lucky draw); block-63 sensitivity 95.6% PF>1 p5 1.03. Control (mom_k5_pos) fails as designed at 42.8%. Edge is not a path artifact. Combined with the regime-bound caveat (BM2: worlds inherit the 2024-26 golden mix \u2014 novel-regime risk stays with forward accrual), the sleeve proceeds toward the Sep 7-14 review.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     },
     {
       "epoch": 1,
@@ -78,7 +84,9 @@
         "last_checked": null
       },
       "promotion_bar": null,
-      "notes": "RSI(2) H1 fade, long-only v1, 2000u, tag h1-rev (map #174 #179)"
+      "notes": "RSI(2) H1 fade, long-only v1, 2000u, tag h1-rev (map #174 #179)",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     },
     {
       "epoch": 1,
@@ -98,7 +106,9 @@
         "last_checked": null
       },
       "promotion_bar": null,
-      "notes": "H4 Donchian-20 breakout, long-only, no TP (opposite-channel exit), 2000u, tag h4-brk (map #174 #180)"
+      "notes": "H4 Donchian-20 breakout, long-only, no TP (opposite-channel exit), 2000u, tag h4-brk (map #174 #180)",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     },
     {
       "epoch": 1,
@@ -118,7 +128,121 @@
         "last_checked": null
       },
       "promotion_bar": null,
-      "notes": "D1 momentum K=10 sibling of mom-k5 (A/B, size confound documented), 2000u, tag d1-mom10 (map #174 #181)"
+      "notes": "D1 momentum K=10 sibling of mom-k5 (A/B, size confound documented), 2000u, tag d1-mom10 (map #174 #181)",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g13",
+      "kind": "challenger",
+      "family": "fx-transformer",
+      "venue": "oanda-practice",
+      "universe": "16-pair accrual store D1",
+      "status": "fail",
+      "registered": "2026-09-06T14:52:50.093581+00:00",
+      "registered_by": "agent",
+      "source": "fxexpert loop generation 13 (OOS PF 1.1855, IC 0.08458)",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "OOS walkforward PF>=1.05 beating buy-hold/RSI-MR/mom20/random, >=2/3 folds IC>0, >=2000 pair-days; live requires human signoff after forward shadow accrual",
+      "notes": "fxexpert recursive loop v0.1; numeric branch (prices/carry/rates/COT/events)",
+      "lifecycle": "cut",
+      "notional_cap": 1.0
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g15",
+      "kind": "challenger",
+      "family": "fx-transformer",
+      "venue": "oanda-practice",
+      "universe": "16-pair accrual store D1",
+      "status": "fail",
+      "registered": "2026-09-06T14:53:39.427902+00:00",
+      "registered_by": "agent",
+      "source": "fxexpert loop generation 15 (OOS PF 1.3014, IC 0.10327)",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "OOS walkforward PF>=1.05 beating buy-hold/RSI-MR/mom20/random, >=2/3 folds IC>0, >=2000 pair-days; live requires human signoff after forward shadow accrual",
+      "notes": "fxexpert recursive loop v0.1; numeric branch (prices/carry/rates/COT/events)",
+      "lifecycle": "cut",
+      "notional_cap": 1.0
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g151",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice",
+      "universe": "58-pair accrual store D1, 10d horizon",
+      "status": "accruing",
+      "registered": "2026-09-07T02:13:15.733777+00:00",
+      "registered_by": "agent",
+      "source": "fxexpert loop g151: OOS PF 1.0846, Sharpe 0.281, IC 0.0309 (3/3 folds), weekly rank-rebalanced dollar-neutral book",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE still requires human signoff after forward shadow accrual (ADR-0009 \u00a74) \u2014 the accrual ledger is the real promotion evidence.",
+      "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g151 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g151), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g137",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice",
+      "universe": "58-pair accrual store D1, 10d horizon",
+      "status": "accruing",
+      "registered": "2026-09-07T02:27:47.093480+00:00",
+      "registered_by": "agent",
+      "source": "fxexpert loop g137: OOS PF 1.0793, Sharpe 0.262, IC 3/3 folds",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE requires human signoff after forward shadow accrual (ADR-0009 \u00a74).",
+      "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g137 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g137), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0,
+      "lifecycle_changed": "2026-09-09T19:42:50.663719+00:00",
+      "lifecycle_reason": "test reverted"
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g138",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice",
+      "universe": "58-pair accrual store D1, 10d horizon",
+      "status": "accruing",
+      "registered": "2026-09-07T02:27:47.094704+00:00",
+      "registered_by": "agent",
+      "source": "fxexpert loop g138: OOS PF 1.0845, Sharpe 0.283, IC 3/3 folds",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE requires human signoff after forward shadow accrual (ADR-0009 \u00a74).",
+      "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g138 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g138), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
+      "lifecycle": "accruing",
+      "notional_cap": 1.0
     }
   ]
 }

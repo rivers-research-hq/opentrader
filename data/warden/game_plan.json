@@ -1,0 +1,43 @@
+{
+ "period_start": "2026-09-09",
+ "period_start_nav": 99624.8006,
+ "realized_at_plan": {
+  "fxexp-g137": 0.0,
+  "fxexp-g138": 0.0,
+  "fxexp-g151": 0.0,
+  "h1-mom": 0.0
+ },
+ "regime_read": "Global stress indicators elevated (VIX 15.3, curve steepening), JPY/NZD/SGD show HIGH vol_ratio with 5d-shock >1.0; USD/GBP/TRY near HIGH; CAD/AUD elevated. Recent lanes are flat/exhausted with zero expected carry bias.",
+ "plan": {
+  "fxexp-g137": {
+   "expected_pnl_pct": 0.0,
+   "direction": "flat",
+   "conviction": 0.5,
+   "rationale": "Pairs include EUR_SGD, USD_JPY etc.; JPY and SGD are HIGH vol_ratio; flat bias due to exhaustion and carry neutral."
+  },
+  "fxexp-g138": {
+   "expected_pnl_pct": 0.0,
+   "direction": "flat",
+   "conviction": 0.5,
+   "rationale": "AUD_USD, USD_CAD etc. involve CAD/AUD (elevated) and USD (HIGH); flat due to instability and zero carry bias."
+  },
+  "fxexp-g151": {
+   "expected_pnl_pct": 0.0,
+   "direction": "flat",
+   "conviction": 0.5,
+   "rationale": "EUR_TRY, USD_TRY etc. involve TRY (HIGH) and EUR (HIGH); flat due to instability and no clear carry edge."
+  },
+  "h1-mom": {
+   "expected_pnl_pct": 0.0,
+   "direction": "flat",
+   "conviction": 0.5,
+   "rationale": "GBP_USD/EUR_USD pairs face USD (HIGH) and GBP (HIGH); flat bias due to recent flat performance."
+  }
+ },
+ "watch": [
+  "fxexp-g137",
+  "fxexp-g138",
+  "fxexp-g151",
+  "h1-mom"
+ ]
+}

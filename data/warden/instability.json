@@ -1,0 +1,180 @@
+{
+ "asof": "2026-09-10T12:47:49.707119+00:00",
+ "global_stress_bonus": 0.0,
+ "stress": {
+  "vix": {
+   "value": 15.3,
+   "z": -0.87
+  },
+  "us_hy_oas": {
+   "value": 2.68,
+   "z": -1.11
+  },
+  "em_hy_oas": {
+   "value": 2.86,
+   "z": -1.95
+  },
+  "ust10y": {
+   "value": 4.78,
+   "z": 2.13
+  },
+  "curve_2s10s": {
+   "value": 0.41,
+   "z": -1.11
+  }
+ },
+ "currencies": {
+  "AUD": {
+   "score": 34.8,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.58,
+   "shock": 0.76,
+   "event_48h": false
+  },
+  "CAD": {
+   "score": 38.7,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.66,
+   "shock": 0.88,
+   "event_48h": false
+  },
+  "CHF": {
+   "score": 39.2,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.62,
+   "shock": 0.92,
+   "event_48h": false
+  },
+  "CNH": {
+   "score": 12.0,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 0.63,
+   "shock": 0.23,
+   "event_48h": false
+  },
+  "CZK": {
+   "score": 21.5,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.17,
+   "shock": 0.39,
+   "event_48h": false
+  },
+  "EUR": {
+   "score": 40.6,
+   "tier": "high",
+   "halted": false,
+   "vol_ratio": 1.81,
+   "shock": 0.9,
+   "event_48h": false
+  },
+  "GBP": {
+   "score": 37.4,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.68,
+   "shock": 0.82,
+   "event_48h": false
+  },
+  "HUF": {
+   "score": 20.4,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.32,
+   "shock": 0.29,
+   "event_48h": false
+  },
+  "JPY": {
+   "score": 42.6,
+   "tier": "high",
+   "halted": false,
+   "vol_ratio": 1.9,
+   "shock": 0.94,
+   "event_48h": false
+  },
+  "MXN": {
+   "score": 10.4,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 0.56,
+   "shock": 0.19,
+   "event_48h": false
+  },
+  "NOK": {
+   "score": 17.8,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 0.78,
+   "shock": 0.4,
+   "event_48h": false
+  },
+  "NZD": {
+   "score": 40.2,
+   "tier": "high",
+   "halted": false,
+   "vol_ratio": 1.66,
+   "shock": 0.94,
+   "event_48h": false
+  },
+  "PLN": {
+   "score": 15.1,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 0.79,
+   "shock": 0.29,
+   "event_48h": false
+  },
+  "SEK": {
+   "score": 13.4,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 1.11,
+   "shock": 0.09,
+   "event_48h": false
+  },
+  "SGD": {
+   "score": 41.1,
+   "tier": "high",
+   "halted": false,
+   "vol_ratio": 1.89,
+   "shock": 0.89,
+   "event_48h": false
+  },
+  "THB": {
+   "score": 19.6,
+   "tier": "calm",
+   "halted": false,
+   "vol_ratio": 1.08,
+   "shock": 0.35,
+   "event_48h": false
+  },
+  "TRY": {
+   "score": 41.3,
+   "tier": "high",
+   "halted": false,
+   "vol_ratio": 1.9,
+   "shock": 0.89,
+   "event_48h": false
+  },
+  "USD": {
+   "score": 39.8,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.8,
+   "shock": 0.87,
+   "event_48h": false
+  },
+  "ZAR": {
+   "score": 34.0,
+   "tier": "elevated",
+   "halted": false,
+   "vol_ratio": 1.52,
+   "shock": 0.75,
+   "event_48h": false
+  }
+ }
+}

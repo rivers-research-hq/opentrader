@@ -299,6 +299,7 @@ class OandaExchange(ExchangeBase):
         stop_loss: Optional[float] = None,
         take_profit: Optional[float] = None,
         tag: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> OrderResult:
         """Place an order. OANDA is netted: BUY adds units, SELL subtracts.
 
@@ -329,8 +330,10 @@ class OandaExchange(ExchangeBase):
             }
             if tag:
                 # client id must be unique across open trades; the tag is the
-                # ownership group (one position per symbol per strategy)
-                order["tradeClientExtensions"] = {"id": f"{tag}-{symbol}", "tag": tag,
+                # ownership group. Lanes that resize existing positions pass a
+                # fresh client_id per attempt — a reused id is rejected with
+                # CLIENT_TRADE_ID_ALREADY_EXISTS (fxexpert lanes, 2026-09-08).
+                order["tradeClientExtensions"] = {"id": client_id or f"{tag}-{symbol}", "tag": tag,
                                                   "comment": tag}
             if stop_loss:
                 order["stopLossOnFill"] = {

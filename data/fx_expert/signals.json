@@ -1,0 +1,358 @@
+{
+ "generated": "2026-09-09T18:33:50.141773+00:00",
+ "expert": "fx-expert-g151",
+ "date": "2026-09-07",
+ "q_long": 0.834987998008728,
+ "q_short": -0.6895737648010254,
+ "note": "shadow signals only; venue (OANDA) is authoritative; live is human-gated",
+ "signals": [
+  {
+   "pair": "AUD_CAD",
+   "score": -0.1846,
+   "weight": 0.1034,
+   "side": "long"
+  },
+  {
+   "pair": "AUD_CHF",
+   "score": -0.3684,
+   "weight": -0.3103,
+   "side": "short"
+  },
+  {
+   "pair": "AUD_JPY",
+   "score": -0.5093,
+   "weight": -0.5862,
+   "side": "short"
+  },
+  {
+   "pair": "AUD_NZD",
+   "score": -0.3406,
+   "weight": -0.1724,
+   "side": "short"
+  },
+  {
+   "pair": "AUD_SGD",
+   "score": -0.5618,
+   "weight": -0.6897,
+   "side": "short"
+  },
+  {
+   "pair": "AUD_USD",
+   "score": -0.144,
+   "weight": 0.3448,
+   "side": "long"
+  },
+  {
+   "pair": "CAD_CHF",
+   "score": -0.3385,
+   "weight": -0.1379,
+   "side": "short"
+  },
+  {
+   "pair": "CAD_JPY",
+   "score": -0.6799,
+   "weight": -0.8966,
+   "side": "short"
+  },
+  {
+   "pair": "CAD_SGD",
+   "score": -0.0976,
+   "weight": 0.4138,
+   "side": "long"
+  },
+  {
+   "pair": "CHF_JPY",
+   "score": -0.5196,
+   "weight": -0.6207,
+   "side": "short"
+  },
+  {
+   "pair": "CHF_ZAR",
+   "score": 0.2077,
+   "weight": 0.6897,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_AUD",
+   "score": 0.2832,
+   "weight": 0.8276,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_CAD",
+   "score": -0.2071,
+   "weight": 0.069,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_CHF",
+   "score": -0.5754,
+   "weight": -0.7241,
+   "side": "short"
+  },
+  {
+   "pair": "EUR_CZK",
+   "score": 0.4061,
+   "weight": 0.8966,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_GBP",
+   "score": 0.1562,
+   "weight": 0.5862,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_HUF",
+   "score": 0.7553,
+   "weight": 0.9655,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_JPY",
+   "score": -0.5513,
+   "weight": -0.6552,
+   "side": "short"
+  },
+  {
+   "pair": "EUR_NOK",
+   "score": 0.2048,
+   "weight": 0.6552,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_NZD",
+   "score": -0.1807,
+   "weight": 0.1379,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_PLN",
+   "score": -0.2716,
+   "weight": 0.0345,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_SEK",
+   "score": -0.4185,
+   "weight": -0.5172,
+   "side": "short"
+  },
+  {
+   "pair": "EUR_SGD",
+   "score": -0.168,
+   "weight": 0.1724,
+   "side": "long"
+  },
+  {
+   "pair": "EUR_TRY",
+   "score": -1.0298,
+   "weight": -0.9655,
+   "side": "short"
+  },
+  {
+   "pair": "EUR_USD",
+   "score": -0.3422,
+   "weight": -0.2069,
+   "side": "short"
+  },
+  {
+   "pair": "EUR_ZAR",
+   "score": 0.4033,
+   "weight": 0.8621,
+   "side": "long"
+  },
+  {
+   "pair": "GBP_AUD",
+   "score": 0.2795,
+   "weight": 0.7931,
+   "side": "long"
+  },
+  {
+   "pair": "GBP_CAD",
+   "score": -0.4057,
+   "weight": -0.4483,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_CHF",
+   "score": -0.3653,
+   "weight": -0.2759,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_JPY",
+   "score": -0.61,
+   "weight": -0.7931,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_NZD",
+   "score": -0.426,
+   "weight": -0.5517,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_PLN",
+   "score": -0.1289,
+   "weight": 0.3793,
+   "side": "long"
+  },
+  {
+   "pair": "GBP_SGD",
+   "score": -0.6478,
+   "weight": -0.8621,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_USD",
+   "score": -0.3063,
+   "weight": -0.0345,
+   "side": "short"
+  },
+  {
+   "pair": "GBP_ZAR",
+   "score": 0.2338,
+   "weight": 0.7586,
+   "side": "long"
+  },
+  {
+   "pair": "NZD_CAD",
+   "score": -0.1671,
+   "weight": 0.2414,
+   "side": "long"
+  },
+  {
+   "pair": "NZD_CHF",
+   "score": -0.3566,
+   "weight": -0.2414,
+   "side": "short"
+  },
+  {
+   "pair": "NZD_JPY",
+   "score": -0.4168,
+   "weight": -0.4828,
+   "side": "short"
+  },
+  {
+   "pair": "NZD_SGD",
+   "score": -0.0949,
+   "weight": 0.4483,
+   "side": "long"
+  },
+  {
+   "pair": "NZD_USD",
+   "score": -0.161,
+   "weight": 0.2759,
+   "side": "long"
+  },
+  {
+   "pair": "SGD_CHF",
+   "score": -0.1678,
+   "weight": 0.2069,
+   "side": "long"
+  },
+  {
+   "pair": "SGD_JPY",
+   "score": -0.3933,
+   "weight": -0.3448,
+   "side": "short"
+  },
+  {
+   "pair": "TRY_JPY",
+   "score": 0.6652,
+   "weight": 0.931,
+   "side": "long"
+  },
+  {
+   "pair": "USD_CAD",
+   "score": -0.3082,
+   "weight": -0.069,
+   "side": "short"
+  },
+  {
+   "pair": "USD_CHF",
+   "score": -0.1607,
+   "weight": 0.3103,
+   "side": "long"
+  },
+  {
+   "pair": "USD_CNH",
+   "score": 0.1004,
+   "weight": 0.5517,
+   "side": "long"
+  },
+  {
+   "pair": "USD_CZK",
+   "score": -0.2859,
+   "weight": 0.0,
+   "side": "flat"
+  },
+  {
+   "pair": "USD_HUF",
+   "score": 1.0178,
+   "weight": 1.0,
+   "side": "long"
+  },
+  {
+   "pair": "USD_JPY",
+   "score": -0.3992,
+   "weight": -0.3793,
+   "side": "short"
+  },
+  {
+   "pair": "USD_MXN",
+   "score": 0.1677,
+   "weight": 0.6207,
+   "side": "long"
+  },
+  {
+   "pair": "USD_NOK",
+   "score": -0.0738,
+   "weight": 0.4828,
+   "side": "long"
+  },
+  {
+   "pair": "USD_PLN",
+   "score": -0.4039,
+   "weight": -0.4138,
+   "side": "short"
+  },
+  {
+   "pair": "USD_SEK",
+   "score": -0.6004,
+   "weight": -0.7586,
+   "side": "short"
+  },
+  {
+   "pair": "USD_SGD",
+   "score": 0.0762,
+   "weight": 0.5172,
+   "side": "long"
+  },
+  {
+   "pair": "USD_THB",
+   "score": -0.32,
+   "weight": -0.1034,
+   "side": "short"
+  },
+  {
+   "pair": "USD_TRY",
+   "score": -0.7183,
+   "weight": -0.931,
+   "side": "short"
+  },
+  {
+   "pair": "USD_ZAR",
+   "score": 0.2196,
+   "weight": 0.7241,
+   "side": "long"
+  },
+  {
+   "pair": "ZAR_JPY",
+   "score": -0.638,
+   "weight": -0.8276,
+   "side": "short"
+  }
+ ]
+}

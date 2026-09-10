@@ -1,0 +1,19 @@
+{
+ "asof": "AUD",
+ "carry_per_pair_pct_yr": {
+  "EUR_USD": -1.38,
+  "GBP_USD": 0.099,
+  "AUD_USD": 0.72,
+  "NZD_USD": 0.7,
+  "USD_JPY": 2.789,
+  "USD_CAD": 3.63,
+  "USD_CHF": 3.675,
+  "EUR_GBP": -1.479,
+  "EUR_JPY": 1.409,
+  "EUR_CHF": 2.295,
+  "GBP_JPY": 2.888,
+  "AUD_JPY": 3.509,
+  "NZD_JPY": 3.489,
+  "CHF_JPY": -0.886
+ }
+}

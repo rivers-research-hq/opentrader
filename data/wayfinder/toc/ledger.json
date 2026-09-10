@@ -1,388 +1,508 @@
 {
- "version": 1,
- "task": "OpenTrader frontier under ADR-0007",
- "createdAt": "2026-08-29T04:40:00.031Z",
- "currentPhase": "oanda",
- "phases": [
-  {
-   "name": "155",
-   "allowance": 30000,
-   "spent": 0,
-   "checkpoints": 0,
-   "startedAt": "2026-08-29T05:23:43.949Z",
-   "endedAt": "2026-08-29T19:38:21.361Z"
+  "version": 1,
+  "task": "OpenTrader frontier under ADR-0007",
+  "createdAt": "2026-08-29T04:40:00.031Z",
+  "currentPhase": "oanda",
+  "phases": [
+    {
+      "name": "155",
+      "allowance": 30000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-29T05:23:43.949Z",
+      "endedAt": "2026-08-29T19:38:21.361Z"
+    },
+    {
+      "name": "v11-recompute",
+      "allowance": 20000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-29T19:38:21.362Z",
+      "endedAt": "2026-08-29T21:22:45.679Z"
+    },
+    {
+      "name": "156-memo",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-29T21:22:45.680Z",
+      "endedAt": "2026-08-30T02:52:39.884Z"
+    },
+    {
+      "name": "157",
+      "allowance": 30000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-30T02:52:39.887Z",
+      "endedAt": "2026-08-30T02:53:29.370Z"
+    },
+    {
+      "name": "157",
+      "allowance": 30000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-30T02:53:29.370Z",
+      "endedAt": null
+    },
+    {
+      "name": "continuity",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-30T08:20:31.222Z",
+      "endedAt": "2026-08-31T12:32:28.881Z"
+    },
+    {
+      "name": "oanda",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 1,
+      "startedAt": "2026-08-31T12:32:28.881Z",
+      "endedAt": "2026-08-31T14:00:33.404Z"
+    },
+    {
+      "name": "oanda",
+      "allowance": 25000,
+      "spent": 0,
+      "checkpoints": 0,
+      "startedAt": "2026-08-31T14:00:33.407Z",
+      "endedAt": null
+    }
+  ],
+  "totals": {
+    "spent": 51218,
+    "checkpointed": 51218,
+    "compactionTokens": 51218
   },
-  {
-   "name": "v11-recompute",
-   "allowance": 20000,
-   "spent": 0,
-   "checkpoints": 1,
-   "startedAt": "2026-08-29T19:38:21.362Z",
-   "endedAt": "2026-08-29T21:22:45.679Z"
-  },
-  {
-   "name": "156-memo",
-   "allowance": 25000,
-   "spent": 0,
-   "checkpoints": 1,
-   "startedAt": "2026-08-29T21:22:45.680Z",
-   "endedAt": "2026-08-30T02:52:39.884Z"
-  },
-  {
-   "name": "157",
-   "allowance": 30000,
-   "spent": 0,
-   "checkpoints": 1,
-   "startedAt": "2026-08-30T02:52:39.887Z",
-   "endedAt": "2026-08-30T02:53:29.370Z"
-  },
-  {
-   "name": "157",
-   "allowance": 30000,
-   "spent": 0,
-   "checkpoints": 0,
-   "startedAt": "2026-08-30T02:53:29.370Z",
-   "endedAt": null
-  },
-  {
-   "name": "continuity",
-   "allowance": 25000,
-   "spent": 0,
-   "checkpoints": 0,
-   "startedAt": "2026-08-30T08:20:31.222Z",
-   "endedAt": "2026-08-31T12:32:28.881Z"
-  },
-  {
-   "name": "oanda",
-   "allowance": 25000,
-   "spent": 0,
-   "checkpoints": 1,
-   "startedAt": "2026-08-31T12:32:28.881Z",
-   "endedAt": "2026-08-31T14:00:33.404Z"
-  },
-  {
-   "name": "oanda",
-   "allowance": 25000,
-   "spent": 0,
-   "checkpoints": 0,
-   "startedAt": "2026-08-31T14:00:33.407Z",
-   "endedAt": null
-  }
- ],
- "totals": {
-  "spent": 51218,
-  "checkpointed": 51218,
-  "compactionTokens": 51218
- },
- "variables": [
-  {
-   "id": "V01",
-   "status": "known",
-   "desc": "Rule floor contract (ledger iter-74) on 17-symbol search universe: +23.1% net 5y pre-1718f33, +18.6% after engine fix (metrics pre-fix optimistic ~4-5pp)",
-   "bounds": "data/setup_search/ledger.jsonl; data/setup_search/best.json"
-  },
-  {
-   "id": "V02",
-   "status": "known",
-   "desc": "Universe contract does NOT generalize: -45.95% on 511-registry, -41.07% on 7.3k fullcross (re-verified 2026-08-23). Treat every edge claim as universe-bound",
-   "bounds": "scripts/universe_contract_test.py (~25 min)"
-  },
-  {
-   "id": "V03",
-   "status": "known",
-   "desc": "Signal-family probe: NO existing feature family (mom/rev/rsi/brk/z, rank, vol-scaling, filters) generalizes wide under realistic fees (2026-08-13); only new signal inputs untested",
-   "bounds": "scripts/signal_family_probe.py (~20 min)"
-  },
-  {
-   "id": "V04",
-   "status": "known",
-   "desc": "ff_falling macro gate is a loss-reducer, NOT a validatable edge (OOS walkforward 1/4 folds positive); dedicated script lost to /tmp cleanup 2026-08-23, DISPROVED verdict stands",
-   "bounds": "AGENTS.md quantitative-claims section"
-  },
-  {
-   "id": "V05",
-   "status": "known",
-   "desc": "Contrarian rotation: long worst-5 by 60d momentum in liquid large-caps beats B&H 3/4 folds 2008-26 (9.1% vs 6.8% ann); a crisis-rotation tool, not a standalone edge; script lost 2026-08-23",
-   "bounds": "AGENTS.md quantitative-claims section"
-  },
-  {
-   "id": "V06",
-   "status": "known",
-   "desc": "9 prototype experts OOS-verified; laggard is champion (OOS Calmar 1.666, maxDD -7.5%). ROUTING/MONITORING only, never live order flow. Swarm pkl data lost; committed ports in strategies/ are the durable artifacts",
-   "bounds": "strategies/experts.py; data/live_router_state.json"
-  },
-  {
-   "id": "V07",
-   "status": "known",
-   "desc": "Epoch engine verdict: no-promotion. Both epochs FAIL (+0.945%/+0.533% vs +1% gate; epoch2 erosion 1.006% > 0.5%). ADR-0006 phase-2 PASS narrative is UNVERIFIED - never repeat it",
-   "bounds": "data/arena/epoch_report.json"
-  },
-  {
-   "id": "V08",
-   "status": "known",
-   "desc": "Transfer findings: drawdown control passes 6/8 of R2 intl gauntlet; intl basket BH beats SPY BH risk-adjusted (Calmar 0.73 vs 0.47); THE benchmark is SPY buy-and-hold net of costs. Scripts lost 2026-08-23, findings stand as recorded",
-   "bounds": "AGENTS.md quantitative-claims section"
-  },
-  {
-   "id": "V09",
-   "status": "known",
-   "desc": "VIX gate edge FALSIFIED (1/3 eras OOS). Live harness runs --vix-gate off (commit 7ed8271); code default remains strict fail-closed - a footgun for future runs",
-   "bounds": "data/vix_gate.py docstring; commit 7ed8271"
-  },
-  {
-   "id": "V10",
-   "status": "known",
-   "desc": "Arena gate FAILING (-0.57%/+0.20% vs +1% bar, 2026-08-23 audit); improvement loop seeded once from static OOS evidence, does not close (#155-157 open)",
-   "bounds": "docs/agents/research/self-improvement-loop-audit.md"
-  },
-  {
-   "id": "V11",
-   "status": "computable",
-   "desc": "Deployability status vs ADR-0002 three clauses - MUST be recomputed from real ledgers at session end, never quoted from prose",
-   "bounds": "docs/adr/0002-deployability-criterion.md; paper_state.json + shadow reconciliation"
-  },
-  {
-   "id": "V12",
-   "status": "computable",
-   "desc": "FTMO Phase-1 cadence ~939 days / 44 trades at current trade frequency (ADR-0005 sandbox sim); re-run only if the config changes",
-   "bounds": "setup_search/prop_challenge_sim.py"
-  },
-  {
-   "id": "V13",
-   "status": "computable",
-   "desc": "Live harness universe is the 511-registry industry radar curated to 6 focus symbols (fallback ~66 names); the 19-symbol-universe phrasing in CONTEXT.md/AGENTS.md/experts.py is stale boilerplate",
-   "bounds": "mot/industry_map.py; docs/agents/research/universe-bridge-matrix.md"
-  },
-  {
-   "id": "V14",
-   "status": "unknowable",
-   "desc": "Mechanism of WHY the contract fails wide (regime fragmentation vs fee structure vs selection effect) - parked as the ADR-0007 research track, do not burn tokens guessing",
-   "bounds": "docs/adr/0007-reground-victory-path.md decision 3"
-  },
-  {
-   "id": "V15",
-   "status": "explore",
-   "desc": "Macro-relative / sector-relative signal inputs generalize wide - untested hypothesis, speculation only until probed",
-   "bounds": "ADR-0007 decision 3; scripts/signal_family_probe.py conclusion"
-  },
-  {
-   "id": "V16",
-   "status": "known",
-   "desc": "FTUK One-Step rules (official FAQ, spot-checked 2026-08-29): 10% target / 4% daily DD / 8% RELATIVE max DD / min 4 days / no time limit / 80% split / on-demand payout $250 min. Relative != trailing (friendlier). Newer Flex variant differs (4% target, 5% daily DD) - re-verify before quoting",
-   "bounds": "faq.ftuk.com one-step rules; docs/research/small-capital-profitability-plan.md 1.2"
-  },
-  {
-   "id": "V17",
-   "status": "known",
-   "desc": "E8 Signature 25K (spot-checked 2026-08-29): fee ~$110 FUTURES / ~$138 CFD (plan conflated variants); EOD dynamic DD 4% on 25K/50K; ~6% target; 35% best-day payout rule; payout buffer = DD size; fixed 80% split on Signature; CFD requires activity every 60 days (a clock)",
-   "bounds": "e8markets.com compare-simfi; help.e8markets.com payout-on-demand; plan 1.2"
-  },
-  {
-   "id": "V18",
-   "status": "known",
-   "desc": "TradeLocker venue class satisfies the no-inactivity-clock constraint that drove ADR-0005 to FTMO: FTUK/FunderPro/E8 have no time limits with static/relative DD. FunderPro carries a trust caution (Trustpilot Jan 2026, payout-denial complaints)",
-   "bounds": "docs/research/small-capital-profitability-plan.md 1; fundedtrading.com best-tradelocker-prop-firms"
-  },
-  {
-   "id": "V19",
-   "status": "computable",
-   "desc": "Plan pass-probabilities and income figures (15-25% pass, $425-1068/mo) are HEURISTIC - decision inputs only. Recompute by extending setup_search/prop_challenge_sim.py to venue-specific rules before any purchase decision",
-   "bounds": "setup_search/prop_challenge_sim.py; plan 4"
-  },
-  {
-   "id": "V20",
-   "status": "known",
-   "desc": "ADR-0008 (2026-08-29): multi-venue posture - FTMO stays sim-validated primary, TradeLocker firm class added. TradeLocker ExchangeBase adapter is sanctioned bridge work, sequenced AFTER #155-157, sandbox-first, demo-paper-validated. Challenge-mode risk reconfig requires its own ADR (ADR-0001)",
-   "bounds": "docs/adr/0008-multi-venue-prop-bridge.md"
-  },
-  {
-   "id": "V21",
-   "status": "known",
-   "desc": "#156 RESOLVED (ADR-0009, 2026-08-31): promotion seam = separate epoch-expert registry, shadow-first, compete-not-displace. Seed = gate_margin x SCALE, n=5, marked seed:gate_margin, replaced on forward accrual. Auto-promote into shadow registry with artifact log; human signoff only at shadow-to-live-order-flow boundary. Zero-fwd regimes hold rule floor. Gate bar unchanged (ADR-0006) \u2014 no candidate has cleared it",
-   "bounds": "docs/adr/0009-expert-promotion-seam.md; data/wayfinder/promotion-path-memo.md"
-  },
-  {
-   "id": "BM1",
-   "status": "explore",
-   "desc": "No public LLM benchmark fulfills the FX-agent needs (surveyed 2026-08-31 vs primary sources: FinBen arXiv 2402.12659 = equities task-level; InvestorBench arXiv 2412.18174 = stocks/crypto/ETF agent env, no FX; Alpha Arena = live crypto one-off, recall-labeled). Human decisions: internal gate first, FX-only v0. Groundwork = agent_gym (scripts/agent_gym.py, protocol docs/research/agent-gym-protocol-v0.md)",
-   "bounds": "Verified against arXiv abstracts this session; nof1.ai rate-limited (Alpha Arena from recall); re-verify before any public claim"
-  },
-  {
-   "id": "BM2",
-   "status": "explore",
-   "desc": "Fade alpha is regime-bound + information-ceiling confirmed: 7-pair deep dataset (3824 events, 2008-2026) base winrate 45.4% mean R +0.083 vs 57.5%/+0.370 in the frozen window (2024-26 = top-decile fade regime). Value head honest AUC ~0.60 (7-pair, 17 features). ABLATION 2026-09-01: 26-pair expansion (13506 events, 3.4x) LOWERED AUC to 0.573 and q0.5 scoreboard PF 2.67->1.29 \u2014 cross pairs are correlated permutations of the same 7 currencies; they add volume, not information. The binding constraint is informational (new data TYPES: carry/rates, intraday microstructure, preference layer), not sample size",
-   "bounds": "Re-runnable: scripts/build_trajectories.py (--candles candles_deep.json vs candles_deep28.json); v8-crosspair scoreboard; OANDA deep history starts 2008-11"
-  },
-  {
-   "id": "BM3",
-   "status": "explore",
-   "desc": "Rates/carry avenue (wired 2026-09-01): 4 of 8 policy-rate legs live (US DFF, EUR ECBDFR, GBP IUDSOIA via FRED keyless CSV; CA via BoC valet) with publication-lag handling; per-pair CARRY series in exog cache. Missing legs: JPY/CHF/AUD/NZD (FRED BIS monthly discontinued 2013-2023, RBNZ down, SNB cube mismatch, RBA daily 404). RESULTS: c09 fade+positive-carry positive in BOTH windows but volume-dead (n=8/7 vs bar 10/5 \u2014 2024-26 rate env makes positive-carry longs rare); rate features lift walkforward AUC 0.605->0.616 BUT degrade scoreboard PF 2.67->0.08 (second instance of the regime-feature transfer failure, after trailing-R) \u2014 production head stays at 17 features, rates kept as research",
-   "bounds": "Re-runnable: scripts/fetch_rates.py + build_trajectories.py + signal_gym.py; v9-rates/v9-rates-r2 scoreboards; JPY/CHF/AUD/NZD legs are the open hunt"
-  },
-  {
-   "id": "BM4",
-   "status": "explore",
-   "desc": "1000-worlds robustness (Stage 1 adversarial loop, 2026-09-01): date-block bootstrap (block mean 21d, 1000 realities) \u2014 c08_mr_fade_cot OOS PF mean 2.52 p5 1.16, PF>1 in 98.1% of worlds, real path p60.8; c04 96.8% PF>1; mom_k5 control FAILS as designed (42.8%). Block-63 sensitivity: c08 95.6% PF>1 p5 1.03. Verdict: c08 edge is NOT a path artifact; harness discriminates (control fails). Caveat: worlds inherit the golden-window regime mix \u2014 novel-regime risk remains with forward accrual",
-   "bounds": "Re-runnable: scripts/worlds.py --worlds 1000 --block-mean 21 --candidates c08_mr_fade_cot,c04_mr_fade_ma20,c01_mom_k5_pos; results data/agent_gym/worlds/"
-  },
-  {
-   "id": "V26",
-   "status": "computable",
-   "desc": "FX OANDA practice account, venue-reconciled 2026-09-02: balance $100,002.81 (07:00) drifting to $99,999.08 (13:40) on crash-lane churn; crash-lane realized since lane start 2026-09-01 = -$0.21 net over 9 venue closes; mom-k5 realized since 08-31 = -$0.68 (USD_CAD +0.29, USD_JPY -0.97) with USD_CHF open (+0.42 uPL at 13:40)",
-   "bounds": "OANDA v3 transactions/openTrades queried read-only 2026-09-02; USD; +/-0.01 rounding; drifts with every venue fill"
-  },
-  {
-   "id": "V27",
-   "status": "computable",
-   "desc": "fx_crashtest $300-model accounting now venue-derived: realized recomputed each run from venue ORDER_FILL pl (self-heals), unrealized from openTrades unrealizedPL. Venue-derived max DD since lane start $0.21. The prior max DD $572 and realized $0.00 in fx_crashtest.json were artifacts (one-cycle stale mark + unbooked SL/TP closes) \u2014 quarantined, do not quote",
-   "bounds": "LANDED LIVE 2026-09-02 (tickets #163/#167). Tracker recomputes realized from venue ORDER_FILL pl over the FULL lane epoch each run (a since-cursor window briefly reset it hourly \u2014 fixed); unrealized from venue unrealizedPL; DD series reset once on migration. Ledger FIFO realized for crash (+5.03) is a known pairing artifact \u2014 venue pl sum (-0.21) is authoritative"
-  },
-  {
-   "id": "V28",
-   "status": "computable",
-   "desc": "FX lane attribution rule: venue SL/TP closes arrive as tagless venue-reconciliation rows in fx_ledger.jsonl and attribute to lanes by fill size (100u mom-k5, 2000u h1-mom, 5000u crash) in fx_crashtest.py and tui/index.js. Known limit: 100u reconciliation rows are indistinguishable from mom-k5 closes \u2014 mom-k5's RT count includes 3 EUR_USD Aug-31 dust pairs (-0.065)",
-   "bounds": "rule documented 2026-09-02; breaks silently if a lane changes size \u2014 fix-list item 11 in docs/ARCHITECTURE.md. SUPERSEDED 2026-09-03: tradeID attribution landed (#175) \u2014 rec rows carry venue tags stamped at write time; size matcher is legacy-fallback only (map #158/#174)"
-  },
-  {
-   "id": "V29",
-   "status": "computable",
-   "desc": "Hardware: TWO GPUs on the box \u2014 RTX 3070 8GB (local-LLM duty, ~3.7GB resident) AND AMD RX 7900 GRE (Navi 31). nvidia-smi-only surveys are structurally blind to the AMD card; GPU inventory requires lspci | grep -iE 'vga|3d' plus nvidia-smi",
-   "bounds": "verified 2026-09-04 via lspci + nvidia-smi (ticket #190; an external research model's survey missed the 7900 GRE, corrected on map #187)"
-  },
-  {
-   "id": "V30",
-   "status": "computable",
-   "desc": "Mount layout: /mnt sits on the ROOT filesystem (nvme0n1p2 \u2014 held 142G during the 93%-full crisis); /home is the data drive (nvme1n1). Any pipeline/workspace/archive path must name /home/... \u2014 never /mnt. Post-cleanup 2026-09-05: root 48%, 457G free",
-   "bounds": "verified via df -h / /home /mnt + du sweep 2026-09-04/05 (tickets #188/#189/#190)"
-  },
-  {
-   "id": "V31",
-   "status": "computable",
-   "desc": "RAM 32GB with ~5.6GB available (tight) \u2014 data pipelines must STREAM (DuckDB/Arrow), never load full histories. snap IS installed on this Arch box (snapd 12G; disabled revisions prunable) \u2014 snap-retention advice applies despite Arch",
-   "bounds": "verified via free -h + snap list --all (2026-09-04, ticket #190)"
-  },
-  {
-   "id": "V32",
-   "status": "computable",
-   "desc": "PRE-REGISTERED (map #191 #193, timestamp 2026-09-05 01:5x UTC, human-witnessed before any full-sample run): news-surprise drift hypothesis \u2014 after a tier-1 release, the affected FX pair drifts exploitably over +1h/+4h/+24h, net of costs, conditioned on regime. Protocol: surprise = actual - forecast, z-scored against trailing 24-month consensus-error std per event family; windows on H1 bars of the currency-mapped pair (c08 EXPOSURE mapping); costs = 1.2 pips round-trip majors / 1.8 pips JPY + crosses; regime conditioning = RATE trend bucket (falling/rising, from exog RATE series) crossed with 20d pair momentum sign; walkforward >= 4 time-ordered folds; a fold passes only if net drift > costs with consistent sign within the fold; minimum sample 30 events per family per fold, below which the fold is UNTESTABLE not failed; PASS bar = OOS median fold net-drift PF > 1.0 AND >= 3/4 folds positive. Dataset = FF week-view scrape (ticket #192 primary source). Any result read before this entry existed is void.",
-   "bounds": "recorded 2026-09-05 pre-results (map #191; witness: human). Engine: setup_search.engine (macro_gate seam precedent); fold sign-consistency prevents single-lucky-fold PASS; FOMC excluded from v1 (statement surprise undefined); FOMC-in-scope is a later ticket if numeric families pass"
-  }
- ],
- "openQuestions": [
-  {
-   "id": "Q01",
-   "text": "Human decision pending: C2 transmit daemon (7 attempts, all HTTP 404, latest 2026-08-28) - suspend the service (ADR-0007 default) or fix the endpoint?",
-   "createdAt": "2026-08-29T04:41:35.084Z",
-   "status": "closed"
-  },
-  {
-   "id": "Q02",
-   "text": "Human decision queued: challenge-mode risk contract (per small-capital plan 1.3) \u2014 requires its own ADR + sandbox walkforward per ADR-0008 s4 before any E8/FTUK purchase. Proposed params (0.04 breaker / 0.02 stop / 0.04 target / 0.10 pos / 0.25 kelly) are HEURISTIC, unvalidated",
-   "createdAt": "2026-08-29T05:17:34.990Z",
-   "status": "open"
-  },
-  {
-   "id": "Q03",
-   "text": "Q03 (from V11 run, added by orchestrator 2026-08-29 \u2014 operator wrote it in deployability_status.json but did not execute toc open add): paper harness has 0 closed round trips since 2026-08-01 (3 open BUY positions only) \u2014 clause 1 cannot pass on trade evidence; is the harness expected to close positions at this stage, or is the 70-day calendar clock the binding constraint (clause 3, currently 0 continuous days due to gaps)?",
-   "createdAt": "2026-08-29T20:43:02.601Z",
-   "status": "open"
-  },
-  {
-   "id": "Q04",
-   "text": "exchange/oanda.py diverged between live tree (security guards + tag kwarg) and sandbox (server-truth get_balance): which is canonical, and should the fixes be merged before landing the FX tickets (#162/#163)?",
-   "createdAt": "2026-09-02T14:26:40.489Z",
-   "status": "open"
-  },
-  {
-   "id": "Q05",
-   "text": "exchange/oanda.py fork (live: security guards + tag kwarg; sandbox: server-truth get_balance) \u2014 Q04 open. NEW related: should venue-reconciliation rows carry the originating lane tag stamped from the venue txn clientExtensions at reconcile time (kills size inference + the 100u ambiguity)?",
-   "createdAt": "2026-09-02T18:22:24.583Z",
-   "status": "open",
-   "question": "Should venue-reconciliation rows carry the originating lane tag, stamped from the venue txn's clientExtensions at reconcile time (kills size inference and the 100u mom-k5 dust ambiguity)? Size-based attribution (V28) is the current rule."
-  }
- ],
- "history": [
-  {
-   "ts": "2026-08-29T20:08:16.410Z",
-   "kind": "checkpoint-compact",
-   "promptTokens": 2964,
-   "completionTokens": 1416,
-   "totalTokens": 4380,
-   "promptEstimate": 2497,
-   "requestedMax": 8000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-29T20:10:15.996Z",
-   "kind": "checkpoint-verify",
-   "promptTokens": 3703,
-   "completionTokens": 701,
-   "totalTokens": 4404,
-   "promptEstimate": 3059,
-   "requestedMax": 6000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-29T21:44:22.205Z",
-   "kind": "checkpoint-compact",
-   "promptTokens": 3086,
-   "completionTokens": 1932,
-   "totalTokens": 5018,
-   "promptEstimate": 2606,
-   "requestedMax": 8000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-29T21:45:29.210Z",
-   "kind": "checkpoint-verify",
-   "promptTokens": 8283,
-   "completionTokens": 814,
-   "totalTokens": 9097,
-   "promptEstimate": 6749,
-   "requestedMax": 6000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-30T04:51:27.863Z",
-   "kind": "checkpoint-compact",
-   "promptTokens": 3086,
-   "completionTokens": 1193,
-   "totalTokens": 4279,
-   "promptEstimate": 2606,
-   "requestedMax": 8000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-30T04:53:44.392Z",
-   "kind": "checkpoint-verify",
-   "promptTokens": 8295,
-   "completionTokens": 853,
-   "totalTokens": 9148,
-   "promptEstimate": 6816,
-   "requestedMax": 6000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-31T14:19:26.090Z",
-   "kind": "checkpoint-compact",
-   "promptTokens": 3086,
-   "completionTokens": 2222,
-   "totalTokens": 5308,
-   "promptEstimate": 2606,
-   "requestedMax": 8000,
-   "finishReason": "stop"
-  },
-  {
-   "ts": "2026-08-31T14:20:28.549Z",
-   "kind": "checkpoint-verify",
-   "promptTokens": 8624,
-   "completionTokens": 960,
-   "totalTokens": 9584,
-   "promptEstimate": 7061,
-   "requestedMax": 6000,
-   "finishReason": "stop"
-  }
- ],
- "lastCheckpoint": "checkpoints/ckpt-04.md",
- "_defaultAllowance": 12000
+  "variables": [
+    {
+      "id": "V01",
+      "status": "known",
+      "desc": "Rule floor contract (ledger iter-74) on 17-symbol search universe: +23.1% net 5y pre-1718f33, +18.6% after engine fix (metrics pre-fix optimistic ~4-5pp)",
+      "bounds": "data/setup_search/ledger.jsonl; data/setup_search/best.json"
+    },
+    {
+      "id": "V02",
+      "status": "known",
+      "desc": "Universe contract does NOT generalize: -45.95% on 511-registry, -41.07% on 7.3k fullcross (re-verified 2026-08-23). Treat every edge claim as universe-bound",
+      "bounds": "scripts/universe_contract_test.py (~25 min)"
+    },
+    {
+      "id": "V03",
+      "status": "known",
+      "desc": "Signal-family probe: NO existing feature family (mom/rev/rsi/brk/z, rank, vol-scaling, filters) generalizes wide under realistic fees (2026-08-13); only new signal inputs untested",
+      "bounds": "scripts/signal_family_probe.py (~20 min)"
+    },
+    {
+      "id": "V04",
+      "status": "known",
+      "desc": "ff_falling macro gate is a loss-reducer, NOT a validatable edge (OOS walkforward 1/4 folds positive); dedicated script lost to /tmp cleanup 2026-08-23, DISPROVED verdict stands",
+      "bounds": "AGENTS.md quantitative-claims section"
+    },
+    {
+      "id": "V05",
+      "status": "known",
+      "desc": "Contrarian rotation: long worst-5 by 60d momentum in liquid large-caps beats B&H 3/4 folds 2008-26 (9.1% vs 6.8% ann); a crisis-rotation tool, not a standalone edge; script lost 2026-08-23",
+      "bounds": "AGENTS.md quantitative-claims section"
+    },
+    {
+      "id": "V06",
+      "status": "known",
+      "desc": "9 prototype experts OOS-verified; laggard is champion (OOS Calmar 1.666, maxDD -7.5%). ROUTING/MONITORING only, never live order flow. Swarm pkl data lost; committed ports in strategies/ are the durable artifacts",
+      "bounds": "strategies/experts.py; data/live_router_state.json"
+    },
+    {
+      "id": "V07",
+      "status": "known",
+      "desc": "Epoch engine verdict: no-promotion. Both epochs FAIL (+0.945%/+0.533% vs +1% gate; epoch2 erosion 1.006% > 0.5%). ADR-0006 phase-2 PASS narrative is UNVERIFIED - never repeat it",
+      "bounds": "data/arena/epoch_report.json"
+    },
+    {
+      "id": "V08",
+      "status": "known",
+      "desc": "Transfer findings: drawdown control passes 6/8 of R2 intl gauntlet; intl basket BH beats SPY BH risk-adjusted (Calmar 0.73 vs 0.47); THE benchmark is SPY buy-and-hold net of costs. Scripts lost 2026-08-23, findings stand as recorded",
+      "bounds": "AGENTS.md quantitative-claims section"
+    },
+    {
+      "id": "V09",
+      "status": "known",
+      "desc": "VIX gate edge FALSIFIED (1/3 eras OOS). Live harness runs --vix-gate off (commit 7ed8271); code default remains strict fail-closed - a footgun for future runs",
+      "bounds": "data/vix_gate.py docstring; commit 7ed8271"
+    },
+    {
+      "id": "V10",
+      "status": "known",
+      "desc": "Arena gate FAILING (-0.57%/+0.20% vs +1% bar, 2026-08-23 audit); improvement loop seeded once from static OOS evidence, does not close (#155-157 open)",
+      "bounds": "docs/agents/research/self-improvement-loop-audit.md"
+    },
+    {
+      "id": "V11",
+      "status": "computable",
+      "desc": "Deployability status vs ADR-0002 three clauses - MUST be recomputed from real ledgers at session end, never quoted from prose",
+      "bounds": "docs/adr/0002-deployability-criterion.md; paper_state.json + shadow reconciliation"
+    },
+    {
+      "id": "V12",
+      "status": "computable",
+      "desc": "FTMO Phase-1 cadence ~939 days / 44 trades at current trade frequency (ADR-0005 sandbox sim); re-run only if the config changes",
+      "bounds": "setup_search/prop_challenge_sim.py"
+    },
+    {
+      "id": "V13",
+      "status": "computable",
+      "desc": "Live harness universe is the 511-registry industry radar curated to 6 focus symbols (fallback ~66 names); the 19-symbol-universe phrasing in CONTEXT.md/AGENTS.md/experts.py is stale boilerplate",
+      "bounds": "mot/industry_map.py; docs/agents/research/universe-bridge-matrix.md"
+    },
+    {
+      "id": "V14",
+      "status": "unknowable",
+      "desc": "Mechanism of WHY the contract fails wide (regime fragmentation vs fee structure vs selection effect) - parked as the ADR-0007 research track, do not burn tokens guessing",
+      "bounds": "docs/adr/0007-reground-victory-path.md decision 3"
+    },
+    {
+      "id": "V15",
+      "status": "explore",
+      "desc": "Macro-relative / sector-relative signal inputs generalize wide - untested hypothesis, speculation only until probed",
+      "bounds": "ADR-0007 decision 3; scripts/signal_family_probe.py conclusion"
+    },
+    {
+      "id": "V16",
+      "status": "known",
+      "desc": "FTUK One-Step rules (official FAQ, spot-checked 2026-08-29): 10% target / 4% daily DD / 8% RELATIVE max DD / min 4 days / no time limit / 80% split / on-demand payout $250 min. Relative != trailing (friendlier). Newer Flex variant differs (4% target, 5% daily DD) - re-verify before quoting",
+      "bounds": "faq.ftuk.com one-step rules; docs/research/small-capital-profitability-plan.md 1.2"
+    },
+    {
+      "id": "V17",
+      "status": "known",
+      "desc": "E8 Signature 25K (spot-checked 2026-08-29): fee ~$110 FUTURES / ~$138 CFD (plan conflated variants); EOD dynamic DD 4% on 25K/50K; ~6% target; 35% best-day payout rule; payout buffer = DD size; fixed 80% split on Signature; CFD requires activity every 60 days (a clock)",
+      "bounds": "e8markets.com compare-simfi; help.e8markets.com payout-on-demand; plan 1.2"
+    },
+    {
+      "id": "V18",
+      "status": "known",
+      "desc": "TradeLocker venue class satisfies the no-inactivity-clock constraint that drove ADR-0005 to FTMO: FTUK/FunderPro/E8 have no time limits with static/relative DD. FunderPro carries a trust caution (Trustpilot Jan 2026, payout-denial complaints)",
+      "bounds": "docs/research/small-capital-profitability-plan.md 1; fundedtrading.com best-tradelocker-prop-firms"
+    },
+    {
+      "id": "V19",
+      "status": "computable",
+      "desc": "Plan pass-probabilities and income figures (15-25% pass, $425-1068/mo) are HEURISTIC - decision inputs only. Recompute by extending setup_search/prop_challenge_sim.py to venue-specific rules before any purchase decision",
+      "bounds": "setup_search/prop_challenge_sim.py; plan 4"
+    },
+    {
+      "id": "V20",
+      "status": "known",
+      "desc": "ADR-0008 (2026-08-29): multi-venue posture - FTMO stays sim-validated primary, TradeLocker firm class added. TradeLocker ExchangeBase adapter is sanctioned bridge work, sequenced AFTER #155-157, sandbox-first, demo-paper-validated. Challenge-mode risk reconfig requires its own ADR (ADR-0001)",
+      "bounds": "docs/adr/0008-multi-venue-prop-bridge.md"
+    },
+    {
+      "id": "V21",
+      "status": "known",
+      "desc": "#156 RESOLVED (ADR-0009, 2026-08-31): promotion seam = separate epoch-expert registry, shadow-first, compete-not-displace. Seed = gate_margin x SCALE, n=5, marked seed:gate_margin, replaced on forward accrual. Auto-promote into shadow registry with artifact log; human signoff only at shadow-to-live-order-flow boundary. Zero-fwd regimes hold rule floor. Gate bar unchanged (ADR-0006) — no candidate has cleared it",
+      "bounds": "docs/adr/0009-expert-promotion-seam.md; data/wayfinder/promotion-path-memo.md"
+    },
+    {
+      "id": "BM1",
+      "status": "explore",
+      "desc": "No public LLM benchmark fulfills the FX-agent needs (surveyed 2026-08-31 vs primary sources: FinBen arXiv 2402.12659 = equities task-level; InvestorBench arXiv 2412.18174 = stocks/crypto/ETF agent env, no FX; Alpha Arena = live crypto one-off, recall-labeled). Human decisions: internal gate first, FX-only v0. Groundwork = agent_gym (scripts/agent_gym.py, protocol docs/research/agent-gym-protocol-v0.md)",
+      "bounds": "Verified against arXiv abstracts this session; nof1.ai rate-limited (Alpha Arena from recall); re-verify before any public claim"
+    },
+    {
+      "id": "BM2",
+      "status": "explore",
+      "desc": "Fade alpha is regime-bound + information-ceiling confirmed: 7-pair deep dataset (3824 events, 2008-2026) base winrate 45.4% mean R +0.083 vs 57.5%/+0.370 in the frozen window (2024-26 = top-decile fade regime). Value head honest AUC ~0.60 (7-pair, 17 features). ABLATION 2026-09-01: 26-pair expansion (13506 events, 3.4x) LOWERED AUC to 0.573 and q0.5 scoreboard PF 2.67->1.29 — cross pairs are correlated permutations of the same 7 currencies; they add volume, not information. The binding constraint is informational (new data TYPES: carry/rates, intraday microstructure, preference layer), not sample size",
+      "bounds": "Re-runnable: scripts/build_trajectories.py (--candles candles_deep.json vs candles_deep28.json); v8-crosspair scoreboard; OANDA deep history starts 2008-11"
+    },
+    {
+      "id": "BM3",
+      "status": "explore",
+      "desc": "Rates/carry avenue (wired 2026-09-01): 4 of 8 policy-rate legs live (US DFF, EUR ECBDFR, GBP IUDSOIA via FRED keyless CSV; CA via BoC valet) with publication-lag handling; per-pair CARRY series in exog cache. Missing legs: JPY/CHF/AUD/NZD (FRED BIS monthly discontinued 2013-2023, RBNZ down, SNB cube mismatch, RBA daily 404). RESULTS: c09 fade+positive-carry positive in BOTH windows but volume-dead (n=8/7 vs bar 10/5 — 2024-26 rate env makes positive-carry longs rare); rate features lift walkforward AUC 0.605->0.616 BUT degrade scoreboard PF 2.67->0.08 (second instance of the regime-feature transfer failure, after trailing-R) — production head stays at 17 features, rates kept as research",
+      "bounds": "Re-runnable: scripts/fetch_rates.py + build_trajectories.py + signal_gym.py; v9-rates/v9-rates-r2 scoreboards; JPY/CHF/AUD/NZD legs are the open hunt"
+    },
+    {
+      "id": "BM4",
+      "status": "explore",
+      "desc": "1000-worlds robustness (Stage 1 adversarial loop, 2026-09-01): date-block bootstrap (block mean 21d, 1000 realities) — c08_mr_fade_cot OOS PF mean 2.52 p5 1.16, PF>1 in 98.1% of worlds, real path p60.8; c04 96.8% PF>1; mom_k5 control FAILS as designed (42.8%). Block-63 sensitivity: c08 95.6% PF>1 p5 1.03. Verdict: c08 edge is NOT a path artifact; harness discriminates (control fails). Caveat: worlds inherit the golden-window regime mix — novel-regime risk remains with forward accrual",
+      "bounds": "Re-runnable: scripts/worlds.py --worlds 1000 --block-mean 21 --candidates c08_mr_fade_cot,c04_mr_fade_ma20,c01_mom_k5_pos; results data/agent_gym/worlds/"
+    },
+    {
+      "id": "V26",
+      "status": "computable",
+      "desc": "FX OANDA practice account, venue-reconciled 2026-09-02: balance $100,002.81 (07:00) drifting to $99,999.08 (13:40) on crash-lane churn; crash-lane realized since lane start 2026-09-01 = -$0.21 net over 9 venue closes; mom-k5 realized since 08-31 = -$0.68 (USD_CAD +0.29, USD_JPY -0.97) with USD_CHF open (+0.42 uPL at 13:40)",
+      "bounds": "OANDA v3 transactions/openTrades queried read-only 2026-09-02; USD; +/-0.01 rounding; drifts with every venue fill"
+    },
+    {
+      "id": "V27",
+      "status": "computable",
+      "desc": "fx_crashtest $300-model accounting now venue-derived: realized recomputed each run from venue ORDER_FILL pl (self-heals), unrealized from openTrades unrealizedPL. Venue-derived max DD since lane start $0.21. The prior max DD $572 and realized $0.00 in fx_crashtest.json were artifacts (one-cycle stale mark + unbooked SL/TP closes) — quarantined, do not quote",
+      "bounds": "LANDED LIVE 2026-09-02 (tickets #163/#167). Tracker recomputes realized from venue ORDER_FILL pl over the FULL lane epoch each run (a since-cursor window briefly reset it hourly — fixed); unrealized from venue unrealizedPL; DD series reset once on migration. Ledger FIFO realized for crash (+5.03) is a known pairing artifact — venue pl sum (-0.21) is authoritative"
+    },
+    {
+      "id": "V28",
+      "status": "computable",
+      "desc": "FX lane attribution rule: venue SL/TP closes arrive as tagless venue-reconciliation rows in fx_ledger.jsonl and attribute to lanes by fill size (100u mom-k5, 2000u h1-mom, 5000u crash) in fx_crashtest.py and tui/index.js. Known limit: 100u reconciliation rows are indistinguishable from mom-k5 closes — mom-k5's RT count includes 3 EUR_USD Aug-31 dust pairs (-0.065)",
+      "bounds": "rule documented 2026-09-02; breaks silently if a lane changes size — fix-list item 11 in docs/ARCHITECTURE.md. SUPERSEDED 2026-09-03: tradeID attribution landed (#175) — rec rows carry venue tags stamped at write time; size matcher is legacy-fallback only (map #158/#174)"
+    },
+    {
+      "id": "V29",
+      "status": "computable",
+      "desc": "Hardware: TWO GPUs on the box — RTX 3070 8GB (local-LLM duty, ~3.7GB resident) AND AMD RX 7900 GRE (Navi 31). nvidia-smi-only surveys are structurally blind to the AMD card; GPU inventory requires lspci | grep -iE 'vga|3d' plus nvidia-smi",
+      "bounds": "verified 2026-09-04 via lspci + nvidia-smi (ticket #190; an external research model's survey missed the 7900 GRE, corrected on map #187)"
+    },
+    {
+      "id": "V30",
+      "status": "computable",
+      "desc": "Mount layout: /mnt sits on the ROOT filesystem (nvme0n1p2 — held 142G during the 93%-full crisis); /home is the data drive (nvme1n1). Any pipeline/workspace/archive path must name /home/... — never /mnt. Post-cleanup 2026-09-05: root 48%, 457G free",
+      "bounds": "verified via df -h / /home /mnt + du sweep 2026-09-04/05 (tickets #188/#189/#190)"
+    },
+    {
+      "id": "V31",
+      "status": "computable",
+      "desc": "RAM 32GB with ~5.6GB available (tight) — data pipelines must STREAM (DuckDB/Arrow), never load full histories. snap IS installed on this Arch box (snapd 12G; disabled revisions prunable) — snap-retention advice applies despite Arch",
+      "bounds": "verified via free -h + snap list --all (2026-09-04, ticket #190)"
+    },
+    {
+      "id": "V32",
+      "status": "computable",
+      "desc": "PRE-REGISTERED (map #191 #193, timestamp 2026-09-05 01:5x UTC, human-witnessed before any full-sample run): news-surprise drift hypothesis — after a tier-1 release, the affected FX pair drifts exploitably over +1h/+4h/+24h, net of costs, conditioned on regime. Protocol: surprise = actual - forecast, z-scored against trailing 24-month consensus-error std per event family; windows on H1 bars of the currency-mapped pair (c08 EXPOSURE mapping); costs = 1.2 pips round-trip majors / 1.8 pips JPY + crosses; regime conditioning = RATE trend bucket (falling/rising, from exog RATE series) crossed with 20d pair momentum sign; walkforward >= 4 time-ordered folds; a fold passes only if net drift > costs with consistent sign within the fold; minimum sample 30 events per family per fold, below which the fold is UNTESTABLE not failed; PASS bar = OOS median fold net-drift PF > 1.0 AND >= 3/4 folds positive. Dataset = FF week-view scrape (ticket #192 primary source). Any result read before this entry existed is void.",
+      "bounds": "recorded 2026-09-05 pre-results (map #191; witness: human). Engine: setup_search.engine (macro_gate seam precedent); fold sign-consistency prevents single-lucky-fold PASS; FOMC excluded from v1 (statement surprise undefined); FOMC-in-scope is a later ticket if numeric families pass"
+    },
+    {
+      "id": "V33",
+      "status": "computable",
+      "desc": "News-surprise post-release drift at retail cadence: FAIL — ALL pre-registered families (NFP median 4h PF 0.850; CPI 0.907, 0/4 folds, n=5,069; UNEMP 0.873, n=1,719). 18y history, 4 time-ordered folds each, net of costs, surprise-z signed. Family-wide dead end — do NOT re-open without a materially different mechanism (options data, sub-minute infra). The news gate stays.",
+      "bounds": "verdict artifacts probe_results*.json (store root); protocol V32; map #191 #195 + completion addendum. Caveat unchanged: positive-surprise side scored on 4h window only"
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "Q01",
+      "text": "Human decision pending: C2 transmit daemon (7 attempts, all HTTP 404, latest 2026-08-28) - suspend the service (ADR-0007 default) or fix the endpoint?",
+      "createdAt": "2026-08-29T04:41:35.084Z",
+      "status": "closed"
+    },
+    {
+      "id": "Q02",
+      "text": "Human decision queued: challenge-mode risk contract (per small-capital plan 1.3) — requires its own ADR + sandbox walkforward per ADR-0008 s4 before any E8/FTUK purchase. Proposed params (0.04 breaker / 0.02 stop / 0.04 target / 0.10 pos / 0.25 kelly) are HEURISTIC, unvalidated",
+      "createdAt": "2026-08-29T05:17:34.990Z",
+      "status": "open"
+    },
+    {
+      "id": "Q03",
+      "text": "Q03 (from V11 run, added by orchestrator 2026-08-29 — operator wrote it in deployability_status.json but did not execute toc open add): paper harness has 0 closed round trips since 2026-08-01 (3 open BUY positions only) — clause 1 cannot pass on trade evidence; is the harness expected to close positions at this stage, or is the 70-day calendar clock the binding constraint (clause 3, currently 0 continuous days due to gaps)?",
+      "createdAt": "2026-08-29T20:43:02.601Z",
+      "status": "open"
+    },
+    {
+      "id": "Q04",
+      "text": "exchange/oanda.py diverged between live tree (security guards + tag kwarg) and sandbox (server-truth get_balance): which is canonical, and should the fixes be merged before landing the FX tickets (#162/#163)?",
+      "createdAt": "2026-09-02T14:26:40.489Z",
+      "status": "open"
+    },
+    {
+      "id": "Q05",
+      "text": "exchange/oanda.py fork (live: security guards + tag kwarg; sandbox: server-truth get_balance) — Q04 open. NEW related: should venue-reconciliation rows carry the originating lane tag stamped from the venue txn clientExtensions at reconcile time (kills size inference + the 100u ambiguity)?",
+      "createdAt": "2026-09-02T18:22:24.583Z",
+      "status": "open",
+      "question": "Should venue-reconciliation rows carry the originating lane tag, stamped from the venue txn's clientExtensions at reconcile time (kills size inference and the 100u mom-k5 dust ambiguity)? Size-based attribution (V28) is the current rule."
+    },
+    {
+      "id": "Q06",
+      "text": "fxexpert loop v0.1: warm-start recursion lifted OOS IC 0.004->0.029 over 12 gens (hp B, 339k params), but no generation passed the gate (net PF 0.90-1.00 vs bar 1.05; buy-hold 1.17). Gross PF 1.038 with ~0.5bps/day cost drag. Open: does cost-aware training (turnover penalty / wider thresholds / longer holds) convert the gross edge to net? Ref docs/agents/research/fx-expert-loop-2026-09-06.md, data/fx_expert/history.jsonl",
+      "createdAt": "2026-09-06T08:27:43.011Z",
+      "status": "open"
+    },
+    {
+      "id": "Q07",
+      "text": "fxexpert loop v0.2: warm-start future-leak found+fixed (per-fold chains); contaminated g12-35 era invalidated (2 registrations set fail). Clean 24-gen run g36-59: honest convergence to IC ~0.015 / net PF ~0.98, 0 PASSes, plateau by ~g45. Data-bound ceiling at 16-pair daily breadth. Open: do multi-horizon panel + longer targets (10-20d) + fold-chain ensembles clear the 1.05 bar? Ref docs/agents/research/fx-expert-loop-2026-09-06.md §v0.2",
+      "createdAt": "2026-09-06T15:33:52.944Z",
+      "status": "open"
+    },
+    {
+      "id": "Q08",
+      "text": "fxexpert v0.3 100-gen verdict: recursion stable and reproducible, converges to N-family (340k params, 10d horizon, hysteresis) IC ~0.021 / net PF ~1.02 / Sharpe + / 3-3 folds — below the 1.05 gate bar and buy-hold 1.165. Ceiling is information-limited at 16 pairs x daily decisions (340k param optimum, bigger degrades). Decision open: expand data engine vs shadow-accrue the N signal under caps vs declare daily panel exhausted. Ref docs/agents/research/fx-expert-loop-2026-09-06.md §v0.3",
+      "createdAt": "2026-09-06T21:13:39.497Z",
+      "status": "open"
+    },
+    {
+      "id": "Q09",
+      "text": "fxexpert v0.4: 58-pair universe (3.6x breadth, 289k pair-days) lifted N-family OOS IC 0.021->0.032 (+54%), best 0.0354 with regime-uniform fold ICs [0.035,0.037,0.034] — a real cross-sectional factor. But threshold rule converts none of it: PF flat ~1.00-1.02, 0 PASSes, Sharpe down. Bottleneck = construction at breadth: rank-weighted sizing, vol targeting, pair cost selection. Ref docs/agents/research/fx-expert-loop-2026-09-06.md §v0.4",
+      "createdAt": "2026-09-07T00:10:23.373Z",
+      "status": "open"
+    },
+    {
+      "id": "Q10",
+      "text": "fxexpert v0.5: weekly rank-rebalanced portfolio (dollar-neutral, 58 pairs) converts the IC into PF — 1.079/1.085/1.085 across 3 clean runs, Sharpe +0.28, maxDD -0.07, OOS IC 0.028-0.031 (3/3 folds). Clears PF bar 1.05 + 4 of 5 gate criteria; FAILs only 'beat buy-hold 1.143' — dollar-neutral L/S vs long-only carry book on PF, a bar-amendment call for the human. Two sim bugs found+fixed en route (short-sign flip, rebal row-scramble); buggy-era gens on record. Ref docs/agents/research/fx-expert-loop-2026-09-06.md §v0.5",
+      "createdAt": "2026-09-07T01:55:32.171Z",
+      "status": "closed"
+    },
+    {
+      "id": "Q11",
+      "text": "fx-expert-g151 registered accruing (first gate-PASSing trained FX expert, amended bar): PF 1.0846 Sharpe 0.281 IC 0.0309 3/3 folds, weekly rank-rebalanced dollar-neutral book, shadow signals emitting to data/fx_expert/signals.json. OPEN: does the forward shadow accrual ledger confirm the backtested edge? (the only test that matters now; live = human signoff per ADR-0009 §4)",
+      "createdAt": "2026-09-07T02:15:11.711Z",
+      "status": "open"
+    },
+    {
+      "id": "Q12",
+      "text": "fxexpert tournament LIVE 2026-09-06 (human signoff, demo funds): fx-expert-g137/g138/g151 wired as OANDA practice lanes (cron 21:25/21:35/21:45 UTC weekdays, --once=real, 2000u/unit weight, tagged orders, weekly rank rebal). First real trades Monday 21:25 UTC on Monday's D1 close. Bottom two cut Friday 2026-09-11 close (human). Legacy lanes will sit mostly flat (netted-account arbitration vs 57-leg books). OPEN: forward accrual vs backtest edge; tournament PnL per fxexp-* tag. Ref docs/agents/research/fx-expert-loop-2026-09-06.md",
+      "createdAt": "2026-09-07T02:34:26.288Z",
+      "status": "open"
+    },
+    {
+      "id": "Q13",
+      "text": "equity agent #2 SKETCH pre-registered 2026-09-07 (before gen 0, build gated on Friday 09-11): avenue = US equities cross-sectional rank book on data/setup_search/fullcross.pkl (9267 syms x 1300 daily bars 5y, verified). Gate bars pre-registered: OOS Sharpe>=0.8 AND Calmar>=SPY-BH, >=3/4 folds IC>0, beat 12-1 momentum + all baselines, measured neutrality <=0.2, gross-vs-net cost honesty, survivorship check before gen 0, amendments only via logged human call. Ref docs/agents/research/equity-expert-sketch-2026-09-07.md",
+      "createdAt": "2026-09-07T16:26:23.967Z",
+      "status": "open"
+    },
+    {
+      "id": "Q14",
+      "text": "fx-warden v0.1 live (local Qwen3.8-4B on 3070, :5802): hourly observe + daily plan/score, expectation-conditioned reward (QB/RB rule, arithmetic in code), shadow-cut probation state machine, notes verified against venue truth (4B invents derived % ~100% of rate — verifier gates corpus). Mid-train trigger ~2 weeks of records.jsonl. OPEN: does expectation-adjusted scoring separate lane skill from regime? Ref docs/agents/research/fx-warden-2026-09-08.md",
+      "createdAt": "2026-09-08T04:54:08.542Z",
+      "status": "open"
+    },
+    {
+      "id": "Q15",
+      "text": "Warden model A/B (2026-09-08, same 7 prompts from records): Qwen3.8-4B JSON 6/7, plan 1/1, grounding 18/18, 4.8s | Granite-4.0-H-Tiny 3/7 (fails JSON contract) | Granite-4.2-8B with --reasoning off 6/7, 1/1, 16/16, 4.9s — TIE on bar, but 8B weights + qwen3-embed don't co-exist safely on the 8GB 3070 (OOM under concurrent load). Decision: keep Qwen3.8-4B live; Granite 4.2 file kept for mid-train era. NOTE: reasoning-style models need --reasoning off or they burn tokens in reasoning_content (eval-harness lesson).",
+      "createdAt": "2026-09-08T20:31:57.465Z",
+      "status": "open"
+    },
+    {
+      "id": "Q16",
+      "text": "Warden model swap LIVE: Granite 4.2 8B on RX 7900 GRE via llama.cpp Vulkan/RADV (:5802, opentrader-warden-gre.service), records stamped warden-4.2-8b, 3070 freed to embedding-only. A/B tie on bar; swap won on VRAM coexistence. Path: HIP on gfx1101 core-dumps in ROCm 7.2.4 (dead end), Vulkan build needed 3 configure rounds (SPIRV headers no longer vendored). TRY legs still missing (OANDA halt) — tracked in warden audit daily. Ref docs/agents/research/fx-warden-2026-09-08.md",
+      "createdAt": "2026-09-08T22:06:29.248Z",
+      "status": "open"
+    },
+    {
+      "id": "Q17",
+      "text": "Warden v0.2 instability watch LIVE: per-currency composite (halt 30 + vol-spike 25 + shock 25 + events 10 + global bond/vix stress 10) from DGS10/T10Y2Y/EM-HY-OAS bond panel + FX vol from store + venue halt status. Wired into plan/observe prompts; plan stores non-calm snapshot. Robustness: halt = stale price >30min + persists 2 consecutive runs; plan lane-coverage backfill. First real catch: JPY/EUR/USD/TRY critical during rollover flicker, TRY genuine (8h frozen). Ref docs/agents/research/fx-warden-2026-09-08.md",
+      "createdAt": "2026-09-08T22:58:18.026Z",
+      "status": "open"
+    },
+    {
+      "id": "Q18",
+      "text": "Warden GPU-eviction failover LIVE: Granite(GRE,5802) primary + Qwen(3070,5804) on-demand fallback, supervisor timer 5min VRAM-aware (never fights gaming — if 3070 busy, warden skips runs), endpoint chain in llm_json, failover records stamped warden-qwen-fallback. Loop tested: evict->catch->serve->restore. Ref docs/agents/research/fx-warden-2026-09-08.md",
+      "createdAt": "2026-09-08T23:19:55.705Z",
+      "status": "open"
+    },
+    {
+      "id": "Q19",
+      "text": "fxexpert ARCHITECTURAL CONSTRAINT confirmed live: one netted OANDA account = one net position per instrument; three sibling books FIFO-corrupt each other (evidence: off-target 26->40, gross 67k overshoot, cross-lane deferrals). Resolution: g151 = sole live book, g137/g138 = paper competitors (same cost model, disclosed), separate OANDA accounts = the true multi-live option (human-gated). Lane exits now per-tradeID closes; anti-churn drift filter shipped. Friday scoreboard: g151 live fills + g137/g138 paper-vs-live disclosed. Ref fx-expert-loop doc",
+      "createdAt": "2026-09-09T02:13:41.273Z",
+      "status": "open"
+    },
+    {
+      "id": "Q20",
+      "text": "Conviction auction LIVE: 53 symbols held, ZERO overlapping pairs (18/22/18 per lane), claims registry frozen per period, execution core rewritten (tradeID closes surgical, foreign guard on adds). Trade-offs disclosed: per-lane neutrality broken (account residual ~10k net-long), sibling correlation limits differentiation. PUSHBACK recorded: one-week cut on 19-leg books = noise; recommend 2wk or IC-based scoring. Ref fx-warden doc",
+      "createdAt": "2026-09-09T03:24:48.069Z",
+      "status": "open"
+    },
+    {
+      "id": "Q21",
+      "text": "TP/SL A/B (8 variants x 3 OOS folds x ~28k leg-periods, fxexpert/trailing_ab.py): EVERY trailing-stop and TP variant loses to hold-to-rebalance (best trail-3ATR PF 0.594 vs baseline 0.604; Sharpe all worse). Structural: rank-weighted both-side books — stops realize adverse marks the horizon recovers, TPs cap winners. Independently re-confirms the R1-era 'forced exits destroy returns' rule. Lane design decision: no SL/TP is now MEASURED, not assumed. Harness stays for future variants.",
+      "createdAt": "2026-09-09T04:14:21.635Z",
+      "status": "open"
+    },
+    {
+      "id": "Q22",
+      "text": "newsfeed v1 wired into Warden: newsfeed_digest() reads canonical items from data/newsfeed/newsfeed.db (deduped, 25 recent), injected as 'headlines:' block into plan/observe prompts alongside FF/MOF/Fed feeds. Records carry headlines for PIT audit. The plan now conditions on actual GDELT headlines (Brent 00, ECB rate path, BOJ/JPY) not just scheduled events. Verified live: plan ran with 3 trained lanes, observe 3/3 verified notes. Ref fx-warden doc",
+      "createdAt": "2026-09-09T11:54:30.338Z",
+      "status": "open"
+    },
+    {
+      "id": "Q23",
+      "text": "MFE tracker + give-back ratio live on warden scoreboard: hourly observe persists per-lane peak uPL, daily score computes give-back = (peak−current)/peak. First verified readings: g151 peak +1.15 uPL +0.93 (2.0% GB), g137 peak +.17 uPL +.48 (9.6% GB). Separates selection skill from exit-policy cost on the scoreboard. Ref fx-warden doc §MFE",
+      "createdAt": "2026-09-09T15:56:06.886Z",
+      "status": "open"
+    },
+    {
+      "id": "Q24",
+      "text": "Simulated trail/TP LIVE: fx_trail_check.py every 5min via systemd timer. Per-leg peak/trough tracked in trail state, ATR from store, closes triggered legs via per-tradeID surgical close (no server-side SL/TP orders). Defaults: trail 2ATR, TP 3ATR. First run 0 exits (expected — fresh book). The A/B tested uniform stops; this is the per-leg selective version. Ref fx-warden doc",
+      "createdAt": "2026-09-09T18:11:58.751Z",
+      "status": "open"
+    }
+  ],
+  "history": [
+    {
+      "ts": "2026-08-29T20:08:16.410Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 2964,
+      "completionTokens": 1416,
+      "totalTokens": 4380,
+      "promptEstimate": 2497,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T20:10:15.996Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 3703,
+      "completionTokens": 701,
+      "totalTokens": 4404,
+      "promptEstimate": 3059,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T21:44:22.205Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 1932,
+      "totalTokens": 5018,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-29T21:45:29.210Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8283,
+      "completionTokens": 814,
+      "totalTokens": 9097,
+      "promptEstimate": 6749,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-30T04:51:27.863Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 1193,
+      "totalTokens": 4279,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-30T04:53:44.392Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8295,
+      "completionTokens": 853,
+      "totalTokens": 9148,
+      "promptEstimate": 6816,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-31T14:19:26.090Z",
+      "kind": "checkpoint-compact",
+      "promptTokens": 3086,
+      "completionTokens": 2222,
+      "totalTokens": 5308,
+      "promptEstimate": 2606,
+      "requestedMax": 8000,
+      "finishReason": "stop"
+    },
+    {
+      "ts": "2026-08-31T14:20:28.549Z",
+      "kind": "checkpoint-verify",
+      "promptTokens": 8624,
+      "completionTokens": 960,
+      "totalTokens": 9584,
+      "promptEstimate": 7061,
+      "requestedMax": 6000,
+      "finishReason": "stop"
+    }
+  ],
+  "lastCheckpoint": "checkpoints/ckpt-04.md",
+  "_defaultAllowance": 12000
 }

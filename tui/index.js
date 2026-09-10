@@ -32,6 +32,8 @@ const LANE_COLOR = {
   "mom-k5": "cyan", "c08-fade": "green", "h1-mom": "yellow",
   "h1-rev": "blue", "h4-brk": "red", "d1-mom10": "green",
   crash: "red", watchdog: "magenta", reconciled: null,
+  // 🧠 trained parameter models (fxexpert loop, amended gate 2026-09-06)
+  "fxexp-g151": "white", "fxexp-g138": "white", "fxexp-g137": "white",
 };
 
 function loadState() {
@@ -251,9 +253,14 @@ function laneRow(tag, s, note, open) {
   const wr = s.winrate == null ? "—" : s.winrate.toFixed(0) + "%";
   const plCol = (s.realized || 0) >= 0 ? "green" : "red";
   const openTxt = open ? `  ${open.n} open ${open.pl >= 0 ? "+" : ""}${open.pl.toFixed(2)}` : "";
+  // venue-day realized (what the OANDA UI shows) — present when the lane
+  // feed comes from /api/fx-lanes; ledger-only callers omit it
+  const todayTxt = s.realized_today == null ? "" :
+    `  today ${s.realized_today >= 0 ? "+" : ""}${s.realized_today.toFixed(2)}`;
   return { segments: [
     { text: ` ● ${tag.padEnd(10)}`, color: laneColor(tag) },
     { text: `realized ${sign}${(s.realized || 0).toFixed(2)}`, color: plCol },
+    ...(todayTxt ? [{ text: todayTxt, color: s.realized_today >= 0 ? "green" : "red" }] : []),
     { text: `  ${String(s.rounds || 0).padStart(3)} RT  WR ${String(wr).padStart(4)}`, dim: true },
     ...(openTxt ? [{ text: openTxt, color: plCol }] : []),
     ...(note ? [{ text: `  ${note}`, dim: true }] : []),
@@ -280,6 +287,9 @@ export function buildHome(state, fx) {
     agentLines.push({ text: ` [${e.kind === "incumbent" ? "★" : " "}] ${e.expert_id.padEnd(22)} ${String(e.kind).padEnd(12)} ${String(e.status).padEnd(9)} closed ${a.closed_trades ?? "—"}`, color: "green" });
   }
   const laneMeta = [
+    ["fxexp-g151", "🧠 trained model", "rank book 10d · 21:25 UTC · OOS PF 1.08"],
+    ["fxexp-g138", "🧠 trained model", "rank book 10d+vol · 21:35 UTC · OOS PF 1.08"],
+    ["fxexp-g137", "🧠 trained model", "rank book 10d · 21:45 UTC · OOS PF 1.08"],
     ["mom-k5", "fx lane (daily)", "momentum top-2 · 17:10"],
     ["c08-fade", "fx lane (daily)", "mr_fade_ma20_cot · 17:25"],
     ["h1-mom", "fx lane (hourly)", "H1 momentum · evidence"],
@@ -360,8 +370,13 @@ export function buildForex(state, fx) {
   const book = (fx && fx.book) || [];
   const bal = fx && fx.balance, nav = fx && fx.nav;
   const openPl = book.reduce((a, t) => a + Number(t.pl || 0), 0);
+  // venue-day window (matches the OANDA UI's daily view): realized resets at
+  // the venue day boundary; financing is the nightly carry charge
+  const dayTxt = fx && fx.financing_today != null
+    ? `  ·  venue-day real ${Number(fx.realized_today) >= 0 ? "+" : ""}${Number(fx.realized_today).toFixed(2)}  fin ${Number(fx.financing_today).toFixed(2)}`
+    : "";
   const L = [];
-  L.push(bar(` FX PRACTICE BOOK   balance $${money(bal)}  NAV $${money(nav)}  uPL ${openPl >= 0 ? "+" : ""}${openPl.toFixed(2)}  ·  ${book.length} pos  ·  venue authoritative`));
+  L.push(bar(` FX PRACTICE BOOK   balance $${money(bal)}  NAV $${money(nav)}  uPL ${openPl >= 0 ? "+" : ""}${openPl.toFixed(2)}${dayTxt}  ·  ${book.length} pos  ·  venue authoritative`));
 
   // ---- left: LANES table · right: OPEN BOOK (side by side on wide frames) ----
   const flat = (fx && fx.flat) || {};
@@ -376,7 +391,7 @@ export function buildForex(state, fx) {
     { text: ` LANE        REALIZED    RT    WR   OPEN`, bold: true },
     { text: ` ────────────────────────────────────────`, dim: true },
   ];
-  for (const tag of ["mom-k5", "c08-fade", "h1-mom", "h1-rev", "h4-brk", "d1-mom10", "crash", "watchdog"]) {
+  for (const tag of ["fxexp-g151", "fxexp-g138", "fxexp-g137", "mom-k5", "c08-fade", "h1-mom", "h1-rev", "h4-brk", "d1-mom10", "crash", "watchdog"]) {
     let s = lanes[tag] || {};
     if (tag === "crash" && crash.realized != null) {
       // venue-derived tracker (fx_crashtest.json) is authoritative for this
@@ -384,12 +399,14 @@ export function buildForex(state, fx) {
       // venue closes the newest position (SL/TP), so per-pair totals diverge
       s = { ...s, realized: Number(crash.realized) };
     }
-    laneLines.push(laneRow(tag, s, null, openByLane[tag]));
+    laneLines.push(laneRow(tag.startsWith("fxexp-") ? `🧠 ${tag}` : tag, s, null, openByLane[tag]));
     const isFlat = !laneOwners.has(tag);
     if (tag === "watchdog" || isFlat) {
       const why = tag === "watchdog"
         ? "response-only — flattens shocks, never opens"
-        : String(flat[tag] || "no signal — entry condition not met");
+        : tag.startsWith("fxexp-")
+          ? "trained rank book — rebalances every 5 trading days at 21:2x UTC"
+          : String(flat[tag] || "no signal — entry condition not met");
       laneLines.push({ text: `   ↳ ${why}`.slice(0, W - 6), dim: true });
     }
   }

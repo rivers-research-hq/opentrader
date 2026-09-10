@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title>Atom Test Feed</title>
+<entry>
+  <title>Tokyo intervention watch: MOF comments land</title>
+  <link href="https://example.org/mof-comments"/>
+  <updated>2026-09-09T06:00:00Z</updated>
+  <summary>Finance ministry repeats all-options stance.</summary>
+</entry>
+</feed>

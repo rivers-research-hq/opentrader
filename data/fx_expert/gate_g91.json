@@ -1,0 +1,61 @@
+{
+ "rule": "thr",
+ "model": {
+  "pf": 1.0294,
+  "sharpe": 0.153,
+  "maxdd": -0.14143,
+  "days": 3782,
+  "daily_mean_bps": 0.212,
+  "n_pairdays": 42693,
+  "long_frac": 0.385,
+  "short_frac": 0.329
+ },
+ "model_alt_rule": {
+  "pf": 0.9616,
+  "sharpe": -0.212,
+  "maxdd": -0.39881,
+  "days": 3782,
+  "daily_mean_bps": -0.488
+ },
+ "buy_hold": {
+  "pf": 1.1672,
+  "sharpe": 0.879,
+  "maxdd": -0.05362,
+  "days": 3782,
+  "daily_mean_bps": 1.204
+ },
+ "rsi_mr_14": {
+  "pf": 0.8768,
+  "sharpe": -0.365,
+  "maxdd": -0.13414,
+  "days": 3782,
+  "daily_mean_bps": -0.287
+ },
+ "mom20_sign": {
+  "pf": 0.9567,
+  "sharpe": -0.245,
+  "maxdd": -0.22496,
+  "days": 3782,
+  "daily_mean_bps": -0.48
+ },
+ "random_matched": {
+  "pf": 0.5767,
+  "sharpe": -2.899,
+  "maxdd": -1.04945,
+  "days": 3782,
+  "daily_mean_bps": -2.773
+ },
+ "gate": {
+  "verdict": "FAIL",
+  "reasons": [
+   "pf 1.0294 < 1.05",
+   "does not beat baselines: {'buy_hold': 1.1672}"
+  ],
+  "bar": {
+   "pf_min": 1.05,
+   "folds_positive_min": 2,
+   "min_pairdays": 2000
+  },
+  "xgb_reference_pf": 0.974
+ }
+}

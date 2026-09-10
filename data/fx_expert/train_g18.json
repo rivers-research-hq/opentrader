@@ -1,0 +1,62 @@
+{
+ "tag": "18",
+ "hp": {
+  "d_model": 192,
+  "n_layers": 5,
+  "n_heads": 8,
+  "dropout": 0.2,
+  "lr": 0.0004,
+  "epochs": 40,
+  "batch": 4096,
+  "T": 20,
+  "q": 0.9,
+  "rule": "xs",
+  "score_l2": 0.05
+ },
+ "device": "cuda",
+ "params": 2232001,
+ "folds": [
+  {
+   "fold": 0,
+   "span": [
+    "2012-06-16",
+    "2017-02-19"
+   ],
+   "n_train": 17199,
+   "n_test": 20260,
+   "val_loss": 0.46815,
+   "ic_oos": 0.02769,
+   "acc_oos": 0.4989
+  },
+  {
+   "fold": 1,
+   "span": [
+    "2017-02-20",
+    "2021-10-28"
+   ],
+   "n_train": 35447,
+   "n_test": 19808,
+   "val_loss": 0.4847,
+   "ic_oos": 0.00555,
+   "acc_oos": 0.5061
+  },
+  {
+   "fold": 2,
+   "span": [
+    "2021-10-29",
+    "2026-08-27"
+   ],
+   "n_train": 53245,
+   "n_test": 20055,
+   "val_loss": 0.49618,
+   "ic_oos": 0.0005,
+   "acc_oos": 0.5227
+  }
+ ],
+ "warm_from": "/home/mrc/opentrader/data/fx_expert/checkpoints/g15.pt",
+ "aggregate": {
+  "ic_mean": 0.01125,
+  "folds_positive": 3,
+  "n_folds": 3
+ }
+}

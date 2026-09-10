@@ -1,0 +1,137 @@
+{
+ "asof": "2026-09-10T06:45:33.931224+00:00",
+ "days_in_period": 1,
+ "last_scores": {
+  "fxexp-g137": {
+   "actual_pct": -0.013,
+   "expected_pct": 0.0,
+   "miss_pct": -0.013,
+   "score_pct": -0.013,
+   "direction": "flat",
+   "days_in_period": 1,
+   "peak_upl": 7.17,
+   "current_upl": -13.06,
+   "give_back": 2.822
+  },
+  "fxexp-g138": {
+   "actual_pct": -0.0,
+   "expected_pct": 0.0,
+   "miss_pct": -0.0,
+   "score_pct": -0.0,
+   "direction": "flat",
+   "days_in_period": 1,
+   "peak_upl": -9.62,
+   "current_upl": -0.48,
+   "give_back": 0.0
+  },
+  "fxexp-g151": {
+   "actual_pct": -0.005,
+   "expected_pct": 0.0,
+   "miss_pct": -0.005,
+   "score_pct": -0.005,
+   "direction": "flat",
+   "days_in_period": 1,
+   "peak_upl": 11.15,
+   "current_upl": -4.89,
+   "give_back": 1.439
+  },
+  "h1-mom": {
+   "actual_pct": 0.001,
+   "expected_pct": 0.0,
+   "miss_pct": 0.001,
+   "score_pct": 0.001,
+   "direction": "flat",
+   "days_in_period": 1,
+   "peak_upl": 0.0,
+   "current_upl": 1.06,
+   "give_back": 0.0
+  }
+ },
+ "probation": {
+  "h1-rev": {
+   "bad_periods": 1,
+   "status": "probation"
+  }
+ },
+ "sizing_audit": {
+  "asof": "2026-09-10T06:45:33.931215+00:00",
+  "lanes": {
+   "fxexp-g151": {
+    "fidelity_pct": 83.3,
+    "within": 15,
+    "outliers": 3,
+    "missing": 3,
+    "dust_excluded": 0,
+    "outlier_detail": [
+     {
+      "pair": "AUD_CAD",
+      "actual_usd": 0,
+      "intended_usd": 828,
+      "ratio": 0.0,
+      "missing": true
+     },
+     {
+      "pair": "EUR_NZD",
+      "actual_usd": 0,
+      "intended_usd": 690,
+      "ratio": 0.0,
+      "missing": true
+     },
+     {
+      "pair": "EUR_SGD",
+      "actual_usd": 0,
+      "intended_usd": 552,
+      "ratio": 0.0,
+      "missing": true
+     }
+    ]
+   },
+   "fxexp-g138": {
+    "fidelity_pct": 86.4,
+    "within": 19,
+    "outliers": 3,
+    "missing": 2,
+    "dust_excluded": 0,
+    "outlier_detail": [
+     {
+      "pair": "TRY_JPY",
+      "actual_usd": 0,
+      "intended_usd": 2000,
+      "ratio": 0.0,
+      "missing": true
+     },
+     {
+      "pair": "USD_TRY",
+      "actual_usd": 0,
+      "intended_usd": 1586,
+      "ratio": 0.0,
+      "missing": true
+     },
+     {
+      "pair": "AUD_USD",
+      "actual_usd": 549,
+      "intended_usd": 966,
+      "ratio": 0.57,
+      "missing": false
+     }
+    ]
+   },
+   "fxexp-g137": {
+    "fidelity_pct": 94.4,
+    "within": 17,
+    "outliers": 1,
+    "missing": 0,
+    "dust_excluded": 0,
+    "outlier_detail": [
+     {
+      "pair": "USD_SGD",
+      "actual_usd": 966,
+      "intended_usd": 1655,
+      "ratio": 0.58,
+      "missing": false
+     }
+    ]
+   }
+  }
+ }
+}

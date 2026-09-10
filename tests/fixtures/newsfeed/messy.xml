@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+<channel><title>Messy</title>
+<item><title><![CDATA[Title with <b>cdata markup</b> & entities]]></title><link>https://m.example.com/a</link></item>
+<item><link>https://m.example.com/no-title-no-date</link><description>body only</description></item>
+<item><title>No link item</title></item>
+</channel></rss>

@@ -1,0 +1,5 @@
+{"articles": [
+ {"url": "https://wire.example.com/fed-cuts-rates?utm_source=a&utm_campaign=c", "title": "Fed cuts rates by 25bp, signals more to come", "seendate": "20260909T100000Z", "domain": "wire.example.com", "language": "english", "sourcecountry": "United States"},
+ {"url": "https://partner.example.org/story/fed-cuts-rates?fbclid=xyz", "title": "Fed cuts rates by 25bp, signals more to come", "seendate": "20260909T101500Z", "domain": "partner.example.org", "language": "english", "sourcecountry": "United States"},
+ {"url": "https://unique.example.org/entirely-different-story-about-jpy", "title": "Yen slides as MOF rhetoric ramps up", "seendate": "20260909T103000Z", "domain": "unique.example.org", "language": "english", "sourcecountry": "Japan"}
+]}

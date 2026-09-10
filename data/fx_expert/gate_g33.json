@@ -1,0 +1,58 @@
+{
+ "rule": "thr",
+ "model": {
+  "pf": 1.1712,
+  "sharpe": 0.835,
+  "maxdd": -0.12179,
+  "days": 3801,
+  "daily_mean_bps": 1.085,
+  "n_pairdays": 37493,
+  "long_frac": 0.333,
+  "short_frac": 0.291
+ },
+ "model_alt_rule": {
+  "pf": 1.1203,
+  "sharpe": 0.624,
+  "maxdd": -0.18454,
+  "days": 3801,
+  "daily_mean_bps": 1.382
+ },
+ "buy_hold": {
+  "pf": 1.1669,
+  "sharpe": 0.877,
+  "maxdd": -0.05362,
+  "days": 3801,
+  "daily_mean_bps": 1.203
+ },
+ "rsi_mr_14": {
+  "pf": 0.8774,
+  "sharpe": -0.362,
+  "maxdd": -0.13414,
+  "days": 3801,
+  "daily_mean_bps": -0.285
+ },
+ "mom20_sign": {
+  "pf": 0.9521,
+  "sharpe": -0.272,
+  "maxdd": -0.23952,
+  "days": 3801,
+  "daily_mean_bps": -0.533
+ },
+ "random_matched": {
+  "pf": 0.5347,
+  "sharpe": -3.451,
+  "maxdd": -1.08757,
+  "days": 3801,
+  "daily_mean_bps": -2.857
+ },
+ "gate": {
+  "verdict": "PASS",
+  "reasons": [],
+  "bar": {
+   "pf_min": 1.05,
+   "folds_positive_min": 2,
+   "min_pairdays": 2000
+  },
+  "xgb_reference_pf": 0.974
+ }
+}

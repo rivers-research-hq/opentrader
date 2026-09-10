@@ -426,6 +426,17 @@ class RiskManager:
                 fees = fees.get(route) or fees.get("default")
             elif not isinstance(fees, FeeSchedule):
                 fees = None
+            if fees is None:
+                # Known exchange, malformed/routeless table: the guard must
+                # never silently skip (same silent-fallback class the
+                # 2026-08-12 audit hunted — ticket #119 residual).
+                logger.warning(
+                    f"exchange '{exchange}': fee table resolved to None — refusing trade"
+                )
+                return RiskResult(
+                    approved=False,
+                    reason=f"exchange '{exchange}': fee schedule unresolvable — refusing",
+                )
 
             if fees and notional > 0:
                 round_trip = fees.round_trip_cost(notional)

@@ -1,68 +1,68 @@
 {
- "asof": "2026-09-04",
+ "asof": "2026-09-09",
  "lanes": {
   "laggard": {
    "expert": "laggard",
-   "equity": 640.03,
-   "latest_1d_ret": -0.002929,
+   "equity": 613.61,
+   "latest_1d_ret": -0.003976,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "momtrend": {
    "expert": "momtrend",
-   "equity": 733.36,
-   "latest_1d_ret": -0.004166,
+   "equity": 692.2,
+   "latest_1d_ret": -0.004216,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "bayes": {
    "expert": "bayes",
-   "equity": 678.42,
-   "latest_1d_ret": 0.0,
+   "equity": 587.86,
+   "latest_1d_ret": 7.4e-05,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "spectral": {
    "expert": "spectral",
-   "equity": 498.26,
-   "latest_1d_ret": -0.003488,
-   "regime": "down",
-   "asof": "2026-09-04"
+   "equity": 547.97,
+   "latest_1d_ret": -0.003021,
+   "regime": "up",
+   "asof": "2026-09-10"
   },
   "kalman": {
    "expert": "kalman",
-   "equity": 680.88,
-   "latest_1d_ret": -0.00375,
+   "equity": 656.71,
+   "latest_1d_ret": -0.000129,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "hurst": {
    "expert": "hurst",
-   "equity": 595.31,
+   "equity": 638.7,
    "latest_1d_ret": 0.0,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "wavelet": {
    "expert": "wavelet",
-   "equity": 699.35,
-   "latest_1d_ret": -0.004278,
+   "equity": 726.32,
+   "latest_1d_ret": -0.001006,
    "regime": "up",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "entropy": {
    "expert": "entropy",
-   "equity": 498.26,
-   "latest_1d_ret": -0.003488,
+   "equity": 500.0,
+   "latest_1d_ret": 0.0,
    "regime": "down",
-   "asof": "2026-09-04"
+   "asof": "2026-09-10"
   },
   "multiasset": {
    "expert": "multiasset",
-   "equity": 795.73,
-   "latest_1d_ret": 0.010307,
+   "equity": 771.27,
+   "latest_1d_ret": 0.002716,
    "regime": "up",
-   "asof": "2026-09-03"
+   "asof": "2026-09-09"
   }
  },
  "note": "PAPER lanes \u2014 one avenue per expert on its validated universe. NOT live order flow."

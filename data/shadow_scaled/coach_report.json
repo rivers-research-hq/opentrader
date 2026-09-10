@@ -1,45 +1,44 @@
 {
   "grade": "F",
-  "grade_reason": "Agent has a 0% win rate across all 21 trades with no profitable outcomes, indicating a complete failure of the current strategy.",
+  "grade_reason": "All 27 trades resulted in losses, with consistent stop-loss exits across BTC, ETH, and SOL; no winning trades observed.",
   "winning_patterns": [],
   "failure_patterns": [
-    "Using stop-loss at or below entry price (e.g., $4860.51 <= $4918.36 for ETH) causes immediate loss on every trade",
-    "No position management: every trade exits at stop-loss with no take-profit or partial exit",
-    "All 21 trades are in 'unknown' regime with no trend detection or regime filtering applied"
+    "Consistently exiting via stop-loss across all symbols (BTC, ETH, SOL) indicates premature exit or overexposure.",
+    "Entry prices are consistently ~15-25% above recent support levels inferred from stop-loss values (e.g., ETH entry $5300+ vs stop $2400+), suggesting overbought positioning.",
+    "No variation in trade frequency or size; all trades follow same pattern of stop-loss exit, implying strategy lacks adaptive filtering."
   ],
   "symbol_advice": {
-    "BTC/USDT": "neutral",
-    "ETH/USDT": "neutral",
-    "SOL/USDT": "neutral"
+    "BTC/USDT": "cold",
+    "ETH/USDT": "cold",
+    "SOL/USDT": "cold"
   },
-  "position_sizing": "decrease",
-  "position_sizing_rationale": "Current strategy loses money on every trade; reduce position size to minimize drawdown while strategy is being debugged.",
+  "position_sizing": "decrease + rationale: All trades exited via stop-loss; current sizing likely too large relative to stop distance. Reduce position size by ~40% to tighten risk per trade while maintaining exposure.",
   "retrain_recommended": true,
-  "retrain_focus": "Train on trend-following strategies with trailing stop-loss above entry price, position sizing based on ATR volatility, and regime filtering for trending markets only.",
-  "data_curation_advice": "Exclude all stop-loss-at-entry trades. Include only trades with trailing stop-loss above entry and take-profit targets. Focus on BTC/USDT and ETH/USDT for training data.",
-  "confidence": 0.98,
-  "cycle": 17583,
-  "trades_reviewed": 21,
+  "retrain_focus": "Focus on stop-loss placement relative to recent 7-day support; test entry only when price <= 5% above prior 7-day low; include only trades with price \u2264 3x stop distance from entry.",
+  "data_curation_advice": "Include only trades where price at entry \u2264 5% above 7-day prior low; exclude all current trades (all exited via stop-loss); require at least 10 clean validation trades with no stop-loss hit before retraining.",
+  "confidence": 0.92,
+  "cycle": 25017,
+  "trades_reviewed": 27,
   "win_rate": 0.0,
   "symbol_stats": {
     "BTC/USDT": {
-      "pnl": -287.64000000000004,
+      "pnl": -371.20000000000005,
       "wins": 0,
-      "count": 7
+      "count": 9
     },
     "ETH/USDT": {
-      "pnl": -289.88,
+      "pnl": -372.85,
       "wins": 0,
-      "count": 7
+      "count": 9
     },
     "SOL/USDT": {
-      "pnl": -458.12,
+      "pnl": -585.92,
       "wins": 0,
-      "count": 7
+      "count": 9
     }
   },
   "regime_counts": {
-    "unknown": 21
+    "unknown": 27
   },
-  "timestamp": "2026-09-05T03:47:02.666782"
+  "timestamp": "2026-09-10T12:16:13.680873"
 }

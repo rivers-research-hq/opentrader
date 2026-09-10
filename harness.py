@@ -165,7 +165,6 @@ class OpenTraderHarness:
         sidecar_binary: str = None,  # path to exchange-engine binary
         stock_exchange: str = None,  # stock exchange for multi-asset mode (ibkr|finnhub|...+)
         crypto_exchange: str = None,  # crypto exchange for multi-asset mode (kraken|coinbase|...)
-        reset_portfolio: bool = False,  # explicit opt-in: wipe paper_state.json + fills ledger on startup
     ):
         # Load centralized config — CLI args override config, config overrides code defaults
         cfg = self._load_config()
@@ -223,18 +222,6 @@ class OpenTraderHarness:
         os.makedirs(state_dir, exist_ok=True)
         self._fills_ledger_path = os.path.join(state_dir, "fills_ledger.jsonl")
 
-        # Explicit portfolio reset (opt-in via --reset-portfolio)
-        if reset_portfolio:
-            logger.warning(
-                "RESET-PORTFOLIO: wiping paper_state.json and fills_ledger.jsonl — "
-                "starting fresh portfolio"
-            )
-            for _p in (
-                os.path.join(state_dir, "paper_state.json"),
-                self._fills_ledger_path,
-            ):
-                if os.path.exists(_p):
-                    os.remove(_p)
 
         # Multi-asset exchange routing overrides
         self._stock_exchange = stock_exchange
@@ -4648,13 +4635,6 @@ def main():
         "never blocks entries (recommended until a generalizable gate exists). "
         "Default: strict (preserves legacy behavior).",
     )
-    parser.add_argument(
-        "--reset-portfolio",
-        action="store_true",
-        help="Explicitly wipe paper_state.json and fills_ledger.jsonl before "
-        "starting. Without this flag, an existing paper_state.json is resumed "
-        "(cash, positions, fills history are restored).",
-    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -4744,7 +4724,6 @@ def main():
         mixture=args.mixture,
         rule_primary=args.rule_primary,
         vix_gate=args.vix_gate,
-        reset_portfolio=args.reset_portfolio,
     )
 
     if _onchain_wallet:

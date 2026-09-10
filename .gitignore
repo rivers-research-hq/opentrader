@@ -156,3 +156,4 @@ FTMO/
 
 # TUI resize regression test artifacts
 /tests/pty_resize_test.py
+data/newsfeed/

@@ -1,0 +1,135 @@
+{
+ "last_observe": null,
+ "last_plan_day": "2026-09-09",
+ "last_score_day": "2026-09-10",
+ "probation": {
+  "h1-rev": {
+   "bad_periods": 1,
+   "status": "probation"
+  }
+ },
+ "history": {
+  "2026-09-08": {
+   "c08-fade": {
+    "actual_pct": -0.0,
+    "expected_pct": 0.0,
+    "miss_pct": -0.0,
+    "score_pct": -0.0,
+    "direction": "flat",
+    "days_in_period": 0
+   },
+   "fxexp-g137": {
+    "actual_pct": -0.009,
+    "expected_pct": 0.0,
+    "miss_pct": -0.009,
+    "score_pct": -0.009,
+    "direction": "flat",
+    "days_in_period": 0
+   },
+   "fxexp-g138": {
+    "actual_pct": -0.011,
+    "expected_pct": 0.0,
+    "miss_pct": -0.011,
+    "score_pct": -0.011,
+    "direction": "flat",
+    "days_in_period": 0
+   },
+   "fxexp-g151": {
+    "actual_pct": -0.013,
+    "expected_pct": 0.0,
+    "miss_pct": -0.013,
+    "score_pct": -0.013,
+    "direction": "flat",
+    "days_in_period": 0
+   },
+   "h1-rev": {
+    "actual_pct": 0.001,
+    "expected_pct": 0.05,
+    "miss_pct": -0.049,
+    "score_pct": -0.099,
+    "direction": "long_bias",
+    "days_in_period": 0
+   },
+   "mom-k5": {
+    "actual_pct": 0.0,
+    "expected_pct": 0.0,
+    "miss_pct": 0.0,
+    "score_pct": 0.0,
+    "direction": "flat",
+    "days_in_period": 0
+   }
+  },
+  "2026-09-09": {
+   "fxexp-g137": {
+    "actual_pct": -0.013,
+    "expected_pct": 0.0,
+    "miss_pct": -0.013,
+    "score_pct": -0.013,
+    "direction": "flat",
+    "days_in_period": 1,
+    "peak_upl": 7.17,
+    "current_upl": -13.06,
+    "give_back": 2.822
+   },
+   "fxexp-g138": {
+    "actual_pct": -0.0,
+    "expected_pct": 0.0,
+    "miss_pct": -0.0,
+    "score_pct": -0.0,
+    "direction": "flat",
+    "days_in_period": 1,
+    "peak_upl": -9.62,
+    "current_upl": -0.48,
+    "give_back": 0.0
+   },
+   "fxexp-g151": {
+    "actual_pct": -0.005,
+    "expected_pct": 0.0,
+    "miss_pct": -0.005,
+    "score_pct": -0.005,
+    "direction": "flat",
+    "days_in_period": 1,
+    "peak_upl": 11.15,
+    "current_upl": -4.89,
+    "give_back": 1.439
+   },
+   "h1-mom": {
+    "actual_pct": 0.001,
+    "expected_pct": 0.0,
+    "miss_pct": 0.001,
+    "score_pct": 0.001,
+    "direction": "flat",
+    "days_in_period": 1,
+    "peak_upl": 0.0,
+    "current_upl": 1.06,
+    "give_back": 0.0
+   }
+  }
+ },
+ "prev_halted": [
+  "EUR",
+  "JPY",
+  "TRY",
+  "USD"
+ ],
+ "halt_streak": {
+  "EUR": 0,
+  "JPY": 0,
+  "TRY": 0,
+  "USD": 0
+ },
+ "mfe": {
+  "fxexp-g137": {
+   "peak_upl": 17.9705,
+   "period": "2026-09-09"
+  },
+  "fxexp-g138": {
+   "peak_upl": -26.3513,
+   "period": "2026-09-09"
+  },
+  "fxexp-g151": {
+   "peak_upl": 20.7264,
+   "period": "2026-09-09"
+  }
+ }
+}
