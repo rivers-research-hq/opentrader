@@ -37,7 +37,8 @@ import re
 import sys
 import time
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from datetime import time as _dtime
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
@@ -66,6 +67,23 @@ ESCALATE_AFTER = 2  # consecutive bad periods before the human's cut list
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _week_anchor(now=None):
+    """Tournament-week anchor: the most recent Friday 21:00 UTC (Friday
+    close). The scoring period runs Friday close -> Friday close, so the
+    plan's period_start/nav/realized snapshot AND the MFE peak must persist
+    across the whole week. plan() previously rewrote period_start with
+    today's date every day, which reset the MFE peak daily — the dashboard
+    scoreboard showed peaks that had nothing to do with the week (fixed
+    2026-09-10)."""
+    now = now or datetime.now(timezone.utc)
+    d = now.date()
+    delta = (d.weekday() - 4) % 7  # days since Friday (Friday=4)
+    base = d - timedelta(days=delta)
+    if delta == 0 and now.time() < _dtime(21, 0):
+        base = base - timedelta(days=7)  # Friday before close: week started last Friday
+    return base.isoformat()
 
 
 _model_cache = {}
@@ -336,16 +354,21 @@ def observe(dry=False):
     if st is None:
         print("[warden] venue unreachable — skip")
         return
-    # registry filter: only observe lanes matching a registered expert
+    # registry filter: only observe lanes matching a registered expert.
+    # Tags map through registry_tag_index() — venue tags (fxexp-g151),
+    # registry IDs (fx-expert-g151) and legacy aliases (mom-k5) are three
+    # spellings of the same expert; comparing directly orphans every lane.
+    from strategies.expert_lifecycle import all_lifecycles, registry_tag_index
     lc = all_lifecycles()
-    orphan_tags = [tag for tag in st["lanes"] if tag not in lc]
+    tag2eid = registry_tag_index()
+    orphan_tags = [tag for tag in st["lanes"] if tag not in tag2eid]
     if orphan_tags:
         st["anomaly"] = f"unregistered lanes trading: {orphan_tags}"
-        st["lanes"] = {k: v for k, v in st["lanes"].items() if k in lc}
+        st["lanes"] = {k: v for k, v in st["lanes"].items() if k in tag2eid}
     # cut/archived lanes must be flat — positions on a terminal-state expert
     # are a control-plane violation, not an observation
     dead = [tag for tag in st["lanes"]
-            if lc.get(tag) in ("cut", "archived") and st["lanes"][tag]["positions"]]
+            if lc.get(tag2eid[tag]) in ("cut", "archived") and st["lanes"][tag]["positions"]]
     if dead:
         st["anomaly"] = (st.get("anomaly", "") + f" | TERMINAL-STATE LANES HOLDING: {dead}").strip(" |")
     news = feed_digest()
@@ -440,11 +463,29 @@ def plan(dry=False):
             out["plan"][tag] = {"expected_pnl_pct": 0.0, "direction": "flat",
                                 "conviction": 0.2,
                                 "rationale": "model omitted this lane — defaulted flat"}
-    period_start = _now()[:10]
+    # period anchor: keep the week's snapshot (period_start, nav, realized
+    # base) stable for the whole Friday-close-to-Friday-close period — the
+    # model refreshes expectations daily, the scoring base does not move
+    existing = {}
+    if PLAN.exists():
+        try:
+            existing = json.loads(PLAN.read_text())
+        except Exception:
+            existing = {}
+    anchor = _week_anchor()
+    if existing.get("period_start") == anchor and existing.get("period_start_nav"):
+        period_start = existing["period_start"]
+        period_nav = existing["period_start_nav"]
+        realized_base = existing.get("realized_at_plan", {})
+        print(f"[warden] period anchor kept: {period_start}")
+    else:
+        period_start = anchor
+        period_nav = st["nav"]
+        realized_base = {tag: lane.get("realized_all", 0.0)
+                         for tag, lane in st["lanes"].items()}
     plan_doc = {"period_start": period_start,
-                "period_start_nav": st["nav"],
-                "realized_at_plan": {tag: lane.get("realized_all", 0.0)
-                                     for tag, lane in st["lanes"].items()},
+                "period_start_nav": period_nav,
+                "realized_at_plan": realized_base,
                 "regime_read": str(out.get("regime_read", ""))[:400],
                 "plan": {tag: {"expected_pnl_pct": float(v.get("expected_pnl_pct", 0.0)),
                                "direction": str(v.get("direction", "flat"))[:12],
@@ -455,7 +496,9 @@ def plan(dry=False):
     if not dry:
         PLAN.write_text(json.dumps(plan_doc, indent=1))
         state = _read_state()
-        state["last_plan_day"] = period_start
+        # last_plan_day is the DAILY trigger bookkeeping (auto() compares it
+        # to today); period_start above is the weekly scoring anchor
+        state["last_plan_day"] = _now()[:10]
         _save_state(state)
     _append(RECORDS, {"ts": _now(), "model": _model_id(), "mode": "plan", "instability": {k: v for k, v in inst["currencies"].items() if v["tier"] != "calm"}, "headlines": nf[:600], "news_refs": news[:400],
                       "plan": plan_doc["plan"], "regime_read": plan_doc["regime_read"]})

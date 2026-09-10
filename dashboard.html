@@ -176,8 +176,8 @@ footer .err{color:var(--red)}
     </div>
     <div class="p-head">▌SCOREBOARD <span class="sub" id="wd-score-period">actual − expected · QB/RB rule</span></div>
     <div class="scroll"><table>
-      <thead><tr><th>lane</th><th class="num">actual</th><th class="num">exp</th><th class="num">miss</th><th class="num">score</th></tr></thead>
-      <tbody id="wd-score-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+      <thead><tr><th>lane</th><th class="num">actual</th><th class="num">exp</th><th class="num">miss</th><th class="num">score</th><th class="num">peak uPL</th><th class="num">cur uPL</th><th class="num">g-back</th></tr></thead>
+      <tbody id="wd-score-body"><tr><td colspan="8" class="dim">loading…</td></tr></tbody>
     </table></div>
   </section>
 
@@ -367,8 +367,16 @@ $("hdr-clock").textContent = new Date().toISOString().slice(11, 19) + " UTC";
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 
 /* ── warden page ── */
-function renderWarden(d){
+function renderWarden(d, fx){
   const w = d.warden || {};
+  // live venue uPL per lane (5s-cached /api/fx-lanes) — the scorecard's
+  // current_upl is a once-daily snapshot, so the scoreboard merges the
+  // live figure in and recomputes give-back against the tracked peak
+  const liveLanes = (fx && fx.lanes) || {};
+  const liveUpl = (tag) => {
+    const l = liveLanes[tag];
+    return (l && l.open_upl != null && l.open_n) ? l.open_upl : null;
+  };
   $("wd-meta").innerHTML = `
     <tr><td class="dim">model</td><td class="mono">${esc(w.model_current || "—")}</td></tr>
     <tr><td class="dim">last run</td><td class="mono">${esc(String(w.last_run || "—").slice(0, 19))}</td></tr>
@@ -391,16 +399,21 @@ function renderWarden(d){
   $("wd-score-period").textContent = `day ${sc.days_in_period ?? "—"} of period`;
   $("wd-score-body").innerHTML = Object.entries(sc.last_scores || {})
     .sort((a, b) => a[1].score_pct - b[1].score_pct).map(([tag, s]) => {
-      const gb = s.give_back != null ? s.give_back : 0;
+      const peak = s.peak_upl;
+      const cur = liveUpl(tag) ?? s.current_upl;   // live venue truth preferred
+      const gb = (peak != null && peak > 0 && cur != null) ? (peak - cur) / peak
+               : (s.give_back != null ? s.give_back : 0);
       const gbCol = gb > 0.15 ? "var(--red)" : gb > 0.05 ? "var(--amber)" : "var(--green)";
+      const live = liveUpl(tag) != null;
       return `<tr><td>${TRAINED.has(tag) ? "🧠 " : ""}${esc(tag)}</td>
      <td class="num">${signed(s.actual_pct)}</td><td class="num dim">${signed(s.expected_pct)}</td>
      <td class="num">${signed(s.miss_pct)}</td>
      <td class="num" style="color:${s.score_pct >= 0 ? "var(--green)" : "var(--red)"}">${signed(s.score_pct)}</td>
-     <td class="num dim">${s.peak_upl != null ? '+' + fmtN(s.peak_upl, 2) : '—'}</td>
+     <td class="num dim">${peak != null ? '+' + fmtN(peak, 2) : '—'}</td>
+     <td class="num">${signed(cur)}${live ? ' <span class="dim">•</span>' : ""}</td>
      <td class="num" style="color:${gbCol}">${gb > 0 ? (gb * 100).toFixed(1) + '%' : '—'}</td></tr>`;
     }).join("")
-    || '<tr><td colspan="7" class="dim">no scores yet</td></tr>';
+    || '<tr><td colspan="8" class="dim">no scores yet</td></tr>';
   $("wd-note-stats").textContent = `${(w.note_stats || {}).total ?? 0} notes · ${(w.note_stats || {}).verified ?? 0}✓ ${(w.note_stats || {}).fab_flagged ?? 0} flagged`;
   $("wd-notes-body").innerHTML = (w.notes || []).slice().reverse().map(n => {
     const c = LANE_COLOR[n.lane] || "var(--faint)";
@@ -434,7 +447,14 @@ function renderWarden(d){
     ${Object.entries(c.models || {}).map(([m, n]) => `<tr><td class="dim">model: ${esc(m)}</td><td class="mono">${n}</td></tr>`).join("")}`;
 }
 
-async function pollWarden(){ try { renderWarden(await fetchJson("/api/warden")); } catch (e) {} }
+async function pollWarden(){
+  try {
+    const [w, fx] = await Promise.all([fetchJson("/api/warden"), fetchJson("/api/fx-lanes")]);
+    renderWarden(w, fx);
+  } catch (e) {
+    try { renderWarden(await fetchJson("/api/warden")); } catch (e2) {}
+  }
+}
 
 /* ── tabs ── */
 document.querySelectorAll("#tabs .tab").forEach(t => t.addEventListener("click", () => {

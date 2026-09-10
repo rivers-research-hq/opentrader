@@ -84,6 +84,39 @@ def all_lifecycles() -> dict[str, str]:
             for e in _load_registry()["experts"]}
 
 
+# Legacy lanes predate the fx-expert-* naming; their registry IDs don't map
+# mechanically (fx_mom_k5_top2 -> mom-k5). Single source for that mapping.
+LEGACY_LANE_ALIASES = {
+    "fx_mom_k5_top2": "mom-k5",
+    "fx_mr_fade_ma20": "c08-fade",
+    "fx_mr_fade_ma20_cot": "c08-fade",
+    "fx_h1_rev_rsi2": "h1-rev",
+    "fx_h4_donchian20": "h4-brk",
+    "fx_mom_k10_top2": "d1-mom10",
+}
+
+
+def registry_tag_index() -> dict[str, str]:
+    """{lane_or_registry_tag: expert_id} — every spelling a lane-side tag
+    might use for each registry expert. Consumers that match venue tags to
+    registry entries (the Warden's orphan filter, the terminal-state check)
+    must map through this: comparing tags directly to expert_ids orphans
+    EVERY lane (fxexp-g151 vs fx-expert-g151), which is how the Warden ended
+    up observing an empty book with frozen MFE peaks (fixed 2026-09-10)."""
+    idx = {}
+    for e in _load_registry()["experts"]:
+        eid = e["expert_id"]
+        idx[eid] = eid
+        if eid.startswith("fx-expert-"):
+            idx["fxexp-" + eid[len("fx-expert-"):]] = eid
+        elif eid.startswith("fxexp-"):
+            idx["fx-expert-" + eid[len("fxexp-"):]] = eid
+        alias = LEGACY_LANE_ALIASES.get(eid)
+        if alias:
+            idx[alias] = eid
+    return idx
+
+
 def active_lanes() -> list[str]:
     """Expert IDs allowed to trade: accruing + probation."""
     lc = all_lifecycles()
