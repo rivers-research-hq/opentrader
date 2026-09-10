@@ -4,195 +4,358 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-<title>OpenTrader — FX Practice Book</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0f1c">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<title>OT — FX PRACTICE TERMINAL</title>
 <style>
 :root{
-  --bg0:#0a0f1c; --bg1:#0f172a; --surface:#111827; --surface2:#1e293b;
-  --border:#1e293b; --text:#cbd5e1; --bright:#f0f2f7; --dim:#94a3b8; --faint:#64748b;
-  --green:#34d399; --red:#fb7185; --blue:#3b82f6; --amber:#fbbf24;
-  --cyan:#22d3ee; --magenta:#e879f9; --purple:#a78bfa;
+  --bg0:#070b14; --bg1:#0b111f; --panel:#0d1524; --panel2:#111a2e;
+  --border:#1c2941; --text:#c8d3e4; --bright:#eef2f9; --dim:#8296b4; --faint:#5a6c8a;
+  --green:#2fd08c; --red:#ff5d79; --blue:#4d8df6; --amber:#f5b83d;
+  --cyan:#2fd0ee; --magenta:#e879f9; --fxa:#eef2f9;
   --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg0);color:var(--text);font:14px/1.45 -apple-system,'Segoe UI',Inter,sans-serif;min-height:100vh}
+html,body{height:100%}
+body{background:var(--bg0);color:var(--text);font:12px/1.4 var(--mono);overflow:hidden}
 .mono{font-family:var(--mono)}
-header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-  padding:10px 20px;background:var(--bg1);border-bottom:1px solid var(--border)}
-.brand{font-weight:800;font-size:16px;letter-spacing:.08em;color:var(--bright)}
-.brand span{color:var(--cyan)}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
-  font:600 11px var(--mono);letter-spacing:.06em;border:1px solid var(--border)}
-.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
-.pill.live{border-color:rgba(52,211,153,.4);color:var(--green)}
-.pill.live .dot{background:var(--green);animation:pulse 1.6s infinite}
-.pill.down{border-color:rgba(251,113,133,.5);color:var(--red)}
-.pill.down .dot{background:var(--red)}
-@keyframes pulse{50%{opacity:.35}}
-header .stat{font-family:var(--mono);font-size:13px;color:var(--dim)}
-header .stat b{color:var(--bright);font-weight:600}
-#hdr-clock{margin-left:auto;font-family:var(--mono);color:var(--faint);font-size:12px}
-main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 20px;max-width:1500px;margin:0 auto}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.card.full{grid-column:1/-1}
-.card h2{font:700 11px var(--mono);letter-spacing:.14em;color:var(--dim);text-transform:uppercase;
-  padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg1);display:flex;justify-content:space-between;align-items:center}
-.card h2 .tag{color:var(--faint);text-transform:none;letter-spacing:0;font-weight:400}
-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
-th{color:var(--faint);font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);
-  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
-td{padding:7px 12px;border-bottom:1px solid rgba(30,41,55,.6);white-space:nowrap}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(30,41,55,.35)}
-.num{text-align:right}.numth{text-align:right}
-.pos{color:var(--green)} .neg{color:var(--red)} .dim{color:var(--faint)}
-.lane-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
-.retired{opacity:.55}
-.badge{display:inline-block;padding:1px 7px;border-radius:4px;font:600 10px var(--mono);letter-spacing:.05em}
-.badge.high{background:rgba(251,113,133,.15);color:var(--red)}
-.badge.med{background:rgba(251,191,36,.13);color:var(--amber)}
-.badge.dec{background:rgba(167,139,250,.15);color:var(--purple)}
-footer{padding:10px 20px;color:var(--faint);font:11px var(--mono);text-align:center}
+/* ── header strip ─────────────────────────────────────── */
+header{display:flex;align-items:center;gap:14px;height:34px;padding:0 12px;
+  background:var(--bg1);border-bottom:1px solid var(--border)}
+.brand{font-weight:800;font-size:12px;letter-spacing:.12em;color:var(--amber);white-space:nowrap}
+.brand span{color:var(--faint)}
+.pill{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.08em;
+  padding:2px 8px;border:1px solid var(--border);color:var(--dim)}
+#tabs{display:flex;gap:2px}
+.tab{padding:3px 10px;font-size:10px;letter-spacing:.1em;color:var(--faint);
+  border:1px solid var(--border);cursor:pointer;user-select:none}
+.tab.on{color:var(--amber);border-color:var(--amber);background:var(--panel2)}
+.pbar{display:inline-block;width:52px;height:8px;background:var(--bg0);
+  border:1px solid var(--border);vertical-align:middle;margin-right:5px}
+.pbar>div{height:100%;background:var(--amber)}
+.pbar.hot>div{background:var(--green)}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.pill.live{border-color:var(--green)} .pill.live .dot{background:var(--green);box-shadow:0 0 6px var(--green)}
+.pill.down{border-color:var(--red)} .pill.down .dot{background:var(--red)}
+.stat{font-size:11px;color:var(--faint);white-space:nowrap}
+.stat b{color:var(--bright);font-weight:600;margin-left:4px}
+.hdr-clock{margin-left:auto;font-size:11px;color:var(--dim)}
+/* ── workspace grid ───────────────────────────────────── */
+.ws{display:grid;grid-template-columns:250px 1fr 330px;gap:1px;background:var(--border);
+  height:calc(100vh - 35px)}
+.panel{background:var(--panel);display:flex;flex-direction:column;min-width:0;min-height:0}
+.p-head{display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--panel2);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  font:700 10px var(--mono);letter-spacing:.14em;color:var(--amber);white-space:nowrap}
+.p-head .sub{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none}
+.p-head input{background:var(--bg0);border:1px solid var(--border);color:var(--text);
+  font:11px var(--mono);padding:1px 6px;width:130px;margin-left:auto}
+.p-head input:focus{outline:1px solid var(--amber)}
+.scroll{flex:1;overflow:auto;min-height:0}
+.scroll::-webkit-scrollbar{width:8px;height:8px}
+.scroll::-webkit-scrollbar-thumb{background:var(--border)}
+/* ── tables ───────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{position:sticky;top:0;background:var(--panel2);color:var(--faint);font-weight:400;
+  font-size:9px;letter-spacing:.08em;text-align:left;padding:3px 8px;border-bottom:1px solid var(--border);z-index:2}
+td{padding:2px 8px;border-bottom:1px solid #0f1930;white-space:nowrap}
+tr:hover td{background:var(--panel2)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pos{color:var(--green)} .neg{color:var(--red)}
+.dim{color:var(--dim)} .faint{color:var(--faint)}
+.badge{font-size:9px;padding:1px 5px;border:1px solid var(--border);letter-spacing:.06em}
+.badge.med{color:var(--amber);border-color:var(--amber)}
+.badge.high{color:var(--green);border-color:var(--green)}
+.lane-dot{display:inline-block;width:7px;height:7px;margin-right:5px;vertical-align:baseline}
+.brain{color:var(--fxa)}
+/* ── ownership matrix ─────────────────────────────────── */
+.mx-chips{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px;border-bottom:1px solid var(--border)}
+.chip{font-size:9px;padding:1px 6px;border:1px solid var(--border);color:var(--dim);white-space:nowrap}
+.chip b{color:var(--bright);font-weight:600}
+.mx-cell{text-align:right;font-variant-numeric:tabular-nums;color:var(--faint);cursor:default}
+.mx-cell.on{color:var(--bright)}
+.mx-colhead{writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;letter-spacing:.06em;
+  padding:4px 2px;color:var(--dim);white-space:nowrap;border-bottom:none!important}
+/* ── footer strip ─────────────────────────────────────── */
+footer{display:flex;gap:14px;align-items:center;height:22px;padding:0 12px;
+  background:var(--bg1);border-top:1px solid var(--border);font-size:10px;color:var(--faint)}
+footer .err{color:var(--red)}
+/* ── mobile ───────────────────────────────────────────── */
+@media (max-width: 900px){
+  body{overflow:auto}
+  .ws{grid-template-columns:1fr;height:auto}
+  .scroll{max-height:60vh}
+  header{flex-wrap:wrap;height:auto;padding:6px 10px}
+  .hdr-clock{margin-left:0}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">OPENTRADER<span>·</span>FX PRACTICE</div>
+  <nav id="tabs">
+    <span class="tab on" data-page="fx">FX TERMINAL</span>
+    <span class="tab" data-page="warden">🧠 WARDEN</span>
+  </nav>
   <div class="pill" id="venue-pill"><span class="dot"></span><span id="venue-text">CONNECTING</span></div>
-  <div class="stat">balance <b id="h-balance">—</b></div>
+  <div class="stat">BAL <b id="h-balance">—</b></div>
   <div class="stat">NAV <b id="h-nav">—</b></div>
   <div class="stat">uPL <b id="h-upl">—</b></div>
-  <div id="hdr-clock" class="mono">—</div>
+  <div class="stat">DAY <b id="h-dayreal">—</b></div>
+  <div class="stat">FIN <b id="h-fin">—</b></div>
+  <div class="hdr-clock" id="hdr-clock">—</div>
 </header>
 
-<main>
-  <section class="card full">
-    <h2>LANE SCOREBOARD <span class="tag">venue-attributed · phantom-void aware</span></h2>
-    <table>
-      <thead><tr>
-        <th>lane</th><th class="numth">realized</th><th class="numth">RT</th><th class="numth">WR</th>
-        <th class="numth">open</th><th class="numth">uPL</th><th>status</th>
-      </tr></thead>
-      <tbody id="lanes-body"><tr><td colspan="7" class="dim">loading…</td></tr></tbody>
-    </table>
-  </section>
-
-  <section class="card">
-    <h2>OPEN BOOK <span class="tag">venue authoritative</span></h2>
-    <table>
-      <thead><tr><th>id</th><th>pair</th><th class="numth">units</th><th class="numth">entry</th>
-        <th class="numth">uPL</th><th>owner</th><th>SL</th></tr></thead>
-      <tbody id="book-body"><tr><td colspan="7" class="dim">loading…</td></tr></tbody>
-    </table>
-  </section>
-
-  <section class="card">
-    <h2>EXPERT REGISTRY <span class="tag">ADR-0009 · forward accrual</span></h2>
-    <table>
-      <thead><tr><th></th><th>expert</th><th>kind</th><th>status</th></tr></thead>
+<div class="ws" id="page-fx">
+  <!-- ── left rail: lanes + registry ── -->
+  <section class="panel">
+    <div class="p-head">▌LANES <span class="sub" id="lane-count"></span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>lane</th><th class="num">real</th><th class="num">today</th><th class="num">open</th><th class="num">uPL</th></tr></thead>
+      <tbody id="lanes-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+    </table></div>
+    <div class="p-head">▌EXPERT LIFECYCLE <span class="sub">ADR-0009 · state machine controls the lanes</span></div>
+    <div class="scroll" style="max-height:30vh"><table>
+      <thead><tr><th>expert</th><th>state</th><th class="num">cap</th><th>accrual</th></tr></thead>
       <tbody id="registry-body"><tr><td colspan="4" class="dim">loading…</td></tr></tbody>
-    </table>
+    </table></div>
   </section>
 
-  <section class="card full">
-    <h2>FILL STREAM <span class="tag">newest first · lane attributed by tradeID</span></h2>
-    <table>
-      <thead><tr><th>time (UTC)</th><th>pair</th><th>side</th><th class="numth">qty</th>
-        <th class="numth">price</th><th>lane</th><th>reason</th></tr></thead>
-      <tbody id="fills-body"><tr><td colspan="7" class="dim">loading…</td></tr></tbody>
-    </table>
-  </section>
-
-  <section class="card full">
-    <h2>CALENDAR <span class="tag">bank decisions + analyst-consensus releases</span></h2>
-    <table>
-      <thead><tr><th>time (UTC)</th><th>cur</th><th>event</th><th>impact</th><th>forecast</th><th>previous</th></tr></thead>
+  <!-- ── center: ownership matrix ── -->
+  <section class="panel">
+    <div class="p-head">▌OWNERSHIP MATRIX <span class="sub">net units · instrument × lane</span>
+      <input id="mx-filter" placeholder="filter…" oninput="renderMatrix()"></div>
+    <div class="mx-chips" id="mx-chips"></div>
+    <div class="scroll"><table id="mx-table"><thead id="mx-thead"></thead><tbody id="mx-body"></tbody></table></div>
+    <div class="p-head" style="color:var(--faint)">▌CALENDAR <span class="sub">bank decisions + high-impact releases</span></div>
+    <div class="scroll" style="max-height:22vh"><table>
+      <thead><tr><th>time</th><th>cur</th><th>event</th><th>imp</th><th class="num">fcst</th><th class="num">prev</th></tr></thead>
       <tbody id="cal-body"><tr><td colspan="6" class="dim">loading…</td></tr></tbody>
-    </table>
+    </table></div>
   </section>
-</main>
 
-<footer>venue is authoritative · caches are write-through · lanes poll 5s · calendar 60s ·
-last API error: <span id="f-err" class="dim">none</span></footer>
+  <!-- ── right rail: book + tape ── -->
+  <section class="panel">
+    <div class="p-head">▌OPEN BOOK <span class="sub" id="book-stats"></span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>pair</th><th class="num">units</th><th class="num">entry</th><th class="num">uPL</th><th>owner</th></tr></thead>
+      <tbody id="book-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+    </table></div>
+    <div class="p-head">▌FILL STREAM <span class="sub">newest first</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>time</th><th>pair</th><th class="num">qty</th><th>lane</th></tr></thead>
+      <tbody id="fills-body"><tr><td colspan="4" class="dim">loading…</td></tr></tbody>
+    </table></div>
+  </section>
+</div>
+
+<div class="ws" id="page-warden" style="display:none">
+  <!-- ── left rail: warden identity + probation ── -->
+  <section class="panel">
+    <div class="p-head">▌WARDEN <span class="sub">local monitor · read-only venue</span></div>
+    <div class="scroll">
+      <table><tbody id="wd-meta"><tr><td class="dim">loading…</td></tr></tbody></table>
+    </div>
+    <div class="p-head">▌SHADOW CUT LIST <span class="sub">probation before the axe</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>lane</th><th class="num">bad</th><th>status</th></tr></thead>
+      <tbody id="wd-probation"><tr><td colspan="3" class="dim">loading…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <!-- ── center: game plan + scoreboard ── -->
+  <section class="panel">
+    <div class="p-head">▌GAME PLAN <span class="sub" id="wd-plan-period">expected PnL, news-conditioned</span></div>
+    <div class="scroll" style="max-height:44vh">
+      <div id="wd-regime" style="padding:6px 8px;color:var(--dim);font-size:11px;border-bottom:1px solid var(--border)"></div>
+      <table>
+        <thead><tr><th>lane</th><th class="num">exp %</th><th>dir</th><th class="num">conv</th><th>rationale</th></tr></thead>
+        <tbody id="wd-plan-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="p-head">▌SCOREBOARD <span class="sub" id="wd-score-period">actual − expected · QB/RB rule</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>lane</th><th class="num">actual</th><th class="num">exp</th><th class="num">miss</th><th class="num">score</th></tr></thead>
+      <tbody id="wd-score-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <!-- ── right rail: notes + proposals + corpus ── -->
+  <section class="panel">
+    <div class="p-head">▌NOTES STREAM <span class="sub" id="wd-note-stats">newest first · verified-bitted</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>time</th><th>lane</th><th>note</th></tr></thead>
+      <tbody id="wd-notes-body"><tr><td colspan="3" class="dim">loading…</td></tr></tbody>
+    </table></div>
+    <div class="p-head">▌INSTABILITY WATCH <span class="sub" id="wd-inst-asof">per-currency · tiered</span></div>
+    <div class="scroll" style="max-height:30vh"><table>
+      <thead><tr><th>ccy</th><th class="num">score</th><th>tier</th><th class="num">vol×60d</th><th class="num">shock</th></tr></thead>
+      <tbody id="wd-inst-body"><tr><td colspan="5" class="dim">loading…</td></tr></tbody>
+    </table></div>
+    <div class="p-head">▌PROPOSALS <span class="sub">human-gated — never self-applied</span></div>
+    <div class="scroll" style="max-height:18vh"><table>
+      <tbody id="wd-proposals"><tr><td class="dim">none yet</td></tr></tbody>
+    </table></div>
+    <div class="p-head">▌CORPUS / MODEL LINEAGE <span class="sub">mid-train receipts</span></div>
+    <div class="scroll"><table><tbody id="wd-corpus"><tr><td class="dim">loading…</td></tr></tbody></table></div>
+  </section>
+</div>
+
+<footer>
+  <span>venue authoritative</span><span>·</span><span>caches write-through</span>
+  <span>·</span><span>poll 5s</span><span>·</span>
+  <span>last API error: <span id="f-err" class="dim">none</span></span>
+  <span style="margin-left:auto">🧠 = trained parameter model (fxexpert loop)</span>
+</footer>
 
 <script>
 "use strict";
 const LANE_COLOR = {"mom-k5":"var(--cyan)","c08-fade":"var(--green)","h1-mom":"var(--amber)",
   "h1-rev":"var(--blue)","h4-brk":"var(--red)","d1-mom10":"var(--green)",
-  "crash":"var(--red)","watchdog":"var(--magenta)"};
-const LANES = ["mom-k5","c08-fade","h1-mom","h1-rev","h4-brk","d1-mom10","crash","watchdog"];
+  "crash":"var(--red)","watchdog":"var(--magenta)",
+  "fxexp-g151":"var(--fxa)","fxexp-g138":"var(--fxa)","fxexp-g137":"var(--fxa)"};
+const TRAINED = new Set(["fxexp-g151","fxexp-g138","fxexp-g137"]);
+const LANES = ["fxexp-g151","fxexp-g138","fxexp-g137","mom-k5","c08-fade","h1-mom","h1-rev","h4-brk","d1-mom10","crash","watchdog"];
 const $ = (id) => document.getElementById(id);
 const fmtN = (v, d=2) => (v == null || isNaN(v)) ? "—" : Number(v).toFixed(d);
 const signed = (v, d=2) => v == null ? "—" : `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : ""}${Number(v).toFixed(d)}</span>`;
+const kfmt = (v) => Math.abs(v) >= 1000 ? (v/1000).toFixed(1)+"k" : String(Math.round(v));
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function fetchJson(path){ return fetch(path, {cache:"no-store"}).then(r => r.json()); }
 
-function renderFxLanes(d){
+let BOOK = [];
+
+/* ── lanes + registry + header ── */
+function renderLanes(d){
   if (d.error) { $("f-err").textContent = d.error; $("venue-pill").className = "pill down"; $("venue-text").textContent = "VENUE DOWN"; }
   else { $("f-err").textContent = "none"; $("venue-pill").className = "pill live"; $("venue-text").textContent = "OANDA LIVE"; }
-  $("h-balance").textContent = "$" + fmtN(d.balance);
-  $("h-nav").textContent = "$" + fmtN(d.nav);
-  let upl = 0, rows = "";
+  $("h-balance").textContent = "$" + fmtN(d.balance, 0);
+  $("h-nav").textContent = "$" + fmtN(d.nav, 0);
+  $("h-dayreal").innerHTML = signed(d.realized_today);
+  $("h-fin").innerHTML = signed(d.financing_today);
+  let upl = 0, active = 0, rows = "";
   for (const tag of LANES){
     const l = (d.lanes || {})[tag] || {};
     const color = LANE_COLOR[tag] || "var(--faint)";
     const retired = tag === "crash" && l.note;
-    const flat = l.flat ? `<span class="dim">${esc(l.flat).slice(0,58)}</span>` :
-                 (l.open_n ? `<span class="pos">${l.open_n} open</span>` : `<span class="dim">—</span>`);
-    rows += `<tr class="${retired ? "retired" : ""}">
-      <td><span class="lane-dot" style="background:${color}"></span>${esc(tag)}${retired ? ' <span class="dim">(retired)</span>' : ""}</td>
-      <td class="num">${signed(l.realized)}</td>
-      <td class="num dim">${l.rounds ?? "—"}</td>
-      <td class="num dim">${l.winrate == null ? "—" : l.winrate.toFixed(0) + "%"}</td>
-      <td class="num">${l.open_n || "0"}</td>
-      <td class="num">${signed(l.open_upl)}</td>
-      <td>${flat}</td></tr>`;
     upl += l.open_upl || 0;
+    if (l.open_n) active += l.open_n;
+    rows += `<tr class="${retired ? "faint" : ""}">
+      <td><span class="lane-dot" style="background:${color}"></span>${TRAINED.has(tag) ? '<span class="brain">🧠 </span>' : ""}${esc(tag)}</td>
+      <td class="num">${signed(l.realized)}</td>
+      <td class="num">${signed(l.realized_today)}</td>
+      <td class="num ${l.open_n ? "" : "faint"}">${l.open_n || "·"}</td>
+      <td class="num">${l.open_n ? signed(l.open_upl) : '<span class="faint">·</span>'}</td></tr>`;
   }
   $("lanes-body").innerHTML = rows;
+  $("lane-count").textContent = `${active} open / ${upl >= 0 ? "+" : ""}${upl.toFixed(2)} uPL`;
   $("h-upl").innerHTML = signed(upl);
   const reg = d.registry || [];
-  $("registry-body").innerHTML = reg.length ? reg.map(e =>
-    `<tr><td>${e.kind === "incumbent" ? '<span class="pos">★</span>' : '<span class="dim">·</span>'}</td>
-     <td class="mono">${esc(e.expert_id)}</td><td class="dim">${esc(e.kind)}</td>
-     <td><span class="badge ${e.status === "accruing" ? "med" : e.status === "pass" ? "high" : ""}">${esc(e.status)}</span></td></tr>`
-  ).join("") : `<tr><td colspan="4" class="dim">registry unreadable</td></tr>`;
-  const book = d.book || [];
-  $("book-body").innerHTML = book.length ? book.map(t => {
-    const pl = Number(t.pl || 0), c = LANE_COLOR[t.owner] || "var(--faint)";
-    return `<tr><td class="dim">${esc(t.trade_id)}</td>
-      <td style="color:${c}">${esc(t.instrument)}</td>
-      <td class="num dim">${esc(t.units)}</td><td class="num dim">${fmtN(t.price, 5)}</td>
-      <td class="num">${signed(pl)}</td><td style="color:${c}">${esc(t.owner || "unknown")}</td>
-      <td>${t.protected ? '<span class="pos">SL✓</span>' : '<span class="neg">SL✗</span>'}</td></tr>`;
-  }).join("") : `<tr><td colspan="7" class="dim">(flat)</td></tr>`;
-  const fills = d.fills || [];
+  const LC_COLOR = {"candidate": "var(--faint)", "registered": "var(--cyan)",
+                    "accruing": "var(--green)", "probation": "var(--amber)",
+                    "cut": "var(--red)", "archived": "var(--faint)"};
+  $("registry-body").innerHTML = reg.length ? reg.map(e => {
+    const pct = Math.min(e.accrual_pct || 0, 100);
+    const lc = e.lifecycle || "candidate";
+    const lcCol = LC_COLOR[lc] || "var(--dim)";
+    const title = e.lifecycle_reason ? ` title="${esc(String(e.lifecycle_reason).slice(0, 140))}"` : "";
+    return `<tr${e.lifecycle_active === false ? ' style="opacity:.45"' : ""}>
+     <td>${TRAINED.has(e.expert_id) || String(e.expert_id).startsWith("fxexp-") ? '<span class="brain">🧠 </span>' : ""}${esc(e.expert_id)}</td>
+     <td><span class="badge" style="color:${lcCol};border-color:${lcCol}"${title}>${esc(lc)}${e.lifecycle_active === false ? ' ⛔' : ""}</span></td>
+     <td class="num dim">${Number(e.lifecycle_cap ?? 1).toFixed(2)}</td>
+     <td class="num"><span class="pbar ${pct >= 100 ? "hot" : ""}"><div style="width:${pct}%"></div></span>
+       <span class="dim" style="font-size:9px">${e.accrual_closed ?? 0}/${e.accrual_bar ?? 30}</span></td></tr>`;
+  }).join("") : `<tr><td colspan="4" class="dim">registry unreadable</td></tr>`;
+}
+
+/* ── ownership matrix: instrument × lane, net units ── */
+function renderMatrix(){
+  const book = BOOK;
+  // aggregate net units per (instrument, owner)
+  const cell = {}, gross = {};
+  for (const t of book){
+    const k = t.instrument + "|" + t.owner;
+    cell[k] = (cell[k] || 0) + Number(t.units || 0);
+    gross[t.instrument] = (gross[t.instrument] || 0) + Math.abs(Number(t.units || 0));
+  }
+  const lanesWith = LANES.filter(tag => book.some(t => t.owner === tag));
+  const cols = lanesWith.length ? lanesWith : LANES;
+  const insts = Object.keys(gross).sort((a, b) => gross[b] - gross[a]);
+  const filt = ($("mx-filter").value || "").trim().toLowerCase();
+  const chips = cols.map(tag =>
+    `<span class="chip" style="border-color:${LANE_COLOR[tag] || "var(--border)"}">
+     ${TRAINED.has(tag) ? "🧠 " : ""}${esc(tag)} <b>${book.filter(t => t.owner === tag).length}</b></span>`).join("");
+  $("mx-chips").innerHTML = chips || '<span class="dim">no open positions</span>';
+  $("mx-thead").innerHTML = `<tr><th>instrument</th>${cols.map(tag =>
+    `<th class="mx-colhead" style="color:${LANE_COLOR[tag] || "var(--dim)"}">${esc(tag)}</th>`).join("")}</tr>`;
+  let shown = 0, rows = "";
+  for (const inst of insts){
+    if (filt && !(inst.toLowerCase().includes(filt) ||
+        cols.some(t => t.toLowerCase().includes(filt) && cell[inst + "|" + t]))) continue;
+    shown++;
+    rows += `<tr><td class="dim">${esc(inst)}</td>` + cols.map(tag => {
+      const u = cell[inst + "|" + tag];
+      if (!u) return `<td class="mx-cell">·</td>`;
+      const c = LANE_COLOR[tag] || "var(--dim)";
+      return `<td class="mx-cell on" style="background:color-mix(in srgb, ${c} 16%, transparent);
+        color:${u > 0 ? "var(--green)" : "var(--red)"}" title="${esc(tag)} ${esc(inst)}">${u > 0 ? "+" : ""}${kfmt(u)}</td>`;
+    }).join("") + "</tr>";
+  }
+  $("mx-body").innerHTML = rows || `<tr><td colspan="${cols.length + 1}" class="dim">no match</td></tr>`;
+  $("book-stats") && ($("book-stats").textContent = "");
+}
+
+/* ── open book, grouped by owner ── */
+function renderBook(){
+  const rows = BOOK.slice().sort((a, b) =>
+    (LANES.indexOf(a.owner) - LANES.indexOf(b.owner)) || a.instrument.localeCompare(b.instrument));
+  $("book-body").innerHTML = rows.length ? rows.map(t => {
+    const c = LANE_COLOR[t.owner] || "var(--faint)";
+    return `<tr><td>${esc(t.instrument)}</td>
+      <td class="num" style="color:${Number(t.units) > 0 ? "var(--green)" : "var(--red)"}">${kfmt(Number(t.units))}</td>
+      <td class="num dim">${fmtN(t.price, 5)}</td>
+      <td class="num">${signed(Number(t.pl || 0))}</td>
+      <td style="color:${c}">${TRAINED.has(t.owner) ? "🧠 " : ""}${esc(t.owner || "unknown")}</td></tr>`;
+  }).join("") : `<tr><td colspan="5" class="dim">(flat)</td></tr>`;
+  $("book-stats").textContent = `${rows.length} positions`;
+}
+
+/* ── fill tape ── */
+function renderFills(d){
+  const fills = (d.fills || []).slice(0, 40);
   $("fills-body").innerHTML = fills.length ? fills.map(f => {
     const c = LANE_COLOR[f.tag || ""] || null;
-    return `<tr><td class="dim">${esc(String(f.timestamp || "").slice(0, 19))}</td>
-      <td>${esc(f.symbol)}</td><td class="dim">${esc(f.side)}</td>
-      <td class="num">${esc(f.quantity)}</td><td class="num dim">${fmtN(f.price, 5)}</td>
-      <td ${c ? `style="color:${c}"` : 'class="dim"'}>${esc(f.tag || f.reason || "—")}</td>
-      <td class="dim">${esc(f.reason)}</td></tr>`;
-  }).join("") : `<tr><td colspan="7" class="dim">(no fills yet)</td></tr>`;
+    return `<tr><td class="dim">${esc(String(f.timestamp || "").slice(11, 19))}</td>
+      <td>${esc(f.symbol)}</td>
+      <td class="num ${String(f.side).toUpperCase() === "BUY" ? "pos" : "neg"}">${esc(String(f.side).toUpperCase() === "BUY" ? "+" : "−")}${kfmt(Number(f.quantity || 0))}</td>
+      <td ${c ? `style="color:${c}"` : 'class="dim"'}>${TRAINED.has(f.tag) ? "🧠 " : ""}${esc(f.tag || f.reason || "—")}</td></tr>`;
+  }).join("") : `<tr><td colspan="4" class="dim">(no fills yet)</td></tr>`;
 }
 
 function renderCalendar(d){
   const rows = [];
-  for (const dec of (d.decisions || []).slice(0, 6))
+  for (const dec of (d.decisions || []).slice(0, 4))
     rows.push(`<tr><td class="dim">${esc(dec.date)}</td><td class="mono">${esc(dec.bank)}</td>
-      <td>policy decision</td><td><span class="badge dec">decision</span></td><td class="dim">—</td><td class="dim">—</td></tr>`);
-  for (const e of (d.ff_events || []).slice(0, 18)){
-    const cls = e.impact === "High" ? "high" : "med";
-    rows.push(`<tr><td class="dim">${esc(String(e.date).slice(0, 16))}</td>
-      <td class="mono">${esc(e.currency || "—")}</td><td>${esc(e.title)}</td>
-      <td><span class="badge ${cls}">${esc(e.impact)}</span></td>
-      <td class="dim">${esc(e.forecast)}</td><td class="dim">${esc(e.previous)}</td></tr>`);
+      <td>policy decision</td><td><span class="badge dec">dec</span></td><td class="num dim">—</td><td class="num dim">—</td></tr>`);
+  for (const e of (d.ff_events || []).slice(0, 12)){
+    rows.push(`<tr><td class="dim">${esc(String(e.date).slice(5, 16))}</td>
+      <td class="mono">${esc(e.currency || "—")}</td><td>${esc(String(e.title).slice(0, 40))}</td>
+      <td class="dim">${esc(e.impact)}</td><td class="num dim">${esc(e.forecast)}</td><td class="num dim">${esc(e.previous)}</td></tr>`);
   }
   $("cal-body").innerHTML = rows.length ? rows.join("") : `<tr><td colspan="6" class="dim">no upcoming events in feed</td></tr>`;
 }
 
-async function pollLanes(){ try { renderFxLanes(await fetchJson("/api/fx-lanes")); } catch (e) {
+function renderAll(d){
+  BOOK = d.book || [];
+  renderLanes(d);
+  renderMatrix();
+  renderBook();
+  renderFills(d);
+}
+
+async function pollLanes(){ try { renderAll(await fetchJson("/api/fx-lanes")); } catch (e) {
   $("venue-pill").className = "pill down"; $("venue-text").textContent = "API DOWN"; } }
 async function pollCal(){ try { renderCalendar(await fetchJson("/api/calendar")); } catch (e) {} }
 
@@ -201,6 +364,88 @@ setInterval(() => pollCal(), 60000);
 setInterval(() => { $("hdr-clock").textContent = new Date().toISOString().slice(11, 19) + " UTC"; }, 1000);
 pollLanes(); pollCal();
 $("hdr-clock").textContent = new Date().toISOString().slice(11, 19) + " UTC";
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+
+/* ── warden page ── */
+function renderWarden(d){
+  const w = d.warden || {};
+  $("wd-meta").innerHTML = `
+    <tr><td class="dim">model</td><td class="mono">${esc(w.model_current || "—")}</td></tr>
+    <tr><td class="dim">last run</td><td class="mono">${esc(String(w.last_run || "—").slice(0, 19))}</td></tr>
+    <tr><td class="dim">corpus</td><td class="mono">${(w.corpus || {}).total ?? 0} records</td></tr>
+    <tr><td class="dim">notes</td><td>${(w.note_stats || {}).verified ?? 0} verified · <span class="neg">${(w.note_stats || {}).fab_flagged ?? 0} fab-flagged</span></td></tr>`;
+  const prob = (w.scorecard || {}).probation || {};
+  $("wd-probation").innerHTML = Object.keys(prob).length ? Object.entries(prob).map(([tag, p]) =>
+    `<tr><td>${TRAINED.has(tag) ? "🧠 " : ""}${esc(tag)}</td><td class="num">${p.bad_periods ?? 0}</td>
+     <td><span class="badge ${p.status === "escalate" ? "high" : "med"}">${esc(p.status)}</span></td></tr>`).join("")
+    : '<tr><td colspan="3" class="dim">clean — no lanes on probation</td></tr>';
+  const plan = w.plan || {};
+  $("wd-plan-period").textContent = `period from ${plan.period_start || "—"}`;
+  $("wd-regime").textContent = plan.regime_read || "";
+  $("wd-plan-body").innerHTML = Object.entries(plan.plan || {}).map(([tag, v]) =>
+    `<tr><td>${TRAINED.has(tag) ? "🧠 " : ""}${esc(tag)}</td>
+     <td class="num">${signed(v.expected_pnl_pct, 2)}</td><td class="dim">${esc(v.direction)}</td>
+     <td class="num dim">${Number(v.conviction || 0).toFixed(2)}</td><td class="dim" style="white-space:normal">${esc(v.rationale)}</td></tr>`).join("")
+    || '<tr><td colspan="5" class="dim">no plan yet</td></tr>';
+  const sc = w.scorecard || {};
+  $("wd-score-period").textContent = `day ${sc.days_in_period ?? "—"} of period`;
+  $("wd-score-body").innerHTML = Object.entries(sc.last_scores || {})
+    .sort((a, b) => a[1].score_pct - b[1].score_pct).map(([tag, s]) => {
+      const gb = s.give_back != null ? s.give_back : 0;
+      const gbCol = gb > 0.15 ? "var(--red)" : gb > 0.05 ? "var(--amber)" : "var(--green)";
+      return `<tr><td>${TRAINED.has(tag) ? "🧠 " : ""}${esc(tag)}</td>
+     <td class="num">${signed(s.actual_pct)}</td><td class="num dim">${signed(s.expected_pct)}</td>
+     <td class="num">${signed(s.miss_pct)}</td>
+     <td class="num" style="color:${s.score_pct >= 0 ? "var(--green)" : "var(--red)"}">${signed(s.score_pct)}</td>
+     <td class="num dim">${s.peak_upl != null ? '+' + fmtN(s.peak_upl, 2) : '—'}</td>
+     <td class="num" style="color:${gbCol}">${gb > 0 ? (gb * 100).toFixed(1) + '%' : '—'}</td></tr>`;
+    }).join("")
+    || '<tr><td colspan="7" class="dim">no scores yet</td></tr>';
+  $("wd-note-stats").textContent = `${(w.note_stats || {}).total ?? 0} notes · ${(w.note_stats || {}).verified ?? 0}✓ ${(w.note_stats || {}).fab_flagged ?? 0} flagged`;
+  $("wd-notes-body").innerHTML = (w.notes || []).slice().reverse().map(n => {
+    const c = LANE_COLOR[n.lane] || "var(--faint)";
+    const v = n.verified === true ? '<span class="pos">✓</span>' :
+              n.verified === false ? '<span class="neg">FAB</span>' : '<span class="dim">·</span>';
+    return `<tr><td class="dim">${esc(String(n.ts || "").slice(5, 16))}</td>
+      <td style="color:${c}">${esc(n.lane || "*")}</td>
+      <td style="white-space:normal">${v} ${esc(n.text || "")}</td></tr>`;
+  }).join("") || '<tr><td colspan="3" class="dim">no notes yet</td></tr>';
+  const inst = w.instability || {};
+  $("wd-inst-asof").textContent = `as of ${String(inst.asof || "—").slice(5, 16)} UTC`;
+  const TIER_COLOR = {"critical": "var(--red)", "high": "var(--amber)",
+                      "elevated": "var(--cyan)", "calm": "var(--faint)"};
+  const rows_i = Object.entries(inst.currencies || {})
+    .sort((a, b) => b[1].score - a[1].score).map(([c, v]) =>
+    `<tr><td style="color:${TIER_COLOR[v.tier] || "var(--dim)"}">${esc(c)}${v.halted ? ' <span class="neg">⏸</span>' : ""}</td>
+     <td class="num">${fmtN(v.score, 1)}</td>
+     <td style="color:${TIER_COLOR[v.tier] || "var(--dim)"}">${esc(v.tier)}</td>
+     <td class="num dim">${fmtN(v.vol_ratio, 2)}</td>
+     <td class="num dim">${fmtN(v.shock, 2)}</td></tr>`);
+  $("wd-inst-body").innerHTML = rows_i.join("") ||
+    '<tr><td colspan="5" class="dim">no instability data yet</td></tr>';
+  $("wd-proposals").innerHTML = (w.proposals || []).length ? w.proposals.map(p =>
+    `<tr><td style="white-space:normal" class="dim">${esc(String(p.ts || "").slice(5, 16))} ${esc(String(p.text || JSON.stringify(p))).slice(0, 200)}</td></tr>`).join("")
+    : '<tr><td class="dim">none yet — the Warden proposes, you decide</td></tr>';
+  const c = w.corpus || {};
+  $("wd-corpus").innerHTML = `
+    <tr><td class="dim">records</td><td class="mono">${c.total ?? 0}</td></tr>
+    <tr><td class="dim">span</td><td class="mono">${esc(String(c.first || "—").slice(0, 10))} → ${esc(String(c.last || "—").slice(0, 10))}</td></tr>
+    ${Object.entries(c.by_mode || {}).map(([m, n]) => `<tr><td class="dim">${esc(m)}</td><td class="mono">${n}</td></tr>`).join("")}
+    ${Object.entries(c.models || {}).map(([m, n]) => `<tr><td class="dim">model: ${esc(m)}</td><td class="mono">${n}</td></tr>`).join("")}`;
+}
+
+async function pollWarden(){ try { renderWarden(await fetchJson("/api/warden")); } catch (e) {} }
+
+/* ── tabs ── */
+document.querySelectorAll("#tabs .tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll("#tabs .tab").forEach(x => x.classList.remove("on"));
+  t.classList.add("on");
+  $("page-fx").style.display = t.dataset.page === "fx" ? "" : "none";
+  $("page-warden").style.display = t.dataset.page === "warden" ? "" : "none";
+  if (t.dataset.page === "warden") pollWarden();
+}));
+setInterval(() => pollWarden(), 15000);
+pollWarden();
 </script>
 </body>
 </html>

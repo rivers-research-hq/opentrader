@@ -41,6 +41,23 @@ import pandas
 from exchange.oanda import FX_MAJORS, OandaExchange
 from strategies.fx_runner import _trade_tags
 
+# Expanded universe (map #211 #212): 7 majors + Scandi/EM/commodity pairs.
+# All verified on OANDA practice with H1 history back to 2008.
+EXPANSION_PAIRS = [
+    # 2026-09-08 universe expansion (fx_expand_universe.py): all tradable
+    # pure-FX practice pairs beyond the legacy 16 — do NOT trim; the fxexpert
+    # panel/Warden universe depends on these being rebuilt too
+    "AUD_CAD", "AUD_CHF", "AUD_JPY", "AUD_NZD", "AUD_SGD",
+    "CAD_CHF", "CAD_JPY", "CAD_SGD", "CHF_JPY", "CHF_ZAR",
+    "EUR_AUD", "EUR_CAD", "EUR_CHF", "EUR_CZK", "EUR_GBP", "EUR_HUF",
+    "EUR_JPY", "EUR_NOK", "EUR_NZD", "EUR_SEK", "EUR_SGD", "EUR_TRY",
+    "EUR_ZAR", "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_PLN",
+    "GBP_SGD", "GBP_ZAR", "NZD_CAD", "NZD_CHF", "NZD_JPY", "NZD_SGD",
+    "SGD_CHF", "SGD_JPY", "TRY_JPY", "USD_CNH", "USD_PLN", "USD_SGD",
+    "USD_THB", "ZAR_JPY",
+]
+ALL_PAIRS = FX_MAJORS + EXPANSION_PAIRS
+
 PROJECT = Path(__file__).resolve().parent.parent
 LEDGER = PROJECT / "data" / "fx_ledger.jsonl"
 FF_CACHE = PROJECT / "data" / "cache" / "ff_calendar.json"
@@ -152,7 +169,7 @@ def build_bars(con, ex=None):
     rows = []
     ex = ex or OandaExchange()
     connected = ex.connect()
-    for sym in FX_MAJORS:
+    for sym in ALL_PAIRS:
         d1 = ex.get_bars(sym, "1d", 5000) if connected else []
         for b in d1:
             rows.append({"symbol": sym, "timeframe": "1d",
@@ -163,7 +180,7 @@ def build_bars(con, ex=None):
         register_df(con, "bars", pandas.DataFrame(rows, columns=[
             "symbol", "timeframe", "ts", "open", "high", "low", "close", "volume"]))
         return len(rows)
-    for sym in FX_MAJORS:
+    for sym in ALL_PAIRS:
         cursor = datetime(2008, 1, 1, tzinfo=timezone.utc)
         end = datetime.now(timezone.utc)
         calls = 0

@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import math
+import sqlite3
 import re
 import sys
 from datetime import datetime, timezone
@@ -20,11 +21,12 @@ from pathlib import Path
 logger = logging.getLogger("opentrader.dashboard")
 
 PROJECT = str(Path(__file__).resolve().parent)
+REGISTRY_DB = Path(PROJECT) / "data" / "newsfeed" / "agent_registry.db"
 if PROJECT not in sys.path:
     sys.path.insert(0, PROJECT)
 
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -204,7 +206,10 @@ def _refresh_fx_cache():
 def _fx_snapshot() -> dict:
     """Live FX watch data. Stale-while-revalidate: instant serve from cache;
     a background thread refreshes when older than 30s. Fast pollers (the
-    TUIs) never block on OANDA latency and never trigger concurrent refreshes."""
+    TUIs) never block on OANDA latency and never trigger concurrent
+    refreshes. Cold cache (restart): serve a warming payload immediately —
+    the cold compute takes ~15-20s (throttled venue walk) and must never
+    block the first request."""
     import threading
     import time as _time
     if _FX_CACHE["data"] is not None:
@@ -214,10 +219,12 @@ def _fx_snapshot() -> dict:
         out = dict(_FX_CACHE["data"])
         out["flat"] = _flat_reasons()  # reasons have their own 300s TTL
         return out
-    out = _compute_fx()  # cold path: compute synchronously once, cache, serve
-    _FX_CACHE["ts"] = _time.time()
-    _FX_CACHE["data"] = {k: v for k, v in out.items()}
-    return out
+    if not _FX_REFRESHING["t"]:
+        _FX_REFRESHING["t"] = True
+        threading.Thread(target=_refresh_fx_cache, daemon=True).start()
+    return {"warming": True, "book": [], "fills": [], "registry": [], "queue": {},
+            "balance": None, "nav": None, "error": None,
+            "note": "cold cache — first compute in progress, poll again"}
 def _compute_fx() -> dict:
     import time as _time
     out = {"book": [], "fills": [], "registry": [], "queue": {}, "error": None}
@@ -238,6 +245,17 @@ def _compute_fx() -> dict:
             acct = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
             out["balance"] = acct.get("balance")
             out["nav"] = acct.get("NAV")
+            # Venue day-window PnL (what the OANDA UI shows): realized today
+            # resets at the venue day boundary; financing is the nightly carry
+            # charge — previously invisible in every scoreboard (not a fill).
+            try:
+                summary = ex._request(
+                    "GET", f"/v3/accounts/{ex._account_id}/summary")["account"]
+                out["realized_today"] = float(summary.get("realizedPL", 0) or 0)
+                out["financing_today"] = float(summary.get("financing", 0) or 0)
+            except Exception:
+                out["realized_today"] = None
+                out["financing_today"] = None
             out["_ex"] = ex
         else:
             out["error"] = "OANDA connect failed"
@@ -561,7 +579,9 @@ async def api_calendar():
 @app.get("/api/fx")
 async def api_fx():
     """FX watch data as JSON (same source as /fx)."""
-    return _fx_snapshot()
+    snap = _fx_snapshot()
+    snap.pop("_ex", None)  # live exchange object never belongs in JSON
+    return snap
 
 
 def _venue_lane_realized(ex):
@@ -572,10 +592,12 @@ def _venue_lane_realized(ex):
     only if the venue walk fails."""
     from strategies.fx_runner import _trade_tags
     if not ex:
-        return {}
+        return {}, {}
     try:
         tags, order_tag = _trade_tags(ex)
         out: dict = {}
+        today = datetime.now(timezone.utc).date().isoformat()
+        out_today: dict = {}
         for t in ex._request(
             "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"
         ).get("transactions", []):
@@ -595,9 +617,12 @@ def _venue_lane_realized(ex):
                     tag = "crash" if q >= 5000 else ("h1-mom" if q >= 2000 else "mom-k5")
             out.setdefault(tag, 0.0)
             out[tag] += float(t.get("pl", 0) or 0)
-        return out
+            if str(t.get("time", ""))[:10] == today:
+                out_today.setdefault(tag, 0.0)
+                out_today[tag] += float(t.get("pl", 0) or 0)
+        return out, out_today
     except Exception:
-        return {}
+        return {}, {}
 
 
 @app.get("/api/fx-lanes")
@@ -611,7 +636,7 @@ async def api_fx_lanes():
     from tui import ledger_performance
     snap = _fx_snapshot()
     perf = ledger_performance()
-    venue_realized = _venue_lane_realized(snap.pop("_ex", None))
+    venue_realized, venue_today = _venue_lane_realized(snap.pop("_ex", None))
     open_by: dict = {}
     for t in snap.get("book") or []:
         tag = t.get("owner") or "unknown"
@@ -625,8 +650,17 @@ async def api_fx_lanes():
     except Exception:
         crash_cache = {}
     flat = snap.get("flat") or {}
+    TRAINED_LANES = ("fxexp-g151", "fxexp-g138", "fxexp-g137")
+    # accrual bar (human-adjustable): promotion progress = closed round trips
+    # per lane vs this bar (ADR-0009 accruing evidence, forward ledger)
+    ACCRUAL_BAR = 30
+    EXPERT_LANE = {"fx_mom_k5_top2": "mom-k5", "fx_mr_fade_ma20": "c08-fade",
+                   "fx_mr_fade_ma20_cot": "c08-fade", "fx_h1_rev_rsi2": "h1-rev",
+                   "fx_h4_donchian20": "h4-brk", "fx_mom_k10_top2": "d1-mom10"}
     lanes = {}
-    for tag in ("mom-k5", "c08-fade", "h1-mom", "h1-rev", "h4-brk", "d1-mom10", "crash", "watchdog"):
+    for tag in ("fxexp-g151", "fxexp-g138", "fxexp-g137",
+                "mom-k5", "c08-fade", "h1-mom", "h1-rev", "h4-brk",
+                "d1-mom10", "crash", "watchdog"):
         p = perf.get(tag, {})
         realized = venue_realized.get(tag)
         if realized is None:
@@ -635,14 +669,202 @@ async def api_fx_lanes():
             realized = crash_cache.get("realized")
         lane = {"realized": realized, "rounds": p.get("rounds"),
                 "winrate": p.get("winrate"),
+                "realized_today": venue_today.get(tag, 0.0),
                 "open_n": open_by.get(tag, {}).get("n", 0),
                 "open_upl": open_by.get(tag, {}).get("upl", 0.0),
                 "flat": flat.get(tag)}
         if tag == "crash":
             lane["note"] = "retired 09-03 — scorecard from venue journal"
+        if tag in TRAINED_LANES:
+            # 🧠 trained parameter model (fxexpert loop, amended gate 09-06)
+            lane["trained"] = True
         lanes[tag] = lane
+    # registry accrual progress: closed round trips vs the accrual bar
+    for e in snap.get("registry") or []:
+        eid = e.get("expert_id", "")
+        lane_tag = eid.replace("fx-expert-", "fxexp-") if eid.startswith("fx-expert-") \
+            else EXPERT_LANE.get(eid, eid)
+        closed = (perf.get(lane_tag) or {}).get("rounds") or 0
+        e["lane"] = lane_tag
+        e["accrual_closed"] = closed
+        e["accrual_bar"] = ACCRUAL_BAR
+        e["accrual_pct"] = round(100.0 * closed / ACCRUAL_BAR, 1)
+        e["accrual_realized"] = venue_realized.get(lane_tag)
+    # lifecycle control-plane state (v2 registry): state, cap, transition reason
+    from strategies.expert_lifecycle import active_lanes, notional_cap
+    active = set(active_lanes())
+    for e in snap.get("registry") or []:
+        eid = e.get("expert_id", "")
+        e["lifecycle"] = e.get("lifecycle", "candidate")
+        e["lifecycle_active"] = eid in active
+        e["lifecycle_cap"] = notional_cap(eid)
     return {"lanes": lanes, "balance": snap.get("balance"), "nav": snap.get("nav"),
+            "realized_today": snap.get("realized_today"),
+            "financing_today": snap.get("financing_today"),
+            # the web panels (open book / registry / fill stream) render from
+            # this payload — /api/fx's tables ride along (#user-reported:
+            # panels rendered from a payload that never carried them)
+            "book": snap.get("book") or [], "registry": snap.get("registry") or [],
+            "fills": snap.get("fills") or [],
             "error": snap.get("error"), "generated": dt.datetime.now(dt.timezone.utc).isoformat()}
+
+
+@app.get("/api/lifecycle")
+async def api_lifecycle():
+    """Control-plane view: the registry state machine read directly from the
+    registry file (no cache) — lifecycle, notional cap, accrual, claims, and
+    the log tail so every transition is auditable."""
+    import sys as _sys
+    proj = Path(__file__).resolve().parent
+    if str(proj) not in _sys.path:
+        _sys.path.insert(0, str(proj))
+    from strategies.expert_lifecycle import (
+        REGISTRY, STATES, _load_registry, lifecycle_of, active_lanes,
+    )
+    reg = _load_registry()
+    claims = {}
+    cf = proj / "data" / "fx_expert" / "claims.json"
+    if cf.exists():
+        try:
+            claims = json.loads(cf.read_text()).get("claims", {})
+        except Exception:
+            claims = {}
+    my_claims = {}
+    for pair, v in claims.items():
+        my_claims.setdefault(v.get("lane"), []).append(pair)
+    active = set(active_lanes())
+    experts = []
+    for e in reg.get("experts", []):
+        eid = e["expert_id"]
+        experts.append({
+            "expert_id": eid,
+            "family": e.get("family"),
+            "kind": e.get("kind"),
+            "status": e.get("status"),
+            "lifecycle": e.get("lifecycle", "candidate"),
+            "notional_cap": e.get("notional_cap", 1.0),
+            "lifecycle_reason": e.get("lifecycle_reason"),
+            "cut_reason": e.get("cut_reason"),
+            "lifecycle_changed": e.get("lifecycle_changed"),
+            "active": eid in active,
+            "registered": e.get("registered"),
+            "accrual": e.get("accrual"),
+            "notes": e.get("notes"),
+            "claims": sorted(my_claims.get(eid.replace("fx-expert-", "fxexp-"), [])),
+        })
+    log_tail = []
+    logf = proj / "data" / "epoch_registry_log.jsonl"
+    if logf.exists():
+        for line in logf.read_text().splitlines()[-40:]:
+            if line.strip():
+                try:
+                    log_tail.append(json.loads(line))
+                except Exception:
+                    continue
+    return {"experts": experts, "states": STATES, "log": log_tail,
+            "generated": datetime.now(timezone.utc).isoformat()}
+
+
+@app.get("/api/warden")
+async def api_warden():
+    """The Warden's repository: verified notes, game plans, scoreboards,
+    probation state, proposals, and mid-train corpus stats — per-model
+    receipts so a future swap can clean-train the successor."""
+    import datetime as dt
+    w = Path(__file__).resolve().parent / "data" / "warden"
+    out = {"model_current": None, "notes": [], "note_stats": {},
+           "plan": None, "scorecard": None, "proposals": [],
+           "corpus": {"total": 0, "by_mode": {}, "models": {}, "first": None, "last": None},
+           "last_run": None}
+    notes = []
+    if (w / "notes.jsonl").exists():
+        for line in (w / "notes.jsonl").read_text().splitlines()[-400:]:
+            if not line.strip():
+                continue
+            try:
+                notes.append(json.loads(line))
+            except Exception:
+                continue
+        out["note_stats"] = {"total": len(notes),
+                             "verified": sum(1 for n in notes if n.get("verified") is True),
+                             "fab_flagged": sum(1 for n in notes if n.get("verified") is False)}
+        out["notes"] = notes[-150:]
+    if (w / "game_plan.json").exists():
+        try:
+            out["plan"] = json.loads((w / "game_plan.json").read_text())
+        except Exception:
+            pass
+    if (w / "scorecard.json").exists():
+        try:
+            out["scorecard"] = json.loads((w / "scorecard.json").read_text())
+        except Exception:
+            pass
+    if (w / "instability.json").exists():
+        try:
+            out["instability"] = json.loads((w / "instability.json").read_text())
+        except Exception:
+            out["instability"] = None
+    if (w / "proposals.jsonl").exists():
+        for line in (w / "proposals.jsonl").read_text().splitlines()[-30:]:
+            if line.strip():
+                try:
+                    out["proposals"].append(json.loads(line))
+                except Exception:
+                    pass
+    recs = w / "records.jsonl"
+    if recs.exists():
+        by_mode, models = {}, {}
+        first = last = None
+        n = 0
+        for line in recs.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            n += 1
+            by_mode[r.get("mode", "?")] = by_mode.get(r.get("mode", "?"), 0) + 1
+            m = r.get("model") or "unattributed"
+            models[m] = models.get(m, 0) + 1
+            ts = str(r.get("ts", ""))
+            first = first or ts
+            last = ts
+            out["last_run"] = ts
+        out["corpus"] = {"total": n, "by_mode": by_mode, "models": models,
+                         "first": first, "last": last}
+    # lifecycle control-plane panel (read straight from the registry file —
+    # no cache, per the audit gate)
+    from strategies.expert_lifecycle import lifecycle_of, active_lanes
+    reg = json.loads((Path(__file__).resolve().parent / "data" / "epoch_registry.json").read_text())
+    experts = []
+    for e in reg.get("experts", []):
+        eid = e["expert_id"]
+        acc = e.get("accrual") or {}
+        experts.append({
+            "expert_id": eid,
+            "lifecycle": e.get("lifecycle", "candidate"),
+            "notional_cap": e.get("notional_cap", 1.0),
+            "lifecycle_reason": e.get("lifecycle_reason"),
+            "closed_trades": acc.get("closed_trades"),
+            "active": eid in active_lanes(),
+        })
+    out["lifecycle_panel"] = experts
+    # authoritative: the last STAMPED warden record (what actually produced
+    # the notes) — the live probe races the busy server and flaked to None
+    out["model_current"] = None
+    if notes:
+        out["model_current"] = notes[-1].get("model")
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:5802/v1/models", timeout=5) as r:
+            d = json.loads(r.read())
+        live = (d.get("data") or [{}])[0].get("id")
+        if live and not out["model_current"]:
+            out["model_current"] = live
+        out["model_live"] = live
+    except Exception:
+        out["model_live"] = None
+    return {"warden": out, "generated": dt.datetime.now(dt.timezone.utc).isoformat()}
 
 
 @app.get("/")
@@ -653,6 +875,30 @@ async def root():
         status_code=200,
         headers={"Cache-Control": "no-store, max-age=0"},
     )
+
+
+_PWA = Path(__file__).resolve().parent / "pwa"
+
+
+@app.get("/manifest.webmanifest")
+async def pwa_manifest():
+    return FileResponse(_PWA / "manifest.webmanifest", media_type="application/manifest+json")
+
+
+@app.get("/sw.js")
+async def pwa_sw():
+    return FileResponse(_PWA / "sw.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-store"})
+
+
+@app.get("/icon-192.png")
+async def pwa_icon_192():
+    return FileResponse(_PWA / "icon-192.png", media_type="image/png")
+
+
+@app.get("/icon-512.png")
+async def pwa_icon_512():
+    return FileResponse(_PWA / "icon-512.png", media_type="image/png")
 
 
 @app.get("/health")
@@ -966,3 +1212,65 @@ if __name__ == "__main__":
 
     print(f"OpenTrader Dashboard starting on http://{args.host}:{args.port}")
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+
+
+# ---------------------------------------------------------------------------
+# Agent Lifecycle Registry API (context: agent-registry)
+# ---------------------------------------------------------------------------
+from collections import defaultdict as _dd
+
+
+@app.get("/api/registry/agents")
+async def api_registry_agents():
+    """Per-agent lifecycle registry: gate verdicts, overrides, drift, cycles."""
+    try:
+        from strategies.expert_lifecycle import all_lifecycles, REGISTRY as LC_REGISTRY
+        lc = all_lifecycles()
+        agents = _dd(lambda: {"lifecycle": {}, "gates": [], "overrides": [], "cycles": []})
+        for eid, state in lc.items():
+            agents[eid]["lifecycle"] = {"expert_id": eid, "lifecycle": state}
+        reg_raw = json.loads(LC_REGISTRY.read_text()) if LC_REGISTRY.exists() else {"experts": []}
+        for e in reg_raw.get("experts", []):
+            eid = e.get("expert_id", "?")
+            if eid in agents:
+                agents[eid]["lifecycle"].update({
+                    "status": e.get("status"),
+                    "registered": e.get("registered"),
+                    "kind": e.get("kind"),
+                    "notional_cap": e.get("notional_cap", 1.0),
+                    "lifecycle_reason": e.get("lifecycle_reason"),
+                })
+        out = []
+        for name, d in sorted(agents.items()):
+            gates = d["gates"]
+            out.append({
+                "agent": name,
+                "total_gates": len(gates),
+                "total_overrides": len(d["overrides"]),
+                "pass_rate": (
+                    sum(1 for g in gates if g.get("verdict") == "PASS") / len(gates)
+                    if gates else None
+                ),
+                "last_gate": gates[0] if gates else None,
+                "recent_gates": gates[:20],
+                "recent_overrides": d["overrides"][:10],
+                "cycles": d["cycles"][:10],
+            })
+        return {"agents": out, "count": len(out)}
+    except Exception as exc:
+        return {"agents": [], "count": 0, "error": str(exc)}
+
+
+@app.get("/api/registry/summary")
+async def api_registry_summary():
+    """Rolling summary for the dashboard header strip."""
+    try:
+        from strategies.expert_lifecycle import all_lifecycles
+        lc = all_lifecycles()
+        by_agent = {}
+        for eid, state in lc.items():
+            by_agent[eid] = {"lifecycle": state}
+        return {"agents": by_agent, "recent_gates": [], "recent_overrides": []}
+    except Exception as exc:
+        return {"agents": {}, "recent_gates": [], "recent_overrides": [],
+                "error": str(exc)}
