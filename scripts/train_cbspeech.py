@@ -73,9 +73,16 @@ def main():
     ap.add_argument("--max-seq", type=int, default=512)
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--year-lt", default=None,
+                    help="train only on docs dated strictly before this year "
+                         "(temporal holdout; e.g. 2025 keeps 2025+ out of train)")
     a = ap.parse_args()
 
     docs = [json.loads(l) for l in open(a.data) if l.strip()]
+    if a.year_lt:
+        before = len(docs)
+        docs = [d for d in docs if str(d.get("date", ""))[:4] < a.year_lt]
+        print(f"[train] temporal split: {len(docs)}/{before} docs dated < {a.year_lt}")
     exs = build_examples(docs)
     if a.limit:
         exs = exs[:a.limit]
