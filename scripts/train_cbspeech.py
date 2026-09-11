@@ -19,7 +19,7 @@ from pathlib import Path
 
 import torch
 from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments,
-                          Trainer, DataCollatorForLanguageModeling)
+                          Trainer, DataCollatorForLanguageModeling, BitsAndBytesConfig)
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 BASE = "/home/mrc/models/granite-4.2-8b-hf"
@@ -85,8 +85,11 @@ def main():
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
 
+    bnb = BitsAndBytesConfig(
+        load_in_4bit=True, bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
     model = AutoModelForCausalLM.from_pretrained(
-        BASE, load_in_4bit=True, torch_dtype=torch.bfloat16,
+        BASE, quantization_config=bnb, dtype=torch.bfloat16,
         device_map="auto", trust_remote_code=True)
     model = prepare_model_for_kbit_training(model)
     lora = LoraConfig(

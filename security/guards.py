@@ -41,6 +41,11 @@ ALLOWED_HOSTS = {
     "www.forexfactory.com", "www.mof.go.jp",
     # Fed comms calendar (map #187 #203: speeches RSS)
     "www.federalreserve.gov",
+    # CB speech corpus harvest (plan cb-speech-interpreter-2026-09-10, T2/T3 —
+    # added 2026-09-11): FRASER OAI-PMH archive, RBA speeches RSS, BoE speeches
+    # index. Read-only GETs from scripts/fetch_cbspeeches.py.
+    "fraser.stlouisfed.org", "www.rba.gov.au",
+    "www.bankofengland.co.uk", "bankofengland.co.uk",
     # LLM / infra
     "api.coingecko.com", "api.alternative.me", "api.stlouisfed.org",
     "api.deepseek.com", "api.openai.com", "api.anthropic.com",
