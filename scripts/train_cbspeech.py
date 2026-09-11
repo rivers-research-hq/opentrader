@@ -70,7 +70,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--epochs", type=int, default=1)
     ap.add_argument("--lr", type=float, default=2e-4)
-    ap.add_argument("--max-seq", type=int, default=1024)
+    ap.add_argument("--max-seq", type=int, default=512)
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
@@ -99,6 +99,10 @@ def main():
                         "gate_proj", "up_proj", "down_proj"],
     )
     model = get_peft_model(model, lora)
+    # shrink activation memory so the 8B 4-bit model fits the 8GB 3070
+    if hasattr(model, "enable_input_require_grads"):
+        model.enable_input_require_grads()
+    model.gradient_checkpointing_enable()
     model.print_trainable_parameters()
 
     def tokenize(ex):
