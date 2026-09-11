@@ -50,19 +50,40 @@ SYSTEM = ("You are the Warden: a bounded monitor for an FX practice account. "
 def _parse(out):
     # Granite can leak a reasoning tag and repeat the answer (e.g.
     # "{json}\n</think>\n{json}"). Strip the tag, prefer the whole object, then
-    # fall back to the first balanced JSON object.
+    # fall back to the first balanced JSON object (mirrors fx_warden._extract_json).
     cleaned = re.sub(r"</?think>", "", out).strip()
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
         pass
-    m = re.search(r"\{.*?\}", cleaned, re.S)
-    if not m:
+    start = cleaned.find("{")
+    if start < 0:
         return None
-    try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError:
-        return None
+    depth = 0
+    in_str = False
+    esc = False
+    for i in range(start, len(cleaned)):
+        c = cleaned[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(cleaned[start:i + 1])
+                except json.JSONDecodeError:
+                    return None
+    return None
 
 
 def _grounded(out, doc):

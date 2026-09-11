@@ -244,6 +244,41 @@ def feed_digest(max_chars=2500):
 
 # ── local model call (bounded) ───────────────────────────────────────────
 
+def _extract_json(text):
+    """Extract the first balanced JSON object from model output, tolerating
+    Granite's leaked reasoning tag and a duplicated answer (e.g.
+    "{json}\\n</think>\\n{json}"). Handles nested objects and string escapes."""
+    cleaned = re.sub(r"</?think>", "", text)
+    start = cleaned.find("{")
+    if start < 0:
+        return None
+    depth = 0
+    in_str = False
+    esc = False
+    for i in range(start, len(cleaned)):
+        c = cleaned[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(cleaned[start:i + 1])
+                except json.JSONDecodeError:
+                    return None
+    return None
+
+
 def llm_json(system, user, max_tokens=800):
     """One bounded model call with endpoint failover: primary (Granite on
     GRE) then fallback (Qwen on 3070, started on demand by the failover
@@ -258,14 +293,7 @@ def llm_json(system, user, max_tokens=800):
                                          headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=180) as r:
                 d = json.loads(r.read())
-            text = d["choices"][0]["message"]["content"]
-            m = re.search(r"\{.*\}", text, re.S)
-            if not m:
-                return None
-            try:
-                return json.loads(m.group(0))
-            except json.JSONDecodeError:
-                return None
+            return _extract_json(d["choices"][0]["message"]["content"])
         except Exception as e:
             last_err = e
             continue
