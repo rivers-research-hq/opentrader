@@ -68,15 +68,20 @@ def main():
 
     rng = np.random.default_rng(a.seed)
     # White's Reality Check null: NO config has edge -> each config's true PF
-    # is break-even (1.0) with the search's cross-sectional noise. Demean the
-    # population to 1.0 so the observed max is judged against a "no edge" null
-    # (the observed mean is itself a losing ~0.99, not the null).
-    null = pfs - mean + 1.0
-    n = len(null)
+    # is break-even with the search's cross-sectional noise. Compare the
+    # CENTERED observed max (obs_max - mean) against the bootstrap max of the
+    # centered population (pfs - mean, mean 0). Demeaning to 1.0 and comparing
+    # against the raw obs_max was location-dependent: it flipped from "does not
+    # survive" to "survives" purely because the population mean crossed 1.0 as
+    # the search added generations. Centering both sides is invariant to any
+    # constant shift of the PF scale.
+    centered = pfs - mean
+    obs_centered = obs_max - mean
+    n = len(centered)
     maxima = np.empty(a.bootstrap)
     for b in range(a.bootstrap):
-        maxima[b] = rng.choice(null, size=n, replace=True).max()
-    p = float((maxima >= obs_max).mean())
+        maxima[b] = rng.choice(centered, size=n, replace=True).max()
+    p = float((maxima >= obs_centered).mean())
 
     print(f"clean-era generations: {n} (tags g36+)")
     print(f"observed max PF: {obs_max:.4f} (tag g{obs_tag})")
@@ -85,9 +90,10 @@ def main():
     verdict = "SURVIVES" if p < a.alpha else "DOES NOT SURVIVE"
     print(f"deflated-bar verdict at alpha={a.alpha}: {verdict}")
 
-    # what bar WOULD the best need to clear to survive at alpha?
+    # what bar WOULD the best need to clear to survive at alpha? (centered)
     thr = float(np.quantile(maxima, 1 - a.alpha))
-    print(f"survival threshold ({(1 - a.alpha)*100:.0f}th pct of null max): PF >= {thr:.4f}")
+    print(f"survival threshold ({(1 - a.alpha)*100:.0f}th pct of null max): "
+          f"PF >= {mean + thr:.4f} (centered; raw {obs_max:.4f})")
 
 
 if __name__ == "__main__":
