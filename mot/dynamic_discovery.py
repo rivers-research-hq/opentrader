@@ -13,7 +13,7 @@ urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 from typing import List, Dict, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 
 logger = logging.getLogger("opentrader.discovery")

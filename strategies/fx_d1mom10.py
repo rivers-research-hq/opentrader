@@ -137,6 +137,9 @@ def run(dry=False):
             continue
         atr = atrs.get(sym, 0.0)
         px = ex.get_current_price(sym)
+        if not px:
+            print(f"[d1-mom10] {sym} no price — skipped")
+            continue
         if foreign_holds(ex, sym, TAG):
             print(f"[d1-mom10] {sym} held by another lane at order time — skipped (arbitration)")
             continue

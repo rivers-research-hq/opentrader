@@ -6,9 +6,9 @@ urlopen = guarded_urlopen  # hardening shadow
 Each acquirer: fetch(name) -> {date_str: float} normalized series,
 writes to the lake as parquet, returns (obs_start, obs_end, n_obs).
 """
+from __future__ import annotations
 from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 urlopen = guarded_urlopen  # hardening shadow
-from __future__ import annotations
 
 import json
 import pickle
@@ -16,7 +16,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 import pandas as pd
 

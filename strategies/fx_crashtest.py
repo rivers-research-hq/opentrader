@@ -145,7 +145,7 @@ def run(dry=False):
                   f"{info.get('opened')!r} — hold-age logic skipped this run")
             continue
         net = _venue_net(ex, sym)
-        if abs(net - UNITS) > 1e-9 and net:
+        if abs(abs(net) - UNITS) > 1e-9 and net:
             print(f"[crash] !! {sym} venue net {net} != ours {UNITS} — deferred")
             continue
         if not net:

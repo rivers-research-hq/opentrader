@@ -61,7 +61,9 @@ def run(dry=False):
             print(f"[wd] {sym}: skipped (tag {info['owner']} — unprotected by design)")
             continue
         net = _venue_net(ex, sym)
-        if not net or abs(net - info["units"]) > 1e-9:
+        # net is SIGNED (lu + su); info["units"] is abs(currentUnits). Compare
+        # magnitudes, not the signed net — a short (-U) must match book (+U).
+        if not net or abs(abs(net) - info["units"]) > 1e-9:
             print(f"[wd] {sym}: venue net {net} != book {info['units']} — deferred")
             continue
         d1 = ex.get_bars(sym, "1d", 20)
@@ -73,6 +75,9 @@ def run(dry=False):
         if not atr or atr <= 0:
             continue
         px = ex.get_current_price(sym)
+        if not px:
+            print(f"[wd] {sym} no price — skipped")
+            continue
         long = net > 0
         adverse = (info["entry"] - px) if long else (px - info["entry"])
         velocity = (h1[-2].close - h1[-1].close) if long else (h1[-1].close - h1[-2].close)

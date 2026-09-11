@@ -91,7 +91,6 @@ _model_cache = {}
 
 LLM_ENDPOINTS = ["http://127.0.0.1:5802/v1",   # primary: Granite 4.2 on GRE
                  "http://127.0.0.1:5804/v1"]   # fallback: Qwen3.8-4B on 3070
-_model_cache = {}
 
 
 def _model_id():
@@ -305,8 +304,9 @@ def corpus_records():
     cut/archived expert are excluded (quarantined records), and the count
     of exclusions is returned alongside the kept records so the mid-train
     can log its corpus composition honestly."""
-    from strategies.expert_lifecycle import all_lifecycles
+    from strategies.expert_lifecycle import all_lifecycles, registry_tag_index
     lc = all_lifecycles()
+    tag2eid = registry_tag_index()
     out, excluded = [], 0
     if not RECORDS.exists():
         return out, excluded
@@ -318,7 +318,7 @@ def corpus_records():
         except Exception:
             continue
         tags = set((rec.get("lane_states") or {}).keys())
-        if any(lc.get(t) in ("cut", "archived") for t in tags):
+        if any(lc.get(tag2eid.get(t)) in ("cut", "archived") for t in tags):
             excluded += 1
             continue
         out.append(rec)
@@ -564,9 +564,6 @@ def score(dry=False):
             if prev_status == "probation":
                 _sync_lifecycle(tag, "accruing",
                                 f"warden reprieve {s['score_pct']:+.2f}%", notional_cap=1.0)
-            prob[tag] = {"bad_periods": 0,
-                         "status": "reprieved",
-                         "note": f"recovered {s['score_pct']:+.2f} — shadow cut lifted"}
     # MFE: per-lane peak uPL tracked by the hourly observe; give-back ratio
     # measures exit-policy cost separately from selection skill
     mfe = state.get("mfe", {})
@@ -673,6 +670,8 @@ def instability(dry=False):
                 {"vol_ratio": vol5 / vol60 if vol60 > 0 else 0.0,
                  "shock": abs(ret5) / (vol60 * (5 ** 0.5) * 3) if vol60 > 0 else 0.0})
     con.close()
+    out = {"asof": _now(), "global_stress_bonus": global_stress, "stress": stress,
+           "currencies": {}}
     # venue tradeable status: a REAL halt (TRY-class) freezes the price
     # timestamp — status != tradeable AND price >30 min stale. Transient
     # non-tradeable snapshots (daily maintenance ~21:00-22:00 UTC, staggered
@@ -718,13 +717,11 @@ def instability(dry=False):
         up = json.loads((FEEDS / "ff_upcoming.json").read_text())
         evs = up if isinstance(up, list) else up.get("events", [])
         for e in evs:
-            d = str(e.get("date", ""))[:16]
-            if e.get("impact") in ("High", "Med") and d >= _now()[:16]:
-                events.setdefault(str(e.get("currency", "")).upper(), []).append(d)
+            d = str(e.get("date_label", ""))[:16]
+            if e.get("impact") in ("high", "medium") and d >= _now()[:16]:
+                events.setdefault(str(e.get("country", "")).upper(), []).append(d)
     except Exception:
         pass
-    out = {"asof": _now(), "global_stress_bonus": global_stress, "stress": stress,
-           "currencies": {}}
     for c in ccys:
         sr = shocks.get(c, [])
         vr = max((s["vol_ratio"] for s in sr), default=0.0)

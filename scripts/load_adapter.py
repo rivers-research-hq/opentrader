@@ -38,7 +38,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

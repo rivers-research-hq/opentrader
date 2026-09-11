@@ -39,7 +39,8 @@ import duckdb
 import pandas
 
 from exchange.oanda import FX_MAJORS, OandaExchange
-from strategies.fx_runner import _trade_tags
+from strategies.fx_runner import _trade_tags, _walk_transactions
+from strategies.lane_attribution import resolve_fill_tag, LEGACY_CUTOFF, UNATTRIBUTED
 
 # Expanded universe (map #211 #212): 7 majors + Scandi/EM/commodity pairs.
 # All verified on OANDA practice with H1 history back to 2008.
@@ -124,26 +125,19 @@ def build_journal(con, skip_venue=False):
         ex = OandaExchange()
         if ex.connect():
             tags, order_tag = _trade_tags(ex)
-            for t in ex._request(
-                "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"
-            ).get("transactions", []):
+            for t in _walk_transactions(
+                ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
                 ts = parse_ts(t.get("time"))
                 txns.append({"id": int(t.get("id", 0) or 0), "ts": ts, "type": t.get("type"),
                              "instrument": t.get("instrument"), "time": t.get("time")})
                 if t.get("type") != "ORDER_FILL":
                     continue
-                tag = (t.get("clientExtensions") or {}).get("tag") or order_tag.get(t.get("orderID"))
+                tag = resolve_fill_tag(t, tags, order_tag)
                 if not tag:
-                    for tc in t.get("tradesClosed") or []:
-                        tag = tags.get(str(tc.get("tradeID")))
-                        if tag:
-                            break
-                if not tag:
-                    q = abs(float(t.get("units", 0) or 0))
-                    if t.get("time", "") < "2026-08-31T18:00":
+                    if t.get("time", "") < LEGACY_CUTOFF:
                         tag = "legacy-smoke"
                     else:
-                        tag = "crash" if q >= 5000 else ("h1-mom" if q >= 2000 else "mom-k5")
+                        tag = UNATTRIBUTED
                 fills.append({"ts": ts, "txn_id": int(t.get("id", 0) or 0),
                               "instrument": t.get("instrument"),
                               "units": float(t.get("units", 0) or 0),

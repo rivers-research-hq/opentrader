@@ -19,8 +19,8 @@ CONDITIONAL on a regime + event one-hot.
 
 torch is imported lazily so the rest of the scenarios package works without it.
 """
-from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import math
 

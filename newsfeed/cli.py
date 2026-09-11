@@ -11,6 +11,11 @@ from .net import fetch
 from .sources import rss as rss_src
 from .sources import gdelt as gdelt_src
 
+# kind -> fetcher. `python -m newsfeed fetch` referenced FETCHERS but never
+# defined it (NameError on every fetch); cmd_fetch parses inline by kind below,
+# so this registry just gates which kinds it supports.
+FETCHERS = {"rss": rss_src.parse, "gdelt": gdelt_src.to_items}
+
 
 def _open():
     config.ensure_dir()

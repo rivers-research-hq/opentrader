@@ -79,6 +79,7 @@ def seed(state_dir: str, emit: bool = True) -> dict:
         os.makedirs(state_dir, exist_ok=True)
         # Single-writer contract (#155): the harness owns live_router_state.json;
         # the seed is an artifact for a human to apply, not a direct write.
+        p = os.path.join(state_dir, "live_router_state_seed.json")
         with open(p, "w") as f:
             json.dump(state, f, indent=1)
         print(f"seeded {p}")

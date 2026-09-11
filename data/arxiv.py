@@ -24,7 +24,7 @@ import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 
 logger = logging.getLogger("opentrader.arxiv")

@@ -10,8 +10,8 @@ Usage:
       --data data/setup_search/ohlcv_5y.pkl --epochs 50 \
       --out data/scenarios/neural_gen.pt [--device cuda]
 """
-from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import argparse
 import pickle

@@ -167,8 +167,11 @@ def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None)
         tr_idx = np.where(tr_mask)[0]
         tr_idx, val_idx = tr_idx[:-max(500, len(tr_idx) // 10)], tr_idx[-max(500, len(tr_idx) // 10):]
 
-        mu = X[tr_idx].mean(axis=0)
-        sd = X[tr_idx].std(axis=0)
+        # tr_idx are positions in the keep-FILTERED arrays; map back to global
+        # row indices before indexing the FULL panel X, else whole pairs across
+        # their entire history (incl. future data) leak into mu/sd.
+        mu = X[idx_keep[tr_idx]].mean(axis=0)
+        sd = X[idx_keep[tr_idx]].std(axis=0)
         sd[sd < 1e-8] = 1.0
         Xs = np.clip((X - mu) / sd, -8, 8).astype(np.float32)
         Xs = np.nan_to_num(Xs)

@@ -147,29 +147,49 @@ def _ensure_protection(ex, sym, info, hint, atrs):
     r = ex._request("PUT", f"/v3/accounts/{ex._account_id}/trades/{info['trade_id']}/orders",
                     body={"stopLoss": {"price": f"{sl:.{_digits(sym)}f}", "timeInForce": "GTC"},
                           "takeProfit": {"price": f"{tp:.{_digits(sym)}f}", "timeInForce": "GTC"}})
-    ok = "stopLossOrderTransaction" in r or "stopLossOrderRejectTransaction" not in r
+    # Success = a stopLossOrderTransaction at top level. _request returns {} on
+    # network/JSON failure and {"_error", "_status"} on an HTTP rejection — the
+    # venue's rejectTransaction lives inside _error, never top-level, so the old
+    # "not in r" disjunct read a dead network/rejection as "restored".
+    ok = "stopLossOrderTransaction" in r
     print(f"[fx] protection {'restored' if ok else 'FAILED'} on {sym} "
           f"(trade {info['trade_id']}) SL {sl:.5f} TP {tp:.5f}")
 
 
-def _txns_since(ex, iso_from):
-    """Venue transactions since iso_from (handles the paged response)."""
-    from urllib.parse import quote
-    r = ex._request("GET", f"/v3/accounts/{ex._account_id}/transactions"
-                            f"?from={quote(iso_from)}&pageSize=1000")
-    out = []
-    for page in r.get("pages", []):
+def _walk_transactions(ex, url):
+    """Walk a transactions endpoint to completion.
+
+    Two shapes: the sinceid endpoint caps at 1000 txns/call with NO `pages`
+    field (advance the `id=` cursor until the batch is short); the date-based
+    endpoint (`?from=...`) paginates via a `pages` list. Reading only the first
+    1000 hid ~75% of the journal — the fxexp lanes' closes (and their realized
+    pl) were invisible, so every scoreboard reported them as 0.00."""
+    r = ex._request("GET", url)
+    txs = list(r.get("transactions", []) or [])
+    for page in (r.get("pages") or []):
         path = "/v3/" + page.split("/v3/", 1)[-1]
-        out += ex._request("GET", path).get("transactions", [])
-    return out
+        txs += ex._request("GET", path).get("transactions", []) or []
+    if "sinceid" in url:
+        base = url.split("?", 1)[0]
+        batch = r.get("transactions", []) or []
+        while len(batch) == 1000:
+            last = max(int(t.get("id", 0)) for t in batch if t.get("id"))
+            batch = ex._request("GET", f"{base}?id={last}").get("transactions", []) or []
+            txs += batch
+    return txs
+
+
+def _txns_since(ex, iso_from):
+    """Venue transactions since iso_from (paged)."""
+    from urllib.parse import quote
+    return _walk_transactions(
+        ex, f"/v3/accounts/{ex._account_id}/transactions?from={quote(iso_from)}&pageSize=1000")
 
 
 def _txns_since_id(ex, since_id):
-    """Venue transactions with id > since_id (monotonic journal cursor)."""
-    r = ex._request(
-        "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id={int(since_id)}"
-    )
-    return r.get("transactions", [])
+    """Venue transactions with id > since_id (monotonic journal cursor, paged)."""
+    return _walk_transactions(
+        ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id={int(since_id)}")
 
 
 def held_by_other_tags(ex, my_tag):
@@ -215,9 +235,8 @@ def _trade_tags(ex):
     one request, grows by ~dozens of fills/day."""
     order_tag = {}
     fills = []
-    for t in ex._request(
-        "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"
-    ).get("transactions", []):
+    for t in _walk_transactions(
+        ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
         typ = t.get("type")
         if typ == "MARKET_ORDER":
             tag = (t.get("tradeClientExtensions") or {}).get("tag")
@@ -253,6 +272,7 @@ def _reconcile(ex, dry=False):
     OANDA format — exact-string dedup double-counted every strategy fill
     (fixed 2026-09-01)."""
     from datetime import datetime as _dt
+    from strategies.lane_attribution import resolve_fill_tag
     since_id = 0
     if CURSOR.exists():
         try:
@@ -295,15 +315,10 @@ def _reconcile(ex, dry=False):
                "side": side, "quantity": qty,
                "price": price, "order_id": t.get("transactionID"),
                "reason": "venue-reconciliation"}
-        # venue-attributed lane: the fill's own order tag (runner-placed
-        # entries/closes), else the closed trade's opening-chain tag (server
-        # SL/TP closes — their orders carry no tag)
-        row_tag = order_tag.get(t.get("orderID"))
-        if not row_tag:
-            for tc in t.get("tradesClosed") or []:
-                row_tag = tags.get(str(tc.get("tradeID")))
-                if row_tag:
-                    break
+        # venue-attributed lane via the shared resolver (clientExtensions ->
+        # orderID -> tradesClosed chain); unresolved rows stay tagless and are
+        # only ever size-matched as a grandfathered legacy fallback.
+        row_tag = resolve_fill_tag(t, tags, order_tag)
         if row_tag:
             row["tag"] = row_tag  # size matcher only for legacy (pre-2026-09-03) rows
         fills.append(row)
@@ -381,7 +396,7 @@ def run(dry=False):
             continue
         reason = "max-hold" if age_days >= MAX_HOLD_DAYS else "out-of-target"
         net = _venue_net(ex, sym)
-        if abs(net - book[sym]["units"]) > 1e-9:
+        if abs(abs(net) - book[sym]["units"]) > 1e-9:
             print(f"[fx] !! {sym} venue net {net} != book {book[sym]['units']} "
                   f"— not ours alone, close deferred")
             continue
@@ -417,6 +432,9 @@ def run(dry=False):
             continue
         atr = atrs.get(sym, 0.0)
         px = ex.get_current_price(sym)
+        if not px:
+            print(f"[fx] {sym} no price — skipped")
+            continue
         if foreign_holds(ex, sym, "mom-k5"):
             print(f"[fx] {sym} held by another lane at order time — skipped (arbitration)")
             continue
@@ -491,8 +509,8 @@ def run_intraday(dry=False):
         else:
             age_h = (now - opened).total_seconds() / 3600
         net = _venue_net(ex, sym)
-        if age_h >= 12 or not net or abs(net - 2000) > 1e-9:
-            if abs(net - 2000) > 1e-9 and net:
+        if age_h >= 12 or not net or abs(abs(net) - 2000) > 1e-9:
+            if abs(abs(net) - 2000) > 1e-9 and net:
                 print(f"[fx-id] !! {sym} venue net {net} != ours 2000 — close deferred")
                 continue
             if not net:
@@ -540,6 +558,9 @@ def run_intraday(dry=False):
             continue
         atr = atrs[sym]
         px = ex.get_current_price(sym)
+        if not px:
+            print(f"[fx-id] {sym} no price — skipped")
+            continue
         sl, tp = px - atr, px + 1.5 * atr
         if dry:
             print(f"[fx-id] (dry) would OPEN {sym} 2000 units SL {sl:.5f} TP {tp:.5f}")

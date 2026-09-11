@@ -285,7 +285,7 @@ def run(expert, dry=False, force=False, consolidate=False):
 
     def close_units_by_trade(sym, units_needed):
         """Close exactly units_needed units of my trades on sym, oldest
-        first, via per-tradeID closes. Returns [(tid, closed)]."""
+        first, via per-tradeID closes. Returns [(tid, closed, price)]."""
         done = []
         need = float(units_needed)
         for t in sorted(my_trades.get(sym, []), key=lambda x: int(x["id"])):
@@ -297,8 +297,9 @@ def run(expert, dry=False, force=False, consolidate=False):
                 continue
             r = ex._request("PUT", f"/v3/accounts/{ex._account_id}/trades/{t['id']}/close",
                             body={"units": str(int(round(c)))})
-            if isinstance(r, dict) and "orderCreateTransaction" in r:
-                done.append((t["id"], c))
+            fill = r.get("orderFillTransaction") if isinstance(r, dict) else None
+            if fill:
+                done.append((t["id"], c, float(fill.get("price") or 0)))
                 need -= c
             time.sleep(0.25)
         return done
@@ -353,6 +354,7 @@ def run(expert, dry=False, force=False, consolidate=False):
             continue
         m = mine.get(sym, 0.0)
         f_units = foreign.get(sym, 0)
+        net = m + f_units  # venue net for this symbol; used by both branches below
 
         # reduce/exit: per-tradeID closes (surgical — netting orders FIFO-close
         # other lanes' older fragments)
@@ -364,8 +366,8 @@ def run(expert, dry=False, force=False, consolidate=False):
                 _record(sym, side, close_qty)
                 continue
             done = close_units_by_trade(sym, close_qty)
-            for tid, c in done:
-                _record(sym, side, c, oid=tid)
+            for tid, c, price in done:
+                _record(sym, side, c, price=price, oid=tid)
             print(f"[{my_tag}] CLOSE {sym} {close_qty:.0f}u via {len(done)} tradeID closes")
             if abs(delta) > abs(m):  # flip remainder: market order
                 rem = abs(delta) - abs(m)
@@ -374,14 +376,13 @@ def run(expert, dry=False, force=False, consolidate=False):
                     print(f"[{my_tag}] {sym} flip remainder deferred (foreign net)")
                     continue
                 r = ex.place_order(sym, side2, rem, "market", tag=my_tag,
-                                   client_id=f"{my_tag}-{sym[:8]}-{int(time.time()) % 100000}")
+                                   client_id=f"{my_tag}-{sym[:8]}-{int(time.time() * 1000)}")
                 if r.status == "filled":
                     _record(sym, side2, rem, price=r.price, oid=r.order_id)
                     print(f"[{my_tag}] {side2} {sym} {rem} (flip) -> filled @ {r.price}")
             continue
 
         # pure add/open: market order with the foreign-net guard
-        net = m + f_units
         if f_units != 0 and net != 0 and (delta > 0) != (net > 0):
             print(f"[{my_tag}] {sym} add {delta:+} would reduce foreign-held net "
                   f"({f_units:+} foreign) — deferred (arbitration)")
@@ -393,7 +394,7 @@ def run(expert, dry=False, force=False, consolidate=False):
                   f"(target {delta + m:+.0f}, mine {m:+.0f})")
             continue
         r = ex.place_order(sym, side, qty, "market", tag=my_tag,
-                           client_id=f"{my_tag}-{sym[:8]}-{int(time.time()) % 100000}")
+                           client_id=f"{my_tag}-{sym[:8]}-{int(time.time() * 1000)}")
         if r.status != "filled":
             print(f"[{my_tag}] {side} {sym} {qty} REJECTED ({r.status}) — retried next run")
             continue

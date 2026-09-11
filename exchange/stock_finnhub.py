@@ -22,7 +22,7 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 import pandas as pd
 from urllib.error import URLError

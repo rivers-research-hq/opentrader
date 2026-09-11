@@ -69,6 +69,7 @@ def shadow(state_dir: str, dry: bool = True) -> dict:
         # shadow_mot.py convention: live_router_state_{universe}.json), NOT
         # the harness's live_router_state.json — avoids clobbering the
         # harness's live attribution (audit: single writer per path).
+        p = os.path.join(state_dir, "live_router_state_strategies.json")
         with open(p, "w") as f:
             json.dump(state, f, indent=1)
         print(f"[shadow] wrote {p}")

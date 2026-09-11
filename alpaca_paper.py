@@ -15,7 +15,7 @@ import os
 import sqlite3
 import time
 from urllib.error import URLError
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path

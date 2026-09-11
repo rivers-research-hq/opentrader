@@ -24,7 +24,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 
 logger = logging.getLogger("opentrader.debate")
@@ -493,7 +493,7 @@ class DebateEngine:
             except Exception as e:
                 logger.debug(f"Debate agent finetuned fallback ({model}): {e}")
 
-        from urllib.request import Request, urlopen
+        from urllib.request import Request
         from urllib.error import URLError
 
         acquired = _API_SEMAPHORE.acquire(timeout=DEBATE_TIMEOUT * 2)
@@ -553,7 +553,7 @@ class DebateEngine:
                 logger.warning(f"Debate agent HTTP error ({model}), retrying after 1s: {e}")
                 time.sleep(1.0)
                 try:
-                    from urllib.request import Request, urlopen
+                    from urllib.request import Request
                     req2 = Request(url, data=payload, method="POST")
                     req2.add_header("Content-Type", "application/json")
                     resp2 = urlopen(req2, timeout=DEBATE_TIMEOUT)

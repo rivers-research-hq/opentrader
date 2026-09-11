@@ -7,8 +7,8 @@ directions, date-clustered bootstrap, 3-era OOS, on the full-history registry
 universe. Results go to the evidence ledger. A dataset SURVIVES only if it
 hits >=95th pctile in >=2 of 3 eras with the same sign — the VIX standard.
 """
-from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import pickle
 import sys
@@ -33,8 +33,11 @@ if not REGISTRY.exists():
     REGISTRY = Path("/home/mrc/opentrader-sandbox/data/full_history_registry_rows.pkl")
 
 
-    return sec_pickle_load(open(REGISTRY, "rb"))
-    return pickle.load(open(REGISTRY, "rb"))
+def _load_rows():
+    try:
+        return sec_pickle_load(open(REGISTRY, "rb"))
+    except Exception:
+        return pickle.load(open(REGISTRY, "rb"))
 
 
 def _make_z(series: pd.Series, idx: pd.DatetimeIndex, mode="level"):

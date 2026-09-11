@@ -21,7 +21,7 @@ import re
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 
 from .base import BaseAgent, Signal, AgentContext, register_agent

@@ -9,8 +9,8 @@ into one giant tensor op so the GPU has real work.
 VRAM budget (BF16): registry features 2.7M×11×2B=59MB + 19 series×7525×2B=286KB
 + bootstrap batch 19×6×500×5325×2B=608MB => <1GB of 24GB available.
 """
-from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 from __future__ import annotations
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import pickle
 import sys

@@ -18,9 +18,9 @@ Calibration (#59): sigmoid for value-head outputs — p_edge =
 sigmoid(scale * (v - theta)), clamped to [0.05, 0.95]. mean_impact is tracked
 per (regime, slot) from war/paper relabels for the weighted vote.
 """
-from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
-
 from __future__ import annotations
+
+from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 
 import json
 import time

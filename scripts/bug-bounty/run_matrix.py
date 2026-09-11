@@ -118,7 +118,6 @@ def run_agent(sandbox: Path, timeout: int, ground: dict, model: str,
     start = time.time()
     proc = subprocess.Popen(
         cwd=str(sandbox), stdout=guarded_open(transcript, "w"), stderr=subprocess.STDOUT,
-        cwd=str(sandbox), stdout=open(transcript, "w"), stderr=subprocess.STDOUT,
         text=True,
     )
     found = {}

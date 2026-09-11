@@ -92,7 +92,7 @@ def run(dry=False):
             print(f"[c08] holding {sym} ({age_days}d)")
             continue
         net = _venue_net(ex, sym)
-        if abs(net - mine[sym]["units"]) > 1e-9:
+        if abs(abs(net) - mine[sym]["units"]) > 1e-9:
             print(f"[c08] !! {sym} venue net {net} != ours {mine[sym]['units']} — deferred")
             continue
         if not net:

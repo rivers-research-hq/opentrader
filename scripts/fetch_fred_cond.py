@@ -92,7 +92,12 @@ def main():
     CACHE.write_text(json.dumps(cache, indent=0))
 
     con = duckdb.connect(STORE)
-    con.execute("DELETE FROM exog WHERE series LIKE 'FRED:%'")
+    # Replace only the series actually fetched. The old `DELETE ... LIKE
+    # 'FRED:%'` wiped every FRED series in the store, including ~8 this
+    # script's SERIES list never restores (e.g. the EM-HY OAS the warden
+    # reads) — silent data loss on every run.
+    ph = ",".join(["?"] * len(fetched))
+    con.execute(f"DELETE FROM exog WHERE series IN ({ph})", list(fetched.keys()))
     rows = [{"series": s, "date": d, "value": float(v)}
             for s, vals in fetched_rows(cache, fetched)
             for d, v in vals.items()]

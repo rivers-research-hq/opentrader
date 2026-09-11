@@ -23,10 +23,10 @@ Usage:
     if gate.allow_trading():   # True when VIX z >= threshold (high-vol days)
         ...BUY...
 """
+from __future__ import annotations
 from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 urlopen = guarded_urlopen  # hardening shadow
 open = guarded_open  # hardening shadow
-from __future__ import annotations
 
 import json
 import os
@@ -34,7 +34,7 @@ import pickle
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 import numpy as np
 import pandas as pd

@@ -76,13 +76,9 @@ def _fetch_intl(force: bool = False) -> pd.DataFrame:
         return closes
     except Exception as e:
         print(f"[lanes] yfinance fetch failed ({e}); using static archive")
-        return _intl_archive()
-
-
-    d = pickle.load(open(INTL_ARCHIVE, "rb"))["data"]
-    closes = {s: d[s]["close"] for s in INTL_SYMS if s in d}
-    return pd.DataFrame(closes)
-
+        d = pickle.load(open(INTL_ARCHIVE, "rb"))["data"]
+        closes = {s: d[s]["close"] for s in INTL_SYMS if s in d}
+        return pd.DataFrame(closes)
 
 def _load_basket(force: bool = False) -> pd.DataFrame:
     """13-asset basket closes — forward via yfinance (cached), else tournament."""

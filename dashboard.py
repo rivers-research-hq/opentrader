@@ -590,7 +590,8 @@ def _venue_lane_realized(ex):
     — ledger FIFO pairs closes to the oldest open buy and understates churny
     lanes, so the GUI scoreboard prefers this and falls back to the ledger
     only if the venue walk fails."""
-    from strategies.fx_runner import _trade_tags
+    from strategies.fx_runner import _trade_tags, _walk_transactions
+    from strategies.lane_attribution import resolve_fill_tag, LEGACY_CUTOFF, UNATTRIBUTED
     if not ex:
         return {}, {}
     try:
@@ -598,23 +599,19 @@ def _venue_lane_realized(ex):
         out: dict = {}
         today = datetime.now(timezone.utc).date().isoformat()
         out_today: dict = {}
-        for t in ex._request(
-            "GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"
-        ).get("transactions", []):
+        for t in _walk_transactions(
+            ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
             if t.get("type") != "ORDER_FILL":
                 continue
-            tag = (t.get("clientExtensions") or {}).get("tag") or order_tag.get(t.get("orderID"))
+            tag = resolve_fill_tag(t, tags, order_tag)
             if not tag:
-                for tc in t.get("tradesClosed") or []:
-                    tag = tags.get(str(tc.get("tradeID")))
-                    if tag:
-                        break
-            if not tag:
-                q = abs(float(t.get("units", 0) or 0))
-                if t.get("time", "") < "2026-08-31T18:00":
+                # grandfathered pre-08-31 rows keep the legacy-smoke bucket;
+                # anything newer that fails the chain is UNATTRIBUTED, not
+                # silently credited to mom-k5 (#229 D3).
+                if t.get("time", "") < LEGACY_CUTOFF:
                     tag = "legacy-smoke"
                 else:
-                    tag = "crash" if q >= 5000 else ("h1-mom" if q >= 2000 else "mom-k5")
+                    tag = UNATTRIBUTED
             out.setdefault(tag, 0.0)
             out[tag] += float(t.get("pl", 0) or 0)
             if str(t.get("time", ""))[:10] == today:

@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from .base import ExchangeBase, OHLCV, OrderResult, Balance, register_exchange
 
@@ -252,8 +252,11 @@ class OandaExchange(ExchangeBase):
         if symbol in prices:
             self._price_cache[symbol] = prices[symbol]
             return prices[symbol]
-        # fall back to the last good mark only when the venue gives nothing
-        return self._price_cache.get(symbol)
+        # No fresh price -> return None (callers must handle it). Never hand
+        # out a stale cached mark: _price_cache is untimestamped and get_bars
+        # can leave a day-old bar close there, which re-triggers
+        # STOP_LOSS_ON_FILL_LOSS (the 2026-09-02 phantom entries).
+        return None
 
     def get_prices_batch(self, symbols: list) -> dict:
         """Batch quotes via the account pricing endpoint (one call, up to 50 instruments)."""

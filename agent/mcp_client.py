@@ -9,7 +9,7 @@ urlopen = guarded_urlopen  # hardening shadow
 import json
 import logging
 from typing import Any, Dict, List, Optional
-from urllib.request import Request, urlopen
+from urllib.request import Request
 from urllib.error import URLError
 from urllib.parse import urlencode
 

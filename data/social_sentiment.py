@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.error import URLError
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 logger = logging.getLogger("opentrader.social")
 

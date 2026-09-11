@@ -59,7 +59,7 @@ def check_trails(ex, my_tag, trail_atr=TRAIL_ATR, tp_atr=TP_ATR, dry=False):
     """One trail/TP check: evaluate every open fxexp trade, close triggered
     ones via per-tradeID. Returns list of closed trades."""
     trades = ex._request("GET", f"/v3/accounts/{ex._account_id}/openTrades").get("trades", [])
-    fx = [t for t in trades if ((t.get("clientExtensions") or {}).get("tag") or "").startswith("fxexp-")]
+    fx = [t for t in trades if (t.get("clientExtensions") or {}).get("tag") == my_tag]
     if not fx:
         return []
     atr = load_atr()
