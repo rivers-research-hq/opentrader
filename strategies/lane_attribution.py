@@ -28,10 +28,22 @@ def resolve_fill_tag(t, tags, order_tag):
     tag = (t.get("clientExtensions") or {}).get("tag") or order_tag.get(t.get("orderID"))
     if tag:
         return tag
-    for tc in t.get("tradesClosed") or []:
-        tag = tags.get(str(tc.get("tradeID")))
-        if tag:
-            return tag
+    # Server-side SL/TP and the fxexp lane's per-trade partial closes land as
+    # fills that carry NO extensions of their own — they resolve through the
+    # closed/reduced/opened trade's OPENING-fill tag. tradesClosed is a list;
+    # tradeReduced/tradeOpened are single objects (#250: tradeReduced was the
+    # missing leg — 55 partial-close fills were wrongly "unattributed").
+    for key in ("tradesClosed", "tradeReduced", "tradeOpened"):
+        val = t.get(key)
+        if not val:
+            continue
+        items = val if isinstance(val, list) else [val]
+        for tc in items:
+            tid = (tc or {}).get("tradeID")
+            if tid:
+                tag = tags.get(str(tid))
+                if tag:
+                    return tag
     return None
 
 
