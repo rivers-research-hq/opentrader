@@ -77,12 +77,16 @@ recorded in map #159/#160 (closed out-of-scope) — do not restart that work.
   `--once` to "test".
 - **Ledger**: `data/fx_ledger.jsonl` is append-only. Server-side SL/TP closes
   never produce runner rows — they arrive as tagless `venue-reconciliation`
-  rows and are attributed to lanes **by fill size** (100u→mom-k5/c08,
-  2000u→h1-mom, 5000u→crash). If a lane ever changes size, that matcher
-  breaks (documented in `fx_crashtest.py` and `tui/index.js`). The crash
+  rows and are attributed to lanes by the **shared resolver**
+  (`strategies/lane_attribution.py` `resolve_fill_tag`: clientExtensions →
+  orderID → tradesClosed/tradeReduced/tradeOpened chain), NOT by fill size.
+  The fill-size matcher (100u→mom-k5/c08, 2000u→h1-mom, 5000u→crash) survives
+  only as a grandfathered fallback for pre-08-31 legacy rows (still documented
+  in `tui/index.js`); unresolved post-08-31 rows land in a loud `unattributed`
+  bucket, never silently credited to mom-k5. The crash
   lane's realized comes from the venue journal `pl` (full-lane-epoch recompute
-  in `fx_crashtest.py`), NOT ledger FIFO — FIFO pairs closes to the oldest
-  open buy while the venue closes the newest.
+  in `fx_crashtest.py`, now resolver-attributed too), NOT ledger FIFO — FIFO
+  pairs closes to the oldest open buy while the venue closes the newest.
 - **Adapter rules (exchange/oanda.py)**: `place_order` is truthful — no
   `orderFillTransaction` in the response means REJECTED (venue cancels on
   STOP_LOSS_ON_FILL_LOSS instead of filling into a guaranteed stop-out);
