@@ -26,14 +26,19 @@ STORE = "/home/mrc/opentrader-data/store.duckdb"
 CORPUS = "/home/mrc/opentrader-data/feeds/cbspeeches/corpus.jsonl"
 OUT = "/home/mrc/opentrader-data/feeds/cbspeeches/corpus_labeled.jsonl"
 
-# bank -> pair used for the "vs USD" return. Fed (USD) has no USD pair; its
-# base currency is the dollar itself, so it uses the DXY proxy below or is
-# skipped for the numeric primary task (kept for style/context only).
+# bank -> pair used for the "vs USD" return (banks normalized to UPPERCASE).
+# FED (USD) has no USD pair — its base currency is the dollar itself, so it
+# uses the DXY proxy (broad dollar index) or is skipped for the numeric task.
 BANK_PAIR = {
-    "ECB": "EUR_USD", "BoJ": "USD_JPY", "BoE": "GBP_USD", "RBA": "AUD_USD",
-    "Fed": None,  # USD: no "vs USD" pair — ret via DXY proxy if available
+    "ECB": "EUR_USD", "BOJ": "USD_JPY", "BOE": "GBP_USD", "RBA": "AUD_USD",
+    "FED": None,
 }
 DXY_PROXY = "FRED:DTWEXBGS"  # nominal broad dollar index (if in exog)
+# DXY-style dollar basket (weights) — computed from the FX pairs when the FRED
+# index isn't in the store. Exponent sign: + for USD-quote pairs, - for
+# base-USD pairs (a rising EUR_USD lowers the dollar index).
+DXY_W = [("EUR_USD", -0.576), ("USD_JPY", 0.136), ("GBP_USD", -0.119),
+         ("USD_CAD", 0.091), ("USD_SEK", 0.042), ("USD_CHF", 0.036)]
 
 # stress snapshot series -> output column name (same fields as the warden's
 # instability table): VIX, US HY OAS, EM HY OAS, UST10Y, curve 2s10s
@@ -46,16 +51,33 @@ STRESS_SERIES = {
 }
 
 
+def _compute_dxy(closes):
+    """DXY-style dollar index level per date from the FX pairs (fallback when
+    the FRED index is absent). Unscaled — only ratios matter for returns."""
+    pairs = [p for p, _ in DXY_W if p in closes]
+    if len(pairs) < 4:
+        return {}
+    dates = sorted(set.intersection(*(set(closes[p]) for p in pairs)))
+    dxy = {}
+    for d in dates:
+        v = 1.0
+        for p, w in DXY_W:
+            if p in closes and d in closes[p]:
+                v *= closes[p][d] ** w
+        dxy[d] = v
+    return dxy
+
+
 def _load_closes(con):
     """pair -> {date: close} for D1 bars; also the DXY proxy series."""
-    pairs = {p for p in BANK_PAIR.values() if p}
+    pairs = {p for p in BANK_PAIR.values() if p} | {p for p, _ in DXY_W}
     closes = {}
     for pair in pairs:
         rows = con.execute(
             "SELECT ts, close FROM bars WHERE symbol=? AND timeframe='1d' ORDER BY ts",
             [pair]).fetchall()
         closes[pair] = {str(ts)[:10]: float(c) for ts, c in rows if c is not None}
-    # DXY proxy (daily exog) -> {date: value}
+    # DXY proxy (daily exog) -> {date: value}; fall back to the FX-pair basket
     dxy = {}
     try:
         rows = con.execute(
@@ -64,6 +86,8 @@ def _load_closes(con):
         dxy = {str(d)[:10]: float(v) for d, v in rows if v is not None}
     except Exception:
         pass
+    if not dxy:
+        dxy = _compute_dxy(closes)
     return closes, dxy
 
 
@@ -113,7 +137,7 @@ def main():
             if not line.strip():
                 continue
             doc = json.loads(line)
-            bank = doc.get("bank")
+            bank = (doc.get("bank") or "").upper()
             pair = BANK_PAIR.get(bank)
             date = str(doc.get("date") or "")[:10]
             if not date or len(date) != 10:
@@ -122,18 +146,18 @@ def main():
             ret_1d = ret_5d = None
             if pair and pair in closes:
                 c = closes[pair]
+                prior = sorted(d for d in c if d <= date)
                 later = [d for d in sorted(c) if d > date]
-                if later:
-                    p0 = c.get(date) or c[sorted(d for d in c if d <= date)[-1]]
-                    for i, d in enumerate(later):
-                        if i == 0:
-                            ret_1d = (c[d] / p0 - 1) if p0 else None
-                        if i == 4 and len(later) >= 5:
-                            ret_5d = (c[d] / p0 - 1) if p0 else None
-            elif bank == "Fed" and dxy:
+                if prior and later:
+                    p0 = c.get(date) or c[prior[-1]]
+                    ret_1d = (c[later[0]] / p0 - 1) if p0 else None
+                    if len(later) >= 5:
+                        ret_5d = (c[later[4]] / p0 - 1) if p0 else None
+            elif bank == "FED" and dxy:
+                prior = sorted(d for d in dxy if d <= date)
                 later = [d for d in sorted(dxy) if d > date]
-                if later:
-                    p0 = dxy.get(date) or dxy[sorted(d for d in dxy if d <= date)[-1]]
+                if prior and later:
+                    p0 = dxy.get(date) or dxy[prior[-1]]
                     ret_1d = (dxy[later[0]] / p0 - 1) if p0 else None
                     if len(later) >= 5:
                         ret_5d = (dxy[later[4]] / p0 - 1) if p0 else None
