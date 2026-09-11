@@ -73,17 +73,26 @@ def _load_state():
 
 def _venue_crash_pnl(ex, since_iso):
     """Venue-authoritative crash-lane realized PnL: sum the `pl` of every
-    ORDER_FILL closing a 5,000-unit position since `since_iso`. Crash
-    entries are always BUY UNITS=5000, so exits are fills with units < 0 and
-    abs(units) == UNITS. (Other lanes on this account trade 100-unit sizes;
-    if another lane ever trades 5000, this matcher must grow a tag filter.)"""
+    ORDER_FILL that closes a crash-lane position since `since_iso`.
+
+    Attribution is via the shared lane_attribution resolver (tradeID ->
+    opening-order tag), NOT the retired 5,000-unit size matcher — the resolver
+    distinguishes the crash lane from any other lane regardless of size and
+    correctly books partial closes (a 2,500u reduce is a crash close, not a
+    tagless 2,000u-lane row). (#250: route the crash consumer through the
+    resolver so the experts' evidence base carries correct tags.)"""
+    from strategies.fx_runner import _trade_tags
+    from strategies.lane_attribution import resolve_fill_tag
+    tags, order_tag = _trade_tags(ex)
     total, closes = 0.0, []
     for t in _txns_since(ex, since_iso):
         if t.get("type") != "ORDER_FILL":
             continue
-        units = float(t.get("units", 0))
-        if 0 < abs(units) != UNITS or units >= 0:
+        if resolve_fill_tag(t, tags, order_tag) != TAG:
             continue
+        units = float(t.get("units", 0))
+        if units >= 0:
+            continue  # opening (entry) fills carry no realized pl
         total += float(t.get("pl", 0) or 0)
         closes.append({"time": t.get("time"), "instrument": t.get("instrument"),
                        "price": float(t.get("price", 0)), "pl": float(t.get("pl", 0))})
