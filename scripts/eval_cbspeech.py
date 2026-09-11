@@ -86,9 +86,13 @@ def main():
     hits = json_ok = grounded = 0
     score_base = score_tuned = 0.0
     for d in docs:
-        user = (f"bank: {d.get('bank')} | date: {d.get('date')} | "
-                f"speech: {(d.get('title') or '')[:200]} | text: {(d.get('text') or '')[:800]} | "
-                f"stress: { {k: d.get(k) for k in d if k.startswith('stress_')} }")
+        # prompt format must match train_cbspeech.build_examples() exactly so
+        # the tuned model is evaluated on the task it was trained on
+        stress = {k: d.get(k) for k in d if k.startswith("stress_")}
+        user = (f"bank: {d.get('bank')} | date: {d.get('date')}\n"
+                f"speech title: {(d.get('title') or '')[:200]}\n"
+                f"speech text: {(d.get('text') or '')[:800]}\n"
+                f"stress snapshot: {json.dumps(stress)}")
         out = _call(llm, SYSTEM, user)
         p = _parse(out)
         if p is None:
