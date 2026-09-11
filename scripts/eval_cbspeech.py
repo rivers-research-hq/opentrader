@@ -70,11 +70,14 @@ def main():
     ap.add_argument("--holdout", required=True)
     ap.add_argument("--port", type=int, default=5802)
     ap.add_argument("--year-ge", type=int, default=2025)
+    ap.add_argument("--year-lt", type=int, default=None,
+                    help="optional upper bound (exclusive) on doc year, e.g. 2025 for a 2023-24 val window")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
 
     docs = [json.loads(l) for l in open(a.holdout) if l.strip()]
     docs = [d for d in docs if str(d.get("date", ""))[:4] >= str(a.year_ge)
+            and (a.year_lt is None or str(d.get("date", ""))[:4] < str(a.year_lt))
             and d.get("ret_5d") is not None]
     if a.limit:
         docs = docs[:a.limit]
