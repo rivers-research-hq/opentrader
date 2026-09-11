@@ -4,19 +4,28 @@ Post-mortem backlog from the first full FX week. Markets closed; this is the
 standing work queue for the next open. Each item is a concrete finding with a
 verdict and an owner/next step. Ordered by leverage.
 
-## 1. fxexp — deflated bar not yet cleared (active)
+## 1. fxexp — deflated bar not yet cleared (active, search ran 2026-09-11)
 
-- **Finding:** the leak-free search converges to hp `U` (rank, horizon 10),
-  best g163 PF 1.2774 (IC 0.0306). g164-166 cluster at 1.27 — the search has
-  plateaued just under the deflated bar.
-- **Deflation:** White's Reality Check (population-max bootstrap, demean-to-1.0,
-  131 clean-era gens) gives **p = 0.9821** → does NOT survive. Survival
-  threshold **PF ≥ 1.2892**; g163 is 0.012 short.
-- **Verdict:** no deployable edge yet. The current search round (20 gens,
-  `--refresh`, started 2026-09-11) is probing whether a wider bandit sweep or
-  the rank variants (V/X/AA: vol-target, cost-cap) clear 1.2892.
-- **Owner:** agent. **Next:** deflate the round's best with
-  `scripts/white_reality_check.py`; register only a survivor.
+- **Finding:** the leak-free search converges to hp `U` (rank, horizon 10).
+  Best g163 PF 1.2774 (IC 0.0306) pre-round; the 2026-09-11 round (39 gens,
+  g167–g205) pushed it to **g185 PF 1.2862** (IC 0.0298). The raw gate beats
+  buy-hold (1.144) and the alt-rule (1.0046), but the margin over break-even
+  is thin and the search is plateauing.
+- **Deflation:** White's Reality Check. The script had a **location-invariance
+  bug** (demeaned the population but compared the raw max) that produced a
+  false SURVIVES (p=0.0000) once the population mean crossed 1.0 — fixed
+  (commit 8ed5205) to compare centered statistics. Corrected: **p = 0.63 →
+  DOES NOT SURVIVE** (153 clean-era gens, mean PF 1.0094, sd 0.103, best 2.69σ
+  above mean).
+- **Honest boundary:** the cross-sectional PF bootstrap is degenerate (the
+  observed max is always a member of the null → p ≈ 0.63 regardless). A proper
+  deflation needs the **return-series** White's RC / Hansen SPA (time-period
+  bootstrap), not PF-score resampling. That is the follow-up below.
+- **Verdict:** no promotion. The edge is marginal — best 1.2862 vs break-even,
+  153 evaluations.
+- **Owner:** agent. **Next:** implement return-series WRC (extract daily P&L
+  per generation from `preds_g*.npz` + `gate._simulate`, bootstrap time
+  periods jointly); promote only if p < 0.05 there.
 
 ## 2. CB-speech Warden fine-tune — thesis dead (closed, infrastructure kept)
 
