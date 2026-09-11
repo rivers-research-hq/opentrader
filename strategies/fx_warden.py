@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """fx_warden — the local-model lane monitor (human directive 2026-09-08).
 
-A bounded local-LLM lane (Qwen3.8-4B on the RTX 3070, :5802) that watches
+A bounded local-LLM lane (Granite 4.2-8B on the RX 7900 GRE, :5802) that watches
 every active FX lane, takes structured notes, and sets each lane's
 EXPECTED performance for the period — conditioned on the news feeds — so
 that scoring is expectation-adjusted: a lane that was expected to do badly
