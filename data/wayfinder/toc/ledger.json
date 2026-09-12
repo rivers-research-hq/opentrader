@@ -284,6 +284,12 @@
       "status": "computable",
       "desc": "fxexpert deflated bar (White's Reality Check, return-series, implemented 2026-09-11 per #245): NO clean-era generation survives. Era-matched 89-gen population, joint stationary-block bootstrap (block 20d, B=20k): observed max PF 1.2923 (g185, 1.122 bps/day) -> RC p(mean)=0.198, p(PF)=0.119; needs >=2.00 bps/day for p<0.05. Block 5-60d: p(PF) 0.099-0.130. Registered experts: g151 p(PF)=0.137, g137 0.155, g138 0.182. Calibrated on synthetic nulls (RC 0.050 at alpha=0.05, PF-null 0.113 at alpha=0.10); studentized variants liberal, diagnostic only. NO promotion; the raw gate PASS is a best-of-89 selection.",
       "bounds": "scripts/white_reality_check.py; data/fx_expert/wrc_return_series.json; tests/test_wrc_calibration.py"
+    },
+    {
+      "id": "V-PANEL2",
+      "status": "computable",
+      "desc": "fxexpert panel v2 round (pre-registered 2026-09-12, #243): the panel's exogenous blocks were nearly vacuous (rate_diff 0.0%, events_5d 0.0%, carry 7.4% of rows; cause: FRED-vs-ISO currency-code mismatch in two joins + 6/58 carry coverage). Repaired + extended from BIS daily policy rates (18 ccy), FRED curve/real/copper, lake gold, commodity ToT: carry now 65%, events 67%, rate 65%, ToT 15%. RESULT: all 8 pre-registered generations FAIL the raw gate (best PF 1.0225); matched fresh-init v1 controls score 1.0202/0.9919 -> the new information is worth ~0.00-0.002 PF. Weight-transfer from g185 onto the 61-feature panel recovered the IC (0.029-0.033) but not the PF (1.03 vs 1.286). POPULATION FINDING: corr(IC,PF)=0.168 over 101 gens; within IC quartiles PF spans 0.76-1.29 -> the PF>=1.05 gate bar is dominated by variance unrelated to signal quality. Deflation over the combined population still kills the winner (RC p(mean)=0.198, p(PF)=0.119). NO promotion.",
+      "bounds": "docs/agents/research/fx-panel-v2-preregistration-2026-09-12.md (+addendum); scripts/panel_v2_probe.py; scripts/fxexp_round_v2.py; data/fx_expert/panel_v2.npz; data/fx_expert/wrc_return_series.json"
     }
   ],
   "openQuestions": [
@@ -442,6 +448,12 @@
       "id": "Q26",
       "text": "Search-history reproducibility: 10 of 153 clean-era generations (g124-g136, the mid-search thr_cont/rank fix boundary) have recorded PFs that do not reproduce from their own stored artifacts (deltas +0.10..+0.17). Annotate the stale rows (sidecar, never rewrite history.jsonl) and add a re-score assertion to the loop write path. Ref hardening backlog item 7.",
       "createdAt": "2026-09-12T02:08:23.291Z",
+      "status": "open"
+    },
+    {
+      "id": "Q27",
+      "text": "GATE BAR (HITL): the fxexpert promotion bar PF>=1.05 is dominated by variance unrelated to signal quality — corr(IC,PF)=0.168 over 101 generations, and within an IC quartile PF spans 0.76-1.29 (two models at IC 0.0291/0.0298 score PF 1.034 and 1.286). The weight-transfer test (g221: IC 0.0291, PF 1.034) shows the same signal quality converting to wildly different PF. Decide: replace/augment the bar with a lower-variance criterion (IC-based, or IC+PF composite, or a longer-horizon book with lower PF variance), and re-specify what the deflated correction then evaluates. Ref V-PANEL2, V-WRC.",
+      "createdAt": "2026-09-12T05:17:45.699Z",
       "status": "open"
     }
   ],

@@ -103,7 +103,8 @@ def _fit(X_tr, y_tr, X_val, y_val, hp, warm_state, seed, T=T_WINDOW):
     return model, best_val
 
 
-def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None):
+def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None,
+                   warm_states=None):
     """One walkforward. Warm start: fold fi inherits ONLY fold fi of the
     warm generation (same train window) — sharing the last fold's weights
     across folds leaked future data into earlier folds (caught 2026-09-06,
@@ -145,6 +146,8 @@ def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None)
             if p.exists():
                 warm_by_fold[fi] = torch.load(p, map_location=DEVICE,
                                               weights_only=True)["state_dict"]
+    if warm_states:  # explicit fold->state_dict, e.g. a checkpoint transferred
+        warm_by_fold.update(warm_states)  # across a feature-count change
 
     g = {"tag": tag, "hp": hp, "device": str(DEVICE), "params": None,
          "horizon": horizon, "folds": [], "warm_from": warm_tag}

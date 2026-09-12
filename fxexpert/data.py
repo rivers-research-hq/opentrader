@@ -30,6 +30,34 @@ COST_CROSS = 0.00018
 COST_EM = 0.00050
 G10 = {"USD", "EUR", "GBP", "JPY", "AUD", "NZD", "CAD", "CHF"}
 
+# ISO currency -> BIS policy-rate area (RATEBIS:* in the store; fetched by
+# scripts/fetch_policy_rates.py). SGD is absent by design: Singapore's policy
+# is the S$NEER band, not a rate — SGD pairs carry a masked carry block.
+BIS_AREA = {"USD": "US", "EUR": "XM", "GBP": "GB", "JPY": "JP", "AUD": "AU",
+            "NZD": "NZ", "CAD": "CA", "CHF": "CH", "SEK": "SE", "NOK": "NO",
+            "CZK": "CZ", "HUF": "HU", "PLN": "PL", "TRY": "TR", "ZAR": "ZA",
+            "CNH": "CN", "THB": "TH", "MXN": "MX"}
+
+# Calendar-feed currency codes (nfs.faireconomy.media) -> ISO. The event join
+# used ISO codes against these codes, so it never matched (17,960 high-impact
+# events invisible). SP/BE/WW are not traded here and are ignored.
+FF_CCY = {"US": "USD", "EZ": "EUR", "UK": "GBP", "JN": "JPY", "SZ": "CHF",
+          "CH": "CNH", "CA": "CAD", "AU": "AUD", "NZ": "NZD"}
+ISO_FF = {iso: code for code, iso in FF_CCY.items()}
+
+# Commodity terms-of-trade baskets (heuristic weights, labeled as such):
+# net-export exposure per currency. Only currencies with an unambiguous
+# commodity story carry weights; an empty basket means the pair's ToT block is
+# masked rather than zero-filled.
+TOT_BASKET = {
+    "AUD": {"iron": 0.5, "copper": 0.5},
+    "NZD": {"dairy": 1.0},
+    "CAD": {"oil": 1.0},
+    "NOK": {"oil": 1.0},
+    "ZAR": {"gold": 0.5, "iron": 0.5},
+    "JPY": {"oil": -1.0},       # classic commodity importer
+}
+
 
 def pair_cost(pair):
     a, b = pair.split("_")
@@ -50,7 +78,7 @@ def _rsi(close, n=14):
 
 
 def _pair_features(pair, bars, carry_s, rate_base, rate_quote, cot_z, ev_cnt,
-                   h1p=None, fred_map=None):
+                   h1p=None, fred_map=None, carry_pv=None, tot_pair=None):
     c = bars["close"].astype(float)
     h = bars["high"].astype(float)
     lo = bars["low"].astype(float)
@@ -106,6 +134,30 @@ def _pair_features(pair, bars, carry_s, rate_base, rate_quote, cot_z, ev_cnt,
     f["rate_diff_chg20"] = rd.diff(20) if rd is not None else np.nan
     f["rate_mask"] = f["rate_diff"].notna().astype(float)
 
+    # panel v2: policy-rate carry for every pair the rate table covers
+    # (pre-registered 2026-09-12; the old CARRY:* block reached 6 pairs).
+    if carry_pv is not None and len(carry_pv):
+        cp = carry_pv.reindex(bars.index)
+        f["pv_carry"] = cp
+        mu = carry_pv.rolling(252, min_periods=60).mean()
+        sd = carry_pv.rolling(252, min_periods=60).std().replace(0, np.nan)
+        f["pv_carry_z"] = ((carry_pv - mu) / sd).reindex(bars.index)
+        f["pv_carry_chg20"] = carry_pv.diff(20).reindex(bars.index)
+    else:
+        for col in ("pv_carry", "pv_carry_z", "pv_carry_chg20"):
+            f[col] = np.nan
+    f["pv_carry_mask"] = f["pv_carry"].notna().astype(float)
+
+    # panel v2: commodity terms of trade, base vs quote basket
+    if tot_pair is not None and len(tot_pair):
+        tp = tot_pair.reindex(bars.index)
+        f["pv_tot_diff"] = tp
+        f["pv_tot_chg20"] = tot_pair.diff(20).reindex(bars.index)
+    else:
+        f["pv_tot_diff"] = np.nan
+        f["pv_tot_chg20"] = np.nan
+    f["pv_tot_mask"] = f["pv_tot_diff"].notna().astype(float)
+
     f["cot_z"] = cot_z.reindex(bars.index) if cot_z is not None else np.nan
     f["cot_mask"] = f["cot_z"].notna().astype(float)
 
@@ -144,7 +196,22 @@ def _pair_features(pair, bars, carry_s, rate_base, rate_quote, cot_z, ev_cnt,
     return f, lab
 
 
-def build(store=STORE, out_dir=OUT_DIR):
+def _lake_series(name):
+    """Daily series from the local accumulator lake (parquet, DatetimeIndex,
+    `value` column). Used for gold — FRED discontinued its gold fix series."""
+    p = Path(__file__).resolve().parent.parent / "data" / "accumulator" / "lake" / f"{name}.parquet"
+    if not p.exists():
+        return None
+    try:
+        df = pd.read_parquet(p)
+        s = pd.Series(df["value"].to_numpy(dtype=float),
+                      index=pd.DatetimeIndex(df.index).floor("D"))
+        return s.groupby(level=0).last()
+    except Exception:
+        return None
+
+
+def build(store=STORE, out_dir=OUT_DIR, out_name="panel.npz"):
     out_dir.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect(store, read_only=True)
     pairs = [r[0] for r in con.execute(
@@ -152,38 +219,89 @@ def build(store=STORE, out_dir=OUT_DIR):
 
     def exog_series(name):
         rows = con.execute(
-            "SELECT CAST(date AS DATE) d, value FROM exog WHERE series = ? ORDER BY d",
+            "SELECT CAST(date AS DATE) d, value FROM exog "
+            "WHERE series = ? AND value IS NOT NULL ORDER BY d",
             [name]).fetchall()
         if not rows:
             return None
         s = pd.Series({pd.Timestamp(d): float(v) for d, v in rows})
         return s.groupby(level=0).last()
 
-    rates = {cc: exog_series(f"RATE:{cc}") for cc in ("US", "EA", "GB", "CA")}
+    # Policy rates for every traded currency. BIS daily legs are primary; the
+    # older FRED-derived RATE:* legs are a fallback only. The v1 panel keyed
+    # this table US/EA/GB/CA while pairs carry ISO codes, so `rate_diff` was
+    # dead for every pair (0.0% non-zero) — fixed 2026-09-12.
+    rates = {}
+    for iso, area in BIS_AREA.items():
+        s = exog_series(f"RATEBIS:{area}")
+        if s is not None:
+            rates[iso] = s
+    for cc, iso in (("US", "USD"), ("EA", "EUR"), ("GB", "GBP"), ("CA", "CAD")):
+        if iso not in rates:
+            s = exog_series(f"RATE:{cc}")
+            if s is not None:
+                rates[iso] = s
+    # lag 1 day: the BIS file is compiled from central banks and published
+    # after the fact; the value in effect on day T is used for day T+1
+    # decisions (same discipline as the FRED conditioning block).
+    rates = {iso: s.shift(1) for iso, s in rates.items()}
+    print(f"[data] policy rates for {len(rates)} currencies: "
+          f"{', '.join(sorted(rates))}")
     cots = {cc: exog_series(f"COT:{cc}")
             for cc in ("EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD")}
 
     # FRED conditioning: causal rolling z on the calendar, then the
     # publication lag (daily series 1d, monthly prints 15d — a monthly value
     # for month M is public mid-M+1; conservative either way)
-    MONTHLY = {"FRED:PIORECRUSDM", "FRED:PNGASEUUSDM"}
+    MONTHLY = {"FRED:PIORECRUSDM", "FRED:PNGASEUUSDM", "FRED:PCOPPUSDM"}
     FRED_NAMES = {"FRED:VIXCLS": "fred_vix_z", "FRED:BAMLH0A0HYM2": "fred_hy_z",
                   "FRED:USEPUINDXD": "fred_epu_z", "FRED:DCOILWTICO": "fred_wti_z",
-                  "FRED:PIORECRUSDM": "fred_iron_z", "FRED:PNGASEUUSDM": "fred_ttf_z"}
+                  "FRED:PIORECRUSDM": "fred_iron_z", "FRED:PNGASEUUSDM": "fred_ttf_z",
+                  # panel v2 (pre-registered 2026-09-12): dollar / policy-path
+                  # state. DGS10 and T10Y2Y were in the store but never wired
+                  # into the panel; DGS2 and DFII10 are new legs.
+                  "FRED:DGS2": "fred_dgs2_z", "FRED:DGS10": "fred_dgs10_z",
+                  "FRED:T10Y2Y": "fred_curve_z", "FRED:DFII10": "fred_real10_z"}
     cal = pd.date_range("2005-01-01", "2026-12-31", freq="D").as_unit("ns")
+
+    def _z(ser, monthly=False):
+        sd = ser.reindex(cal).shift(15 if monthly else 1)
+        mu = sd.rolling(252, min_periods=60).mean()
+        sds = sd.rolling(252, min_periods=60).std().replace(0, np.nan)
+        return (sd - mu) / sds
+
     fred_map = {}
     for sid, name in FRED_NAMES.items():
         ser = exog_series(sid)
-        if ser is None:
-            continue
-        sd = ser.reindex(cal)
-        sd = sd.shift(15 if sid in MONTHLY else 1)
-        mu = sd.rolling(252, min_periods=60).mean()
-        sds = sd.rolling(252, min_periods=60).std().replace(0, np.nan)
-        fred_map[name] = (sd - mu) / sds
+        if ser is not None:
+            fred_map[name] = _z(ser, sid in MONTHLY)
     if "fred_wti_z" in fred_map:
         wti = exog_series("FRED:DCOILWTICO").reindex(cal).shift(1)
         fred_map["fred_wti_chg20"] = wti.pct_change(20).clip(-0.5, 0.5)
+
+    # panel v2: commodity prices for the terms-of-trade baskets. Same lag
+    # discipline as the FRED block (daily 1d, monthly 15d).
+    comm = {}
+    for key, sid in (("oil", "FRED:DCOILWTICO"), ("copper", "FRED:PCOPPUSDM"),
+                     ("iron", "FRED:PIORECRUSDM"), ("dairy", "FRED:PNGASEUUSDM")):
+        ser = exog_series(sid)
+        if ser is not None:
+            comm[key] = _z(ser, sid in MONTHLY)
+    gld = _lake_series("etf.GLD")
+    if gld is not None:
+        comm["gold"] = _z(gld)
+    print(f"[data] commodity legs: {', '.join(sorted(comm))}")
+
+    def tot_index(weights):
+        """Weighted z-composite of a currency's commodity basket; None when
+        any leg is unavailable (masked downstream rather than zero-filled)."""
+        if not weights or any(k not in comm for k in weights):
+            return None
+        out = None
+        for k, w in weights.items():
+            term = comm[k] * w
+            out = term if out is None else out + term
+        return out
 
     # H1-derived daily aggregates (intraday structure the D1 bars hide)
     h1 = con.execute("""
@@ -221,8 +339,9 @@ def build(store=STORE, out_dir=OUT_DIR):
         total = pd.Series(0.0, index=cal)
         hit = False
         for cur in currencies:
-            if cur in ev_daily:
-                s = pd.Series(ev_daily[cur]).groupby(level=0).sum()
+            code = ISO_FF.get(cur)  # calendar feed codes, not ISO (v1 joined
+            if code in ev_daily:    # ISO against these -> events_5d was all 0)
+                s = pd.Series(ev_daily[code]).groupby(level=0).sum()
                 total = total.add(s.reindex(cal).fillna(0), fill_value=0)
                 hit = True
         if not hit:
@@ -242,16 +361,18 @@ def build(store=STORE, out_dir=OUT_DIR):
         bars = bars.groupby("ts").last()
         base, quote = pair.split("_")
         carry_s = exog_series(f"CARRY:{pair}")
-        rb = rates.get(base)
-        rq = rates.get(quote)
-        if rb is not None and rq is not None:
-            rate_base, rate_quote = rb, rq
-        elif rb is not None:
-            rate_base, rate_quote = rb, None
-        elif rq is not None:
-            rate_base, rate_quote = rq, None
-        else:
-            rate_base, rate_quote = None, None
+        rate_base, rate_quote = rates.get(base), rates.get(quote)
+        # panel v2: carry (policy-rate differential) for every covered pair;
+        # the legacy pair-level CARRY leg is a fallback where BIS has no rate.
+        carry_pv = (rate_base - rate_quote) if (rate_base is not None and
+                                                rate_quote is not None) else carry_s
+        tb, tq = TOT_BASKET.get(base), TOT_BASKET.get(quote)
+        tot_pair = None
+        if tb or tq:
+            sb = tot_index(tb) if tb else pd.Series(0.0, index=cal)
+            sq = tot_index(tq) if tq else pd.Series(0.0, index=cal)
+            if sb is not None and sq is not None:
+                tot_pair = sb - sq
         cot = None
         if base in cots:
             cot = cots[base]
@@ -261,7 +382,8 @@ def build(store=STORE, out_dir=OUT_DIR):
 
         f, lab = _pair_features(pair, bars, carry_s, rate_base, rate_quote,
                                 cot, evc, h1p=h1_by_pair.get(pair),
-                                fred_map=fred_map)
+                                fred_map=fred_map, carry_pv=carry_pv,
+                                tot_pair=tot_pair)
         feats.append(f)
         lab["pair_idx"] = pi
         lab["cost"] = pair_cost(pair)
@@ -277,6 +399,13 @@ def build(store=STORE, out_dir=OUT_DIR):
     xs = F[["mom_5d", "mom_20d", "mom_60d", "vol_20d", "rsi_14"]].groupby(level=0).mean()
     xs.columns = ["xs_mom5", "xs_mom20", "xs_mom60", "xs_vol20", "xs_rsi_mean"]
     F = F.join(xs, how="left")
+    # panel v2: cross-sectionally demeaned carry and ToT — what a
+    # dollar-neutral rank book actually harvests (levels include the common
+    # USD leg, which nets out of a neutral book).
+    F["pv_carry_xs"] = (F["pv_carry"]
+                        - F["pv_carry"].groupby(level=0).transform("mean"))
+    F["pv_tot_xs"] = (F["pv_tot_diff"]
+                      - F["pv_tot_diff"].groupby(level=0).transform("mean"))
     L = pd.concat(labs)
     dates = F.index
     feat_names = list(F.columns)
@@ -300,20 +429,31 @@ def build(store=STORE, out_dir=OUT_DIR):
         "mom20": L["mom20"].to_numpy(dtype=np.float32),
         "cost": L["cost"].to_numpy(dtype=np.float32),
     }
-    np.savez_compressed(out_dir / "panel.npz", **panel)
+    np.savez_compressed(out_dir / out_name, **panel)
     meta = {
         "pairs": meta_rows, "n_rows": len(X), "n_features": len(feat_names),
         "feature_names": feat_names, "nan_filled": nan_before,
         "date_min": str(dates.min().date()), "date_max": str(dates.max().date()),
         "cost_model": {"majors": COST_MAJORS, "em": COST_EM,
                        "note": "heuristic round-trip return cost"},
+        "policy_rate_currencies": sorted(rates),
+        "commodity_legs": sorted(comm),
     }
-    (out_dir / "panel_meta.json").write_text(json.dumps(meta, indent=1))
+    meta_path = out_dir / out_name.replace(".npz", "_meta.json")
+    meta_path.write_text(json.dumps(meta, indent=1))
     print(f"[data] panel: {len(X)} rows x {len(feat_names)} features, "
           f"{len(meta_rows)} pairs, {meta['date_min']} -> {meta['date_max']}, "
-          f"nan-filled {nan_before}")
+          f"nan-filled {nan_before} -> {out_dir / out_name}")
     return meta
 
 
 if __name__ == "__main__":
-    build()
+    import argparse
+    ap = argparse.ArgumentParser(description="Build the fxexpert training panel")
+    ap.add_argument("--out", default="panel.npz",
+                    help="output file under data/fx_expert (panel_v2.npz for the "
+                         "pre-registered 2026-09-12 round; panel.npz is the live "
+                         "panel the running lanes' checkpoints match)")
+    ap.add_argument("--store", default=STORE)
+    a = ap.parse_args()
+    build(store=a.store, out_name=a.out)

@@ -35,6 +35,10 @@ ALLOWED_HOSTS = {
     # macro / calendar / research feeds
     "fred.stlouisfed.org", "nfs.faireconomy.media", "api.stlouisfed.org",
     "data.bis.org", "www.bis.org", "api.worldbank.org", "www.worldbank.org",
+    # BIS statistical API (SDMX v1) — daily central-bank policy rates for the
+    # fxexpert panel's carry block (scripts/fetch_policy_rates.py, added
+    # 2026-09-12). Same publisher as data.bis.org/www.bis.org above.
+    "stats.bis.org",
     "export.arxiv.org", "arxiv.org", "rss.app", "api.github.com",
     # news / event research feeds (map #187 #203/#204: FF week pages + MOF
     # intervention CSV — added 2026-09-05, ticket #203/#204)

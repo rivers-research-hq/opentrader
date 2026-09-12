@@ -49,7 +49,14 @@ SERIES = ["VIXCLS", "BAMLH0A0HYM2", "USEPUINDXD", "DCOILWTICO",
           # instability watch v0.2: sovereign/curve/corporate stress
           "DGS10",          # US 10Y treasury yield (govt)
           "T10Y2Y",         # 2s10s curve (recession/stress shape)
-          "BAMLEMHYHYLCRPIOAS"]  # EM corporate HY OAS (brewing EM stress)
+          "BAMLEMHYHYLCRPIOAS",  # EM corporate HY OAS (brewing EM stress)
+          # panel v2 (pre-registered 2026-09-12): dollar/rates state + copper
+          "DGS2",           # US 2Y — policy-expectation proxy
+          "DGS5",           # US 5Y
+          "DFII5",          # US 5Y real (TIPS) yield
+          "DFII10",         # US 10Y real yield — dollar factor
+          "PCOPPUSDM",      # copper — AUD/ZAR terms of trade (monthly)
+          ]
 
 
 def fetch(sid):

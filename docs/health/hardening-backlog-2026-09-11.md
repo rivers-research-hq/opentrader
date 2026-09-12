@@ -130,10 +130,54 @@ verdict and an owner/next step. Ordered by leverage.
   have the loop's write path assert that a recorded row re-scores to itself,
   so a gate-code change can never silently invalidate history again.
 
+## 8. Panel v2: the exogenous layer was dead; repairing it did not add edge (closed)
+
+- **Finding (2026-09-12):** the training panel's exogenous blocks were nearly
+  vacuous — `rate_diff` 0.0% non-zero, `events_5d` 0.0%, `carry` 7.4%, `cot_z`
+  14.9%. Two joins were broken by currency-code mismatch: the rate table was
+  keyed `US/EA/GB/CA` (FRED codes) against ISO pair codes, and the event table
+  is keyed `JN/SZ/UK/EZ/CH` (calendar-feed codes) against ISO. The model had
+  been fitting price-derived features almost exclusively while the docs
+  claimed carry/rate/COT blocks.
+- **Repaired + extended:** BIS daily central-bank policy rates for 18 of the 19
+  currencies (SGD has no policy rate by design) via
+  `scripts/fetch_policy_rates.py`; FRED `DGS2/DGS5/DFII5/DFII10/PCOPPUSDM`;
+  gold from the accumulator lake; commodity terms-of-trade baskets for
+  AUD/NZD/CAD/NOK/ZAR/JPY. Coverage now: carry 65%, rate_diff 65%,
+  events_5d 67%, ToT 15% (commodity pairs only), curve/real 60%. Panel v2 =
+  61 features, built to `panel_v2.npz` (the live `panel.npz` and the running
+  lanes' checkpoints are untouched).
+- **Verdict:** NO promotion and no measurable gain. All 8 pre-registered
+  generations FAIL the raw gate (best PF 1.0225); matched fresh-init controls
+  on the v1 panel score 1.0202/0.9919, so the new information is worth
+  ≈0.00–0.002 PF. A weight-transfer test (g185 → 61-feature model) recovered
+  the IC (0.029–0.033) but not the PF (1.03 vs 1.286).
+- **The round's own defect:** hp `U/V/X/AA` differ only in the position rule;
+  with fresh init and one seed they train identical weights, so 8 evaluations
+  were 4 distinct models. Recorded in the pre-registration addendum.
+- **Docs:** `docs/agents/research/fx-panel-v2-preregistration-2026-09-12.md`
+  (+ addendum with the results).
+- **Owner:** done (agent).
+
+## 9. The gate's PF bar is noise-dominated (open — the leverage item)
+
+- **Finding:** across the 101-generation 58-pair population, corr(IC, PF) =
+  **0.168**, and within an IC quartile PF spans 0.76–1.29 (the
+  0.0291–0.0309 quartile: mean 1.063, sd 0.156). Two models with essentially
+  the same IC (0.0291 vs 0.0298) score PF 1.034 and 1.286.
+- **Consequence:** the search has been selecting variance unrelated to signal
+  quality. This is *why* the deflated bar kills the winner (p(PF) = 0.119) and
+  why new information cannot register in the metric — and it retires the
+  standing assumption that a PF≥1.05 PASS means anything about expected return.
+- **Owner:** human (grilling). **Next:** choose the bar (IC-based, IC+PF
+  composite, or a longer-horizon/lower-variance book), then re-specify what the
+  deflated correction evaluates. Ref ToC `V-PANEL2`, `V-WRC`, open Q27.
+
 ---
 
-**Status at 2026-09-12:** items 3, 5, 6 closed; item 2 closed-NO-GO; item 1
-closed-NO-promotion (deflated bar implemented, nothing survives); items 4 and
-7 open. The live fxexp tournament (g151/g138/g137, cron 21:25/21:35/21:45 UTC
-weekdays) is unchanged — the deflation bears on *promotion*, not on the
-running paper accrual.
+**Status at 2026-09-12:** items 3, 5, 6, 8 closed; item 2 closed-NO-GO; item 1
+closed-NO-promotion (deflated bar implemented, nothing survives); items 4, 7
+and 9 open — **item 9 is the leverage item**. The live fxexp tournament
+(g151/g138/g137, cron 21:25/21:35/21:45 UTC weekdays) is unchanged — the
+deflation and the v2 round bear on *promotion*, not on the running paper
+accrual.
