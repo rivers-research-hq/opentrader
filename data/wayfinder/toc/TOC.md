@@ -14,7 +14,7 @@
 | chapter | est. tokens | size | staleness | status |
 |---|--:|--:|--:|---|
 | 01-scope.md | 699 | 2.8 KB | 14d ago | hand-written |
-| 02-variables.md | 4425 | 17.3 KB | just now | rendered from ledger |
+| 02-variables.md | 4425 | 17.3 KB | 2m ago | rendered from ledger |
 | 03-plan.md | 266 | 1.0 KB | 9d ago | hand-written |
 
 ## Raw findings log (append-only, never compacted away)
@@ -52,8 +52,9 @@ last: `checkpoints/ckpt-04.md` (verified)
 - Q24: Simulated trail/TP LIVE: fx_trail_check.py every 5min via systemd timer. Per-leg peak/trough tracked in trail state, ATR from store, closes triggered legs via per-tradeID surgical close (no server-side SL/TP orders). Defaults: trail 2ATR, TP 3ATR. First run 0 exits (expected — fresh book). The A/B tested uniform stops; this is the per-leg selective version. Ref fx-warden doc
 - Q25: fxexpert search continuation: the 2026-09-11 round (g167-g188) plateaued at PF ~1.28-1.29 and NO generation survives the deflated bar (WRC p(PF)=0.119, needs >=2.00 bps/day vs 1.12). Stop the search vs change the information set (new inputs) vs accept ledger-accrual-only evidence? Human decision. Ref V-WRC, docs/health/hardening-backlog-2026-09-11.md item 1.
 - Q26: Search-history reproducibility: 10 of 153 clean-era generations (g124-g136, the mid-search thr_cont/rank fix boundary) have recorded PFs that do not reproduce from their own stored artifacts (deltas +0.10..+0.17). Annotate the stale rows (sidecar, never rewrite history.jsonl) and add a re-score assertion to the loop write path. Ref hardening backlog item 7.
+- Q28: Forward-accrual promotion test is PRE-REGISTERED (docs/agents/research/forward-accrual-promotion-preregistration-2026-09-12.md): per-lane forward mean daily net return from venue-resolver fills, 120 trading days, one-sided bootstrap p<0.05 + >=20 closed round trips, k-lane max-statistic deflated by White's RC (B=20k, block 20d). Candidates fixed now: fx-expert-g185/g163 (registered, NO LANE WIRED - wiring is the human-gated next step) and the live demo lanes g151/g138/g137 (running since 2026-09-06). 0 of 120 days elapsed. Ref V-GATE.
 
 ---
 
-_generated 2026-09-12T06:34:09.046Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
+_generated 2026-09-12T06:36:53.281Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
 

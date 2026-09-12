@@ -461,6 +461,12 @@
       "text": "GATE BAR (HITL): the fxexpert promotion bar PF>=1.05 is dominated by variance unrelated to signal quality — corr(IC,PF)=0.168 over 101 generations, and within an IC quartile PF spans 0.76-1.29 (two models at IC 0.0291/0.0298 score PF 1.034 and 1.286). The weight-transfer test (g221: IC 0.0291, PF 1.034) shows the same signal quality converting to wildly different PF. Decide: replace/augment the bar with a lower-variance criterion (IC-based, or IC+PF composite, or a longer-horizon book with lower PF variance), and re-specify what the deflated correction then evaluates. Ref V-PANEL2, V-WRC.",
       "createdAt": "2026-09-12T05:17:45.699Z",
       "status": "closed"
+    },
+    {
+      "id": "Q28",
+      "text": "Forward-accrual promotion test is PRE-REGISTERED (docs/agents/research/forward-accrual-promotion-preregistration-2026-09-12.md): per-lane forward mean daily net return from venue-resolver fills, 120 trading days, one-sided bootstrap p<0.05 + >=20 closed round trips, k-lane max-statistic deflated by White's RC (B=20k, block 20d). Candidates fixed now: fx-expert-g185/g163 (registered, NO LANE WIRED - wiring is the human-gated next step) and the live demo lanes g151/g138/g137 (running since 2026-09-06). 0 of 120 days elapsed. Ref V-GATE.",
+      "createdAt": "2026-09-12T06:36:53.279Z",
+      "status": "open"
     }
   ],
   "history": [
