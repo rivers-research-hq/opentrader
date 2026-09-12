@@ -77,13 +77,17 @@ def _save_state(s):
 
 
 def _pick_hp(state, rng):
-    """Exploit on mean OOS net PF (the gate metric); IC can't see the
-    position-rule/cost knobs. Explore with prob EPS."""
-    rec = {k: v for k, v in state["bandit"].items() if v["runs"] > 0 and v.get("pf_sum") is not None}
+    """Exploit on mean OOS IC. Re-specified 2026-09-12: the old rule exploited
+    on mean net PF — the population study measured PF/Sharpe/mean-return to be
+    one statistic (rho >= 0.985) that does not persist across periods
+    (year-to-year Spearman +0.02, first/second half -0.23). IC is used here as
+    a search heuristic, not as evidence (its own half-sample persistence is
+    ~0.06). Explore with prob EPS."""
+    rec = {k: v for k, v in state["bandit"].items() if v["runs"] > 0 and v.get("ic_sum") is not None}
     if not rec or rng.random() < EPS:
         name = str(rng.choice(sorted(HPARAMS)))
         return name, HPARAMS[name]
-    name = max(rec, key=lambda k: rec[k]["pf_sum"] / rec[k]["runs"])
+    name = max(rec, key=lambda k: rec[k]["ic_sum"] / rec[k]["runs"])
     return name, HPARAMS[name]
 
 
@@ -104,9 +108,12 @@ def _register_expert(tag, pf, ic):
             venue="oanda-practice", universe="16-pair accrual store D1",
             source=f"fxexpert loop generation {tag} (OOS PF {pf}, IC {ic})",
             accrual_ledger=str(ledger.relative_to(OUT_DIR.parent.parent)),
-            promotion_bar="OOS walkforward PF>=1.05 beating buy-hold/RSI-MR/mom20/random, "
-                          ">=2/3 folds IC>0, >=2000 pair-days; live requires human signoff "
-                          "after forward shadow accrual",
+            promotion_bar="Eligibility 2026-09-12 (#257): OOS IC>0 with >=2/3 folds "
+                          "positive, net mean return >0 after costs, dollar-neutral book, "
+                          ">=2000 pair-days, beats the random control. NO backtest "
+                          "promotion: PF/Sharpe/mean-return are one statistic that does "
+                          "not persist across periods. Promotion = forward shadow "
+                          "accrual; lane wiring requires human signoff (ADR-0009 §4).",
             notes="fxexpert recursive loop v0.1; numeric branch (prices/carry/rates/COT/events)",
             registered_by="agent")
         return True
@@ -166,20 +173,24 @@ def main(generations=1, refresh=False, seed=11, do_register=True, hp_queue=()):
 
         m = res["model"]
         ic = g["aggregate"]["ic_mean"]
-        passed = res["gate"]["verdict"] == "PASS"
-        better = passed and (state["best"] is None or m["pf"] > state["best"]["pf"])
+        # 2026-09-12: no backtest ranking decides anything. Eligibility is a
+        # coherence check; registering means "accrue in shadow", and promotion
+        # is the forward ledger's job (ADR-0009 §3-4).
+        eligible = res["gate"]["verdict"] == "ELIGIBLE"
+        registered = False
+        if eligible and do_register:
+            registered = _register_expert(tag, m["pf"], ic)
+            if registered:
+                state["experts_registered"].append(f"fx-expert-g{tag}")
         # warm-candidate: best positive-IC checkpoint so far, gate or not —
-        # gives failed generations something to build on without promoting
+        # gives later generations something to build on (search heuristic)
         if ic is not None and ic > 0 and (state.get("warm") is None or ic > state["warm"]["ic"]):
             state["warm"] = {"tag": tag, "ic": ic}
-        registered = False
-        if better:
-            state["best"] = {"tag": tag, "pf": m["pf"], "ic": g["aggregate"]["ic_mean"],
-                             "params": g["params"]}
-            if do_register:
-                registered = _register_expert(tag, m["pf"], g["aggregate"]["ic_mean"])
-                if registered:
-                    state["experts_registered"].append(f"fx-expert-g{tag}")
+        if eligible and ic is not None and (
+                state.get("best") is None or ic > (state["best"].get("ic") or -9)):
+            state["best"] = {"tag": tag, "pf": m["pf"], "ic": ic,
+                             "params": g["params"],
+                             "basis": "ic — warm-start heuristic, not evidence"}
         b = state["bandit"].setdefault(name, {"runs": 0, "ic_sum": 0.0, "pf_sum": 0.0})
         b.setdefault("pf_sum", 0.0)  # pre-existing state from the IC-only bandit
         b["runs"] += 1
@@ -194,13 +205,14 @@ def main(generations=1, refresh=False, seed=11, do_register=True, hp_queue=()):
                 "folds_positive": g["aggregate"]["folds_positive"],
                 "pf": m["pf"], "sharpe": m["sharpe"], "maxdd": m["maxdd"],
                 "n_pairdays": m["n_pairdays"], "gate": res["gate"]["verdict"],
-                "gate_reasons": res["gate"]["reasons"], "promoted": bool(better),
+                "gate_reasons": res["gate"]["reasons"],
+                "eligible": bool(eligible), "promoted": False,
                 "registered": registered, "warm_from": g["warm_from"],
                 "secs": round(time.time() - t0, 1)}) + "\n")
         state["generation"] = gen + 1
         _save_state(state)
-        print(f"[loop] gen {tag}: gate {res['gate']['verdict']}, "
-              f"{'PROMOTED' if better else 'not promoted'} "
+        print(f"[loop] gen {tag}: {res['gate']['verdict']}"
+              f"{' (registered for shadow accrual)' if registered else ''} "
               f"({time.time() - t0:.0f}s)")
 
     print("\n[loop] ==== state after run ====")

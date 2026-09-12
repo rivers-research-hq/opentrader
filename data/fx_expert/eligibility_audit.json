@@ -1,0 +1,824 @@
+{
+ "era_pairs": 58,
+ "n": 101,
+ "n_eligible": 53,
+ "criteria": {
+  "ic_min": 0.0,
+  "folds_positive_min": 2,
+  "min_pairdays": 2000,
+  "net_exposure_max": 0.2,
+  "mean_bps_min": 0.0,
+  "pf_reported_only": 1.05,
+  "pf_min": 1.05
+ },
+ "note": "re-judged under the 2026-09-12 criteria without rewriting the recorded gate_g*.json run-time files",
+ "generations": {
+  "100": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.32 bps/day not positive"
+   ],
+   "ic": 0.00425,
+   "mu_bps": -0.32,
+   "pf_reported_only": 0.9295
+  },
+  "101": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0315,
+   "mu_bps": 0.074,
+   "pf_reported_only": 1.0168
+  },
+  "102": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "OOS IC -0.00614 not positive",
+    "positive-IC folds 1/3",
+    "net mean -0.746 bps/day not positive"
+   ],
+   "ic": -0.00614,
+   "mu_bps": -0.746,
+   "pf_reported_only": 0.9525
+  },
+  "103": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -1.217 bps/day not positive"
+   ],
+   "ic": 0.01894,
+   "mu_bps": -1.217,
+   "pf_reported_only": 0.9124
+  },
+  "104": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.038 bps/day not positive"
+   ],
+   "ic": 0.02152,
+   "mu_bps": -0.038,
+   "pf_reported_only": 0.9919
+  },
+  "105": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02993,
+   "mu_bps": 0.029,
+   "pf_reported_only": 1.0065
+  },
+  "106": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0301,
+   "mu_bps": 0.007,
+   "pf_reported_only": 1.0015
+  },
+  "107": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.077 bps/day not positive"
+   ],
+   "ic": 0.00104,
+   "mu_bps": -0.077,
+   "pf_reported_only": 0.9778
+  },
+  "108": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.038 bps/day not positive"
+   ],
+   "ic": 0.02999,
+   "mu_bps": -0.038,
+   "pf_reported_only": 0.9912
+  },
+  "109": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03539,
+   "mu_bps": 0.077,
+   "pf_reported_only": 1.0182
+  },
+  "110": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.042 bps/day not positive"
+   ],
+   "ic": 0.01772,
+   "mu_bps": -0.042,
+   "pf_reported_only": 0.9892
+  },
+  "111": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.003 bps/day not positive"
+   ],
+   "ic": 0.03096,
+   "mu_bps": -0.003,
+   "pf_reported_only": 0.9992
+  },
+  "112": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03058,
+   "mu_bps": 0.038,
+   "pf_reported_only": 1.009
+  },
+  "113": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03186,
+   "mu_bps": 0.004,
+   "pf_reported_only": 1.001
+  },
+  "114": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.062 bps/day not positive"
+   ],
+   "ic": 0.03052,
+   "mu_bps": -0.062,
+   "pf_reported_only": 0.9859
+  },
+  "115": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03528,
+   "mu_bps": 0.034,
+   "pf_reported_only": 1.0079
+  },
+  "116": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.101 bps/day not positive"
+   ],
+   "ic": 0.03369,
+   "mu_bps": -0.101,
+   "pf_reported_only": 0.9771
+  },
+  "117": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02029,
+   "mu_bps": 0.06,
+   "pf_reported_only": 1.0209
+  },
+  "118": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.048 bps/day not positive"
+   ],
+   "ic": 0.03166,
+   "mu_bps": -0.048,
+   "pf_reported_only": 0.989
+  },
+  "119": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.031 bps/day not positive"
+   ],
+   "ic": 0.03036,
+   "mu_bps": -0.031,
+   "pf_reported_only": 0.9927
+  },
+  "120": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.105 bps/day not positive"
+   ],
+   "ic": 0.0234,
+   "mu_bps": -0.105,
+   "pf_reported_only": 0.9777
+  },
+  "121": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03126,
+   "mu_bps": 0.157,
+   "pf_reported_only": 1.0469
+  },
+  "122": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03076,
+   "mu_bps": 0.019,
+   "pf_reported_only": 1.0045
+  },
+  "123": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03508,
+   "mu_bps": 0.102,
+   "pf_reported_only": 1.0238
+  },
+  "124": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0336,
+   "mu_bps": 0.095,
+   "pf_reported_only": 1.0191
+  },
+  "125": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.027 bps/day not positive"
+   ],
+   "ic": 0.0324,
+   "mu_bps": -0.027,
+   "pf_reported_only": 0.9937
+  },
+  "126": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.405 bps/day not positive"
+   ],
+   "ic": 0.02744,
+   "mu_bps": -0.405,
+   "pf_reported_only": 0.8994
+  },
+  "127": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.491 bps/day not positive"
+   ],
+   "ic": 0.02756,
+   "mu_bps": -0.491,
+   "pf_reported_only": 0.8667
+  },
+  "128": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.153 bps/day not positive"
+   ],
+   "ic": 0.02984,
+   "mu_bps": -0.153,
+   "pf_reported_only": 0.9679
+  },
+  "129": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.018 bps/day not positive"
+   ],
+   "ic": 0.03131,
+   "mu_bps": -0.018,
+   "pf_reported_only": 0.9907
+  },
+  "130": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02734,
+   "mu_bps": 0.074,
+   "pf_reported_only": 1.0178
+  },
+  "131": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.015 bps/day not positive"
+   ],
+   "ic": 0.02839,
+   "mu_bps": -0.015,
+   "pf_reported_only": 0.9971
+  },
+  "132": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.103 bps/day not positive"
+   ],
+   "ic": 0.02801,
+   "mu_bps": -0.103,
+   "pf_reported_only": 0.9762
+  },
+  "133": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02913,
+   "mu_bps": 0.294,
+   "pf_reported_only": 1.075
+  },
+  "134": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03014,
+   "mu_bps": 0.294,
+   "pf_reported_only": 1.0837
+  },
+  "135": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.332 bps/day not positive"
+   ],
+   "ic": 0.03002,
+   "mu_bps": -0.332,
+   "pf_reported_only": 0.932
+  },
+  "136": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03254,
+   "mu_bps": 0.045,
+   "pf_reported_only": 1.0239
+  },
+  "137": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02802,
+   "mu_bps": 0.308,
+   "pf_reported_only": 1.0793
+  },
+  "138": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03089,
+   "mu_bps": 0.3,
+   "pf_reported_only": 1.0845
+  },
+  "139": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0319,
+   "mu_bps": 0.026,
+   "pf_reported_only": 1.014
+  },
+  "140": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03026,
+   "mu_bps": 0.019,
+   "pf_reported_only": 1.0105
+  },
+  "141": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03308,
+   "mu_bps": 0.086,
+   "pf_reported_only": 1.0171
+  },
+  "142": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03086,
+   "mu_bps": 0.008,
+   "pf_reported_only": 1.0019
+  },
+  "143": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0282,
+   "mu_bps": 0.171,
+   "pf_reported_only": 1.0526
+  },
+  "144": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.174 bps/day not positive"
+   ],
+   "ic": 0.01934,
+   "mu_bps": -0.174,
+   "pf_reported_only": 0.9629
+  },
+  "145": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.231 bps/day not positive"
+   ],
+   "ic": 0.03117,
+   "mu_bps": -0.231,
+   "pf_reported_only": 0.9523
+  },
+  "146": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.018 bps/day not positive"
+   ],
+   "ic": 0.00233,
+   "mu_bps": -0.018,
+   "pf_reported_only": 0.9951
+  },
+  "147": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.012 bps/day not positive"
+   ],
+   "ic": 0.02664,
+   "mu_bps": -0.012,
+   "pf_reported_only": 0.9966
+  },
+  "148": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.142 bps/day not positive"
+   ],
+   "ic": 0.03231,
+   "mu_bps": -0.142,
+   "pf_reported_only": 0.9695
+  },
+  "149": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.087 bps/day not positive"
+   ],
+   "ic": 0.02079,
+   "mu_bps": -0.087,
+   "pf_reported_only": 0.974
+  },
+  "150": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean 0.0 bps/day not positive"
+   ],
+   "ic": 0.03288,
+   "mu_bps": 0.0,
+   "pf_reported_only": 1.0
+  },
+  "151": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03086,
+   "mu_bps": 0.333,
+   "pf_reported_only": 1.0846
+  },
+  "152": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03228,
+   "mu_bps": 0.06,
+   "pf_reported_only": 1.0141
+  },
+  "153": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03266,
+   "mu_bps": 0.021,
+   "pf_reported_only": 1.0051
+  },
+  "154": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.074 bps/day not positive"
+   ],
+   "ic": 0.03343,
+   "mu_bps": -0.074,
+   "pf_reported_only": 0.9833
+  },
+  "155": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03075,
+   "mu_bps": 0.017,
+   "pf_reported_only": 1.004
+  },
+  "156": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.074 bps/day not positive"
+   ],
+   "ic": 0.02856,
+   "mu_bps": -0.074,
+   "pf_reported_only": 0.9829
+  },
+  "157": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.262 bps/day not positive"
+   ],
+   "ic": 0.02833,
+   "mu_bps": -0.262,
+   "pf_reported_only": 0.9507
+  },
+  "158": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.07 bps/day not positive"
+   ],
+   "ic": 0.02767,
+   "mu_bps": -0.07,
+   "pf_reported_only": 0.9635
+  },
+  "159": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02436,
+   "mu_bps": 0.074,
+   "pf_reported_only": 1.023
+  },
+  "160": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.012 bps/day not positive"
+   ],
+   "ic": 0.02983,
+   "mu_bps": -0.012,
+   "pf_reported_only": 0.9976
+  },
+  "161": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.204 bps/day not positive"
+   ],
+   "ic": 0.02172,
+   "mu_bps": -0.204,
+   "pf_reported_only": 0.943
+  },
+  "162": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.138 bps/day not positive"
+   ],
+   "ic": 0.02465,
+   "mu_bps": -0.138,
+   "pf_reported_only": 0.9587
+  },
+  "163": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0306,
+   "mu_bps": 1.07,
+   "pf_reported_only": 1.2774
+  },
+  "164": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02771,
+   "mu_bps": 1.041,
+   "pf_reported_only": 1.2714
+  },
+  "165": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0275,
+   "mu_bps": 1.058,
+   "pf_reported_only": 1.275
+  },
+  "166": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02976,
+   "mu_bps": 1.049,
+   "pf_reported_only": 1.2757
+  },
+  "167": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03046,
+   "mu_bps": 0.025,
+   "pf_reported_only": 1.0052
+  },
+  "168": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03045,
+   "mu_bps": 1.083,
+   "pf_reported_only": 1.2835
+  },
+  "169": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.16 bps/day not positive"
+   ],
+   "ic": 0.02489,
+   "mu_bps": -0.16,
+   "pf_reported_only": 0.9516
+  },
+  "170": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.019 bps/day not positive"
+   ],
+   "ic": 0.02106,
+   "mu_bps": -0.019,
+   "pf_reported_only": 0.9959
+  },
+  "171": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.187 bps/day not positive"
+   ],
+   "ic": 0.02693,
+   "mu_bps": -0.187,
+   "pf_reported_only": 0.959
+  },
+  "172": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "OOS IC -0.00816 not positive",
+    "positive-IC folds 1/3",
+    "net mean -0.115 bps/day not positive"
+   ],
+   "ic": -0.00816,
+   "mu_bps": -0.115,
+   "pf_reported_only": 0.962
+  },
+  "173": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0287,
+   "mu_bps": 1.039,
+   "pf_reported_only": 1.2702
+  },
+  "174": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.175 bps/day not positive"
+   ],
+   "ic": 0.02708,
+   "mu_bps": -0.175,
+   "pf_reported_only": 0.962
+  },
+  "175": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03052,
+   "mu_bps": 1.065,
+   "pf_reported_only": 1.279
+  },
+  "176": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02683,
+   "mu_bps": 1.046,
+   "pf_reported_only": 1.2717
+  },
+  "177": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03145,
+   "mu_bps": 1.036,
+   "pf_reported_only": 1.2694
+  },
+  "178": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02838,
+   "mu_bps": 1.02,
+   "pf_reported_only": 1.2665
+  },
+  "179": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02807,
+   "mu_bps": 1.072,
+   "pf_reported_only": 1.2813
+  },
+  "180": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02887,
+   "mu_bps": 1.076,
+   "pf_reported_only": 1.2782
+  },
+  "181": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03007,
+   "mu_bps": 1.044,
+   "pf_reported_only": 1.2712
+  },
+  "182": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02979,
+   "mu_bps": 1.058,
+   "pf_reported_only": 1.2749
+  },
+  "183": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03002,
+   "mu_bps": 1.05,
+   "pf_reported_only": 1.2754
+  },
+  "184": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.183 bps/day not positive"
+   ],
+   "ic": 0.02773,
+   "mu_bps": -0.183,
+   "pf_reported_only": 0.9642
+  },
+  "185": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02983,
+   "mu_bps": 1.096,
+   "pf_reported_only": 1.2862
+  },
+  "186": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.214 bps/day not positive"
+   ],
+   "ic": 0.0175,
+   "mu_bps": -0.214,
+   "pf_reported_only": 0.9376
+  },
+  "187": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.093 bps/day not positive"
+   ],
+   "ic": 0.02002,
+   "mu_bps": -0.093,
+   "pf_reported_only": 0.9803
+  },
+  "188": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.242 bps/day not positive"
+   ],
+   "ic": 0.02972,
+   "mu_bps": -0.242,
+   "pf_reported_only": 0.9486
+  },
+  "201": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.01409,
+   "mu_bps": 0.087,
+   "pf_reported_only": 1.0225
+  },
+  "202": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.0266,
+   "mu_bps": 0.049,
+   "pf_reported_only": 1.0122
+  },
+  "203": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.01409,
+   "mu_bps": 0.066,
+   "pf_reported_only": 1.0184
+  },
+  "204": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.01409,
+   "mu_bps": 0.018,
+   "pf_reported_only": 1.0089
+  },
+  "205": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.01409,
+   "mu_bps": 0.016,
+   "pf_reported_only": 1.0084
+  },
+  "206": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.096 bps/day not positive"
+   ],
+   "ic": 0.01732,
+   "mu_bps": -0.096,
+   "pf_reported_only": 0.9787
+  },
+  "207": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.101 bps/day not positive"
+   ],
+   "ic": 0.01409,
+   "mu_bps": -0.101,
+   "pf_reported_only": 0.9809
+  },
+  "208": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.235 bps/day not positive"
+   ],
+   "ic": 0.01409,
+   "mu_bps": -0.235,
+   "pf_reported_only": 0.952
+  },
+  "211": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.01796,
+   "mu_bps": 0.08,
+   "pf_reported_only": 1.0202
+  },
+  "212": {
+   "verdict": "NOT ELIGIBLE",
+   "reasons": [
+    "net mean -0.036 bps/day not positive"
+   ],
+   "ic": 0.01642,
+   "mu_bps": -0.036,
+   "pf_reported_only": 0.9919
+  },
+  "221": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.02907,
+   "mu_bps": 0.132,
+   "pf_reported_only": 1.0337
+  },
+  "222": {
+   "verdict": "ELIGIBLE",
+   "reasons": [],
+   "ic": 0.03261,
+   "mu_bps": 0.114,
+   "pf_reported_only": 1.0291
+  }
+ }
+}

@@ -14,7 +14,7 @@
 | chapter | est. tokens | size | staleness | status |
 |---|--:|--:|--:|---|
 | 01-scope.md | 699 | 2.8 KB | 14d ago | hand-written |
-| 02-variables.md | 4074 | 16.0 KB | just now | rendered from ledger |
+| 02-variables.md | 4425 | 17.3 KB | just now | rendered from ledger |
 | 03-plan.md | 266 | 1.0 KB | 9d ago | hand-written |
 
 ## Raw findings log (append-only, never compacted away)
@@ -52,9 +52,8 @@ last: `checkpoints/ckpt-04.md` (verified)
 - Q24: Simulated trail/TP LIVE: fx_trail_check.py every 5min via systemd timer. Per-leg peak/trough tracked in trail state, ATR from store, closes triggered legs via per-tradeID surgical close (no server-side SL/TP orders). Defaults: trail 2ATR, TP 3ATR. First run 0 exits (expected — fresh book). The A/B tested uniform stops; this is the per-leg selective version. Ref fx-warden doc
 - Q25: fxexpert search continuation: the 2026-09-11 round (g167-g188) plateaued at PF ~1.28-1.29 and NO generation survives the deflated bar (WRC p(PF)=0.119, needs >=2.00 bps/day vs 1.12). Stop the search vs change the information set (new inputs) vs accept ledger-accrual-only evidence? Human decision. Ref V-WRC, docs/health/hardening-backlog-2026-09-11.md item 1.
 - Q26: Search-history reproducibility: 10 of 153 clean-era generations (g124-g136, the mid-search thr_cont/rank fix boundary) have recorded PFs that do not reproduce from their own stored artifacts (deltas +0.10..+0.17). Annotate the stale rows (sidecar, never rewrite history.jsonl) and add a re-score assertion to the loop write path. Ref hardening backlog item 7.
-- Q27: GATE BAR (HITL): the fxexpert promotion bar PF>=1.05 is dominated by variance unrelated to signal quality — corr(IC,PF)=0.168 over 101 generations, and within an IC quartile PF spans 0.76-1.29 (two models at IC 0.0291/0.0298 score PF 1.034 and 1.286). The weight-transfer test (g221: IC 0.0291, PF 1.034) shows the same signal quality converting to wildly different PF. Decide: replace/augment the bar with a lower-variance criterion (IC-based, or IC+PF composite, or a longer-horizon book with lower PF variance), and re-specify what the deflated correction then evaluates. Ref V-PANEL2, V-WRC.
 
 ---
 
-_generated 2026-09-12T05:17:45.702Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
+_generated 2026-09-12T06:34:09.046Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
 

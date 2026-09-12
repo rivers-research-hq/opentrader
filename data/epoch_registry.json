@@ -243,6 +243,46 @@
       "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g138 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g138), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
       "lifecycle": "accruing",
       "notional_cap": 1.0
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g185",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice (shadow accrual; no lane wired)",
+      "universe": "58-pair accrual store D1, 10d horizon",
+      "status": "accruing",
+      "registered": "2026-09-12T06:33:22.017513+00:00",
+      "registered_by": "agent (human-delegated decision, #257)",
+      "source": "fxexpert generation g185: OOS IC 0.02983, PF 1.2862 (reported only), net +1.096 bps/day. Best-observed of the 101-generation 58-pair population, but the deflated bar says the population max is not distinguishable from chance (RC p(PF)=0.119, p(mean)=0.198).",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Eligibility 2026-09-12 (coherence only, #257): OOS IC > 0 with >=2/3 folds positive, net mean return > 0 after costs, dollar-neutral book (net/gross <= 0.2), >= 2000 positioned pair-days, beats the random-matched control. NO backtest promotion: PF/Sharpe/mean-return were measured to be one statistic that does not persist across periods (year-to-year Spearman +0.02). Promotion evidence = forward shadow accrual; wiring a paper lane is a human-gated decision (ADR-0009 \u00a74).",
+      "notes": "Registered 2026-09-12 under the re-specified gate (eligible, NOT promoted). NOT wired to a paper lane: no forward accrual exists yet for this expert \u2014 lane wiring is the remaining human-gated step. Backtest edge NOT established (V-WRC). Reads as a candidate for forward evidence, not as a finding."
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-g163",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice (shadow accrual; no lane wired)",
+      "universe": "58-pair accrual store D1, 10d horizon",
+      "status": "accruing",
+      "registered": "2026-09-12T06:33:22.018935+00:00",
+      "registered_by": "agent (human-delegated decision, #257)",
+      "source": "fxexpert generation g163: OOS IC 0.0306, PF 1.2774 (reported only), net +1.070 bps/day. Best-observed of the 101-generation 58-pair population, but the deflated bar says the population max is not distinguishable from chance (RC p(PF)=0.119, p(mean)=0.198).",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Eligibility 2026-09-12 (coherence only, #257): OOS IC > 0 with >=2/3 folds positive, net mean return > 0 after costs, dollar-neutral book (net/gross <= 0.2), >= 2000 positioned pair-days, beats the random-matched control. NO backtest promotion: PF/Sharpe/mean-return were measured to be one statistic that does not persist across periods (year-to-year Spearman +0.02). Promotion evidence = forward shadow accrual; wiring a paper lane is a human-gated decision (ADR-0009 \u00a74).",
+      "notes": "Registered 2026-09-12 under the re-specified gate (eligible, NOT promoted). NOT wired to a paper lane: no forward accrual exists yet for this expert \u2014 lane wiring is the remaining human-gated step. Backtest edge NOT established (V-WRC). Reads as a candidate for forward evidence, not as a finding."
     }
   ]
 }

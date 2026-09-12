@@ -18,12 +18,25 @@ Baselines use the identical protocol and cost model: buy-and-hold, classic
 RSI(14) mean-reversion, 20d momentum sign, and a random sign draw matched to
 the model's position frequencies.
 
-Gate bar (pre-registered, unchanged): OOS portfolio PF >= 1.05, PF beats
-every baseline, >= 2/3 test folds with positive OOS IC, >= 2000 positioned
-pair-days. PASS earns shadow eligibility (epoch registry, accruing); live
-order flow stays human-gated (ADR-0009 §4). Repeated generation search
-inflates this bar's effective size — the forward shadow accrual ledger, not
-this gate, is the real promotion evidence.
+Gate (re-specified 2026-09-12, human-delegated decision on #257): the old
+`PF >= 1.05` promotion bar was measured to be noise-dominated and is retired
+as a promotion criterion. Evidence (scripts/gate_stat_study.py,
+scripts/gate_stat_study2.py, 101-generation 58-pair population):
+
+  - PF, Sharpe, mean return and their t-stat are the SAME statistic
+    (Spearman >= 0.985 across generations) — swapping PF for t/Sharpe would
+    have changed nothing;
+  - the cross-generation ranking does not persist: year-to-year Spearman
+    +0.02, first-half vs second-half -0.23, even/odd weeks +0.50. A backtest
+    winner is a regime fit, not a durable property;
+  - corr(IC, PF) = 0.168, and PF spans 0.76-1.29 within one IC quartile.
+
+This gate therefore certifies only that a candidate is COHERENT (signal
+positive and folds, net return positive, sane book, beats the random-matched
+control) — eligibility to accrue, not promotion. Promotion evidence is the
+forward shadow accrual ledger (ADR-0009 §3-4); any *claim* of backtest edge
+must still clear the deflated bar (scripts/white_reality_check.py, ToC V-WRC).
+Live order flow stays human-gated.
 """
 
 import json
@@ -33,16 +46,16 @@ import numpy as np
 import pandas as pd
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "fx_expert"
-GATE = {"pf_min": 1.05, "folds_positive_min": 2, "min_pairdays": 2000,
-        # AMENDED 2026-09-06 (human decision): the buy-and-hold criterion
-        # applies only to DIRECTIONAL books. A book measured dollar-neutral
-        # (|net| / gross exposure <= net_exposure_max) is compared against
-        # the like-for-like zero-edge baselines (rsi_mr, mom20, random) and
-        # buy-and-hold is reported but not gating. Amendment made post hoc
-        # with results in view — forward shadow accrual (ADR-0009 ledger)
-        # remains the real promotion evidence; registration grants
-        # eligibility only.
-        "net_exposure_max": 0.2}
+# Eligibility criteria (2026-09-12). These are COHERENCE checks, deliberately
+# low-variance and not a performance bar: a candidate that fails them is
+# broken (negative signal, losing book, unhedged or untraded book), not merely
+# unimpressive. PF >= 1.05 is retained in the report for continuity but no
+# longer decides anything.
+GATE = {"ic_min": 0.0, "folds_positive_min": 2, "min_pairdays": 2000,
+        "net_exposure_max": 0.2, "mean_bps_min": 0.0,
+        "pf_reported_only": 1.05}
+# Backwards-compatible alias: older callers import GATE["pf_min"].
+GATE["pf_min"] = GATE["pf_reported_only"]
 
 
 def _daily_pnl(dates, pair_idx, raw_pos, fwd1, cost, denom="all"):
@@ -218,7 +231,10 @@ def daily_pnl_series(tag, out_dir=OUT_DIR):
     return _daily_pnl(P["date"], P["pair_idx"], raw, P["fwd1"], P["cost"], denom)
 
 
-def evaluate(tag, out_dir=OUT_DIR):
+def evaluate(tag, out_dir=OUT_DIR, write=True):
+    """Score one generation. `write=False` audits without touching the
+    recorded gate_g*.json (those files record what the gate said at run time;
+    re-judging an old generation must not rewrite that history)."""
     P = dict(np.load(out_dir / f"preds_g{tag}.npz"))
     g = json.loads((out_dir / f"train_g{tag}.json").read_text())
     hp = g["hp"]
@@ -260,6 +276,7 @@ def evaluate(tag, out_dir=OUT_DIR):
     if ref_path.exists():
         xgb_ref = json.loads(ref_path.read_text()).get("aggregate", {}).get("pf")
 
+    # ---- eligibility: coherence checks, NOT a performance bar -------------
     reasons = []
     gross = float(np.abs(raw).sum())
     net_ratio = float(np.abs(raw.sum()) / gross) if gross > 0 else 1.0
@@ -268,31 +285,39 @@ def evaluate(tag, out_dir=OUT_DIR):
     m["dollar_neutral"] = dollar_neutral
     res["gate_amendment"] = {"beat_buy_hold": not dollar_neutral,
                              "net_exposure_max": GATE["net_exposure_max"]}
-    base_pfs = {k: v["pf"] for k, v in res.items()
-                if k not in ("model", "model_alt_rule", "rule", "gate",
-                             "gate_amendment")}
-    if not dollar_neutral:
-        pass  # directional book: buy_hold gates (original bar)
-    elif "buy_hold" in base_pfs:
-        base_pfs.pop("buy_hold")  # amended: reported above, not gating
-    if m["pf"] is None or m["pf"] < GATE["pf_min"]:
-        reasons.append(f"pf {m['pf']} < {GATE['pf_min']}")
-    beaten = {k: v for k, v in base_pfs.items()
-              if m["pf"] is not None and (v is None or m["pf"] <= v)}
-    if beaten:
-        reasons.append(f"does not beat baselines: {beaten}")
-    if g["aggregate"]["folds_positive"] < GATE["folds_positive_min"]:
-        reasons.append(f"positive-IC folds {g['aggregate']['folds_positive']}/{g['aggregate']['n_folds']}")
+    agg = g["aggregate"]
+    if agg.get("ic_mean") is None or agg["ic_mean"] <= GATE["ic_min"]:
+        reasons.append(f"OOS IC {agg.get('ic_mean')} not positive")
+    if agg["folds_positive"] < GATE["folds_positive_min"]:
+        reasons.append(f"positive-IC folds {agg['folds_positive']}/{agg['n_folds']}")
+    if m["daily_mean_bps"] <= GATE["mean_bps_min"]:
+        reasons.append(f"net mean {m['daily_mean_bps']} bps/day not positive")
     if m["n_pairdays"] < GATE["min_pairdays"]:
         reasons.append(f"n_pairdays {m['n_pairdays']} < {GATE['min_pairdays']}")
-    res["gate"] = {"verdict": "PASS" if not reasons else "FAIL",
-                   "reasons": reasons, "bar": GATE, "xgb_reference_pf": xgb_ref}
+    if not dollar_neutral:
+        reasons.append(f"net exposure ratio {net_ratio:.3f} > "
+                       f"{GATE['net_exposure_max']} (directional book)")
+        bh = res.get("buy_hold", {}).get("pf")
+        if bh is not None and (m["pf"] is None or m["pf"] <= bh):
+            reasons.append(f"directional book does not beat buy-and-hold "
+                           f"({m['pf']} <= {bh})")
+    rnd = res.get("random_matched", {}).get("pf")
+    if rnd is not None and (m["pf"] is None or m["pf"] <= rnd):
+        reasons.append(f"does not beat the random-matched control ({m['pf']} <= {rnd})")
+    res["gate"] = {"verdict": "ELIGIBLE" if not reasons else "NOT ELIGIBLE",
+                   "reasons": reasons, "criteria": GATE,
+                   "promotion": "forward shadow accrual only (ADR-0009 §3-4)",
+                   "backtest_claims": "require the deflated bar "
+                                      "(scripts/white_reality_check.py, ToC V-WRC)",
+                   "pf_reported_only": m["pf"], "xgb_reference_pf": xgb_ref}
 
-    (out_dir / f"gate_g{tag}.json").write_text(json.dumps(res, indent=1))
+    if write:
+        (out_dir / f"gate_g{tag}.json").write_text(json.dumps(res, indent=1))
     print(f"[gate g{tag}] rule={rule} model PF {m['pf']} Sharpe {m['sharpe']} "
           f"maxDD {m['maxdd']} pairdays {m['n_pairdays']} | alt-rule PF "
           f"{res['model_alt_rule']['pf']} | baselines " +
-          " ".join(f"{k}={v}" for k, v in base_pfs.items()) +
+          " ".join(f"{k}={v['pf']}" for k, v in res.items()
+                   if k in ("buy_hold", "rsi_mr_14", "mom20_sign", "random_matched")) +
           f" | xgb_ref={xgb_ref} | {res['gate']['verdict']}")
     if reasons:
         for r in reasons:

@@ -159,19 +159,36 @@ verdict and an owner/next step. Ordered by leverage.
   (+ addendum with the results).
 - **Owner:** done (agent).
 
-## 9. The gate's PF bar is noise-dominated (open — the leverage item)
+## 9. The gate's PF bar was noise-dominated — retired (closed 2026-09-12)
 
 - **Finding:** across the 101-generation 58-pair population, corr(IC, PF) =
   **0.168**, and within an IC quartile PF spans 0.76–1.29 (the
   0.0291–0.0309 quartile: mean 1.063, sd 0.156). Two models with essentially
   the same IC (0.0291 vs 0.0298) score PF 1.034 and 1.286.
-- **Consequence:** the search has been selecting variance unrelated to signal
-  quality. This is *why* the deflated bar kills the winner (p(PF) = 0.119) and
-  why new information cannot register in the metric — and it retires the
-  standing assumption that a PF≥1.05 PASS means anything about expected return.
-- **Owner:** human (grilling). **Next:** choose the bar (IC-based, IC+PF
-  composite, or a longer-horizon/lower-variance book), then re-specify what the
-  deflated correction evaluates. Ref ToC `V-PANEL2`, `V-WRC`, open Q27.
+- **Deeper measurement (`scripts/gate_stat_study.py`, `gate_stat_study2.py`):**
+  PF, Sharpe, mean return and their t-stat are **one statistic**
+  (Spearman ≥ 0.985), so swapping PF for a "better" P&L statistic would have
+  changed nothing; and its cross-generation ranking **does not persist** —
+  year-to-year Spearman **+0.019** (225 year-pairs), first-half vs second-half
+  **−0.227**, even/odd weeks +0.499. A backtest winner is a regime fit.
+  An equal-weight score ensemble of all 101 generations reproduces the best
+  single member (PF 1.2836 vs 1.2862) — ensembling is not a lever either.
+- **Decision (human-delegated, #257):** PF ≥ 1.05 is retired as a promotion
+  bar. The gate is now an **eligibility (coherence) check** — OOS IC > 0 with
+  ≥2/3 folds positive, net mean return > 0 after costs, dollar-neutral book,
+  ≥2000 pair-days, beats the random-matched control. Eligibility grants
+  accrual, **not** promotion; promotion evidence is the forward shadow accrual
+  ledger (ADR-0009 §3-4), and any *claim* of backtest edge must still clear
+  the deflated bar (V-WRC) — none does.
+- **Implemented:** `fxexpert/gate.py` (criteria + verdict + `write=False`
+  audit mode), `fxexpert/loop.py` (no backtest ranking: hp picks by IC as a
+  heuristic, registration on eligibility, `promoted` is always False),
+  `scripts/gate_eligibility_audit.py`, `tests/test_gate_eligibility.py`.
+  Audit: **53 of 101 generations eligible**; 48 fail on a losing net book.
+- **Registered** (bookkeeping only — no lane wired, wiring stays human-gated):
+  `fx-expert-g185`, `fx-expert-g163` as shadow-accrual candidates.
+- **Owner:** done (agent, human-delegated). Ref ToC `V-GATE`, `V-WRC`,
+  `V-PANEL2`.
 
 ---
 
