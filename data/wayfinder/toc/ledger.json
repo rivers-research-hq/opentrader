@@ -272,6 +272,18 @@
       "status": "computable",
       "desc": "News-surprise post-release drift at retail cadence: FAIL — ALL pre-registered families (NFP median 4h PF 0.850; CPI 0.907, 0/4 folds, n=5,069; UNEMP 0.873, n=1,719). 18y history, 4 time-ordered folds each, net of costs, surprise-z signed. Family-wide dead end — do NOT re-open without a materially different mechanism (options data, sub-minute infra). The news gate stays.",
       "bounds": "verdict artifacts probe_results*.json (store root); protocol V32; map #191 #195 + completion addendum. Caveat unchanged: positive-surprise side scored on 4h window only"
+    },
+    {
+      "id": "V-CBFT",
+      "status": "explore",
+      "desc": "CB-speech fine-tune of Warden Granite improves expectation quality; FRASER+multi-CB keyless corpora, offline policy-replay gate required before any :5802 swap",
+      "bounds": "unproven until offline eval + 2wk shadow; research plan docs/agents/research/cb-speech-interpreter-plan-2026-09-10.md"
+    },
+    {
+      "id": "V-WRC",
+      "status": "computable",
+      "desc": "fxexpert deflated bar (White's Reality Check, return-series, implemented 2026-09-11 per #245): NO clean-era generation survives. Era-matched 89-gen population, joint stationary-block bootstrap (block 20d, B=20k): observed max PF 1.2923 (g185, 1.122 bps/day) -> RC p(mean)=0.198, p(PF)=0.119; needs >=2.00 bps/day for p<0.05. Block 5-60d: p(PF) 0.099-0.130. Registered experts: g151 p(PF)=0.137, g137 0.155, g138 0.182. Calibrated on synthetic nulls (RC 0.050 at alpha=0.05, PF-null 0.113 at alpha=0.10); studentized variants liberal, diagnostic only. NO promotion; the raw gate PASS is a best-of-89 selection.",
+      "bounds": "scripts/white_reality_check.py; data/fx_expert/wrc_return_series.json; tests/test_wrc_calibration.py"
     }
   ],
   "openQuestions": [
@@ -418,6 +430,18 @@
       "id": "Q24",
       "text": "Simulated trail/TP LIVE: fx_trail_check.py every 5min via systemd timer. Per-leg peak/trough tracked in trail state, ATR from store, closes triggered legs via per-tradeID surgical close (no server-side SL/TP orders). Defaults: trail 2ATR, TP 3ATR. First run 0 exits (expected — fresh book). The A/B tested uniform stops; this is the per-leg selective version. Ref fx-warden doc",
       "createdAt": "2026-09-09T18:11:58.751Z",
+      "status": "open"
+    },
+    {
+      "id": "Q25",
+      "text": "fxexpert search continuation: the 2026-09-11 round (g167-g188) plateaued at PF ~1.28-1.29 and NO generation survives the deflated bar (WRC p(PF)=0.119, needs >=2.00 bps/day vs 1.12). Stop the search vs change the information set (new inputs) vs accept ledger-accrual-only evidence? Human decision. Ref V-WRC, docs/health/hardening-backlog-2026-09-11.md item 1.",
+      "createdAt": "2026-09-12T02:08:23.241Z",
+      "status": "open"
+    },
+    {
+      "id": "Q26",
+      "text": "Search-history reproducibility: 10 of 153 clean-era generations (g124-g136, the mid-search thr_cont/rank fix boundary) have recorded PFs that do not reproduce from their own stored artifacts (deltas +0.10..+0.17). Annotate the stale rows (sidecar, never rewrite history.jsonl) and add a re-score assertion to the loop write path. Ref hardening backlog item 7.",
+      "createdAt": "2026-09-12T02:08:23.291Z",
       "status": "open"
     }
   ],

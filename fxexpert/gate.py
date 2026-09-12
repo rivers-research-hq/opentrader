@@ -45,7 +45,10 @@ GATE = {"pf_min": 1.05, "folds_positive_min": 2, "min_pairdays": 2000,
         "net_exposure_max": 0.2}
 
 
-def _simulate(dates, pair_idx, raw_pos, fwd1, cost, denom="all"):
+def _daily_pnl(dates, pair_idx, raw_pos, fwd1, cost, denom="all"):
+    """Daily portfolio P&L series (the raw return series behind every gate
+    metric). Kept separate from _simulate so multiple-testing corrections can
+    bootstrap the same series the gate scored."""
     order = np.lexsort((dates, pair_idx))
     pnl = np.zeros(len(dates), dtype=np.float64)
     prev = {}
@@ -56,13 +59,16 @@ def _simulate(dates, pair_idx, raw_pos, fwd1, cost, denom="all"):
         pnl[i] = pos * fwd1[i] - chg * cost[i]
         prev[p] = pos
     if denom == "all":
-        daily = pd.Series(pnl).groupby(dates).mean().sort_index()
-    else:  # "pos": mean over deployed positions only (no flat dilution)
-        mask = np.asarray(raw_pos) != 0
-        if not mask.any():
-            daily = pd.Series(dtype=np.float64)
-        else:
-            daily = pd.Series(pnl[mask]).groupby(dates[mask]).mean().sort_index()
+        return pd.Series(pnl).groupby(dates).mean().sort_index()
+    # "pos": mean over deployed positions only (no flat dilution)
+    mask = np.asarray(raw_pos) != 0
+    if not mask.any():
+        return pd.Series(dtype=np.float64)
+    return pd.Series(pnl[mask]).groupby(dates[mask]).mean().sort_index()
+
+
+def _simulate(dates, pair_idx, raw_pos, fwd1, cost, denom="all"):
+    daily = _daily_pnl(dates, pair_idx, raw_pos, fwd1, cost, denom)
     gains = daily[daily > 0].sum()
     losses = -daily[daily < 0].sum()
     pf = float(gains / losses) if losses > 0 else (float("inf") if gains > 0 else None)
@@ -174,6 +180,44 @@ def _vol_scale(raw, dates, vol20):
             ).astype(np.float32)
 
 
+def build_positions(hp, P):
+    """Raw position vector for config `hp` on its own OOS predictions, plus
+    the _simulate denominator that pairs with it. The single construction path
+    shared by evaluate() and the return-series deflation."""
+    rule = hp.get("rule", "thr")
+    dates, pi = P["date"], P["pair_idx"]
+    if rule == "xs":
+        return _positions_xs(dates, pi, P["score"], k=int(hp.get("k", 3))), "pos"
+    if rule == "thr_cont":
+        raw = _positions_thr_cont(dates, pi, P["score"], P["q_long"],
+                                  P["q_short"], P["q_mid"],
+                                  size_cap=float(hp.get("size_cap", 2.0)))
+        if hp.get("vol_target"):
+            raw = _vol_scale(raw, dates, P.get("vol20"))
+        if hp.get("cost_cap") is not None:
+            raw = np.where(np.asarray(P["cost"]) <= float(hp["cost_cap"]),
+                           raw, 0.0).astype(np.float32)
+        return raw, "all"
+    if rule == "rank":
+        raw = _positions_rank(dates, pi, P["score"], P.get("vol20"),
+                              P["cost"], lev=float(hp.get("lev", 1.0)),
+                              vol_target=bool(hp.get("vol_target")),
+                              cost_cap=hp.get("cost_cap"),
+                              rebal=int(hp.get("rebal", 1)))
+        return raw, "all"
+    return _positions_thr(dates, pi, P["score"], P["q_long"],
+                          P["q_short"], P["q_mid"]), "all"
+
+
+def daily_pnl_series(tag, out_dir=OUT_DIR):
+    """Daily OOS portfolio P&L series for a generation, computed through the
+    gate's own position construction and cost model (no re-implementation)."""
+    P = dict(np.load(out_dir / f"preds_g{tag}.npz"))
+    g = json.loads((out_dir / f"train_g{tag}.json").read_text())
+    raw, denom = build_positions(g["hp"], P)
+    return _daily_pnl(P["date"], P["pair_idx"], raw, P["fwd1"], P["cost"], denom)
+
+
 def evaluate(tag, out_dir=OUT_DIR):
     P = dict(np.load(out_dir / f"preds_g{tag}.npz"))
     g = json.loads((out_dir / f"train_g{tag}.json").read_text())
@@ -183,28 +227,8 @@ def evaluate(tag, out_dir=OUT_DIR):
     res = {"rule": rule}
 
     def sim_for(r):
-        if r == "xs":
-            raw = _positions_xs(dates, pi, P["score"], k=int(hp.get("k", 3)))
-            return raw, _simulate(dates, pi, raw, P["fwd1"], P["cost"], denom="pos")
-        if r == "thr_cont":
-            raw = _positions_thr_cont(dates, pi, P["score"], P["q_long"],
-                                      P["q_short"], P["q_mid"],
-                                      size_cap=float(hp.get("size_cap", 2.0)))
-            if hp.get("vol_target"):
-                raw = _vol_scale(raw, dates, P.get("vol20"))
-            if hp.get("cost_cap") is not None:
-                raw = np.where(np.asarray(P["cost"]) <= float(hp["cost_cap"]),
-                               raw, 0.0).astype(np.float32)
-            return raw, _simulate(dates, pi, raw, P["fwd1"], P["cost"], denom="all")
-        if r == "rank":
-            raw = _positions_rank(dates, pi, P["score"], P.get("vol20"),
-                                  P["cost"], lev=float(hp.get("lev", 1.0)),
-                                  vol_target=bool(hp.get("vol_target")),
-                                  cost_cap=hp.get("cost_cap"),
-                                  rebal=int(hp.get("rebal", 1)))
-            return raw, _simulate(dates, pi, raw, P["fwd1"], P["cost"], denom="all")
-        raw = _positions_thr(dates, pi, P["score"], P["q_long"], P["q_short"], P["q_mid"])
-        return raw, _simulate(dates, pi, raw, P["fwd1"], P["cost"], denom="all")
+        raw, denom = build_positions({**hp, "rule": r}, P)
+        return raw, _simulate(dates, pi, raw, P["fwd1"], P["cost"], denom=denom)
 
     raw, m = sim_for(rule)
     raw = np.nan_to_num(np.asarray(raw), nan=0.0, posinf=0.0, neginf=0.0)

@@ -13,9 +13,9 @@
 
 | chapter | est. tokens | size | staleness | status |
 |---|--:|--:|--:|---|
-| 01-scope.md | 699 | 2.8 KB | 11d ago | hand-written |
-| 02-variables.md | 2733 | 10.7 KB | 6d ago | rendered from ledger |
-| 03-plan.md | 266 | 1.0 KB | 6d ago | hand-written |
+| 01-scope.md | 699 | 2.8 KB | 13d ago | hand-written |
+| 02-variables.md | 3776 | 14.8 KB | just now | rendered from ledger |
+| 03-plan.md | 266 | 1.0 KB | 9d ago | hand-written |
 
 ## Raw findings log (append-only, never compacted away)
 
@@ -50,8 +50,10 @@ last: `checkpoints/ckpt-04.md` (verified)
 - Q22: newsfeed v1 wired into Warden: newsfeed_digest() reads canonical items from data/newsfeed/newsfeed.db (deduped, 25 recent), injected as 'headlines:' block into plan/observe prompts alongside FF/MOF/Fed feeds. Records carry headlines for PIT audit. The plan now conditions on actual GDELT headlines (Brent 00, ECB rate path, BOJ/JPY) not just scheduled events. Verified live: plan ran with 3 trained lanes, observe 3/3 verified notes. Ref fx-warden doc
 - Q23: MFE tracker + give-back ratio live on warden scoreboard: hourly observe persists per-lane peak uPL, daily score computes give-back = (peak−current)/peak. First verified readings: g151 peak +1.15 uPL +0.93 (2.0% GB), g137 peak +.17 uPL +.48 (9.6% GB). Separates selection skill from exit-policy cost on the scoreboard. Ref fx-warden doc §MFE
 - Q24: Simulated trail/TP LIVE: fx_trail_check.py every 5min via systemd timer. Per-leg peak/trough tracked in trail state, ATR from store, closes triggered legs via per-tradeID surgical close (no server-side SL/TP orders). Defaults: trail 2ATR, TP 3ATR. First run 0 exits (expected — fresh book). The A/B tested uniform stops; this is the per-leg selective version. Ref fx-warden doc
+- Q25: fxexpert search continuation: the 2026-09-11 round (g167-g188) plateaued at PF ~1.28-1.29 and NO generation survives the deflated bar (WRC p(PF)=0.119, needs >=2.00 bps/day vs 1.12). Stop the search vs change the information set (new inputs) vs accept ledger-accrual-only evidence? Human decision. Ref V-WRC, docs/health/hardening-backlog-2026-09-11.md item 1.
+- Q26: Search-history reproducibility: 10 of 153 clean-era generations (g124-g136, the mid-search thr_cont/rank fix boundary) have recorded PFs that do not reproduce from their own stored artifacts (deltas +0.10..+0.17). Annotate the stale rows (sidecar, never rewrite history.jsonl) and add a re-score assertion to the loop write path. Ref hardening backlog item 7.
 
 ---
 
-_generated 2026-09-09T18:11:58.755Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
+_generated 2026-09-12T02:08:23.296Z · governor: qwen38 @ http://127.0.0.1:5804/v1 · ctxCap 60000 tok_
 

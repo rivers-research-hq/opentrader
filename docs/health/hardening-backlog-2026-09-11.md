@@ -4,28 +4,45 @@ Post-mortem backlog from the first full FX week. Markets closed; this is the
 standing work queue for the next open. Each item is a concrete finding with a
 verdict and an owner/next step. Ordered by leverage.
 
-## 1. fxexp — deflated bar not yet cleared (active, search ran 2026-09-11)
+## 1. fxexp — deflated bar implemented; no generation survives (closed, NO promotion)
 
 - **Finding:** the leak-free search converges to hp `U` (rank, horizon 10).
-  Best g163 PF 1.2774 (IC 0.0306) pre-round; the 2026-09-11 round (39 gens,
-  g167–g205) pushed it to **g185 PF 1.2862** (IC 0.0298). The raw gate beats
-  buy-hold (1.144) and the alt-rule (1.0046), but the margin over break-even
-  is thin and the search is plateauing.
-- **Deflation:** White's Reality Check. The script had a **location-invariance
-  bug** (demeaned the population but compared the raw max) that produced a
-  false SURVIVES (p=0.0000) once the population mean crossed 1.0 — fixed
-  (commit 8ed5205) to compare centered statistics. Corrected: **p = 0.63 →
-  DOES NOT SURVIVE** (153 clean-era gens, mean PF 1.0094, sd 0.103, best 2.69σ
-  above mean).
-- **Honest boundary:** the cross-sectional PF bootstrap is degenerate (the
-  observed max is always a member of the null → p ≈ 0.63 regardless). A proper
-  deflation needs the **return-series** White's RC / Hansen SPA (time-period
-  bootstrap), not PF-score resampling. That is the follow-up below.
-- **Verdict:** no promotion. The edge is marginal — best 1.2862 vs break-even,
-  153 evaluations.
-- **Owner:** agent. **Next:** implement return-series WRC (extract daily P&L
-  per generation from `preds_g*.npz` + `gate._simulate`, bootstrap time
-  periods jointly); promote only if p < 0.05 there.
+  Best g163 PF 1.2774 pre-round; the 2026-09-11 round (g167–g188) pushed it to
+  **g185 PF 1.2862** (IC 0.0298). The raw gate beats buy-hold (1.144) and the
+  alt-rule (1.0046), but the margin over break-even is thin.
+- **Deflation history:** the first script (population-max bootstrap over the
+  recorded PF *scores*) was degenerate — the observed max is always a member of
+  the resampled population, so p ≈ 0.63 regardless of the data. Replaced with
+  the **return-series** implementation (#245 decision: White's Reality Check):
+  every clean-era generation's daily OOS P&L re-simulated through
+  `fxexpert.gate.daily_pnl_series`, then resampled in **joint** stationary
+  blocks (Politis-Romano, mean block 20 trading days) so warm-start chains,
+  shared folds and the shared universe keep their cross-model dependence.
+- **Result (B = 20 000, era-matched population = the 89 generations that
+  produced g185, 58-pair universe, 3841 common days, observed max PF 1.2923):**
+  - White RC p(mean daily return) = **0.198**
+  - White RC p(PF) = **0.119** (null max-PF median 1.094, 95th pct 1.448)
+  - marginal (uncorrected) p of g185: 0.140 on the mean, 0.112 on PF
+  - to clear α=0.05 the winner needs **≥ 2.00 bps/day**; it has 1.12.
+- **Robustness:** block length 5/10/20/40/60d gives p(PF) 0.099–0.130 and
+  p(mean) 0.189–0.213 — the verdict is not a block-length artifact. Full
+  clean era (153 gens, 16- and 58-pair universes pooled): p(mean) 0.228,
+  p(PF) 0.105.
+- **Registered experts re-judged (the #245 ask):** g151 marginal p(PF) 0.137
+  (mean 0.149), g137 0.155, g138 0.182. None survives; as members of the
+  searched population their corrected p is ≥ the winner's.
+- **Calibration (`tests/test_wrc_calibration.py`):** on synthetic zero-edge
+  nulls the RC statistic rejects 0.050 at α=0.05 and the PF-space null 0.113
+  at α=0.10; 73% power on a planted 4 bps/day edge. The studentized
+  (Hansen-SPA-style) variants measure **liberal** (0.13–0.20 at α=0.10) and
+  are reported as diagnostics only — the verdict rests on RC/PF.
+- **Verdict:** no promotion, and no re-promotion of g151. The raw gate PASS is
+  a best-of-89 selection and does not clear the data-snooping bar.
+- **Owner:** human — decide whether the search continues (it is plateaued and
+  cannot promote under the deflated bar) or the next round changes the
+  information set (new inputs, not more hyperparameter generations).
+  Artifacts: `scripts/white_reality_check.py`,
+  `data/fx_expert/wrc_return_series.json`.
 
 ## 2. CB-speech Warden fine-tune — thesis dead (closed, infrastructure kept)
 
@@ -74,9 +91,13 @@ verdict and an owner/next step. Ordered by leverage.
   the first 1000 txns (masked realized P&L as "0" / cross-lane netting).
 - **Fixed:** `_walk_transactions` cursor-loops via `id=`; accrual store now
   holds the full 4104-txn journal.
-- **Owner:** agent. **Next:** add a one-line guard asserting
-  `len(txns) >= last_known_count` on rebuild so a silent truncation can never
-  recur.
+- **Guard added (2026-09-11):** `journal_shrink_guard()` in
+  `scripts/build_accrual_store.py` refuses to write a store whose `txns` or
+  `fills` count is below the previous manifest's (`--allow-journal-shrink`
+  opts out; `--skip-venue` rebuilds are exempt). Unit-tested in
+  `tests/test_accrual_journal_guard.py`; live read-only check the same day:
+  venue 4105 txns / 1591 fills vs manifest 4104 / 1591 — monotonic.
+- **Owner:** done.
 
 ## 6. Warden parser — Granite reasoning artifact handled (closed)
 
@@ -87,7 +108,32 @@ verdict and an owner/next step. Ordered by leverage.
   future model swap.
 - **Owner:** done.
 
+## 7. Search history is not reproducible for g124–g136 (open, disclosed)
+
+- **Finding:** for 10 of the 153 clean-era generations the PF recorded in
+  `history.jsonl` (and in the run-time `gate_g*.json`) is not reproducible
+  from the stored `preds_g*.npz` + `train_g*.json` under the current gate
+  code — the recorded value is lower by +0.10…+0.17. Every generation from
+  g139 on reproduces exactly, and g137/g138/g151/g185 were re-stamped at the
+  time (their gate files were rewritten minutes-to-hours after the run).
+- **Cause:** the gate's `thr_cont`/`rank` position construction changed
+  mid-search (the `gate_g124.json` written at run time shows `short_frac: 0.0`
+  and no dollar-neutral amendment — the pre-fix path opened longs only). The
+  window is the fix boundary, not a data defect.
+- **Impact:** the recorded leaderboard for that window is stale — the hp
+  bandit consumed those rows when choosing S/T/W/U/V/X — and any prose
+  quoting a g124–g136 PF is quoting the pre-fix code. The deflation is
+  **unaffected**: it re-scores every generation from the stored predictions,
+  and the winner g185 is inside the reproducible window.
+- **Owner:** agent. **Next:** annotate the ten stale rows (do not rewrite
+  `history.jsonl` — it is the run log; add a sidecar `stale_scope` note) and
+  have the loop's write path assert that a recorded row re-scores to itself,
+  so a gate-code change can never silently invalidate history again.
+
 ---
 
-**Status at 2026-09-11:** items 3, 5, 6 closed; item 2 closed-NO-GO; items 1
-and 4 open (item 1 = the active search round).
+**Status at 2026-09-12:** items 3, 5, 6 closed; item 2 closed-NO-GO; item 1
+closed-NO-promotion (deflated bar implemented, nothing survives); items 4 and
+7 open. The live fxexp tournament (g151/g138/g137, cron 21:25/21:35/21:45 UTC
+weekdays) is unchanged — the deflation bears on *promotion*, not on the
+running paper accrual.

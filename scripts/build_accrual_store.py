@@ -328,10 +328,31 @@ def build_exog(con):
     return len(rows)
 
 
+def journal_shrink_guard(prev_counts, counts, skip_venue=False):
+    """Refuse to write a store whose venue journal shrank.
+
+    The sinceid walk once truncated at 1000 txns (no `pages` field), hiding
+    ~75% of the journal — including the fxexp lanes' closes — behind a
+    plausible-looking store. A monotonicity check is the cheap invariant that
+    makes that failure mode loud: the journal only ever grows. Returns an
+    error string, or None when the counts are admissible."""
+    if skip_venue:
+        return None
+    for key in ("txns", "fills"):
+        prev, now = prev_counts.get(key), counts.get(key)
+        if prev and now is not None and now < prev:
+            return (f"journal {key} shrank {prev} -> {now} "
+                    f"(venue pull truncated?); refusing to rebuild. "
+                    f"Pass --allow-journal-shrink only if this is intentional.")
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser(description="Build the FX accrual store (DuckDB + Parquet)")
     ap.add_argument("--skip-venue", action="store_true", help="reuse existing venue tables (offline rebuild)")
     ap.add_argument("--no-bars", action="store_true", help="skip the OHLCV pull")
+    ap.add_argument("--allow-journal-shrink", action="store_true",
+                    help="bypass the journal monotonicity guard (intentional resets only)")
     args = ap.parse_args()
 
     started = time.time()
@@ -339,9 +360,16 @@ def main():
     os.chdir(STORE)  # the duckdb file + parquet live together under the store root
 
     con = duckdb.connect("store.duckdb")
+    prev_manifest = Path("manifest.json")
+    prev_counts = (json.loads(prev_manifest.read_text()).get("counts", {})
+                   if prev_manifest.exists() else {})
     counts = {}
     counts["ledger"], counts["voids"] = build_ledger(con)
     counts["fills"], counts["txns"] = build_journal(con, skip_venue=args.skip_venue)
+    guard = journal_shrink_guard(prev_counts, counts, skip_venue=args.skip_venue)
+    if guard and not args.allow_journal_shrink:
+        con.close()
+        raise SystemExit(f"[store] REFUSING to rebuild: {guard}")
     counts["bars"] = 0 if args.no_bars else build_bars(con)
     counts["releases"], counts["decisions"], counts["events"], counts["releases_history"] = build_calendar(con)
     counts["exog"] = build_exog(con)
