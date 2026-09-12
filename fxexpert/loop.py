@@ -172,6 +172,26 @@ def main(generations=1, refresh=False, seed=11, do_register=True, hp_queue=()):
             continue
 
         m = res["model"]
+        # Reproducibility assertion (#255): a history row must re-derive from
+        # the generation's written preds. On mismatch, refuse to record (and
+        # refuse to register or feed the bandit) — a gate-code change can
+        # never again silently invalidate history the way the g124-g136
+        # thr_cont fix did; the refusal row documents it loudly instead.
+        rescored = fxgate.rescore(tag)
+        if rescored != m["pf"]:
+            print(f"[loop] gen {tag}: REFUSED history row — gate PF {m['pf']} "
+                  f"does not reproduce from written preds ({rescored}); "
+                  f"no registration, no bandit update (#255)")
+            with HISTORY.open("a") as f:
+                f.write(json.dumps({
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "tag": tag, "hp": name, "params": g["params"],
+                    "pf": m["pf"], "rescored_pf": rescored,
+                    "error": "row refused: gate PF does not reproduce from "
+                             "written preds (#255)"}) + "\n")
+            state["generation"] = gen + 1
+            _save_state(state)
+            continue
         ic = g["aggregate"]["ic_mean"]
         # 2026-09-12: no backtest ranking decides anything. Eligibility is a
         # coherence check; registering means "accrue in shadow", and promotion

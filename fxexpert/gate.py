@@ -231,6 +231,20 @@ def daily_pnl_series(tag, out_dir=OUT_DIR):
     return _daily_pnl(P["date"], P["pair_idx"], raw, P["fwd1"], P["cost"], denom)
 
 
+def rescore(tag, out_dir=OUT_DIR):
+    """Re-derive a generation's model PF from its artifacts on disk
+    (preds_g{tag}.npz + train_g{tag}.json) through the same construction path
+    the deflation scores (daily_pnl_series). This is the number a history row
+    must match to be recorded (#255): a row that does not reproduce from its
+    own written preds is not evidence — the g124-g136 window proved a gate-code
+    change can otherwise silently invalidate history mid-search."""
+    daily = daily_pnl_series(tag, out_dir)
+    gains = float(daily[daily > 0].sum())
+    losses = -float(daily[daily < 0].sum())
+    pf = float(gains / losses) if losses > 0 else (float("inf") if gains > 0 else None)
+    return None if pf is None else round(pf, 4)
+
+
 def evaluate(tag, out_dir=OUT_DIR, write=True):
     """Score one generation. `write=False` audits without touching the
     recorded gate_g*.json (those files record what the gate said at run time;

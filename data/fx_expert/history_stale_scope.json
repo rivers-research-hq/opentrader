@@ -1,0 +1,35 @@
+{
+  "schema": "history_stale_scope v1",
+  "created": "2026-09-12",
+  "issue": "https://github.com/rivers-research-hq/opentrader/issues/255 (map #243)",
+  "what": "history.jsonl rows (and their run-time gate_g*.json) whose recorded model PF does NOT reproduce from the generation's own stored artifacts (preds_g*.npz + train_g*.json) under the current gate code. The recorded value is LOWER than the artifact re-run in every case.",
+  "scope": {
+    "tags": ["124", "125", "128", "130", "131", "132", "133", "134", "135", "136"],
+    "window": "g124-g136, clean era. The other three generations inside the window (g126, g127, g129) re-verify EXACTLY and are NOT stale.",
+    "verified": {
+      "method": "fxexpert.gate.evaluate(tag, write=False) vs the recorded gate_g{tag}.json model pf (per-artifact re-run, not the WRC population-aligned recompute)",
+      "re_run": "2026-09-12",
+      "rows": [
+        {"tag": "124", "recorded_pf": 0.8768, "rerun_pf": 1.0191, "delta": 0.1423},
+        {"tag": "125", "recorded_pf": 0.8821, "rerun_pf": 0.9937, "delta": 0.1116},
+        {"tag": "128", "recorded_pf": 0.808, "rerun_pf": 0.9679, "delta": 0.1599},
+        {"tag": "130", "recorded_pf": 0.8881, "rerun_pf": 1.0178, "delta": 0.1297},
+        {"tag": "131", "recorded_pf": 0.8228, "rerun_pf": 0.9971, "delta": 0.1743},
+        {"tag": "132", "recorded_pf": 0.8802, "rerun_pf": 0.9762, "delta": 0.096},
+        {"tag": "133", "recorded_pf": 0.9121, "rerun_pf": 1.075, "delta": 0.1629},
+        {"tag": "134", "recorded_pf": 0.9135, "rerun_pf": 1.0837, "delta": 0.1702},
+        {"tag": "135", "recorded_pf": 0.7615, "rerun_pf": 0.932, "delta": 0.1705},
+        {"tag": "136", "recorded_pf": 0.9061, "rerun_pf": 1.0239, "delta": 0.1178}
+      ]
+    }
+  },
+  "reason": "The gate's thr_cont position construction changed mid-search (g124-129 first used daily re-sizing, which churns round-trip cost every bar; entry-only sizing is the fix, fxexpert/gate.py _positions_thr_cont). The run-time gate_g124.json shows the pre-fix signature: short_frac 0.0 (longs-only book) and no dollar-neutral amendment (gate_amendment null). The window is the fix boundary, not a data defect.",
+  "affected_fields": ["pf, sharpe, maxdd, daily_mean_bps, long_frac, short_frac in the history.jsonl rows of these tags", "the same fields in gate_g{tag}.json for these tags"],
+  "not_affected": [
+    "history.jsonl itself is the append-only run log and is NOT rewritten; this sidecar is the annotation",
+    "the deflated bar (#245, V-WRC): scripts/white_reality_check.py re-scores every generation from stored preds; the winner g185 sits inside the reproducible window (g139+ reproduces exactly; g137/g138/g151/g185 were re-stamped at the time and reproduce exactly)"
+  ],
+  "impact": "The recorded leaderboard for the g124-g136 window is stale; the hp bandit consumed those rows when choosing S/T/W/U/V/X; any prose quoting a g124-g136 PF quotes pre-fix code.",
+  "guard": "Since 2026-09-12 the loop's write path (fxexpert/loop.py) re-derives the model PF from the written preds (fxexpert/gate.py rescore) and REFUSES to record a history row that does not match, so a gate-code change can never silently invalidate history again.",
+  "reproduce": "PYTHONPATH=/home/mrc/opentrader /home/mrc/opentrader/.venv/bin/python3 -c \"import json; from fxexpert.gate import OUT_DIR, evaluate; [print(t, json.loads((OUT_DIR/f'gate_g{t}.json').read_text())['model']['pf'], evaluate(t, write=False)['model']['pf']) for t in ['124','125','128','130','131','132','133','134','135','136']]\"  (or scripts/white_reality_check.py --mode returns, which prints the stale set per population)"
+}
