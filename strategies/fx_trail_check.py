@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""fx_trail_check — simulated trailing stop / TP for trained FX lanes.
+"""fx_trail_check — selective trailing stop / TP for trained FX lanes.
+
+Mode (binding cron contract): no flag = DRY (evaluate, track peaks, log
+would-closes; no orders); --once = REAL (closes triggered legs at the venue).
+Since 2026-09-13 the timer runs DRY by human decision — the OOS A/B
+(fxexpert/trailing_ab.py) showed every forced-exit variant losing to
+hold-to-rebalance, and the service had crossed the human gate silently
+(docs/agents/research/trail-closer-gate-brief-2026-09-13.md).
 
 The books hold to rebalance because the A/B said uniform ATR stops hurt the
 *portfolio* PF. But that tested uniform stops applied to every leg; this
@@ -161,7 +168,8 @@ def run_all(dry=False):
                     seen.add(key)
                     f.write(json.dumps(c, default=str) + "\n")
             f.flush()
-    print(f"[trail] {len(all_closed)} simulated exits ({'dry' if dry else 'live'})")
+    print(f"[trail] {len(all_closed)} trail exits "
+          f"({'DRY — no orders sent' if dry else 'LIVE — real closes sent'})")
     return all_closed
 
 
