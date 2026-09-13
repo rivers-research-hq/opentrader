@@ -364,6 +364,14 @@ def run(expert, dry=False, force=False, consolidate=False):
         else:
             halt_pairs = stale_pairs
 
+    # "traded" honesty (2026-09-13): the period is marked traded only on real
+    # progress — >=1 fill, or the book was already at target. Friday 09-12's
+    # all-halt-deferred run marked period 1045 traded with ZERO fills (the
+    # book then cannot rebalance until the next period opens), and a
+    # rejected-order run would have done the same while printing "retried
+    # next run" — a promise the already-traded gate made void. Leave the
+    # period open on no progress; a retry run finishes the rebalance.
+    actionable = 0  # deltas that reached a real order/close attempt
     for sym in sorted(deltas, key=lambda s: -abs(deltas[s])):
         delta = deltas[sym]
         if delta == 0:
@@ -385,6 +393,7 @@ def run(expert, dry=False, force=False, consolidate=False):
                 _record(sym, side, close_qty)
                 continue
             done = close_units_by_trade(sym, close_qty)
+            actionable += 1
             for tid, c, price in done:
                 _record(sym, side, c, price=price, oid=tid)
             print(f"[{my_tag}] CLOSE {sym} {close_qty:.0f}u via {len(done)} tradeID closes")
@@ -396,6 +405,7 @@ def run(expert, dry=False, force=False, consolidate=False):
                     continue
                 r = ex.place_order(sym, side2, rem, "market", tag=my_tag,
                                    client_id=f"{my_tag}-{sym[:8]}-{int(time.time() * 1000)}")
+                actionable += 1
                 if r.status == "filled":
                     _record(sym, side2, rem, price=r.price, oid=r.order_id)
                     print(f"[{my_tag}] {side2} {sym} {rem} (flip) -> filled @ {r.price}")
@@ -414,6 +424,7 @@ def run(expert, dry=False, force=False, consolidate=False):
             continue
         r = ex.place_order(sym, side, qty, "market", tag=my_tag,
                            client_id=f"{my_tag}-{sym[:8]}-{int(time.time() * 1000)}")
+        actionable += 1
         if r.status != "filled":
             print(f"[{my_tag}] {side} {sym} {qty} REJECTED ({r.status}) — retried next run")
             continue
@@ -423,11 +434,19 @@ def run(expert, dry=False, force=False, consolidate=False):
 
     _append_ledger(fills)
     if not dry:
-        state.update({"last_period": period, "last_traded": panel_day,
-                      "updated": datetime.now(timezone.utc).isoformat(),
-                      "note": "cache only — venue is authoritative"})
-        state_f.write_text(json.dumps(state, indent=1))
-        print(f"[{my_tag}] {len(fills)} fills; state -> {state_f.name} (period {period})")
+        # mark traded only on real progress: >=1 fill, or no open deltas at
+        # all (book at target). All-deferred (halt/arbitration) or
+        # all-rejected runs leave the period open for a retry.
+        n_deltas = sum(1 for d in deltas.values() if d != 0)
+        if fills or n_deltas == 0:
+            state.update({"last_period": period, "last_traded": panel_day,
+                          "updated": datetime.now(timezone.utc).isoformat(),
+                          "note": "cache only — venue is authoritative"})
+            state_f.write_text(json.dumps(state, indent=1))
+            print(f"[{my_tag}] {len(fills)} fills; state -> {state_f.name} (period {period})")
+        else:
+            print(f"[{my_tag}] {actionable} actionable deltas, 0 fills — period "
+                  f"{period} NOT marked traded; the next run retries the rebalance")
     else:
         print(f"[{my_tag}] dry run — {len(fills)} would-fill, no state/ledger write")
 
