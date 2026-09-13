@@ -35,6 +35,12 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+# The lane's scoring model is ~340k params — CPU inference is instant. Pin
+# to CPU BEFORE importing fxexpert.train: the lane runs 21:25-21:45 UTC
+# (prime gaming time) and must never grab a GPU (AGENTS.md 2026-09-13),
+# nor fail on VRAM contention.
+os.environ.setdefault("FXEXPERT_DEVICE", "cpu")
+
 import numpy as np
 import torch
 
@@ -331,19 +337,32 @@ def run(expert, dry=False, force=False, consolidate=False):
     # halt-gate: venue status per leg before ordering — non-tradeable legs
     # are deferred as HALT (distinct from rejections). Real halts (TRY-class)
     # have a stale price timestamp (>30 min); transient snapshots don't.
+    # VENUE-WIDE MAINTENANCE EXEMPTION (2026-09-13, pre-open readiness): the
+    # lanes run 21:25-21:45 UTC, inside OANDA's daily maintenance freeze —
+    # every leg then reads non-tradeable with a stale timestamp and the gate
+    # deferred ALL of period 1045's rebalance (89 fills in period 1044 vs 0
+    # in 1045). >30% of the legs stale = the venue-wide freeze (the same rule
+    # fx_warden.instability uses), not per-pair halts: defer nothing (orders
+    # at these times filled for weeks before the gate existed).
     pairs_csv = ",".join(pairs)
     halt_pairs = set()
     if pairs_csv:
         now_s = time.time()
+        stale_pairs = set()
         for pr in ex._request("GET", f"/v3/accounts/{ex._account_id}/pricing?instruments={pairs_csv}").get("prices", []):
             if pr.get("status") not in ("tradeable",):
                 ts = str(pr.get("time", ""))
                 try:
                     pt = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
                     if now_s - pt > 1800:
-                        halt_pairs.add(pr["instrument"])
+                        stale_pairs.add(pr["instrument"])
                 except (ValueError, KeyError):
                     pass
+        if len(stale_pairs) > max(1, int(0.3 * len(pairs))):
+            print(f"[{my_tag}] {len(stale_pairs)}/{len(pairs)} legs stale — "
+                  f"venue-wide maintenance window, halt-gate stands down")
+        else:
+            halt_pairs = stale_pairs
 
     for sym in sorted(deltas, key=lambda s: -abs(deltas[s])):
         delta = deltas[sym]

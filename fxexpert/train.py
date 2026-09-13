@@ -13,6 +13,7 @@ promoted generation when the architecture matches, else fresh init.
 """
 
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -24,7 +25,12 @@ from .model import FXExpert, param_count
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "fx_expert"
 T_WINDOW = 20
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# GPU contract (AGENTS.md 2026-09-13): training jobs run on the RTX 3070
+# (via .venv-cuda); the GRE is never a compute target. FXEXPERT_DEVICE=cpu
+# pins tiny-inference consumers (the live lanes) to CPU explicitly.
+DEVICE = torch.device(
+    os.environ.get("FXEXPERT_DEVICE")
+    or ("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 def load_panel(out_dir=OUT_DIR):
