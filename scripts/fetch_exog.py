@@ -15,6 +15,13 @@ days; enforced in the gym's Ctx.exog).
 
 Usage:   python3 scripts/fetch_exog.py   (idempotent; rewrites the cache)
 """
+import sys
+from pathlib import Path
+
+PROJECT = Path(__file__).resolve().parent.parent
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
+
 from security.guards import guarded_urlopen, guarded_open, guarded_requests_get, sec_pickle_load  # noqa: E402  (hardening layer)
 urlopen = guarded_urlopen  # hardening shadow
 

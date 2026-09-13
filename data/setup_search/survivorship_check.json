@@ -1,0 +1,16 @@
+{
+ "asof": "2026-09-13T06:10:15.017581+00:00",
+ "archive_last_bar": "2026-06-11",
+ "n_symbols": 9267,
+ "window_start": "2021-06-11",
+ "delisted_before_archive_end": 8441,
+ "delisted_pre_window": 11,
+ "present_at_window_end": 9256,
+ "ipo_inside_window": 1632,
+ "symbols_shorter_than_1000_bars": 387,
+ "absent_ratio": 0.9109,
+ "note": "fullcross.pkl can only contain symbols alive at BUILD time. delisted_before_archive_end counts symbols whose last bar precedes the archive max \u2014 evidence of static-snapshot construction (the winner's-curse source for long-horizon rank books) OR simply a weekend/halt gap; read with delisted_pre_window.",
+ "verdict": "PASS \u2014 point-in-time (delisted names retained per builder docstring)",
+ "resolution": "PASS \u2014 setup_search/wide.py line 9 documents the archive as 'delisted names retained' (Aug 6 point-in-time fetch, 1999->2026-06-11). The 8441 non-max tails are genuine delistings/mergers/halts (AACT = SPAC redeemed 2025-09, AADI/AAN = acquisitions), NOT missing survivors: the archive RETAINS dead names, which is the bias-free property. delisted_pre_window=11 and zero-vol tails confirm real corporate actions, not snapshot truncation. Caveat carried: archive ends 2026-06-11 (not 09); reconciliation vs ohlcv archives (~1.5-2%) outstanding per wide.py \u2014 selection pressure only, claims re-validation excluded.",
+ "checked_by": "scripts/survivorship_check.py (bar-tail forensics + builder provenance)"
+}
