@@ -1,0 +1,341 @@
+{
+ "asof": "2026-09-13T02:09:09.265810+00:00",
+ "preregistration": "docs/agents/research/fxexp-leak-ab-preregistration-2026-09-12.md",
+ "question": "#249 D1: did the #244 standardization leak flatter, hurt, or sit neutral to reported PF/IC?",
+ "device": "NVIDIA GeForce RTX 3070",
+ "panel_snapshot": {
+  "n_rows": 289467,
+  "date_min": "2008-09-25",
+  "date_max": "2026-09-10",
+  "n_features": 48
+ },
+ "design": {
+  "configs": [
+   "U",
+   "V"
+  ],
+  "warm_tag": "109",
+  "seeds": [
+   11,
+   1020,
+   2029,
+   3038,
+   4047
+  ],
+  "metric_primary": "oos_ic_mean",
+  "metric_secondary": "gate_pf"
+ },
+ "runs": [
+  {
+   "config": "U",
+   "seed": 11,
+   "leaky": true,
+   "tag": "abUL0",
+   "ic_mean": 0.03041,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0612
+  },
+  {
+   "config": "U",
+   "seed": 11,
+   "leaky": false,
+   "tag": "abUF0",
+   "ic_mean": 0.0274,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.064
+  },
+  {
+   "config": "U",
+   "seed": 1020,
+   "leaky": true,
+   "tag": "abUL1",
+   "ic_mean": 0.03058,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0502
+  },
+  {
+   "config": "U",
+   "seed": 1020,
+   "leaky": false,
+   "tag": "abUF1",
+   "ic_mean": 0.02434,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0498
+  },
+  {
+   "config": "U",
+   "seed": 2029,
+   "leaky": true,
+   "tag": "abUL2",
+   "ic_mean": 0.03054,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0631
+  },
+  {
+   "config": "U",
+   "seed": 2029,
+   "leaky": false,
+   "tag": "abUF2",
+   "ic_mean": 0.02861,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0597
+  },
+  {
+   "config": "U",
+   "seed": 3038,
+   "leaky": true,
+   "tag": "abUL3",
+   "ic_mean": 0.03246,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0652
+  },
+  {
+   "config": "U",
+   "seed": 3038,
+   "leaky": false,
+   "tag": "abUF3",
+   "ic_mean": 0.02775,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0546
+  },
+  {
+   "config": "U",
+   "seed": 4047,
+   "leaky": true,
+   "tag": "abUL4",
+   "ic_mean": 0.03125,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0582
+  },
+  {
+   "config": "U",
+   "seed": 4047,
+   "leaky": false,
+   "tag": "abUF4",
+   "ic_mean": 0.0282,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.059
+  },
+  {
+   "config": "V",
+   "seed": 11,
+   "leaky": true,
+   "tag": "abVL0",
+   "ic_mean": 0.03041,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0516
+  },
+  {
+   "config": "V",
+   "seed": 11,
+   "leaky": false,
+   "tag": "abVF0",
+   "ic_mean": 0.0274,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0543
+  },
+  {
+   "config": "V",
+   "seed": 1020,
+   "leaky": true,
+   "tag": "abVL1",
+   "ic_mean": 0.03058,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0382
+  },
+  {
+   "config": "V",
+   "seed": 1020,
+   "leaky": false,
+   "tag": "abVF1",
+   "ic_mean": 0.02434,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0383
+  },
+  {
+   "config": "V",
+   "seed": 2029,
+   "leaky": true,
+   "tag": "abVL2",
+   "ic_mean": 0.03054,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0533
+  },
+  {
+   "config": "V",
+   "seed": 2029,
+   "leaky": false,
+   "tag": "abVF2",
+   "ic_mean": 0.02861,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0504
+  },
+  {
+   "config": "V",
+   "seed": 3038,
+   "leaky": true,
+   "tag": "abVL3",
+   "ic_mean": 0.03246,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0527
+  },
+  {
+   "config": "V",
+   "seed": 3038,
+   "leaky": false,
+   "tag": "abVF3",
+   "ic_mean": 0.02775,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0439
+  },
+  {
+   "config": "V",
+   "seed": 4047,
+   "leaky": true,
+   "tag": "abVL4",
+   "ic_mean": 0.03125,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0513
+  },
+  {
+   "config": "V",
+   "seed": 4047,
+   "leaky": false,
+   "tag": "abVF4",
+   "ic_mean": 0.0282,
+   "folds_positive": 3,
+   "n_folds": 3,
+   "pf": 1.0529
+  }
+ ],
+ "pairs": [
+  {
+   "config": "U",
+   "seed": 11,
+   "ic_leaky": 0.03041,
+   "ic_fixed": 0.0274,
+   "d_ic": 0.00301,
+   "pf_leaky": 1.0612,
+   "pf_fixed": 1.064,
+   "d_pf": -0.0028
+  },
+  {
+   "config": "U",
+   "seed": 1020,
+   "ic_leaky": 0.03058,
+   "ic_fixed": 0.02434,
+   "d_ic": 0.00624,
+   "pf_leaky": 1.0502,
+   "pf_fixed": 1.0498,
+   "d_pf": 0.0004
+  },
+  {
+   "config": "U",
+   "seed": 2029,
+   "ic_leaky": 0.03054,
+   "ic_fixed": 0.02861,
+   "d_ic": 0.00193,
+   "pf_leaky": 1.0631,
+   "pf_fixed": 1.0597,
+   "d_pf": 0.0034
+  },
+  {
+   "config": "U",
+   "seed": 3038,
+   "ic_leaky": 0.03246,
+   "ic_fixed": 0.02775,
+   "d_ic": 0.00471,
+   "pf_leaky": 1.0652,
+   "pf_fixed": 1.0546,
+   "d_pf": 0.0106
+  },
+  {
+   "config": "U",
+   "seed": 4047,
+   "ic_leaky": 0.03125,
+   "ic_fixed": 0.0282,
+   "d_ic": 0.00305,
+   "pf_leaky": 1.0582,
+   "pf_fixed": 1.059,
+   "d_pf": -0.0008
+  },
+  {
+   "config": "V",
+   "seed": 11,
+   "ic_leaky": 0.03041,
+   "ic_fixed": 0.0274,
+   "d_ic": 0.00301,
+   "pf_leaky": 1.0516,
+   "pf_fixed": 1.0543,
+   "d_pf": -0.0027
+  },
+  {
+   "config": "V",
+   "seed": 1020,
+   "ic_leaky": 0.03058,
+   "ic_fixed": 0.02434,
+   "d_ic": 0.00624,
+   "pf_leaky": 1.0382,
+   "pf_fixed": 1.0383,
+   "d_pf": -0.0001
+  },
+  {
+   "config": "V",
+   "seed": 2029,
+   "ic_leaky": 0.03054,
+   "ic_fixed": 0.02861,
+   "d_ic": 0.00193,
+   "pf_leaky": 1.0533,
+   "pf_fixed": 1.0504,
+   "d_pf": 0.0029
+  },
+  {
+   "config": "V",
+   "seed": 3038,
+   "ic_leaky": 0.03246,
+   "ic_fixed": 0.02775,
+   "d_ic": 0.00471,
+   "pf_leaky": 1.0527,
+   "pf_fixed": 1.0439,
+   "d_pf": 0.0088
+  },
+  {
+   "config": "V",
+   "seed": 4047,
+   "ic_leaky": 0.03125,
+   "ic_fixed": 0.0282,
+   "d_ic": 0.00305,
+   "pf_leaky": 1.0513,
+   "pf_fixed": 1.0529,
+   "d_pf": -0.0016
+  }
+ ],
+ "verdict": {
+  "rule": "sign test, >= 80% of 10 pairs on d_ic",
+  "n_pairs": 10,
+  "pos": 10,
+  "neg": 0,
+  "median_d_ic": 0.00305,
+  "median_d_pf": 0.0004,
+  "verdict": "leak flattered IC"
+ }
+}

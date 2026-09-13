@@ -104,11 +104,16 @@ def _fit(X_tr, y_tr, X_val, y_val, hp, warm_state, seed, T=T_WINDOW):
 
 
 def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None,
-                   warm_states=None):
+                   warm_states=None, leak_standardization=False):
     """One walkforward. Warm start: fold fi inherits ONLY fold fi of the
     warm generation (same train window) — sharing the last fold's weights
     across folds leaked future data into earlier folds (caught 2026-09-06,
-    see fx-expert-loop doc §v0.2)."""
+    see fx-expert-loop doc §v0.2).
+
+    leak_standardization=True reintroduces the pre-#244 standardization bug
+    (mu/sd indexed without the keep-filter map, so out-of-fold rows incl.
+    future data enter the stats). DEBUG-ONLY arm of the #249 leak A/B —
+    never for search, gate, or promotion runs."""
     panel = panel or load_panel(out_dir)
     T = int(hp.get("T", T_WINDOW))
     X_all = panel["features"]
@@ -173,8 +178,12 @@ def run_generation(tag, hp, warm_tag=None, out_dir=OUT_DIR, seed=11, panel=None,
         # tr_idx are positions in the keep-FILTERED arrays; map back to global
         # row indices before indexing the FULL panel X, else whole pairs across
         # their entire history (incl. future data) leak into mu/sd.
-        mu = X[idx_keep[tr_idx]].mean(axis=0)
-        sd = X[idx_keep[tr_idx]].std(axis=0)
+        # The leaky arm (DEBUG-ONLY, #249 A/B) skips the map: X[tr_idx] grabs
+        # full-array rows regardless of the keep filter, so invalid and
+        # out-of-fold rows contaminate the stats exactly as pre-#244.
+        stats_idx = tr_idx if leak_standardization else idx_keep[tr_idx]
+        mu = X[stats_idx].mean(axis=0)
+        sd = X[stats_idx].std(axis=0)
         sd[sd < 1e-8] = 1.0
         Xs = np.clip((X - mu) / sd, -8, 8).astype(np.float32)
         Xs = np.nan_to_num(Xs)
