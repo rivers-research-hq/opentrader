@@ -28,33 +28,25 @@ OUT_DEFAULT = PROJECT / "data" / "warden" / "friday_scoreboard.json"
 
 def _financing_by_tag(ex):
     """Per-lane financing from TRADE_FINANCING transactions, attributed via
-    the same tag chain as realized PnL. Best-effort: financing rows carry
-    tradeID, so attribution is trade-tag -> lane."""
-    txns = ex._request("GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0").get("transactions", [])
-    order_tag, trade_tag = {}, {}
-    for t in txns:
-        if t.get("type") == "MARKET_ORDER":
-            tg = (t.get("tradeClientExtensions") or {}).get("tag")
-            if tg:
-                order_tag[t.get("id")] = tg
-        if t.get("type") == "ORDER_FILL":
-            tg = (t.get("clientExtensions") or {}).get("tag") or order_tag.get(t.get("orderID"))
-            if tg and t.get("tradeOpened"):
-                trade_tag[str(t["tradeOpened"].get("tradeID"))] = tg
-            if tg and t.get("tradeReduced"):
-                trade_tag[str(t["tradeReduced"].get("tradeID"))] = tg
+    the shared tradeID->tag chain. Full-journal walk (#252): a single
+    sinceid call caps at 1000 txns with no pagination — the old first-page
+    read hid most of the financing history."""
+    from strategies.fx_runner import _trade_tags, _walk_transactions
+    tags, _ = _trade_tags(ex)
     fin = {}
-    for t in txns:
+    for t in _walk_transactions(
+            ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
         if t.get("type") != "TRADE_FINANCING":
             continue
-        tg = trade_tag.get(str(t.get("tradeID")))
-        fin[tg or "unknown"] = fin.get(tg or "unknown", 0.0) + float(t.get("pl", 0) or 0)
+        tg = tags.get(str(t.get("tradeID"))) or "unknown"
+        fin[tg] = fin.get(tg, 0.0) + float(t.get("pl", 0) or 0)
     return fin
 
 
 def build():
     from strategies.fx_warden import lane_states, audit_sizing
     from strategies.expert_lifecycle import lifecycle_of
+    from strategies.lane_attribution import realized_by_tag
     ex = OandaExchange()
     if not ex.connect():
         raise SystemExit("[scoreboard] venue unreachable")
@@ -65,6 +57,11 @@ def build():
     # scoreboard reads its return value, not the cache)
     audit = audit_sizing(dry=True) or {}
     fin = _financing_by_tag(ex)
+    # realized straight from the venue journal per tag (#251): the open-book
+    # lanes map drops a trained lane the moment it goes flat and used to
+    # render its realized as a silent 0.0; a tag with NO journal fills is an
+    # anomaly and shows as None, never as 0.00.
+    realized_all, realized_today = realized_by_tag(ex)
 
     state = json.loads((PROJECT / "data" / "warden" / "warden_state.json").read_text()) \
         if (PROJECT / "data" / "warden" / "warden_state.json").exists() else {}
@@ -83,11 +80,14 @@ def build():
         cur = lane.get("upl", 0.0)
         s = last_scores.get(tag, {})
         lc = lifecycle_of(eid) or {}
+        rz = realized_all.get(tag)
         rows[tag] = {
             "lifecycle": lc.get("lifecycle", "unregistered"),
             "notional_cap": lc.get("notional_cap", 1.0),
-            "realized_all": lane.get("realized_all", 0.0),
-            "realized_today": lane.get("realized_today", 0.0),
+            "realized_all": None if rz is None else round(rz, 2),
+            "realized_all_source": ("venue-journal" if rz is not None
+                                    else "NO JOURNAL FILLS FOR TAG"),
+            "realized_today": round(realized_today.get(tag, 0.0), 2),
             "upl": round(cur, 2),
             "peak_upl": round(peak, 2),
             "give_back": round((peak - cur) / peak, 3) if peak > 0 else 0.0,
@@ -98,7 +98,7 @@ def build():
             "warden_score_pct": s.get("score_pct"),
             "warden_miss_pct": s.get("miss_pct"),
         }
-    total_pnl = sum(r["realized_all"] + r["upl"] for r in rows.values())
+    total_pnl = sum((r["realized_all"] or 0.0) + r["upl"] for r in rows.values())
     return {"asof": datetime.now(timezone.utc).isoformat(),
             "account": {"nav": st.get("nav"), "balance": st.get("balance"),
                         "unrealized": st.get("unrealized"),
@@ -123,7 +123,8 @@ def main():
     for tag, r in sorted(sb["lanes"].items()):
         ws = "—" if r["warden_score_pct"] is None else f"{r['warden_score_pct']:+.2f}"
         fid = "—" if r["sizing_fidelity_pct"] is None else f"{r['sizing_fidelity_pct']:.0f}"
-        print(f"{tag:14s} {r['lifecycle']:10s} {r['realized_all']:>+10.2f} "
+        rz = "—" if r["realized_all"] is None else f"{r['realized_all']:>+10.2f}"
+        print(f"{tag:14s} {r['lifecycle']:10s} {rz:>10s} "
               f"{r['upl']:>+9.2f} {r['peak_upl']:>+9.2f} "
               f"{r['give_back'] * 100:>5.1f}% {r['financing']:>+7.2f} {fid:>6s} {ws:>8s}")
     print(f"\n[scoreboard] saved -> {a.out}")

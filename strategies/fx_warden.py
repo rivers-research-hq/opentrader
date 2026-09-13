@@ -158,22 +158,13 @@ def lane_states():
         d["gross_usd"] += usd_notional
         d["upl"] += float(t["unrealizedPL"])
         d["pairs"].append(t["instrument"])
-    # realized today + period-to-date from the venue journal (tag chain)
-    txns = ex._request("GET", f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0").get("transactions", [])
-    fills = [t for t in txns if t.get("type") == "ORDER_FILL"]
-    order_tag = {}
-    for t in txns:
-        if t.get("type") == "MARKET_ORDER":
-            tg = (t.get("tradeClientExtensions") or {}).get("tag")
-            if tg:
-                order_tag[t.get("id")] = tg
-    realized_day, realized_all = {}, {}
-    today = _now()[:10]
-    for f in fills:
-        tag = (f.get("clientExtensions") or {}).get("tag") or order_tag.get(f.get("orderID")) or "unknown"
-        realized_all[tag] = realized_all.get(tag, 0.0) + float(f.get("pl", 0) or 0)
-        if str(f.get("time", ""))[:10] == today:
-            realized_day[tag] = realized_day.get(tag, 0.0) + float(f.get("pl", 0) or 0)
+    # realized today + period-to-date from the venue journal via the SHARED
+    # attribution walk (#251): the old inline chain read one sinceid call
+    # (caps at 1000 txns, no pagination — #252) and resolved tags without
+    # the tradesClosed/tradeReduced chain, so the trained lanes' closes fell
+    # outside the window and their realized rendered as a silent 0.0.
+    from strategies.lane_attribution import realized_by_tag
+    realized_all, realized_day = realized_by_tag(ex)
     return {
         "asof": _now(),
         "balance": float(s["balance"]), "nav": float(s["NAV"]),

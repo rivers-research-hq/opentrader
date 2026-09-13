@@ -14,6 +14,38 @@ single place for.
 
 LEGACY_CUTOFF = "2026-08-31T18:00"
 UNATTRIBUTED = "unattributed"
+LEGACY_SMOKE = "legacy-smoke"
+
+
+def realized_by_tag(ex):
+    """Per-tag realized PnL straight from the venue journal (venue is
+    authoritative): full journal walk + the shared tag chain. #251: the
+    scoreboard/warden consumers previously read a SINGLE sinceid call —
+    which caps at 1000 txns with no pagination (#252) — and resolved tags
+    without the tradesClosed/tradeReduced chain, so the trained lanes'
+    closes were invisible and their realized rendered as a silent 0.0
+    masking a real loss.
+
+    Returns (realized_all, realized_today): {tag: usd} each. Opening fills
+    carry pl 0.0 and are harmless to the sum. Tagless fills pre-cutoff
+    grandfather to LEGACY_SMOKE; post-cutoff failures land LOUD in
+    UNATTRIBUTED — never silently credited to a lane."""
+    from datetime import datetime, timezone
+
+    from strategies.fx_runner import _trade_tags, _walk_transactions
+    tags, order_tag = _trade_tags(ex)
+    realized_all, realized_today = {}, {}
+    today = datetime.now(timezone.utc).date().isoformat()
+    for t in _walk_transactions(
+            ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
+        if t.get("type") != "ORDER_FILL":
+            continue
+        tag = resolve_fill_tag(t, tags, order_tag) \
+            or (LEGACY_SMOKE if t.get("time", "") < LEGACY_CUTOFF else UNATTRIBUTED)
+        realized_all[tag] = realized_all.get(tag, 0.0) + float(t.get("pl", 0) or 0)
+        if str(t.get("time", ""))[:10] == today:
+            realized_today[tag] = realized_today.get(tag, 0.0) + float(t.get("pl", 0) or 0)
+    return realized_all, realized_today
 
 
 def resolve_fill_tag(t, tags, order_tag):
