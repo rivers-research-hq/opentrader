@@ -41,6 +41,26 @@ Multi-day interactive implementer sessions are **outside that envelope**
 4. **The human decides and gates** — ledger promotions, ADRs, strategy
    commits, live-tree landings. Unchanged.
 
+## GPU devices — binding (2026-09-13)
+
+- **The RX 7900 GRE is the human's gaming GPU — never a compute target.**
+  `opentrader-warden-gre.service` (Granite 4.2-8B, :5802) is restarted
+  MANUALLY by the human after gaming; agents must not start it. While it is
+  stopped the warden falls back to Qwen3.8-4B on the 3070 (:5804,
+  `opentrader-llama-gpu1`) or skips its LLM note (designed degradation).
+- **Compute GPU = the RTX 3070**, via `/home/mrc/opentrader/.venv-cuda`
+  (torch 2.11.0+cu128). The default `.venv` torch is a ROCm build whose
+  "cuda" device IS the GRE — GPU jobs must run under `.venv-cuda/bin/python`,
+  and scripts must refuse `torch.version.hip` builds BEFORE initializing CUDA
+  (incident 2026-09-13: a guard test trained on the GRE through the ROCm
+  venv; run killed, artifacts deleted).
+- `/etc/pip.conf` sets a global `extra-index-url` to the ROCm wheelhouse —
+  pin exact variants (`torch==2.11.0+cu128`) or pip silently installs ROCm
+  wheels over CUDA ones.
+- The 3070 also hosts warden-4b + qwen3-embed (~5.1GB of 8GB): pause those
+  services for a big job and RESTORE them after (`systemctl --user stop/start
+  opentrader-llama-gpu1 qwen3-embed`).
+
 ## Agent skills
 
 ### Issue tracker
