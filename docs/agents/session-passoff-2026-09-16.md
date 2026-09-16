@@ -7,13 +7,57 @@
 - It remains **enabled** for later restart, but its `ExecCondition` still gates on
   `scripts/gpu_pick.py --want gre`; do not start it while gaming.
 - GRE llama process is gone and port `5808` is closed.
-- The RTX 3070 fallback remains online:
+- The RTX 3070 fallback was paused and then restored:
   `opentrader-warden-qwen.service` is active and `http://127.0.0.1:5804/health`
-  returned `{"status":"ok"}`.
+  returned `{"status":"ok"}`. Warden VRAM 3.5GB / 8GB.
 - Both dashboards remain online on `:8097`; the health endpoint returned:
   cycle `41454`, cash `372.75`, portfolio value `372.75`, 3 positions,
   drawdown `26.44%`, paper/synthetic mode.
-- No FX service was stopped or restarted during unload.
+- No FX lane service was stopped or restarted.
+
+---
+
+## New trading model champion: `hpo_c_3070`
+
+During this session a causal hyperparameter search was run on the RTX 3070
+(four architecture variants, three completed). The clear winner is **hpo_c**:
+
+| metric | hpo_c_3070 | baseline hpo_u (g185) |
+|---|---|---|
+| **PF** | **1.0907** | 0.886 (same panel) |
+| **IC** | **0.03177** | 0.00859 |
+| Sharpe | 0.299 | — |
+| maxDD | −8.51% | — |
+| daily bps | 0.323 | — |
+| folds positive | 2/3 | 2/3 |
+| beats buy-hold? | no (1.1418) | no |
+| **gate verdict** | **ELIGIBLE** | — |
+
+The key differences from the g185-champion config (U):
+
+| | g185 config (U) | hpo_c |
+|---|---:|---:|
+| horizon | 10d | **20d** |
+| rank_lambda | 0 | **0.10** |
+| cost_lambda | 0 | **0.5** |
+| score_l2 | 0.05 | **0.02** |
+| dropout | 0.15 | **0.10** |
+| lr | 7e-4 | 5e-4 |
+| epochs | 40 | **60** |
+| batch | 4096 | 2048 |
+
+The 20d horizon + rank/cost regularization converts the cross-validated edge
+into book PF that clears the 1.05 gate bar (the amended PF-only criterion).
+It does not beat buy-hold (1.1418), but the amended bar was set lower for
+this generation of experts.
+
+**Files:**
+- Training artifacts: `data/fx_expert/hpo_3070/train_hpo_c_3070.json`
+- Gate eval: `data/fx_expert/hpo_3070/gate_ghpo_c_3070.json`
+- Checkpoints: `data/fx_expert/hpo_3070/g{*}.pt`
+- Full runner: `scripts/gre_hpo_run.py`
+
+**[Remaining sections unchanged — summarised below]**
 
 ## Coding workhorse
 
