@@ -1,0 +1,27 @@
+# fxexpert retry slots (2026-09-13): same-evening second chance — if the 21:2x run
+# filled nothing (venue freeze/rejects), the period stays open and these finish it;
+# if the first run filled, the already-traded gate makes this a no-op.
+15 22 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_expert_lane --expert g151 --once >> /home/mrc/opentrader/data/logs/fx_expert_lane_retry.log 2>&1
+# ── exog refreshers (2026-09-13 audit fix): the exogenous pipeline had NO
+# scheduler — COT sat 18d stale feeding cot_z on all 57 pairs. COT publishes
+# Friday (~15:00 ET); fetch 21:07 UTC Fri + a daily catch-up (idempotent).
+07 21 * * 5 cd /home/mrc/opentrader && .venv/bin/python3 scripts/fetch_exog.py >> data/logs/fetch_exog.log 2>&1 && .venv/bin/python3 scripts/materialize_exog.py >> data/logs/fetch_exog.log 2>&1
+17 5 * * 1-6 .venv/bin/python3 scripts/fetch_fred_cond.py >> data/logs/fetch_fred_cond.log 2>&1
+27 5 * * 1-6 cd /home/mrc/opentrader && .venv/bin/python3 scripts/fetch_policy_rates.py >> data/logs/fetch_policy_rates.log 2>&1
+# ── FX lanes (restored 2026-09-13 from the cronie journal's Sep-11 firings —
+# these entries were lost from the crontab during the 09-13 exog-audit rewrite;
+# all weekday-gated exactly as observed). Crash lane dark since Sep 3, same
+# class of loss, no deliberate-stop record in defect log — restored too.
+30 14 * * 1-5 /home/mrc/opentrader/data/accumulator_run.sh
+0 * * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_runner --intraday --once >> /home/mrc/opentrader/data/logs/fx_intraday.log 2>&1
+15 * * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_h1rev --once >> /home/mrc/opentrader/data/logs/fx_h1rev.log 2>&1
+30 */4 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_h4brk --once >> /home/mrc/opentrader/data/logs/fx_h4brk.log 2>&1
+*/15 * * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_watchdog --once >> /home/mrc/opentrader/data/logs/fx_watchdog.log 2>&1
+10 17 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_runner --once >> /home/mrc/opentrader/data/logs/fx_runner.log 2>&1
+20 17 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_shadow --apply >> /home/mrc/opentrader/data/logs/fx_shadow.log 2>&1
+25 17 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_challenger --once >> /home/mrc/opentrader/data/logs/fx_challenger.log 2>&1
+30 17 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_d1mom10 --once >> /home/mrc/opentrader/data/logs/fx_d1mom10.log 2>&1
+30 18 * * 1-5 cd /home/mrc/opentrader && PYTHONPATH=/home/mrc/opentrader /home/mrc/opentrader/.venv/bin/python3 -m strategies.lanes --write >> /home/mrc/opentrader/data/logs/lanes.log 2>&1
+35 18 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.shadow_driver --once >> /home/mrc/opentrader/data/wayfinder/shadow_driver.log 2>&1
+0 19 * * 1-5 cd /home/mrc/opentrader && PYTHONPATH=/home/mrc/opentrader /home/mrc/opentrader/.venv/bin/python3 scripts/document_bugs.py >> /home/mrc/opentrader/data/logs/document_bugs.log 2>&1
+25 21 * * 1-5 cd /home/mrc/opentrader && /home/mrc/opentrader/.venv/bin/python3 -m strategies.fx_expert_lane --expert g151 --once >> /home/mrc/opentrader/data/logs/fx_expert_lane.log 2>&1

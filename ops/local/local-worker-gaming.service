@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenTrader local worker — LIGHT profile (safe alongside gaming)
+After=network.target
+[Service]
+Type=simple
+EnvironmentFile=%h/opentrader/ops/local/worker.env
+ExecStart=/home/mrc/src/llama.cpp/build/bin/llama-server \
+  --model ${MODEL_PATH} --alias ${MODEL_ALIAS}-light --host 127.0.0.1 --port ${PORT} \
+  --n-gpu-layers 40 --n-cpu-moe ${N_CPU_MOE} \
+  --ctx-size 16384 --ctx-checkpoints 2 --flash-attn on \
+  --cache-type-k q4_0 --cache-type-v q4_0 \
+  --parallel 1 --cont-batching --threads ${THREADS} --jinja --metrics
+Restart=on-failure
+[Install]
+WantedBy=default.target

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // OpenTrader — local provider config
+  // GPU1 (RX 7900 GRE, 16GB, ROCm): DeepSeek-V4-Pro-Qwen3.5-9B-MTP Q8_0 on :5802 → primary model
+  // 5803 (Qwen2.5-7B / RTX 3070) is RETIRED — removed from this config.
+  "model": "deepseek-amd/deepseek-v4-pro-qwen3.5-9b",
+  "provider": {
+    "deepseek-amd": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "DeepSeek-V4-Pro-Qwen3.5-9B-MTP Q8_0 (AMD RX 7900 GRE)",
+      "options": {
+        "baseURL": "http://localhost:5802/v1"
+      },
+      "models": {
+        "deepseek-v4-pro-qwen3.5-9b": {
+          "name": "deepseek-v4-pro-qwen3.5-9b",
+          "alias": ["qwythos-9b-mtp"],
+          "limit": {
+            "context": 16384,
+            "output": 2048,
+            "input": 16384
+          },
+          "options": {
+            "num_ctx": 16384
+          }
+        }
+      },
+      "blacklist": []
+    }
+  }
+}

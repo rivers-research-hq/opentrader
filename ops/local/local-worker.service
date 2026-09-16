@@ -1,0 +1,24 @@
+[Unit]
+Description=OpenTrader local worker (llama.cpp server) — normal profile
+After=network.target
+# a bad model/offload config must fail loudly, not thrash the GPU.
+# These keys are only honoured in [Unit] — in [Service] systemd logs
+# "Unknown key ... ignoring" and the restart burst limit silently does nothing.
+StartLimitIntervalSec=180
+StartLimitBurst=3
+[Service]
+Type=simple
+EnvironmentFile=%h/opentrader/ops/local/worker.env
+# yield to gaming: refuse to start (or restart) while a game is running
+ExecCondition=/home/mrc/opentrader/.venv/bin/python3 /home/mrc/opentrader/scripts/gpu_pick.py --want gre
+ExecStart=/home/mrc/src/llama.cpp/build/bin/llama-server \
+  --model ${MODEL_PATH} --alias ${MODEL_ALIAS} --host 127.0.0.1 --port ${PORT} \
+  --n-gpu-layers ${N_GPU_LAYERS} --n-cpu-moe ${N_CPU_MOE} \
+  --ctx-size ${CTX} --ctx-checkpoints 4 --flash-attn on \
+  --cache-type-k q8_0 --cache-type-v q8_0 \
+  --spec-type ngram-simple \
+  --parallel 1 --cont-batching --threads ${THREADS} --jinja --metrics
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=default.target

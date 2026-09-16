@@ -76,3 +76,4 @@ continuity heartbeat 3 item:3 did:test_continuity.py PASSED (restart survival + 
 continuity2 heartbeat 1 did:proportional restore_ledger in multi_router + FinnhubExchange.restore_ledger + LiveExchange.restore_ledger; test_continuity.py ALL PASSED (354.00 aggregate, ±$1 proportions, clean reset); 3 patches in data/wayfinder/patches/
 continuity3 heartbeat 1 did:composite fill key + ledger-authoritative replace + Phase C double-restart test — ALL PASSED (fills 3→3, no compounding); patch 90 lines
 oanda heartbeat 1 did:fixed 3 API-shape bugs (pricing depth arrays, order body type field, orderFillTransaction parse) + 4 proofs green on practice (order IDs 12/14) next:patch+checkpoint
+v11 heartbeat 2026-09-16 did:recompute deployability status from real ledgers pass:c1:accruing(19trades,0exits) c2:accruing(-0.128) c3:accruing(6.6d)

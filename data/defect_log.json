@@ -1,0 +1,317 @@
+{
+ "runway_start": "2026-08-05T18:22:00+00:00",
+ "defects": [
+  {
+   "date": "2026-08-05T22:33",
+   "severity": "fatal",
+   "category": "crash_episode",
+   "episode_start": "2026-08-05T22:33",
+   "description": "crash episode: 522 events over ~83 min (first: 3 consecutive crashes (cycle 12121))",
+   "root_cause": "future-dated daily bar from the stock waterfall (next-UTC-midnight placeholder); its date keyed into other series raised KeyError(Timestamp)",
+   "fix": "harness _daily_bars() drops future-dated bars at every fetch; rule_gate fail-closed feat_rows filter (belt-and-braces)",
+   "status": "fixed"
+  },
+  {
+   "date": "2026-08-06T00:31",
+   "severity": "fatal",
+   "category": "crash_episode",
+   "episode_start": "2026-08-06T00:31",
+   "description": "crash episode: 18 events over ~2 min (first: 3 consecutive crashes (cycle 12702))",
+   "root_cause": "future-dated daily bar from the stock waterfall (next-UTC-midnight placeholder); its date keyed into other series raised KeyError(Timestamp)",
+   "fix": "harness _daily_bars() drops future-dated bars at every fetch; rule_gate fail-closed feat_rows filter (belt-and-braces)",
+   "status": "fixed"
+  }
+ ],
+ "stats": {
+  "cycles": 12487,
+  "cycles_since": 41454,
+  "avg_cycle_s": 4.11,
+  "max_cycle_s": 297.63,
+  "last_cycle": 41454,
+  "days_running": 39.3,
+  "fatal_defects": 2,
+  "moderate_defects": 0,
+  "closed_trades": 21,
+  "exit_paths": {
+   "stop": 0,
+   "target": 0,
+   "hold": 0,
+   "other": 21
+  }
+ },
+ "updated_at": "2026-09-16T00:00:01+00:00",
+ "fx_defects": [
+  {
+   "date": "2026-09-01T17:10",
+   "severity": "moderate",
+   "category": "lane_crash",
+   "description": "fx_runner invocation crashed: KeyError('opened') at strategies/fx_runner.py:106 while iterating the venue book; later cron runs recovered; no positions harmed",
+   "root_cause": "datetime.fromisoformat(book[sym]['opened']) parsed an unvalidated stamp \u2014 a venue trade without openTime (or a clobbered state cache) yields an empty string",
+   "fix": "_parse_opened() defensive parser (returns None -> warning + age logic skipped that run); unit-tested 7/7, live dry run clean (map ticket #162)",
+   "status": "fixed (landed live 2026-09-02, with the intraday dead-code fix #165 and the place_order/trade_id fixes #167)"
+  },
+  {
+   "date": "2026-09-02T05:30",
+   "severity": "moderate",
+   "category": "ledger_drift",
+   "description": "fx_crashtest.json reported realized $0.00 despite 9 venue-closed fills, and max DD $572-on-$300 from a one-cycle stale mark (honest venue-derived DD: $0.21); stale position rows for already-closed trades persisted",
+   "root_cause": "realized was only booked on our own 12h-hold closes (SL/TP closes skipped); equity marks came from local price snapshots with no venue cross-check; peak/max_dd are monotonic so the phantom persisted",
+   "fix": "realized recomputed each run from venue ORDER_FILL pl (crash-size exit fills); unrealized from venue openTrades unrealizedPL; one-time series reset on schema migration (no last_venue_sync cursor) (map ticket #163)",
+   "status": "fixed (landed live 2026-09-02)"
+  },
+  {
+   "date": "2026-09-02T15:00",
+   "severity": "moderate",
+   "category": "lane_crash",
+   "description": "intraday lane (h1-mom) crashed 11 consecutive hourly runs: UnboundLocalError('r') \u2014 place_order sat after 'continue' inside the dry branch (dead code), so real-mode runs crashed on the first positive-momentum open; lane opened nothing all day",
+   "root_cause": "dead-code placement bug in strategies/fx_runner.py run_intraday(); plus the #162-class unguarded fromisoformat(opened)",
+   "fix": "dead-code dedent + _parse_opened guard; landed live by human direction, lane resumed 15:39 UTC (GBP_USD 2000u) (map ticket #165)",
+   "status": "fixed (landed live)"
+  },
+  {
+   "date": "2026-09-02T15:45",
+   "severity": "moderate",
+   "category": "stale_display",
+   "description": "TUI file-backed panels (crash book, per-lane ledger, watchdog, registry, router) silently showed defaults: tui.py PROJECT = parent.parent resolved DATA to nonexistent /home/mrc/data; _read_json swallowed the errors; venue panels via /api/fx stayed live \u2014 read as 'TUI stale while the venue trades'",
+   "root_cause": "off-by-one PROJECT derivation in tui.py:28; silent except in _read_json masked it",
+   "fix": "PROJECT = Path(__file__).resolve().parent; landed live, collect_all verified end-to-end (map ticket #166)",
+   "status": "fixed (landed live)"
+  },
+  {
+   "date": "2026-09-02T16:40",
+   "severity": "high",
+   "category": "phantom_fills",
+   "description": "oanda place_order hardcoded status='filled' on any successful POST \u2014 venue-cancelled orders (STOP_LOSS_ON_FILL_LOSS during a fast JPY drop, 160.2\u2192158.8) booked two phantom USD_JPY fills into fx_ledger.jsonl and a phantom position into fx_state.json; get_current_price served an unbounded cache (stale 160.198 quote twice while venue traded 158.82), which set the doomed stops; the #163 landed fix also bounded realized recompute by last_venue_sync, resetting the cumulative total hourly",
+   "root_cause": "no orderCancelTransaction/orderRejectTransaction check in place_order; _price_cache written once and never expired (same no-TTL cache-first disease as ticket #159); since-cursor window instead of full-history recompute",
+   "fix": "place_order rejects unless orderFillTransaction exists (venue reason surfaced to the runner log); get_current_price always fetches fresh; crashtest realized recomputes over full lane epoch; 2 phantom ledger rows removed (venue-proven cancelled), state cache rewritten from venue (map ticket #167)",
+   "status": "fixed (landed live 2026-09-02)"
+  },
+  {
+   "date": "2026-09-02T18:44:06+00:00",
+   "severity": "moderate",
+   "category": "lane_crash",
+   "description": "fx_watchdog cycle crashed: KeyError('account') \u2014 _venue_net (strategies/fx_runner.py:100, imported by fx_watchdog) indexed [\"account\"] unguarded; an error-shaped venue payload (no account key) killed that cycle (first surfaced in fx_watchdog.log, caught by document_bugs.py auto-scan)",
+   "root_cause": "#162 class: unvalidated venue payload indexing (same family as the unguarded fromisoformat('opened'))",
+   "fix": "_venue_net uses .get('account') or {} \u2014 net 0 from a bad payload, callers defer closes on ambiguity; landed live + sandbox (map ticket #167 follow-up)",
+   "status": "fixed (landed live 2026-09-02)",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_watchdog.log",
+   "source": "document_bugs.py auto-scan, triaged by subscription agent 2026-09-02"
+  },
+  {
+   "date": "2026-09-02T22:00:04+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '158', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '158', 'requestID': '61544231777643118', 'time': '2026-09-02T22:00:04.103183504Z', 'type': 'MARKET_ORDER_REJECT', 'rejectReason': 'TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED', 'instrument': 'USD_JPY', 'units': '2000', 'timeInForce': 'FOK', 'positionFill': 'DEFAULT', 'takeProfitOnFill': {'price': '159.12433', 'timeInForce': 'GTC...",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-03T00:00:01+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.43544 TP 159.12433",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-02T23:00:04+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '159', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '159', 'requestID': '61544246876558491', 'time': '2026-09-02T23:00:04.084612737Z', 'type': 'MARKET_ORDER_REJECT', 'rejectReason': 'TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED', 'instrument': 'USD_JPY', 'units': '2000', 'timeInForce': 'FOK', 'positionFill': 'DEFAULT', 'takeProfitOnFill': {'price': '159.20433', 'timeInForce': 'GTC...",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-03T00:00:01+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.52044 TP 159.20433",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-03T02:41:32.495342+00:00",
+   "severity": "low",
+   "category": "ledger_correction",
+   "description": "5 phantom ledger rows voided append-only (reason=phantom-void, voids=<ts>): 02:30:04 AUD_USD o/76 + 12:30:04 USD_CAD o/104 \u2014 venue cancelled, never filled (lying-adapter era, #167); 22:00:04/23:00:04/00:00:05 USD_JPY price-0 \u2014 TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED hourly rejects (fixed #168). Consumers (tui/index.js laneStats, dashboard /api/fx, tui.py ledger_performance, fx_review load_events) skip void+voided rows. Map #158 ticket #171.",
+   "log_source": "manual correction, charting/work session 2026-09-03"
+  },
+  {
+   "date": "2026-09-03T11:18:17.635427+00:00",
+   "severity": "low",
+   "category": "ledger_correction",
+   "description": "AUDIT CORRECTION: 2 additional phantom rows found by the #173 venue-agreement audit and voided (EUR_USD 2026-09-02T13:30:05.579748 o/118, 14:30:05.608223 o/126 \u2014 venue cancelled both; the 09-03 recap had misread the venue fill list and counted only 5 phantoms; true total 7, all voided append-only).",
+   "log_source": "#173 audit transcript, 2026-09-03"
+  },
+  {
+   "date": "2026-09-03T00:00:04+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '160', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '160', 'requestID': '97573058996770891', 'time': '2026-09-03T00:00:04.996740560Z', 'type': 'MARKET_ORDER_REJECT', 'rejectReason': 'TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED', 'instrument': 'USD_JPY', 'units': '2000', 'timeInForce': 'FOK', 'positionFill': 'DEFAULT', 'takeProfitOnFill': {'price': '159.31783', 'timeInForce': 'GTC...",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-04T00:00:00+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.65478 TP 159.31783",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged/fixed (#168): venue reject reason TAKE_PROFIT_ON_FILL_PRICE_PRECISION_EXCEEDED \u2014 JPY pairs take 3 decimals, not 5. Fixed by the adapter's _price_digits/_fmt_price formatting; the '@ 0.00000' in the log line is the pre-#167 lying-adapter era. Verified no such reject since 2026-09-03.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-04T00:00:00+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN USD_CAD REJECTED (rejected) \u2014 retried next run",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged (venue non-fill class): the adapter reported status=rejected truthfully (no orderFillTransaction = no fill, post-#167) and the lane retried next run; no phantom row was written. The venue's own reason was not captured by the old log line \u2014 capture added 2026-09-13 (_why() in fx_runner/fx_h1rev/fx_expert_lane) so the next occurrence self-documents.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-04T01:32:40.353089+00:00",
+   "severity": "moderate",
+   "category": "stale_ui_data",
+   "description": "TUI calendar stale/empty for ~2 days: dashboard _ff_events() fetched thisweek OK then nextweek 404'd (FF rotates the feed at week's end) \u2014 both in ONE try block, so the valid thisweek payload was discarded, function returned [], and /api/calendar served ff_events: 0 (decisions-only view starts at RBA 09-08, matching what the human saw). Cache was 50.8h stale vs 6h TTL. Fixed: per-feed fetch tolerance + stale-fallback (old cache beats an empty calendar) + guarded_urlopen for the SSRF-hardening layer. Fixed code validated offline; live dashboard process restart is the human's gate.",
+   "log_source": "TUI staleness investigation, 2026-09-04 (map #158 audit lineage)",
+   "status": "resolved 2026-09-13: /api/calendar serves 21 upcoming FF events (verified incl. 2026-09-14 CAD CPI); hardened in 96e87cd."
+  },
+  {
+   "date": "2026-09-05T00:00:00+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN AUD_USD REJECTED (rejected) \u2014 retried next run",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged (venue non-fill class): the adapter reported status=rejected truthfully (no orderFillTransaction = no fill, post-#167) and the lane retried next run; no phantom row was written. The venue's own reason was not captured by the old log line \u2014 capture added 2026-09-13 (_why() in fx_runner/fx_h1rev/fx_expert_lane) so the next occurrence self-documents.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-08T00:00:01+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN GBP_JPY REJECTED (rejected) \u2014 retried next run",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged (venue non-fill class): the adapter reported status=rejected truthfully (no orderFillTransaction = no fill, post-#167) and the lane retried next run; no phantom row was written. The venue's own reason was not captured by the old log line \u2014 capture added 2026-09-13 (_why() in fx_runner/fx_h1rev/fx_expert_lane) so the next occurrence self-documents.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-10T00:00:00+00:00",
+   "severity": "moderate",
+   "category": "venue_rejection",
+   "description": "[fx-id] OPEN EUR_USD REJECTED (rejected) \u2014 retried next run",
+   "log_source": "/home/mrc/opentrader/data/logs/fx_intraday.log",
+   "status": "triaged (venue non-fill class): the adapter reported status=rejected truthfully (no orderFillTransaction = no fill, post-#167) and the lane retried next run; no phantom row was written. The venue's own reason was not captured by the old log line \u2014 capture added 2026-09-13 (_why() in fx_runner/fx_h1rev/fx_expert_lane) so the next occurrence self-documents.",
+   "source": "document_bugs.py auto-scan"
+  },
+  {
+   "date": "2026-09-13T20:20:00-05:00",
+   "severity": "major",
+   "category": "ledger_integrity",
+   "description": "161 fxexp ledger rows carry price 0.0 (59 on 2026-09-09, 69 on 2026-09-10, 33 on 2026-09-13): reason=rank-rebal BUY/SELL rows written as real fills with no price and empty order_id. Dry runs do NOT write the ledger (fx_expert_lane.py:451), so these came from REAL-mode runs during the venue freeze window and one unscheduled 00:11 CDT Sunday run \u2014 a fill at price 0 is not a fill. Any FIFO/PnL consumer reading these rows gets a corrupted cost basis. Fix: lane must refuse to append a fill whose price is not > 0; backfill/flag the 161 rows.",
+   "log_source": "data/fx_ledger.jsonl",
+   "status": "fixed 2026-09-13: both causes closed at source (dry-mode append guarded; place_order reads the venue transaction before a quote; _append_ledger refuses price<=0) and the 161 rows voided append-only (scripts/fx_ledger_repair.py). Not backfilled: the stored ids are the trades' OPENING fills, not the closes \u2014 the venue journal is the P&L authority.",
+   "source": "operational-readiness session 2026-09-13"
+  },
+  {
+   "date": "2026-09-13T21:05:00-05:00",
+   "severity": "minor",
+   "category": "dead_flag",
+   "description": "fx_expert_lane --consolidate is accepted at the CLI and never used inside run() \u2014 the lifecycle 'cut' spec says 'positions close' but no tool implemented it (a cut lane refuses to start and trail-check skips it, so cut-without-flatten orphans positions). Superseded by scripts/fx_lane_flatten.py (per-tradeID closes, REAL fills only, reason=cut-flatten); used 2026-09-13 to flatten g137/g138 before their cut. Remove the dead flag at next fx_expert_lane touch.",
+   "log_source": "strategies/fx_expert_lane.py",
+   "status": "fixed 2026-09-13: --consolidate now runs the shared flatten core (strategies/fx_flatten.py)",
+   "source": "operational-readiness session 2026-09-13"
+  },
+  {
+   "date": "2026-09-14T00:30:00-05:00",
+   "severity": "major",
+   "category": "bad_input_units",
+   "description": "fx_trail_check.load_atr() computed MAX(high)/close (a ratio ~1.0, median 1.0074) while both it and fx_expert_lane treated the value as a FRACTION of price. Every trail/TP threshold was multiplied by ~1.0x price, putting triggers ~2x PRICE away - the trail could never fire. This is the real reason behind '0 triggers in 829 live runs', cited as 'the trail is wide' in trail-closer-gate-brief-2026-09-13.md. Fixed to the documented mean(high-low)/close (median 0.00526 = 0.53% of price).",
+   "log_source": "strategies/fx_trail_check.py",
+   "status": "fixed 2026-09-14",
+   "source": "ops session 2026-09-14 (server-side exits landing)"
+  },
+  {
+   "date": "2026-09-14T00:30:00-05:00",
+   "severity": "major",
+   "category": "phantom_fill_class",
+   "description": "fx_trail_check recorded a close and wrote a ledger row on 'orderCreateTransaction' - present even when the venue CANCELS the close (first live run: USD_TRY txn 4232 TRADE_CLOSE -> 4233 ORDER_CANCEL MARKET_HALTED; venue trade stayed open). Same lying-response class as #167. Fixed: require orderFillTransaction, log the venue cancel reason, defer venue-halted pairs. Phantom row voided append-only.",
+   "log_source": "strategies/fx_trail_check.py",
+   "status": "fixed 2026-09-14",
+   "source": "ops session 2026-09-14"
+  },
+  {
+   "date": "2026-09-14T00:30:00-05:00",
+   "severity": "minor",
+   "category": "ambiguous_reporting",
+   "description": "fx-trail-check.service Description said 'simulated trailing stop / TP' while the unit ran REAL (--once). The same ambiguity #258 identified as how the crossed gate stayed invisible. Description now states LIVE closes explicitly; fx_trail_check dry summary also no longer reports '0 trail exits' when legs would close.",
+   "log_source": "~/.config/systemd/user/fx-trail-check.service",
+   "status": "fixed 2026-09-14",
+   "source": "ops session 2026-09-14"
+  },
+  {
+   "date": "2026-09-14T16:10:00-05:00",
+   "severity": "moderate",
+   "category": "latent_gate",
+   "description": "fx_expert_lane.dry_check_fresh() returned True when the venue probe returned NO bars \u2014 i.e. a venue hiccup/failed probe silently disabled every future panel refresh (fail-OPEN on the one gate that keeps the panel current, the opposite of the docstring's stated safe default). Fixed: no bars -> refresh (False), plus a loud ValueError path from the adapter. Found during the 2026-09-14 staleness audit; no live impact was observed (the panel was current).",
+   "log_source": "strategies/fx_expert_lane.py",
+   "status": "fixed 2026-09-14",
+   "source": "staleness audit 2026-09-14"
+  },
+  {
+   "date": "2026-09-14T16:10:00-05:00",
+   "severity": "moderate",
+   "category": "silent_wrong_data",
+   "description": "exchange/oanda.py get_bars() mapped unknown timeframes via _GRANULARITY.get(timeframe,'H1') \u2014 asking for 'D' (daily) silently returned HOURLY bars. This produced a false 'the venue has fresher daily data than our panel' reading during the staleness audit and would equally fool any future caller. Fixed: unmapped timeframe now raises ValueError listing the valid keys (all in-repo callers use mapped keys: 1d/1h/4h).",
+   "log_source": "exchange/oanda.py",
+   "status": "fixed 2026-09-14",
+   "source": "staleness audit 2026-09-14"
+  },
+  {
+   "date": "2026-09-14T16:35:00-05:00",
+   "severity": "major",
+   "category": "deploy_contract_drift",
+   "description": "Deployed checkpoint g151 was trained on a 48-feature panel; the current panel builder emits 61 features (pv_carry + fred block INSERTED at index 28, nothing removed, relative order preserved). Any post-refresh real lane run would therefore have fed either the wrong width (crash) or, with a naive positional fix, the WRONG COLUMNS at the same indices \u2014 silently garbage scores. The refresh that surfaced this is exactly what tonight's 21:25 run performs, so it was armed to fail live. Fixed three ways: (1) checkpoints/{g151}.features.json records the trained feature contract (recovered from git HEAD:data/fx_expert/panel_meta.json); (2) today_weights selects those columns BY NAME (loud error if a trained feature is missing) instead of trusting panel order; (3) fxexpert/train.py now writes the same sidecar for every new checkpoint. Verified: lane dry-run scores correctly on the 61-feature panel.",
+   "log_source": "strategies/fx_expert_lane.py, fxexpert/train.py",
+   "status": "fixed 2026-09-14",
+   "source": "staleness/leak audit 2026-09-14"
+  },
+  {
+   "date": "2026-09-15T10:30:00-05:00",
+   "severity": "moderate",
+   "category": "artifact_provenance",
+   "description": "Four ad-hoc candidate artifacts (hx20/hx20s23/h20_s37/h20_s53, the h=20 @ 30-day cadence experiment) store hp.rebal=5 inherited from hp U, but their headline PF (1.233-1.291) is only reproducible at rebal=30 \u2014 re-deriving from the artifact's own metadata gives PF ~1.01. This is the #255 class the repo guards against (a recorded number must re-derive from its artifacts), violated by the experiment harness rather than the loop. Found by the openrouter deflation work order (docs/agents/research/fx-deflation-h20-2026-09-15.md), which documented the rebal override as its single deviation. Fixed non-destructively: eval_rebal=30 + eval_note written into the four artifacts; hp left as-run.",
+   "log_source": "data/fx_expert/train_g{hx20,hx20s23,h20_s37,h20_s53}.json",
+   "status": "fixed 2026-09-15 (metadata annotated; hp unchanged)",
+   "source": "openrouter deflation work order 2026-09-15"
+  },
+  {
+   "date": "2026-09-16T14:05:50.209191",
+   "severity": "high",
+   "category": "lane_design",
+   "description": "Crash lane cron entry removed 2026-09-16 per human directive. The lane was inadvertently restored during the 2026-09-13 crontab repair (no deliberate-stop record existed in the defect log at that time). Decision recorded: crash lane is CLOSED \u2014 it was never part of the FX project and destroyed NAV. The cron line  is removed and the golden crontab must be updated to match."
+  }
+ ],
+ "last_processed_log_fingerprints": {
+  "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '160', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '160', 'requestID': '9757305899": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN AUD_USD REJECTED (rejected) \u2014 retried next run": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN GBP_JPY REJECTED (rejected) \u2014 retried next run": "2026-09-16T00:00:01+00:00",
+  "KeyError: 'opened'": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN EUR_USD REJECTED (rejected) \u2014 retried next run": "2026-09-16T00:00:01+00:00",
+  "Traceback (most recent call last):": "2026-09-16T00:00:01+00:00",
+  "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '158', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '158', 'requestID': '6154423177": "2026-09-16T00:00:01+00:00",
+  "[crash] hypothetical $300 account: equity $-212.15 (realized +0.00, unrealized -512.15) | peak $360.00 max DD $572.15": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.65478 TP 159.31783": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.52044 TP 159.20433": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN USD_JPY 2000 units -> rejected @ 0.00000 SL 158.43544 TP 159.12433": "2026-09-16T00:00:01+00:00",
+  "[fx-id] OPEN USD_CAD REJECTED (rejected) \u2014 retried next run": "2026-09-16T00:00:01+00:00",
+  "KeyError: 'account'": "2026-09-16T00:00:01+00:00",
+  "OANDA POST /v3/accounts/101-001-40262644-001/orders -> 400: {'orderRejectTransaction': {'id': '159', 'accountID': '101-001-40262644-001', 'userID': 40262644, 'batchID': '159', 'requestID': '6154424687": "2026-09-16T00:00:01+00:00",
+  "UnboundLocalError: cannot access local variable 'r' where it is not associated with a value": "2026-09-16T00:00:01+00:00"
+ }
+}
