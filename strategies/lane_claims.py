@@ -19,7 +19,22 @@ import time
 from pathlib import Path
 
 WARDEN_DIR = Path(__file__).resolve().parent.parent / "data" / "fx_expert"
-LANE_ORDER = ["fxexp-g151", "fxexp-g138", "fxexp-g137"]  # promoted first
+LANE_ORDER = ["fxexp-g151", "fxexp-g138", "fxexp-g137"]  # legacy; kept for compatibility, replaced by _lane_order() below
+
+
+def _lane_order() -> list[str]:
+    """Dynamic lane priority from lifecycle: most recently promoted first."""
+    from strategies.expert_lifecycle import active_lanes, lifecycle_of
+    lane_tags = []
+    for eid in active_lanes():
+        if not eid.startswith("fx-expert-"):
+            continue
+        tag = "fxexp-" + eid.replace("fx-expert-", "")
+        lc = lifecycle_of(eid)
+        changed = lc.get("lifecycle_changed", "") if lc else ""
+        lane_tags.append((tag, changed))
+    lane_tags.sort(key=lambda x: x[1], reverse=True)  # most recent first
+    return [t[0] for t in lane_tags]
 FRESH_S = 26 * 3600
 
 
@@ -35,7 +50,7 @@ def assign(all_scores, now=None):
     claims = {}
     for pair in sorted({p for scores, _ in fresh.values() for p in scores}):
         best_tag, best_score = None, None
-        for tag in LANE_ORDER:
+        for tag in _lane_order():
             if tag not in fresh:
                 continue
             s = fresh[tag][0].get(pair)
@@ -58,7 +73,7 @@ def load_scores():
     from strategies.expert_lifecycle import active_lanes
     active = {f"fxexp-{eid.replace('fx-expert-', '')}" for eid in active_lanes()}
     out = {}
-    for tag in LANE_ORDER:
+    for tag in _lane_order():
         if tag not in active:
             continue  # cut/inactive lanes don't claim
         p = WARDEN_DIR / f"claims_scores_{tag}.json"
