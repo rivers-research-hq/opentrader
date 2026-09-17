@@ -713,30 +713,43 @@ async def api_fx():
     return snap
 
 
+def _venue_cursor():
+    """Persistent high-water mark for the venue transaction walk.
+    First boot walks from 0; restarts start from the last-seen ID."""
+    p = Path(__file__).resolve().parent / "data" / "fx_expert" / "venue_cursor.json"
+    if p.exists():
+        return json.loads(p.read_text()).get("since_id", 0)
+    return 0
+
+
+def _save_venue_cursor(since_id: int):
+    p = Path(__file__).resolve().parent / "data" / "fx_expert" / "venue_cursor.json"
+    p.write_text(json.dumps({"since_id": since_id}))
+
+
 def _venue_lane_realized(ex):
     """Per-lane realized from the venue journal (fills' pl attributed via the
-    tradeID→tag chain, legacy size fallback pre-08-31). Venue is authoritative
-    — ledger FIFO pairs closes to the oldest open buy and understates churny
-    lanes, so the GUI scoreboard prefers this and falls back to the ledger
-    only if the venue walk fails."""
+    tradeID→tag chain, legacy size fallback pre-08-31)."""
     from strategies.fx_runner import _trade_tags, _walk_transactions
     from strategies.lane_attribution import resolve_fill_tag, LEGACY_CUTOFF, UNATTRIBUTED
     if not ex:
         return {}, {}
     try:
+        since = _venue_cursor()
         tags, order_tag = _trade_tags(ex)
         out: dict = {}
         today = datetime.now(timezone.utc).date().isoformat()
         out_today: dict = {}
+        max_id = since
         for t in _walk_transactions(
-            ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id=0"):
+            ex, f"/v3/accounts/{ex._account_id}/transactions/sinceid?id={since}"):
+            tid = int(t.get("id", 0))
+            if tid > max_id:
+                max_id = tid
             if t.get("type") != "ORDER_FILL":
                 continue
             tag = resolve_fill_tag(t, tags, order_tag)
             if not tag:
-                # grandfathered pre-08-31 rows keep the legacy-smoke bucket;
-                # anything newer that fails the chain is UNATTRIBUTED, not
-                # silently credited to mom-k5 (#229 D3).
                 if t.get("time", "") < LEGACY_CUTOFF:
                     tag = "legacy-smoke"
                 else:
@@ -746,6 +759,8 @@ def _venue_lane_realized(ex):
             if str(t.get("time", ""))[:10] == today:
                 out_today.setdefault(tag, 0.0)
                 out_today[tag] += float(t.get("pl", 0) or 0)
+        if max_id > since:
+            _save_venue_cursor(max_id)
         return out, out_today
     except Exception:
         return {}, {}
@@ -1337,6 +1352,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print(f"OpenTrader Dashboard starting on http://{args.host}:{args.port}")
+    # Pre-warm FX cache immediately on startup so the dashboard is ready
+    # by the time the human's TUI first polls. The background thread runs
+    # concurrently with uvicorn; cold-requests still get the warming payload.
+    if not _FX_REFRESHING["t"]:
+        _FX_REFRESHING["t"] = True
+        import threading as _threading
+        _threading.Thread(target=_refresh_fx_cache, daemon=True).start()
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 
