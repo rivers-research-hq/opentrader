@@ -3,6 +3,8 @@
 import json, pathlib, sys, time, numpy as np
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from fxexpert import train
+from fxexpert.recorder import record_generation
+from fxexpert.gate import evaluate
 
 OUT = pathlib.Path("data/fx_expert/hpo_batch_20260916_gre")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -32,9 +34,13 @@ for tag, hp in configs.items():
     g = train.run_generation(tag, hp, out_dir=OUT, seed=11, panel=panel)
     secs = round(time.time() - t0, 1)
     agg = g.get("aggregate", {})
+    gate_result = evaluate(tag, out_dir=OUT, write=False)
+    history_row = record_generation(tag, out_dir=OUT, gate_result=gate_result)
     row = {"tag": tag, "seconds": secs, "params": g.get("params"),
-           "aggregate": agg, "folds": [{"fold": f.get("fold"), "ic_oos": f.get("ic_oos"),
-                                         "huber_loss": f.get("huber_loss")} for f in g.get("folds", [])]}
+           "aggregate": agg, "gate": gate_result.get("gate"),
+           "history_row": history_row,
+           "folds": [{"fold": f.get("fold"), "ic_oos": f.get("ic_oos"),
+                      "huber_loss": f.get("huber_loss")} for f in g.get("folds", [])]}
     summary.append(row)
     print(f"[{tag}] IC {agg.get('ic_mean')} folds {agg.get('folds_positive')}/{agg.get('n_folds')} "
           f"params {g.get('params')} {secs}s")

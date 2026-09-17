@@ -195,8 +195,10 @@
       },
       "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE still requires human signoff after forward shadow accrual (ADR-0009 \u00a74) \u2014 the accrual ledger is the real promotion evidence.",
       "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g151 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g151), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
-      "lifecycle": "accruing",
-      "notional_cap": 1.0
+      "lifecycle": "cut",
+      "notional_cap": 1.0,
+      "lifecycle_changed": "2026-09-16T20:00:00Z",
+      "lifecycle_reason": "replacement by hpo_c_3070"
     },
     {
       "epoch": 1,
@@ -217,10 +219,11 @@
       },
       "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE requires human signoff after forward shadow accrual (ADR-0009 \u00a74).",
       "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g137 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g137), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
-      "lifecycle": "accruing",
-      "notional_cap": 1.0,
-      "lifecycle_changed": "2026-09-09T19:42:50.663719+00:00",
-      "lifecycle_reason": "test reverted"
+      "lifecycle": "cut",
+      "notional_cap": 0.5,
+      "lifecycle_changed": "2026-09-14T01:18:39.965466+00:00",
+      "lifecycle_reason": "one-expert deployment (human directive 2026-09-13): book flattened via fx_lane_flatten (19 trades, +$31.06 uPL realized)",
+      "cut_reason": "bottom-two under one-expert-at-a-time policy"
     },
     {
       "epoch": 1,
@@ -241,8 +244,11 @@
       },
       "promotion_bar": "Amended gate 2026-09-06 (human): dollar-neutral books (net/gross<=0.2) excused from buy-hold; PF>=1.05, beat rsi-mr/mom20/random, >=2/3 folds IC>0. LIVE requires human signoff after forward shadow accrual (ADR-0009 \u00a74).",
       "notes": "LIVE LANES WIRED 2026-09-06 (human signoff for demo trading): strategies.fx_expert_lane --expert g138 --once, cron 21:25/21:35/21:45 UTC weekdays (staggered after D1 close), 2000u notional per unit weight, tagged orders (fxexp-g138), rank book rebal every 5 trading days, no SL/TP (holds to rebalance, backtest-faithful). Demo tournament: bottom two cut at Friday 2026-09-11 close (human). Venue authoritative; ledger tag-attributed.",
-      "lifecycle": "accruing",
-      "notional_cap": 1.0
+      "lifecycle": "cut",
+      "notional_cap": 0.5,
+      "lifecycle_changed": "2026-09-14T01:18:39.967398+00:00",
+      "lifecycle_reason": "one-expert deployment (human directive 2026-09-13): book flattened via fx_lane_flatten (21 trades, -$55.02 uPL realized)",
+      "cut_reason": "bottom-two under one-expert-at-a-time policy"
     },
     {
       "epoch": 1,
@@ -283,6 +289,30 @@
       },
       "promotion_bar": "Eligibility 2026-09-12 (coherence only, #257): OOS IC > 0 with >=2/3 folds positive, net mean return > 0 after costs, dollar-neutral book (net/gross <= 0.2), >= 2000 positioned pair-days, beats the random-matched control. NO backtest promotion: PF/Sharpe/mean-return were measured to be one statistic that does not persist across periods (year-to-year Spearman +0.02). Promotion evidence = forward shadow accrual; wiring a paper lane is a human-gated decision (ADR-0009 \u00a74).",
       "notes": "Registered 2026-09-12 under the re-specified gate (eligible, NOT promoted). NOT wired to a paper lane: no forward accrual exists yet for this expert \u2014 lane wiring is the remaining human-gated step. Backtest edge NOT established (V-WRC). Reads as a candidate for forward evidence, not as a finding."
+    },
+    {
+      "epoch": 1,
+      "expert_id": "fx-expert-hpo_c_3070",
+      "kind": "challenger",
+      "family": "fx-transformer-rank",
+      "venue": "oanda-practice",
+      "universe": "58-pair accrual store D1, 20d horizon",
+      "status": "accruing",
+      "registered": "2026-09-17T02:55:27.720521+00:00",
+      "registered_by": "human (Daryl) via 2026-09-16 session",
+      "source": "hpo_c_3070 training run (PF 1.0907, IC 0.03177, 2/3 folds, 61 features)",
+      "seed": null,
+      "accrual": {
+        "ledger": "data/fx_expert/shadow_fills.jsonl",
+        "closed_trades": null,
+        "last_checked": null
+      },
+      "promotion_bar": "Manual override by human (2026-09-16): deployed directly to live, bypassing shadow accrual.",
+      "notes": "HPO champion \u2014 20d horizon + rank/cost regularization converts CV edge into book PF; one-expert policy deployment replacing fx-expert-g151.",
+      "lifecycle": "accruing",
+      "lifecycle_changed": "2026-09-17T02:55:34.035796+00:00",
+      "lifecycle_reason": "Human directive 2026-09-16: direct deployment as sole expert, overriding shadow phase",
+      "notional_cap": 1.0
     }
   ]
 }

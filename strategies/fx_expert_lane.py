@@ -5,7 +5,7 @@ Wires the three amended-gate experts (fx-expert-g137/g138/g151) into the
 OANDA practice account as competing lanes (human directive 2026-09-06:
 demo funds, bottom two cut at Friday close). Mirrors the backtest: a
 dollar-neutral weekly rank-rebalanced book over the accrual store's pairs,
-10-day-horizon transformer scores, weights held 5 trading days.
+10-day-horizon transformer scores, weights held REBAL=30 trading days.
 
 CRON CONTRACT (binding): --once means REAL orders; no flag = dry run.
 Never pass --once to "test".
@@ -60,8 +60,31 @@ REFRESH_MARK = FX_DIR / "refresh_state.json"
 NOTIONAL = 2000          # account-ccy units per unit weight, per expert
 MIN_UNITS = 100          # dust floor — legs below this are not traded
 REFRESH_DAYS = 14        # incremental bar upsert window
-REBAL = 5                # trading days per weight period (mirrors rebal=5)
-LANES = {"g137": "fxexp-g137", "g138": "fxexp-g138", "g151": "fxexp-g151"}
+REBAL = 5                # trading days per weight period.
+# RECONCILIATION 2026-09-14 (this constant was briefly 30 — reverted):
+# the 30-day cadence was set from fxexpert/trailing_ab.py on generation gab1
+# (PF 0.604@5d -> 1.013@30d, "turnover dominates"). The gate's own protocol,
+# scored on the LIVE generations with BOTH metrics, says the opposite:
+#   g151 (deployed): 5d PF 1.0846 / +0.333 bp-day   30d PF 0.9962 / -0.013
+#   g185 (best pass): 5d PF 1.2862 / +1.096 bp-day  30d PF 1.0868 / +0.328
+#   g221/g222 (panel-v2 transfer): 30d slightly better than 5d
+# So the cadence optimum is GENERATION-specific, and gab1's ranking did not
+# transfer to the deployed book (the same generation-specificity the gate's
+# own stats study documents for PF). Holding 30 days costs more signal than it
+# saves in spread for the live book. Cadence is therefore re-derived per
+# generation at deployment time, on the gate, using both PF and bp/day.
+def _lane_tags():
+    """Dynamic {short_tag: lane_tag} from lifecycle active lanes.
+    Replaces the hardcoded LANES dict — any actively accruing fx-expert
+    lane is immediately runnable without a code change."""
+    from strategies.expert_lifecycle import active_lanes
+    result = {}
+    for eid in active_lanes():
+        if not eid.startswith("fx-expert-"):
+            continue
+        short = eid.replace("fx-expert-", "")
+        result[short] = "fxexp-" + short
+    return result
 
 
 def _fill_key(f):
@@ -82,6 +105,16 @@ def _append_ledger(fills):
                     pass
     with LEDGER.open("a") as f:
         for fill in fills:
+            # An unpriced row is not evidence — a fill we cannot price corrupts
+            # every FIFO/PnL consumer downstream. 102 such rows were written
+            # during the 2026-09-09/10 venue freezes (get_current_price failed
+            # after a venue fill) and 59 more by unguarded dry runs; both are
+            # quarantined. Refuse at write time.
+            if float(fill.get("price") or 0) <= 0:
+                print(f"[ledger] REFUSED unpriced fill {fill.get('symbol')} "
+                      f"{fill.get('side')} {fill.get('quantity')} "
+                      f"(reason={fill.get('reason')}) — not recorded")
+                continue
             if _fill_key(fill) in seen:
                 continue
             seen.add(_fill_key(fill))
@@ -143,7 +176,11 @@ def dry_check_fresh(ex):
         meta = json.loads((FX_DIR / "panel_meta.json").read_text())
         bars = ex.get_bars("EUR_USD", "1d", 2)
         if not bars:
-            return True
+            # A probe that returns nothing is NOT evidence of freshness.
+            # Returning True here meant a venue hiccup silently disabled every
+            # future refresh (fail-open on the one gate that keeps the panel
+            # current).
+            return False
         latest = datetime.fromtimestamp(bars[-1].timestamp, tz=timezone.utc).date().isoformat()
         return str(meta.get("date_max"))[:10] >= latest
     except Exception:
@@ -164,7 +201,30 @@ def today_weights(tag):
     rows_v, win_v = fxtrain._windows(panel["pair_idx"], len(day))
     sel = day[rows_v] == last
     rows = rows_v[sel]
-    X = panel["features"][win_v[sel]]
+    # FEATURE CONTRACT (2026-09-14): the panel builder grew 48 -> 61 features
+    # (pv_carry/fred block inserted mid-list) after the deployed checkpoint was
+    # trained. Feeding all 61 would be a shape mismatch (crash) or, worse, the
+    # wrong columns at the same indices. Select the checkpoint's features BY
+    # NAME, in its trained order, so the weights see exactly what they learned.
+    feat_names = list(panel["feature_names"])
+    want = None
+    fpath = FX_DIR / "checkpoints" / f"{tag}.features.json"
+    if fpath.exists():
+        want = json.loads(fpath.read_text())["feature_names"]
+    if want:
+        missing = [n for n in want if n not in feat_names]
+        if missing:
+            raise SystemExit(f"[{tag}] panel is missing trained features: "
+                             f"{missing[:5]} — retrain required")
+        col = [feat_names.index(n) for n in want]
+        # shape is (rows, T, n_feat) — the feature axis is LAST
+        X = panel["features"][win_v[sel]][..., col]
+        if X.shape[-1] != ckpt["config"]["n_feat"]:
+            raise SystemExit(f"[{tag}] feature contract mismatch: selected "
+                             f"{X.shape[-1]}, checkpoint expects "
+                             f"{ckpt['config']['n_feat']}")
+    else:
+        X = panel["features"][win_v[sel]]
     Xs = np.nan_to_num(np.clip(
         (X - ckpt["feat_mean"].numpy()) / ckpt["feat_std"].numpy(), -8, 8)).astype(np.float32)
     with torch.no_grad():
@@ -183,6 +243,109 @@ def today_weights(tag):
     udays = np.unique(day)
     period = int(np.where(udays == last)[0][0]) // REBAL
     return weights, period, str(np.datetime64(last, "D"))
+
+
+def _trail_state_path(my_tag):
+    return FX_DIR / f"trail_state_{my_tag}.json"
+
+
+def load_trimmed_units(my_tag):
+    """{symbol: units the trail closed} — the capital to redeploy."""
+    p = _trail_state_path(my_tag)
+    if not p.exists():
+        return {}
+    try:
+        return (json.loads(p.read_text()) or {}).get("trimmed_units") or {}
+    except Exception:
+        return {}
+
+
+def clear_trimmed_units(my_tag):
+    """Handled -> reset, so the same freed units are not redeployed twice."""
+    p = _trail_state_path(my_tag)
+    if not p.exists():
+        return
+    try:
+        d = json.loads(p.read_text()) or {}
+    except Exception:
+        return
+    if d.get("trimmed_units"):
+        d["trimmed_units"] = {}
+        p.write_text(json.dumps(d, indent=1))
+
+
+def rescale_trimmed_units(my_tag, keep):
+    """Retain `keep` of the recorded freed units (the undeployed remainder)."""
+    p = _trail_state_path(my_tag)
+    if not p.exists():
+        return
+    try:
+        d = json.loads(p.read_text()) or {}
+    except Exception:
+        return
+    tu = d.get("trimmed_units") or {}
+    if tu:
+        d["trimmed_units"] = {k: int(round(v * keep)) for k, v in tu.items()
+                              if int(round(v * keep)) > 0}
+        p.write_text(json.dumps(d, indent=1))
+
+
+def rotate_execute(ex, my_tag, adds):
+    """Market adds that redeploy freed capital (halt-gated, tagged, protected).
+
+    Returns the units actually filled, so the caller can retain the rest.
+    """
+    halted = set()
+    try:
+        from strategies.fx_trail_check import _halted_pairs
+        halted = _halted_pairs(ex, set(adds))
+    except Exception as exc:
+        print(f"[{my_tag}] rotation halt-check unavailable ({exc})")
+    deployed = 0.0
+    for sym in sorted(adds, key=lambda s: -abs(adds[s])):
+        qty = abs(adds[sym])
+        if sym in halted:
+            print(f"[{my_tag}] rotate {sym} HALTED at venue — deferred")
+            continue
+        side = "BUY" if adds[sym] > 0 else "SELL"
+        r = ex.place_order(sym, side, qty, "market", tag=my_tag,
+                           client_id=f"{my_tag}-rot-{sym[:8]}-{int(time.time()*1000)}")
+        if r.status != "filled":
+            print(f"[{my_tag}] rotate {side} {sym} {qty} REJECTED "
+                  f"({r.status}: {_why(r)}) — retried next run")
+            continue
+        _append_ledger([{"timestamp": datetime.now(timezone.utc).isoformat(),
+                         "symbol": sym, "side": side, "quantity": qty,
+                         "price": r.price, "order_id": r.order_id,
+                         "reason": "rotation", "tag": my_tag}])
+        deployed += qty
+        print(f"[{my_tag}] rotate {side} {sym} {qty}u -> filled @ {r.price}")
+        time.sleep(0.3)
+    return deployed
+
+
+def load_trims(my_tag):
+    """{symbol: fraction trimmed} written by the trail's scale-outs."""
+    p = _trail_state_path(my_tag)
+    if not p.exists():
+        return {}
+    try:
+        return (json.loads(p.read_text()) or {}).get("trimmed") or {}
+    except Exception:
+        return {}
+
+
+def clear_trims(my_tag):
+    p = _trail_state_path(my_tag)
+    if not p.exists():
+        return
+    try:
+        d = json.loads(p.read_text()) or {}
+    except Exception:
+        return
+    if d.get("trimmed"):
+        d["trimmed"] = {}
+        p.write_text(json.dumps(d, indent=1))
 
 
 def quote_usd_rates(ex, quotes, known_pairs):
@@ -220,7 +383,32 @@ def venue_books(ex, my_tag):
 
 
 def run(expert, dry=False, force=False, consolidate=False):
-    my_tag = LANES[expert]
+    my_tag = _lane_tags().get(expert)
+    ex = OandaExchange()
+    if not ex.connect():
+        raise SystemExit(f"[{my_tag}] connect failed")
+    # --consolidate: the cut-path flatten (lifecycle v2: a cut means
+    # "positions close"). Runs BEFORE the lifecycle gate — the whole point is
+    # to flatten a lane that is about to be (or just was) cut. --once governs
+    # REAL, exactly like every other lane entry point.
+    if consolidate:
+        from strategies.fx_flatten import flatten_tag
+        res = flatten_tag(ex, my_tag, dry=dry)
+        for c in res["closed"]:
+            verb = "(dry) CLOSE" if c.get("dry") else f"CLOSE @ {c['price']}"
+            print(f"[{my_tag}] {verb} {c['symbol']} {c['quantity']}u")
+        for r in res["rejected"]:
+            print(f"[{my_tag}] REJECTED {r['symbol']} tradeID "
+                  f"{r['trade_id']}: {r['why']} — rerun to retry")
+        rows = [c for c in res["closed"] if not c.get("dry")]
+        if dry:
+            print(f"[{my_tag}] dry run — {len(res['closed'])} would-close, "
+                  f"no ledger write")
+        else:
+            _append_ledger(rows)
+            print(f"[{my_tag}] consolidate: {len(rows)} closed, "
+                  f"{len(res['rejected'])} rejected")
+        return
     # lifecycle gate: the registry controls whether this lane can run
     from strategies.expert_lifecycle import lifecycle_of, notional_cap
     lc = lifecycle_of(my_tag.replace("fxexp-", "fx-expert-"))
@@ -233,9 +421,6 @@ def run(expert, dry=False, force=False, consolidate=False):
     ncap = float(lc.get("notional_cap", 1.0))
     if lstate in ("cut", "archived"):
         raise SystemExit(f"[{my_tag}] lifecycle is {lstate} — lane refuses to start")
-    ex = OandaExchange()
-    if not ex.connect():
-        raise SystemExit(f"[{my_tag}] connect failed")
     bal = ex.get_balance()
     print(f"[{my_tag}] connected: balance ${bal.cash:,.2f} (dry={dry}) "
           f"(lifecycle={lstate}, notional_cap={ncap})")
@@ -254,10 +439,51 @@ def run(expert, dry=False, force=False, consolidate=False):
         claims = lane_claims.recompute()
         mine_n = sum(1 for v in claims.values() if v["lane"] == my_tag)
         print(f"[{my_tag}] claims recomputed: {len(claims)} pairs, mine {mine_n}")
+        if period != state.get("last_period"):
+            # new period: the book is re-picked, so scale-out trims no longer
+            # constrain targets — clear them (stale trims would distort the
+            # fresh weights).
+            clear_trims(my_tag)
 
     if period == state.get("last_period") and state.get("last_period") is not None and not force:
         check_trails(ex, my_tag, dry=dry)
-        print(f"[{my_tag}] period {period} already traded — weights held (rebal every {REBAL} days)")
+        # ROTATION (human directive 2026-09-14): capital freed by scale-outs is
+        # redeployed into the book's untouched legs now, rather than sitting
+        # idle until the next 30-day rebalance. Trimmed legs are NOT refilled.
+        trims = load_trims(my_tag)
+        freed = load_trimmed_units(my_tag)
+        if not trims or not freed:
+            print(f"[{my_tag}] period {period} already traded — weights held "
+                  f"(rebal every {REBAL} days)")
+            return
+        # rotate only the units the trail closed, within the current book
+        m_now, _f = venue_books(ex, my_tag)
+        tgt = rotation_targets(m_now, freed)
+        adds = {s: tgt[s] - m_now.get(s, 0) for s in tgt
+                if abs(tgt[s] - m_now.get(s, 0)) >= MIN_UNITS}
+        if not adds:
+            print(f"[{my_tag}] rotation: nothing to redeploy "
+                  f"({len(freed)} trimmed leg(s), no same-side room)")
+            return
+        print(f"[{my_tag}] rotation: redeploying {sum(abs(v) for v in adds.values()):.0f}u "
+              f"from {sorted(freed)} across {len(adds)} same-side leg(s)")
+        if dry:
+            for s in sorted(adds, key=lambda x: -abs(adds[x])):
+                print(f"[{my_tag}] (dry) rotate {adds[s]:+d}u {s} "
+                      f"(held {m_now.get(s, 0):+d})")
+            return
+        deployed = rotate_execute(ex, my_tag, adds)
+        # Only the units that actually reached the market are retired: an
+        # allocation below the dust floor is not redeployed, and clearing the
+        # whole marker would silently bank it instead of rotating it.
+        total_freed = sum(abs(v) for v in freed.values())
+        if total_freed > 0 and deployed < total_freed:
+            keep = max(0.0, 1.0 - deployed / total_freed)
+            rescale_trimmed_units(my_tag, keep)
+            print(f"[{my_tag}] rotation: {total_freed - deployed:.0f}u left "
+                  f"(below the {MIN_UNITS}u dust floor) — kept for the next run")
+        else:
+            clear_trimmed_units(my_tag)
         return
     if not weights:
         print(f"[{my_tag}] no weights for {panel_day} — nothing to do")
@@ -305,7 +531,18 @@ def run(expert, dry=False, force=False, consolidate=False):
                             body={"units": str(int(round(c)))})
             fill = r.get("orderFillTransaction") if isinstance(r, dict) else None
             if fill:
-                done.append((t["id"], c, float(fill.get("price") or 0)))
+                # A close fill must be priceable: the venue response carries
+                # "price" normally, but during freezes it can be absent and a
+                # price-0 row is not evidence (see _append_ledger). Fall back
+                # to the venue's own trade record, then to a fresh quote.
+                price = float(fill.get("price") or fill.get("fullVWAP") or 0)
+                if price <= 0:
+                    tr = ex._request(
+                        "GET", f"/v3/accounts/{ex._account_id}/trades/{t['id']}")
+                    price = float((tr.get("trade") or {}).get("price") or 0)
+                if price <= 0:
+                    price = float(ex.get_current_price(sym) or 0)
+                done.append((t["id"], c, price))
                 need -= c
             time.sleep(0.25)
         return done
@@ -426,14 +663,14 @@ def run(expert, dry=False, force=False, consolidate=False):
                            client_id=f"{my_tag}-{sym[:8]}-{int(time.time() * 1000)}")
         actionable += 1
         if r.status != "filled":
-            print(f"[{my_tag}] {side} {sym} {qty} REJECTED ({r.status}) — retried next run")
+            print(f"[{my_tag}] {side} {sym} {qty} REJECTED ({r.status}: {_why(r)}) — retried next run")
             continue
         _record(sym, side, qty, price=r.price, oid=r.order_id)
         print(f"[{my_tag}] {side} {sym} {qty} -> {r.status} @ {r.price}")
         time.sleep(0.3)
 
-    _append_ledger(fills)
     if not dry:
+        _append_ledger(fills)
         # mark traded only on real progress: >=1 fill, or no open deltas at
         # all (book at target). All-deferred (halt/arbitration) or
         # all-rejected runs leave the period open for a retry.
@@ -447,6 +684,18 @@ def run(expert, dry=False, force=False, consolidate=False):
         else:
             print(f"[{my_tag}] {actionable} actionable deltas, 0 fills — period "
                   f"{period} NOT marked traded; the next run retries the rebalance")
+        # at-entry protection (human directive 2026-09-14): attach the hard
+        # SL/TP backstop to anything of ours still unprotected — the legs we
+        # just opened AND any older leg the book carried in.
+        try:
+            from strategies.fx_trail_check import load_atr
+            p = protect_open_trades(ex, my_tag, load_atr())
+            if p["attached"]:
+                print(f"[{my_tag}] protected {len(p['attached'])} trade(s)")
+            for sym, tid, why in p["failed"]:
+                print(f"[{my_tag}] protect FAILED {sym} tradeID {tid}: {why}")
+        except Exception as exc:
+            print(f"[{my_tag}] protect pass failed (non-fatal): {exc}")
     else:
         print(f"[{my_tag}] dry run — {len(fills)} would-fill, no state/ledger write")
 
@@ -454,11 +703,164 @@ def run(expert, dry=False, force=False, consolidate=False):
 def main():
     args = sys.argv[1:]
     expert = args[args.index("--expert") + 1] if "--expert" in args else None
-    if expert not in LANES:
-        raise SystemExit(f"usage: --expert [{'|'.join(LANES)}] [--once] [--force]")
+    lanes = _lane_tags()
+    if expert not in lanes:
+        raise SystemExit(f"usage: --expert [{'|'.join(lanes)}] [--once] "
+                         f"[--force] [--consolidate] [--protect]")
+    if "--protect" in args:
+        # Attach server-side SL/TP to this lane's unprotected open trades and
+        # exit. --once means REAL, as everywhere else.
+        from strategies.fx_trail_check import load_atr
+        dry = "--once" not in args
+        my_tag = _lane_tags().get(expert)
+        ex = OandaExchange()
+        if not ex.connect():
+            raise SystemExit(f"[{my_tag}] connect failed")
+        res = protect_open_trades(ex, my_tag, load_atr(), dry=dry)
+        for sym, tid, note, *rest in res["attached"]:
+            print(f"[{my_tag}] {'(dry) ' if dry else ''}PROTECT {sym} "
+                  f"tradeID {tid}: {note}")
+        for sym, tid, why in res["skipped"]:
+            print(f"[{my_tag}] skip {sym} tradeID {tid}: {why}")
+        for sym, tid, why in res["failed"]:
+            print(f"[{my_tag}] FAILED {sym} tradeID {tid}: {why}")
+        print(f"[{my_tag}] protect: {len(res['attached'])} attached, "
+              f"{len(res['skipped'])} skipped, {len(res['failed'])} failed"
+              f"{' (dry)' if dry else ''}")
+        return
     run(expert, dry="--once" not in args, force="--force" in args,
         consolidate="--consolidate" in args)
 
+
+
+
+def _why(r):
+    """The venue's own reject/cancel reason for a non-fill response.
+
+    Four rejection defects (2026-09-04..10) were untriageable because the
+    lanes logged only "REJECTED (rejected)". place_order already carries the
+    reason in OrderResult.raw; surface it so the next one self-documents.
+    """
+    raw = getattr(r, "raw", None) or {}
+    return (raw.get("reason") or raw.get("rejectReason")
+            or raw.get("cancelReason") or "no fill (venue returned no reason)")
+
+
+# ── server-side protection (human directive 2026-09-14: "Both") ──────────
+# Hard SL/TP attached to the venue trade itself, so protection survives
+# restarts and does not depend on this box being up. Levels mirror the
+# trail-check's own math (fx_trail_check.TP_ATR) with a deliberately WIDER
+# stop than the 2.0 ATR trail, so the trail normally exits first and this is
+# the backstop. Levels already breached at attach time are SKIPPED, never
+# attached — attaching a through-the-price stop would fire instantly and turn
+# a bookkeeping action into a market exit.
+SL_ATR = 3.0
+TP_ATR = 3.0
+
+
+def rotation_targets(mine, freed_units, same_side_only=True):
+    """Units targets for rotating capital the trail's scale-outs freed.
+
+    `mine` = {sym: signed units held NOW (post-trim)}, `freed_units` = {sym:
+    units the trail closed}. Trimmed legs keep their current size (never
+    refilled — that would fight the exit); the freed units are spread across
+    the same-side legs still held, pro-rata to their size.
+
+    Net semantics: each side's TOTAL is restored to its pre-trim level, so the
+    rotated book's net equals the net the book had BEFORE the trim (i.e.
+    net(targets) = net(mine) + signed(freed)). Redeploying a trimmed long back
+    into other longs re-invests capital the trim had taken out of the book —
+    that is the point of rotating rather than banking it.
+
+    Deliberately units-based, NOT weight-based: the model's target weights
+    drift with each day's panel, so re-targeting after a trim would quietly
+    re-balance daily and defeat the 30-day cadence. This moves only the units
+    the trail actually closed. Pure + unit-tested (tests/test_fx_rotation.py).
+    """
+    tgt = dict(mine)
+    freed = {1: 0.0, -1: 0.0}
+    for sym, u in freed_units.items():
+        if sym in mine and mine[sym]:
+            freed[1 if mine[sym] > 0 else -1] += abs(u)
+    for side in (1, -1):
+        legs = [s for s in mine
+                if s not in freed_units and mine[s] * side > 0]
+        base = sum(abs(mine[s]) for s in legs)
+        if legs and freed[side] > 0 and base > 0:
+            for s in legs:
+                add = freed[side] * (abs(mine[s]) / base) * side
+                tgt[s] = mine[s] + add
+    if not same_side_only:
+        raise NotImplementedError("cross-side rotation changes net exposure")
+    return {s: int(round(v)) for s, v in tgt.items()}
+
+
+def stop_levels(entry, atr_frac, long, sl_atr=SL_ATR, tp_atr=TP_ATR):
+    """(stop_loss, take_profit) price levels, or (None, None) if unusable.
+
+    Pure + unit-tested (tests/test_fx_atr_units.py): `atr_frac` MUST be a
+    FRACTION of price (0.005 = 0.5%), which is what load_atr() returns. The
+    MAX(high)/close-era value (~1.0) silently inverted these levels — the
+    guard below turns that class of mistake into a loud (None, None) instead
+    of a stop on the wrong side of the market.
+    """
+    if not entry or not atr_frac or atr_frac <= 0 or not (0 < atr_frac < 0.5):
+        return None, None
+    if long:
+        return entry * (1 - sl_atr * atr_frac), entry * (1 + tp_atr * atr_frac)
+    return entry * (1 + sl_atr * atr_frac), entry * (1 - tp_atr * atr_frac)
+
+
+def protect_open_trades(ex, tag, atr_by_pair, dry=False):
+    """Attach server-side SL/TP to this lane's unprotected open trades.
+
+    Idempotent: trades that already carry both orders are skipped. Returns
+    {"attached": [...], "skipped": [...], "failed": [...]} for the caller to
+    log. New entries call this right after their fill, so `at entry` is the
+    same run; existing book legs are covered by the first pass.
+    """
+    out = {"attached": [], "skipped": [], "failed": []}
+    trades = ex._request(
+        "GET", f"/v3/accounts/{ex._account_id}/openTrades").get("trades", [])
+    for t in trades:
+        if (t.get("clientExtensions") or {}).get("tag") != tag:
+            continue
+        sym = t["instrument"]
+        price = float(t.get("price") or 0)     # entry
+        cur = ex.get_current_price(sym)
+        a = float(atr_by_pair.get(sym) or 0)
+        if t.get("stopLossOrder") and t.get("takeProfitOrder"):
+            out["skipped"].append((sym, t["id"], "already protected"))
+            continue
+        if not price or not cur or a <= 0:
+            out["failed"].append((sym, t["id"],
+                                  f"no basis (entry={price} px={cur} atr={a})"))
+            continue
+        long = float(t["currentUnits"]) > 0
+        sl, tp = stop_levels(price, a, long)
+        if sl is None:
+            out["failed"].append((sym, t["id"], f"unusable ATR basis ({a})"))
+            continue
+        if (long and (cur <= sl or cur >= tp)) or (not long and (cur >= sl or cur <= tp)):
+            out["skipped"].append(
+                (sym, t["id"], f"level already breached (entry={price} px={cur})"))
+            continue
+        if dry:
+            out["attached"].append((sym, t["id"], f"SL {sl:.6g} TP {tp:.6g}", True))
+            continue
+        body = {"stopLoss": {"price": ex._fmt_price(sym, sl), "timeInForce": "GTC"},
+                "takeProfit": {"price": ex._fmt_price(sym, tp), "timeInForce": "GTC"}}
+        r = ex._request("PUT",
+                        f"/v3/accounts/{ex._account_id}/trades/{t['id']}/orders",
+                        body=body)
+        if isinstance(r, dict) and not r.get("_error") and (
+                r.get("stopLossOrder") or r.get("takeProfitOrder")
+                or r.get("lastTransactionID")):
+            out["attached"].append((sym, t["id"], f"SL {sl:.6g} TP {tp:.6g}"))
+        else:
+            out["failed"].append((sym, t["id"], str(r)[:160]))
+        time.sleep(0.2)
+    return out
 
 if __name__ == "__main__":
     main()
