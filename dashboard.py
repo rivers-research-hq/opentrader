@@ -233,14 +233,49 @@ def _compute_fx() -> dict:
         ex = OandaExchange()
         if ex.connect():
             book = ex._request("GET", f"/v3/accounts/{ex._account_id}/openTrades").get("trades", [])
+            # live prices, so every row can show the DISTANCE to its targets
+            pxs = {}
+            try:
+                pxs = ex.get_prices_batch(sorted({t["instrument"] for t in book})) or {}
+            except Exception:
+                pass
             for t in book:
+                sym = t.get("instrument")
+                ent = float(t.get("price") or 0)
+                cur = float(pxs.get(sym) or 0)
+                pip = 10 ** (-ex._price_digits(sym)) if sym else 0
+                sl_o, tp_o = t.get("stopLossOrder"), t.get("takeProfitOrder")
+                sl = float(sl_o["price"]) if sl_o else None
+                tp = float(tp_o["price"]) if tp_o else None
+                def _dist(level):
+                    if not level or not cur:
+                        return None, None
+                    d = abs(level - cur)
+                    return (round(d / cur * 100, 2),
+                            round(d / pip) if pip else None)
+                to_tp_pct, to_tp_pips = _dist(tp)
+                to_sl_pct, to_sl_pips = _dist(sl)
+                prog = None
+                if tp and ent and cur and tp != ent:
+                    prog = round((cur - ent) / (tp - ent) * 100, 1)
                 out["book"].append({
+                    "px": round(cur, 6) if cur else None,
+                    "tp": tp, "sl": sl,
+                    "to_tp_pct": to_tp_pct, "to_tp_pips": to_tp_pips,
+                    "to_sl_pct": to_sl_pct, "to_sl_pips": to_sl_pips,
+                    "progress_to_tp": prog,
                     "trade_id": t.get("id"), "instrument": t.get("instrument"),
                     "units": t.get("currentUnits"), "price": t.get("price"),
                     "opened": str(t.get("openTime", ""))[:19],
                     "owner": (t.get("clientExtensions") or {}).get("tag") or "unknown",
                     "pl": t.get("unrealizedPL"),
-                    "protected": bool(t.get("stopLossOrder") or t.get("takeProfitOrder")),
+                    # BOTH orders = protected. Checking either one counted a
+                    # leg with a stop but no target (venue 2026-09-14:
+                    # USD_CHF/h4-brk had SL only) as fully protected.
+                    "protected": bool(t.get("stopLossOrder")
+                                      and t.get("takeProfitOrder")),
+                    "orders": ("SL" if t.get("stopLossOrder") else "")
+                              + ("TP" if t.get("takeProfitOrder") else "") or "-",
                 })
             acct = ex._request("GET", f"/v3/accounts/{ex._account_id}")["account"]
             out["balance"] = acct.get("balance")
@@ -256,6 +291,29 @@ def _compute_fx() -> dict:
             except Exception:
                 out["realized_today"] = None
                 out["financing_today"] = None
+            # protection coverage + the policy values the lane runs under
+            # (2026-09-14: SL/TP backstops, 30-day cadence, scale-out trims).
+            prot = [t for t in out["book"] if t["protected"]]
+            unprot = [t for t in out["book"] if not t["protected"]]
+            why = {}
+            for t in unprot:
+                if t.get("orders") not in ("-", None):
+                    why[t["instrument"]] = f"partial ({t['orders']} only)"
+            if unprot:
+                try:
+                    sys.path.insert(0, str(PROJECT))
+                    from strategies.fx_trail_check import _halted_pairs
+                    halted = _halted_pairs(ex, {t["instrument"] for t in unprot})
+                    for sym in halted:
+                        why[sym] = "venue-halted"   # merge: keep partial-order reasons
+                except Exception:
+                    pass
+            out["protection"] = {
+                "total": len(out["book"]), "protected": len(prot),
+                "unprotected": [{"symbol": t["instrument"], "trade_id": t["trade_id"],
+                                 "why": why.get(t["instrument"], "no SL/TP order")}
+                                for t in unprot],
+            }
             out["_ex"] = ex
         else:
             out["error"] = "OANDA connect failed"
@@ -279,6 +337,33 @@ def _compute_fx() -> dict:
         out["queue"] = {"events": len(load_events()), "labeled": len(load_labels())}
     except Exception:
         pass
+    policy: dict[str, object] = {
+        "expert": "no-active-expert", "cadence_days": 5,
+        "period": None, "last_traded": None,
+        "trimmed_frac": {}, "rotation_pending": {},
+    }
+    try:
+        sys.path.insert(0, str(PROJECT))
+        from strategies.fx_expert_lane import REBAL
+        from strategies.expert_lifecycle import active_lanes
+        active = [e for e in active_lanes() if e.startswith("fx-expert-")]
+        if active:
+            my_eid = active[0]
+            my_tag = my_eid.replace("fx-expert-", "fxexp-")
+            ls = DATA / "fx_expert" / f"lane_state_{my_tag[6:]}.json"
+            st = json.loads(ls.read_text()) if ls.exists() else {}
+            ts = DATA / "fx_expert" / f"trail_state_{my_tag}.json"
+            tr = json.loads(ts.read_text()) if ts.exists() else {}
+            policy.update({
+                "expert": my_tag, "cadence_days": REBAL,
+                "period": st.get("last_period"),
+                "last_traded": st.get("last_traded"),
+                "trimmed_frac": tr.get("trimmed") or {},
+                "rotation_pending": tr.get("trimmed_units") or {},
+            })
+    except Exception as e:
+        policy["error"] = str(e)
+    out["policy"] = policy
     out["flat"] = _flat_reasons()
     return out
 
@@ -408,18 +493,62 @@ async def fx_page():
                 f'NAV <b>${float(s.get("nav") or 0):,.2f}</b> &middot; '
                 f'preference queue: <b>{s["queue"].get("events", 0)}</b> events, '
                 f'{s["queue"].get("labeled", 0)} labeled</p>')
-    rows.append('<h2>Open book (by owner tag)</h2><table><tr><th>trade</th><th>instrument</th>'
-                '<th>units</th><th>entry</th><th>opened (UTC)</th><th>owner</th><th>unrealized</th>'
-                '<th>SL/TP</th></tr>')
+    pol = s.get("policy") or {}
+    prot = s.get("protection") or {}
+    if pol and not pol.get("error"):
+        pend = pol.get("rotation_pending") or {}
+        pend_s = (", ".join(f"{k} {v}u" for k, v in sorted(pend.items()))
+                  if pend else "none")
+        rows.append(
+            '<h2>Deployed expert &amp; policy</h2>'
+            f'<p><b>{pol.get("expert")}</b> &middot; cadence '
+            f'<b>{pol.get("cadence_days")} trading days</b> (ADR-0013) &middot; '
+            f'period <b>{pol.get("period")}</b> last traded {pol.get("last_traded")} &middot; '
+            f'scale-out trims pending rotation: <b>{pend_s}</b></p>'
+            '<p class="dim">g137/g138 cut 2026-09-13 (one-expert deployment, ADR-0011); '
+            'scale-out trail LIVE (reduces 50% and re-arms, ADR-0013).</p>')
+    if prot:
+        un = prot.get("unprotected") or []
+        if un:
+            lst = ", ".join(f'{u["symbol"]} ({u["why"]})' for u in un)
+            rows.append(f'<p>protection: <b>{prot.get("protected")}</b>/'
+                        f'{prot.get("total")} legs carry venue SL/TP &middot; '
+                        f'<span class="err">unprotected: {lst}</span></p>')
+        else:
+            rows.append(f'<p>protection: <span class="ok"><b>{prot.get("protected")}</b>/'
+                        f'{prot.get("total")} legs carry venue SL/TP</span></p>')
+    rows.append('<h2>Open book — with sell targets</h2>'
+                '<p class="dim">SELL TARGET = the venue take-profit; the trail sells 50% '
+                'there and re-arms (ADR-0013). STOP = the venue stop-loss. '
+                '“to TP/SL” = distance from the current price (%, pips); '
+                '“progress” = how far entry→target the price has travelled.</p>'
+                '<table><tr><th>instrument</th><th>owner</th><th>units</th>'
+                '<th>entry</th><th>now</th><th>SELL TARGET</th><th>to TP</th>'
+                '<th>progress</th><th>STOP</th><th>to SL</th><th>unrealized</th>'
+                '<th>trade</th></tr>')
     if not s["book"]:
-        rows.append('<tr><td colspan="8" class="dim">flat</td></tr>')
+        rows.append('<tr><td colspan="12" class="dim">flat</td></tr>')
     for t in s["book"]:
-        prot = '<span class="ok">yes</span>' if t["protected"] else '<span class="err">NO</span>'
         pl = float(t["pl"] or 0)
-        rows.append(f"<tr><td>{t['trade_id']}</td><td>{t['instrument']}</td>"
-                    f"<td class='num'>{t['units']}</td><td class='num'>{t['price']}</td>"
-                    f"<td>{t['opened']}</td><td>{t['owner']}</td>"
-                    f"<td class='num'>{pl:+.2f}</td><td>{prot}</td></tr>")
+        tp = t.get("tp")
+        sl = t.get("sl")
+        tp_s = f"{tp:.5f}" if tp else '<span class="err">none</span>'
+        sl_s = f"{sl:.5f}" if sl else '<span class="err">none</span>'
+        to_tp = (f"{t['to_tp_pct']:+.2f}% / {t['to_tp_pips']}p"
+                 if t.get("to_tp_pct") is not None else "-")
+        to_sl = (f"{t['to_sl_pct']:+.2f}% / {t['to_sl_pips']}p"
+                 if t.get("to_sl_pct") is not None else "-")
+        prog = t.get("progress_to_tp")
+        prog_s = f"{prog:.0f}%" if prog is not None else "-"
+        px_s = f"{t['px']:.5f}" if t.get("px") else "-"
+        rows.append(f"<tr><td>{t['instrument']}</td><td>{t['owner']}</td>"
+                    f"<td class='num'>{t['units']}</td>"
+                    f"<td class='num'>{float(t['price'] or 0):.5f}</td>"
+                    f"<td class='num'>{px_s}</td>"
+                    f"<td class='num'>{tp_s}</td><td class='num'>{to_tp}</td>"
+                    f"<td class='num'>{prog_s}</td>"
+                    f"<td class='num'>{sl_s}</td><td class='num'>{to_sl}</td>"
+                    f"<td class='num'>{pl:+.2f}</td><td>{t['trade_id']}</td></tr>")
     rows.append('</table><h2>Recent fills (ledger tail)</h2>'
                 '<table><tr><th>time (UTC)</th><th>symbol</th><th>side</th><th>qty</th>'
                 '<th>price</th><th>reason</th></tr>')
