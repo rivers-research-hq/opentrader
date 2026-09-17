@@ -159,11 +159,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--expert", type=str, default=None)
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--force", action="store_true", help="replay a candidate already in the ledger")
     args = ap.parse_args()
 
     experts = evidencable_experts(args.expert)
     if not experts:
         print("[shadow] no evidencable experts found")
+        return
+
+    # A paper ledger is append-only evidence. Replaying the same historical
+    # artifact would fabricate additional forward trades, so candidates with
+    # an existing paper-sim ledger are skipped unless explicitly forced.
+    existing_tags = set()
+    if LEDGER.exists():
+        for line in LEDGER.read_text().splitlines():
+            if line.strip():
+                existing_tags.add(json.loads(line).get("tag"))
+    if not args.force:
+        experts = [e for e in experts if f"fxexp-{e['tag']}" not in existing_tags]
+    if not experts:
+        print("[shadow] all requested candidates already accrued; no-op")
         return
 
     all_fills = []
