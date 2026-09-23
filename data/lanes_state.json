@@ -1,0 +1,69 @@
+{
+ "asof": "2026-09-22",
+ "lanes": {
+  "laggard": {
+   "expert": "laggard",
+   "equity": 606.1,
+   "latest_1d_ret": 0.0,
+   "regime": "down",
+   "asof": "2026-09-22"
+  },
+  "momtrend": {
+   "expert": "momtrend",
+   "equity": 693.23,
+   "latest_1d_ret": 0.0,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "bayes": {
+   "expert": "bayes",
+   "equity": 728.26,
+   "latest_1d_ret": 0.0,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "spectral": {
+   "expert": "spectral",
+   "equity": 495.44,
+   "latest_1d_ret": -0.000166,
+   "regime": "down",
+   "asof": "2026-09-22"
+  },
+  "kalman": {
+   "expert": "kalman",
+   "equity": 579.46,
+   "latest_1d_ret": 0.0,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "hurst": {
+   "expert": "hurst",
+   "equity": 580.55,
+   "latest_1d_ret": 0.000271,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "wavelet": {
+   "expert": "wavelet",
+   "equity": 602.29,
+   "latest_1d_ret": 0.000349,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "entropy": {
+   "expert": "entropy",
+   "equity": 620.74,
+   "latest_1d_ret": -0.000137,
+   "regime": "up",
+   "asof": "2026-09-22"
+  },
+  "multiasset": {
+   "expert": "multiasset",
+   "equity": 695.68,
+   "latest_1d_ret": 0.00229,
+   "regime": "up",
+   "asof": "2026-09-21"
+  }
+ },
+ "note": "PAPER lanes \u2014 one avenue per expert on its validated universe. NOT live order flow."
+}

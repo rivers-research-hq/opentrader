@@ -1,0 +1,13 @@
+{
+  "positions": {
+    "USD_JPY": {
+      "units": 2000.0,
+      "opened": "2026-09-22T15:15:04",
+      "entry": 157.345,
+      "trade_id": "5217",
+      "owner": "h1-rev",
+      "protected": true
+    }
+  },
+  "updated": "2026-09-23T01:15:02.029182+00:00"
+}
