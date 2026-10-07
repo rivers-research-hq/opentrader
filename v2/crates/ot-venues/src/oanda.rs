@@ -180,6 +180,16 @@ impl Keys {
     }
 }
 
+/// One open venue trade — the trade ID is the venue's own (needed for
+/// the trade-specific close — W1-tails-3).
+#[derive(Debug, Clone)]
+pub struct OpenTradeInfo {
+    pub symbol: String,
+    pub tag: String,
+    pub units: f64,
+    pub trade_id: String,
+}
+
 pub struct OandaAdapter<'a> {
     pub keys: Keys,
     transport: &'a dyn Transport,
@@ -733,7 +743,15 @@ impl<'a> OandaAdapter<'a> {
 
     /// Open trades with their owner tags (no-overlap arbitration input).
     pub fn open_trades(&self) -> Vec<(String, String, f64)> {
-        // (instrument, tag, units) — tag "untagged" when absent
+        self.open_trades_detailed()
+            .into_iter()
+            .map(|t| (t.symbol, t.tag, t.units))
+            .collect()
+    }
+
+    /// Detailed open trades: symbol, tag, units, and the venue's own
+    /// trade ID (needed for the trade-specific close — W1-tails-3).
+    pub fn open_trades_detailed(&self) -> Vec<OpenTradeInfo> {
         let data = self.request(
             "GET",
             &format!("/v3/accounts/{}/openTrades", self.keys.account_id),
@@ -753,7 +771,17 @@ impl<'a> OandaAdapter<'a> {
                     .and_then(|v| v.as_str())
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(0.0);
-                out.push((sym, tag, units));
+                let id = t
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                out.push(OpenTradeInfo {
+                    symbol: sym,
+                    tag,
+                    units,
+                    trade_id: id,
+                });
             }
         }
         out
