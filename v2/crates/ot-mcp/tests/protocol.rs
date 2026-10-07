@@ -5,7 +5,12 @@ use ot_mcp::{serve_lines, ServerState};
 use serde_json::{json, Value};
 
 fn call_tool(name: &str, args: Value) -> (ServerState, Value) {
-    let mut state = ServerState::default();
+    // the tool surfaces are tested here; the auth gate itself is covered
+    // in auth.rs — this file skips it (local-dev mode)
+    let mut state = ServerState {
+        skip_auth: true,
+        ..Default::default()
+    };
     let msg = json!({
         "jsonrpc": "2.0",
         "id": 1,
@@ -27,7 +32,10 @@ fn result_text(resp: &Value) -> String {
 
 #[test]
 fn initialize_handshake_echoes_protocol_version() {
-    let mut state = ServerState::default();
+    let mut state = ServerState {
+        skip_auth: true,
+        ..Default::default()
+    };
     let msg = json!({
         "jsonrpc": "2.0", "id": 1, "method": "initialize",
         "params": {"protocolVersion": "2025-03-26", "capabilities": {}}
@@ -63,7 +71,10 @@ fn unparseable_line_yields_parse_error() {
 
 #[test]
 fn stdio_loop_serves_multiple_messages_in_order() {
-    let mut state = ServerState::default();
+    let mut state = ServerState {
+        skip_auth: true,
+        ..Default::default()
+    };
     let lines = vec![
         json!({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}).to_string(),
         json!({"jsonrpc": "2.0", "method": "notifications/initialized"}).to_string(),

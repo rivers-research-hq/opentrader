@@ -11,3 +11,9 @@ ot-script = { path = "../ot-script" }
 ot-venues = { path = "../ot-venues" }
 serde = { workspace = true }
 serde_json = { workspace = true }
+sha2 = "0.10"
+getrandom = "0.2"
+
+[[bin]]
+name = "ot-mcp"
+path = "src/main.rs"
