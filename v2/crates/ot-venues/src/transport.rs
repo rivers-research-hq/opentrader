@@ -40,11 +40,15 @@ pub trait Transport: Send + Sync {
 }
 
 /// Allowlist — the guard law: only these hosts may be contacted.
+/// Alpaca: paper/live trading hosts + the market-data host (W2d).
 pub const ALLOWED_HOSTS: &[&str] = &[
     "api-fxpractice.oanda.com",
     "api-fxtrade.oanda.com",
     "stream-fxpractice.oanda.com",
     "stream-fxtrade.oanda.com",
+    "paper-api.alpaca.markets",
+    "api.alpaca.markets",
+    "data.alpaca.markets",
 ];
 
 pub fn validate_url(url: &str) -> Result<(), String> {
@@ -97,6 +101,7 @@ impl Transport for UreqTransport {
             "GET" => self.agent.get(url),
             "POST" => self.agent.post(url),
             "PUT" => self.agent.put(url),
+            "DELETE" => self.agent.delete(url),
             _ => return Err(format!("unsupported method {method}")),
         };
         for (k, v) in headers {

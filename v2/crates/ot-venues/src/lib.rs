@@ -50,11 +50,31 @@ pub struct OrderRequest {
 /// The truthful fill model: `filled == false` means REJECTED — the venue
 /// cancelled (e.g. OANDA STOP_LOSS_ON_FILL_LOSS) or refused. There is no
 /// "assume it worked" path.
+///
+/// Async venues (Alpaca, W2d) add a third state: ACCEPTED. The order POST
+/// returned `accepted`/`pending_new` — the venue took the order, but the
+/// fill is ASYNC: `accepted != filled`, and no code path may report a
+/// fill from a POST response. Fills surface only via the polling surface
+/// (GET /v2/orders/{id} → status `filled` with `filled_avg_price`) or the
+/// trade stream. `terminal_status` carries the venue's own status string
+/// as last seen, so callers can track the async lifecycle without
+/// guessing.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderAck {
     pub order_id: String,
-    /// True ONLY with a venue fill transaction attached.
+    /// True ONLY with a venue fill attached (sync venues: fill
+    /// transaction in the POST; async venues: polled terminal `filled`).
     pub filled: bool,
+    /// Async venues: the venue accepted the order into its workflow
+    /// (Alpaca status accepted/pending_new/new/...). `accepted == true,
+    /// filled == false` is a live order awaiting its fill — NOT a
+    /// rejection and NOT a fill.
+    pub accepted: bool,
+    /// The venue's own order-status string as last seen ("accepted",
+    /// "pending_new", "partially_filled", "filled", "canceled",
+    /// "rejected", ...). `None` when the venue never gave one (sync
+    /// rejections carry the reason in `reject_reason` instead).
+    pub terminal_status: Option<String>,
     /// Venue fill transaction id (V1 `orderFillTransaction`) — required
     /// when `filled`; the reason string carries the venue's rejection
     /// reason when not.
@@ -65,15 +85,33 @@ pub struct OrderAck {
 }
 
 impl OrderAck {
-    /// Construct the only two valid acks. A "filled" ack without a fill
+    /// Construct the only three valid acks. A "filled" ack without a fill
     /// transaction id is unrepresentable — that is the point.
     pub fn filled(order_id: &str, tx_id: &str, qty: f64, price: f64) -> Self {
         OrderAck {
             order_id: order_id.to_string(),
             filled: true,
+            accepted: true,
+            terminal_status: Some("filled".to_string()),
             fill_tx_id: Some(tx_id.to_string()),
             filled_qty: Some(qty),
             fill_price: Some(price),
+            reject_reason: None,
+        }
+    }
+
+    /// The async-venue ack: the venue ACCEPTED the order; the fill is
+    /// pending and must be established by polling. `filled` is false by
+    /// construction — no accepted ack can claim a fill.
+    pub fn accepted(order_id: &str, venue_status: &str) -> Self {
+        OrderAck {
+            order_id: order_id.to_string(),
+            filled: false,
+            accepted: true,
+            terminal_status: Some(venue_status.to_string()),
+            fill_tx_id: None,
+            filled_qty: None,
+            fill_price: None,
             reject_reason: None,
         }
     }
@@ -82,6 +120,8 @@ impl OrderAck {
         OrderAck {
             order_id: order_id.to_string(),
             filled: false,
+            accepted: false,
+            terminal_status: None,
             fill_tx_id: None,
             filled_qty: None,
             fill_price: None,
@@ -162,6 +202,7 @@ pub mod history {
     }
 }
 
+pub mod alpaca;
 pub mod oanda;
 pub mod attribution;
 pub mod transport;
@@ -176,5 +217,8 @@ mod tests {
         assert!(ack.filled && ack.fill_tx_id.is_some());
         let rej = OrderAck::rejected("123", "STOP_LOSS_ON_FILL_LOSS");
         assert!(!rej.filled && rej.fill_tx_id.is_none());
+        // The async-venue third state: accepted != filled (the Alpaca law).
+        let acc = OrderAck::accepted("123", "pending_new");
+        assert!(acc.accepted && !acc.filled && acc.fill_tx_id.is_none());
     }
 }
