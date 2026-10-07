@@ -176,11 +176,11 @@ impl RuleFloor {
 }
 
 impl Handler for RuleFloor {
-    fn signal_exits(&mut self, view: &DecisionView, open_syms: &[String]) -> Vec<(String, ExitReason)> {
+    fn signal_exits(&mut self, view: &DecisionView, open: &[crate::engine::Position]) -> Vec<(String, ExitReason)> {
         let c = self.cfg.clone();
         let m = self.bar_scores(view);
         let mut out = Vec::new();
-        for held in open_syms {
+        for held in open.iter().map(|p| &p.sym) {
             // V1: signal exit uses scores.get(s, 0.0) — default 0.0 (NOT
             // the -99 that candidates use). A held symbol that lost
             // signal-bar coverage scores 0.0 → no signal exit at
@@ -213,7 +213,7 @@ impl Handler for RuleFloor {
         out
     }
 
-    fn candidates(&mut self, view: &DecisionView, open_syms: &[String]) -> Vec<Candidate> {
+    fn candidates(&mut self, view: &DecisionView, open_syms: &[crate::engine::Position]) -> Vec<Candidate> {
         let c = self.cfg.clone();
         let m = self.bar_scores(view);
         if m.bar_feat.is_empty() {
@@ -224,7 +224,7 @@ impl Handler for RuleFloor {
 
         let mut out = Vec::new();
         for (sym, _sig_pos, row) in &m.bar_feat {
-            if open_syms.iter().any(|h| h == sym) {
+            if open_syms.iter().any(|h| &h.sym == sym) {
                 continue;
             }
             // V1 candidates default: scores.get(s, -99) — but every
@@ -267,6 +267,9 @@ impl Handler for RuleFloor {
             out.push(Candidate {
                 sym: sym.clone(),
                 vol_reduce_applies,
+                notional_override: None,
+                stop_loss: None,
+                take_profit: None,
             });
         }
         // V1: candidates.sort(key=lambda x: -x[1]) — Python's sort sends

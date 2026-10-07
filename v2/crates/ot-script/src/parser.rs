@@ -47,14 +47,25 @@ impl<'a> P<'a> {
         }
     }
     fn ident(&mut self) -> Result<String, String> {
-        if let K::Ident(s) = self.kind().clone() {
-            self.pos += 1;
-            Ok(s)
-        } else {
-            Err(format!(
-                "parse error: expected identifier, found {:?} at byte {}",
-                self.toks[self.pos].kind, self.toks[self.pos].span.start
-            ))
+        // contextual keywords (lower/upper/on_price are declare-words but
+        // legal binding names — `def upper = ...`)
+        match self.kind().clone() {
+            K::Ident(s) => {
+                self.pos += 1;
+                Ok(s)
+            }
+            K::Lower | K::Upper | K::OnPrice => {
+                // contextual keywords: legal binding names (e.g. `def upper`)
+                let s = self.toks[self.pos].text.clone();
+                self.pos += 1;
+                Ok(s)
+            }
+            _ => {
+                Err(format!(
+                    "parse error: expected identifier, found {:?} at byte {}",
+                    self.toks[self.pos].kind, self.toks[self.pos].span.start
+                ))
+            }
         }
     }
 
@@ -66,6 +77,7 @@ impl<'a> P<'a> {
             K::KwSeries => self.series_stmt(),
             K::KwPlot => self.plot_stmt(),
             K::KwIf => self.if_assign_stmt(),
+            K::Ident(name) if name == "strategy" => self.strategy_stmt(),
             other => Err(format!(
                 "parse error: unexpected {:?} at byte {} — expected declare/input/def/series/plot/if",
                 other, self.toks[self.pos].span.start
@@ -168,6 +180,117 @@ impl<'a> P<'a> {
             }
         }
         Ok(Stmt::IfAssign { cond, then, els })
+    }
+
+    fn strategy_stmt(&mut self) -> Result<Stmt, String> {
+        self.pos += 1; // "strategy" (lexed as Ident — not a reserved word)
+        let name = self.ident()?;
+        self.expect(K::LBrace, "'{'")?;
+        let mut items = Vec::new();
+        while !self.at(K::RBrace) && !self.at(K::Eof) {
+            let is_on = matches!(self.kind(), K::Ident(w) if w == "on");
+            if is_on {
+                self.pos += 1;
+                let cond = self.expr()?;
+                self.expect(K::Arrow, "'->'")?;
+                let action_name = self.ident()?;
+                let action = match action_name.as_str() {
+                    "Entry" => {
+                        let args = self.call_args()?;
+                        StrategyAction::Entry { args }
+                    }
+                    "Exit" => {
+                        // optional (side = ...) — accepted, W2b is long-only
+                        if self.eat(K::LParen) {
+                            while !self.at(K::RParen) && !self.at(K::Eof) {
+                                self.pos += 1;
+                            }
+                            self.expect(K::RParen, "')'")?;
+                        }
+                        self.expect(K::Semicolon, "';'")?;
+                        StrategyAction::Exit
+                    }
+                    "Flatten" => {
+                        if self.eat(K::LParen) {
+                            while !self.at(K::RParen) && !self.at(K::Eof) {
+                                self.pos += 1;
+                            }
+                            self.expect(K::RParen, "')'")?;
+                        }
+                        self.expect(K::Semicolon, "';'")?;
+                        StrategyAction::Flatten
+                    }
+                    other => {
+                        return Err(format!(
+                            "parse error: unknown strategy action `{other}` (Entry/Exit/Flatten)"
+                        ))
+                    }
+                };
+                if !matches!(action, StrategyAction::Entry { .. }) {
+                    // Exit/Flatten consumed their semicolon above
+                } else {
+                    self.expect(K::Semicolon, "';'")?;
+                }
+                items.push(StrategyItem::On { cond, action });
+            } else if self.at(K::KwInput) {
+                self.pos += 1;
+                let name = self.ident()?;
+                self.expect(K::Eq, "'='")?;
+                let default_expr = self.expr()?;
+                self.expect(K::Semicolon, "';'")?;
+                items.push(StrategyItem::Input { name, default_expr });
+            } else if self.at(K::KwDef) {
+                self.pos += 1;
+                let name = self.ident()?;
+                self.expect(K::Eq, "'='")?;
+                let expr = self.expr()?;
+                self.expect(K::Semicolon, "';'")?;
+                items.push(StrategyItem::Def { name, expr });
+            } else if self.at(K::KwSeries) {
+                self.pos += 1;
+                let name = self.ident()?;
+                self.expect(K::Eq, "'='")?;
+                let init = self.expr()?;
+                self.expect(K::KwThen, "'then'")?;
+                let step = self.expr()?;
+                self.expect(K::Semicolon, "';'")?;
+                items.push(StrategyItem::Series { name, init, step });
+            } else {
+                return Err(format!(
+                    "parse error: strategy bodies take input/def/series/on (found {:?})",
+                    self.kind()
+                ));
+            }
+        }
+        self.expect(K::RBrace, "'}'")?;
+        Ok(Stmt::Strategy(StrategyBlock { name, items }))
+    }
+
+    /// call args (named or positional) — shared with Entry
+    fn call_args(&mut self) -> Result<Vec<(Option<String>, Expr)>, String> {
+        self.expect(K::LParen, "'('")?;
+        let mut args = Vec::new();
+        if !self.at(K::RParen) {
+            loop {
+                let named = if let K::Ident(pname) = self.kind().clone() {
+                    if self.toks.len() > self.pos + 1 && self.toks[self.pos + 1].kind == K::Eq {
+                        self.pos += 2;
+                        Some(pname)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+                let v = self.expr()?;
+                args.push((named, v));
+                if !self.eat(K::Comma) {
+                    break;
+                }
+            }
+        }
+        self.expect(K::RParen, "')'")?;
+        Ok(args)
     }
 
     fn plot_or_if(&mut self) -> Result<Stmt, String> {
@@ -383,7 +506,11 @@ impl<'a> P<'a> {
                 self.expect(K::RParen, "')'")?;
                 Ok(e)
             }
-            K::Ident(name) => {
+            K::Ident(..) | K::Lower | K::Upper | K::OnPrice => {
+                let name = match &self.toks[self.pos].kind {
+                    K::Ident(n) => n.clone(),
+                    _ => self.toks[self.pos].text.clone(),
+                };
                 self.pos += 1;
                 if self.eat(K::LParen) {
                     // call with named args (order-free); positional calls

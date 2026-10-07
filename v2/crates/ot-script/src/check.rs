@@ -49,6 +49,40 @@ pub enum BindingKind {
     Field,
 }
 
+/// The order-aware strategy surface plan (spec §7).
+#[derive(Debug, Clone)]
+pub struct StrategyPlan {
+    pub name: String,
+    pub ons: Vec<OnPlan>,
+}
+
+#[derive(Debug, Clone)]
+pub struct OnPlan {
+    pub action: OnAction,
+    pub cond: CondSpec,
+}
+
+#[derive(Debug, Clone)]
+pub enum OnAction {
+    /// market entry; explicit `size` (units) × fill close = notional;
+    /// optional absolute brackets ride the position (engine ladder).
+    Entry {
+        size: Option<String>,
+        stop: Option<String>,
+        target: Option<String>,
+    },
+    Exit,
+    Flatten,
+}
+
+#[derive(Debug, Clone)]
+pub enum CondSpec {
+    /// hidden bool binding (column name in the plan's bindings)
+    Column(String),
+    /// position age ≥ n bars (engine state — the handler computes it)
+    MaxHold(i64),
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct CompilePlan {
     pub bindings: Vec<BindingPlan>,
@@ -61,6 +95,8 @@ pub struct CompilePlan {
     /// Binding evaluation order (series in declaration order first at each
     /// bar; defs after their dependencies — the evaluator uses this order).
     pub eval_order: Vec<String>,
+    /// strategy blocks (W2b: at most one per script)
+    pub strategies: Vec<StrategyPlan>,
 }
 
 #[derive(Debug, Clone)]
@@ -145,6 +181,58 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
             Stmt::PlotAssign { .. } | Stmt::IfAssign { .. } => {
                 return cerr("plot assignment must appear at top level in W2a (declared-then-assigned plots land with the full statement-if form)".to_string());
             }
+            Stmt::Strategy(sb) => {
+                if !ctx.plan.strategies.is_empty() {
+                    return cerr("at most one strategy block per script (W2b)");
+                }
+                let ns = format!("{}::", sb.name);
+                for item in &sb.items {
+                    match item {
+                        StrategyItem::Input { name, default_expr } => {
+                            if ctx.bindings.contains_key(name) {
+                                return cerr(format!("duplicate binding `{name}` (strategy `{}`)", sb.name));
+                            }
+                            let (ty, default) = literal_type(default_expr)?;
+                            ctx.bindings.insert(name.clone(), (BindingKind::Input, ty, 0));
+                            ctx.plan.inputs.insert(name.clone(), InputSpec { ty, default });
+                            ctx.plan.bindings.push(BindingPlan {
+                                name: name.clone(),
+                                kind: BindingKind::Input,
+                                ty,
+                                lookback: 0,
+                                warmup: 0,
+                                pane: None,
+                            });
+                        }
+                        StrategyItem::Def { name, .. } => {
+                            let qn = format!("{ns}{name}");
+                            ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, i64::MAX));
+                            ctx.plan.bindings.push(BindingPlan {
+                                name: qn,
+                                kind: BindingKind::Def,
+                                ty: Type::Float,
+                                lookback: i64::MAX,
+                                warmup: i64::MAX,
+                                pane: None,
+                            });
+                        }
+                        StrategyItem::Series { name, .. } => {
+                            let qn = format!("{ns}{name}");
+                            ctx.bindings.insert(qn.clone(), (BindingKind::Series, Type::Float, i64::MAX));
+                            ctx.plan.bindings.push(BindingPlan {
+                                name: qn,
+                                kind: BindingKind::Series,
+                                ty: Type::Float,
+                                lookback: i64::MAX,
+                                warmup: i64::MAX,
+                                pane: None,
+                            });
+                        }
+                        StrategyItem::On { .. } => {}
+                    }
+                }
+                ctx.plan.strategies.push(StrategyPlan { name: sb.name.clone(), ons: Vec::new() });
+            }
         }
     }
 
@@ -167,7 +255,7 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
                     return cerr(format!("`def {name}` must be float or bool (got {ty:?})"));
                 }
             }
-            Stmt::Series { name, init, step } => {
+            Stmt::Series { name, init, step } if !name.contains("::") => {
                 let _ = type_of(&mut ctx, init)?;
                 let ty_step = type_of(&mut ctx, step)?;
                 if ty_step != Type::Float && ty_step != Type::Bool {
@@ -182,6 +270,92 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
                 ctx.bindings.insert(name.clone(), (BindingKind::Series, Type::Float, lb));
             }
             _ => {}
+        }
+    }
+
+    // pass 2b: strategy bodies — defs/series (namespaced) + on-conditions
+    for s in &stmts {
+        let Stmt::Strategy(sb) = s else { continue };
+        let ns = format!("{}::", sb.name);
+        for item in &sb.items {
+            match item {
+                StrategyItem::Def { name, expr } => {
+                    let qn = format!("{ns}{name}");
+                    let rexpr = rewrite(expr, &ns, &sb.name)?;
+                    let ty = type_of(&mut ctx, &rexpr)?;
+                    if ty != Type::Float && ty != Type::Bool {
+                        return cerr(format!("strategy def `{name}` must be float or bool (got {ty:?})"));
+                    }
+                    let lb = lookback_of(&mut ctx, &rexpr)?;
+                    if let Some(e) = ctx.bindings.get_mut(&qn) {
+                        e.1 = ty;
+                        e.2 = lb;
+                    }
+                }
+                StrategyItem::Series { name, init, step } => {
+                    let qn = format!("{ns}{name}");
+                    let rinit = rewrite(init, &ns, &sb.name)?;
+                    let rstep = rewrite(step, &ns, &sb.name)?;
+                    let _ = type_of(&mut ctx, &rinit)?;
+                    let ty_step = type_of(&mut ctx, &rstep)?;
+                    if ty_step != Type::Float && ty_step != Type::Bool {
+                        return cerr(format!("strategy series `{name}` must be float or bool (got {ty_step:?})"));
+                    }
+                    let lb = lookback_of(&mut ctx, &rinit)?.max(lookback_of(&mut ctx, &rstep)?);
+                    if let Some(e) = ctx.bindings.get_mut(&qn) {
+                        e.2 = lb;
+                    }
+                }
+                StrategyItem::Input { .. } => {}
+                StrategyItem::On { cond, action } => {
+                    // compound MaxHold rejected FIRST (any position in the tree)
+                    if expr_contains(cond, "MaxHold") {
+                        if !matches!(cond, Expr::Call { name, .. } if name == "MaxHold") {
+                            return cerr("MaxHold is only supported as a bare `on MaxHold(n)` condition (compound forms are a later W2 slice)");
+                        }
+                    }
+                    // MaxHold marker: bare MaxHold(n) condition
+                    if let Expr::Call { name: cn, args, .. } = cond {
+                        if cn == "MaxHold" {
+                            let n = match args.first() {
+                                Some((_, Expr::Num(v))) => *v as i64,
+                                _ => return cerr("MaxHold(n) requires a constant n"),
+                            };
+                            let act = check_action(action, &ns, &mut ctx)?;
+                            ctx.plan.strategies.last_mut().unwrap().ons.push(OnPlan {
+                                action: act,
+                                cond: CondSpec::MaxHold(n),
+                            });
+                            continue;
+                        }
+                    }
+                    let rcond = rewrite(cond, &ns, &sb.name)?;
+                    let ty = type_of(&mut ctx, &rcond)?;
+                    if ty != Type::Bool {
+                        return cerr(format!("`on` condition must be bool (got {ty:?})"));
+                    }
+                    let idx = ctx.plan.strategies.last().unwrap().ons.len();
+                    let qn = format!("{ns}on{idx}");
+                    ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Bool, 0));
+                    ctx.plan.bindings.push(BindingPlan {
+                        name: qn.clone(),
+                        kind: BindingKind::Def,
+                        ty: Type::Bool,
+                        lookback: 0,
+                        warmup: 0,
+                        pane: None,
+                    });
+                    let lb = lookback_of(&mut ctx, &rcond)?;
+                    if let Some(e) = ctx.bindings.get_mut(&qn) {
+                        e.2 = lb;
+                    }
+                    let act = check_action(action, &ns, &mut ctx)?;
+                    ctx.plan.strategies.last_mut().unwrap().ons.push(OnPlan {
+                        action: act,
+                        cond: CondSpec::Column(qn),
+                    });
+                }
+            }
         }
     }
 
@@ -245,11 +419,231 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
                 });
                 eval_order.push(name.clone());
             }
+            Stmt::Strategy(sb) => {
+                let ns = format!("{}::", sb.name);
+                // strategy bindings in declaration order, then the on-cols
+                let mut k = 0usize;
+                for item in &sb.items {
+                    match item {
+                        StrategyItem::Def { name, .. } | StrategyItem::Series { name, .. } => {
+                            eval_order.push(format!("{ns}{name}"));
+                        }
+                        StrategyItem::On { .. } => {
+                            let plan = ctx.plan.strategies.first().unwrap();
+                            if let Some(OnPlan { cond: CondSpec::Column(qn), .. }) =
+                                plan.ons.get(k)
+                            {
+                                eval_order.push(qn.clone());
+                            }
+                            k += 1;
+                        }
+                        _ => {}
+                    }
+                }
+                // size/stop/target value bindings (registered by check_action)
+                for (n, (kind, _, _)) in ctx.bindings.iter() {
+                    if n.starts_with(&ns) && *kind == BindingKind::Def
+                        && (n.contains(".size") || n.contains(".stop") || n.contains(".target"))
+                    {
+                        eval_order.push(n.clone());
+                    }
+                }
+            }
             _ => {}
         }
     }
     ctx.plan.eval_order = eval_order;
     Ok(ctx.plan)
+}
+
+/// Strategy on-action validation: returns the plan action; value exprs
+/// (size/stop/target) become hidden bindings `ns::eK_size` etc.
+fn check_action(
+    action: &StrategyAction,
+    ns: &str,
+    ctx: &mut Ctx,
+) -> Result<OnAction, CheckError> {
+    Ok(match action {
+        StrategyAction::Exit => OnAction::Exit,
+        StrategyAction::Flatten => OnAction::Flatten,
+        StrategyAction::Entry { args } => {
+            // resolve positional via Entry's declared order, then named
+            let order = ["side", "size", "stop", "target"];
+            let mut named: Vec<(String, &Expr)> = Vec::new();
+            let seen_named = args.iter().any(|(n, _)| n.is_some());
+            let seen_positional = args.iter().any(|(n, _)| n.is_none());
+            if seen_named && seen_positional {
+                return cerr("Entry: mixing positional and named args is a type error");
+            }
+            if seen_positional {
+                for ((_, e), pname) in args.iter().zip(order) {
+                    named.push((pname.to_string(), e));
+                }
+            } else {
+                for (n, e) in args {
+                    let Some(n) = n else { unreachable!() };
+                    if !order.contains(&n.as_str()) {
+                        return cerr(format!("Entry: unknown parameter `{n}` (expected one of {order:?})"));
+                    }
+                    named.push((n.clone(), e));
+                }
+            }
+            let mut size = None;
+            let mut stop = None;
+            let mut target = None;
+            let mut side_seen = false;
+            for (k, e) in named {
+                match k.as_str() {
+                    "side" => {
+                        // W2b: LONG only; SHORT is a later slice (FX-first
+                        // long-only engine surface)
+                        match e {
+                            Expr::Ident(s, _) if s == "LONG" => side_seen = true,
+                            Expr::Ident(s, _) if s == "SHORT" => {
+                                return cerr("Entry(side = SHORT) lands in a later W2 slice (long-only engine surface)");
+                            }
+                            _ => return cerr("Entry(side = LONG) — side must be the LONG constant in W2b"),
+                        }
+                    }
+                    "size" => {
+                        let qn = format!("{ns}e{}.size", ctx.plan.bindings.len());
+                        let ty = type_of(ctx, e)?;
+                        if ty != Type::Float && ty != Type::Int {
+                            return cerr("Entry(size = <units>) must be numeric");
+                        }
+                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
+                        ctx.plan.bindings.push(BindingPlan {
+                            name: qn.clone(),
+                            kind: BindingKind::Def,
+                            ty: Type::Float,
+                            lookback: 0,
+                            warmup: 0,
+                            pane: None,
+                        });
+                        size = Some((qn, e.clone()));
+                    }
+                    "stop" => {
+                        let qn = format!("{ns}e{}.stop", ctx.plan.bindings.len());
+                        let ty = type_of(ctx, e)?;
+                        if ty != Type::Float {
+                            return cerr("Entry(stop = <price>) must be float");
+                        }
+                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
+                        ctx.plan.bindings.push(BindingPlan {
+                            name: qn.clone(),
+                            kind: BindingKind::Def,
+                            ty: Type::Float,
+                            lookback: 0,
+                            warmup: 0,
+                            pane: None,
+                        });
+                        stop = Some((qn, e.clone()));
+                    }
+                    "target" => {
+                        let qn = format!("{ns}e{}.target", ctx.plan.bindings.len());
+                        let ty = type_of(ctx, e)?;
+                        if ty != Type::Float {
+                            return cerr("Entry(target = <price>) must be float");
+                        }
+                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
+                        ctx.plan.bindings.push(BindingPlan {
+                            name: qn.clone(),
+                            kind: BindingKind::Def,
+                            ty: Type::Float,
+                            lookback: 0,
+                            warmup: 0,
+                            pane: None,
+                        });
+                        target = Some((qn, e.clone()));
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            if !side_seen {
+                return cerr("Entry requires `side = LONG` (W2b)");
+            }
+            // hidden value bindings need their exprs checked/lookbacked —
+            // register their stmts so pass-2-style resolution works: we
+            // already type-checked; record lookback via lookback_of
+            for (qn, e) in [&size, &stop, &target].into_iter().flatten() {
+                let lb = lookback_of(ctx, e)?;
+                if let Some(entry) = ctx.bindings.get_mut(qn) {
+                    entry.2 = lb;
+                }
+            }
+            OnAction::Entry {
+                size: size.map(|(q, _)| q),
+                stop: stop.map(|(q, _)| q),
+                target: target.map(|(q, _)| q),
+            }
+        }
+    })
+}
+
+/// Rewrite idents inside a strategy body to their namespaced bindings.
+/// Fundamentals, builtins, and unknown names pass through (unknown names
+/// error later — including intentional top-level refs, which resolve to
+/// top-level columns at eval).
+fn rewrite(e: &Expr, ns: &str, strat: &str) -> Result<Expr, CheckError> {
+    let owned_names = |name: &str| -> bool { name.starts_with(ns) };
+    let _ = owned_names;
+    let _ = strat;
+    match e {
+        Expr::Ident(name, sp) => {
+            // rewrite only if NOT a fundamental (fundamentals stay bare)
+            if crate::builtins::is_fundamental(name) {
+                Ok(e.clone())
+            } else {
+                Ok(Expr::Ident(format!("{ns}{name}"), *sp))
+            }
+        }
+        Expr::Index(inner, n) => Ok(Expr::Index(
+            Box::new(rewrite(inner, ns, strat)?),
+            *n,
+        )),
+        Expr::Bin { op, lhs, rhs } => Ok(Expr::Bin {
+            op: *op,
+            lhs: Box::new(rewrite(lhs, ns, strat)?),
+            rhs: Box::new(rewrite(rhs, ns, strat)?),
+        }),
+        Expr::Not(inner) => Ok(Expr::Not(Box::new(rewrite(inner, ns, strat)?))),
+        Expr::If { cond, then, els } => Ok(Expr::If {
+            cond: Box::new(rewrite(cond, ns, strat)?),
+            then: Box::new(rewrite(then, ns, strat)?),
+            els: Box::new(rewrite(els, ns, strat)?),
+        }),
+        Expr::Call { name, args, span } => {
+            if crate::builtins::is_known_builtin(name) || name == "MaxHold" {
+                let mut out = Vec::new();
+                for (n, a) in args {
+                    out.push((n.clone(), rewrite(a, ns, strat)?));
+                }
+                return Ok(Expr::Call { name: name.clone(), args: out, span: *span });
+            }
+            // user study calls land in a later slice — treat unknown call
+            // names as errors pointing there
+            Err(CheckError {
+                message: format!("`{name}(...)` — user-study calls are a later W2 slice"),
+            })
+        }
+        Expr::Num(_) | Expr::BoolLit(_) | Expr::StrLit(_) => Ok(e.clone()),
+    }
+}
+
+/// Does the expression contain a call to the named builtin anywhere?
+fn expr_contains(e: &Expr, name: &str) -> bool {
+    match e {
+        Expr::Call { name: n, args, .. } => {
+            n == name || args.iter().any(|(_, a)| expr_contains(a, name))
+        }
+        Expr::Bin { lhs, rhs, .. } => expr_contains(lhs, name) || expr_contains(rhs, name),
+        Expr::Not(inner) => expr_contains(inner, name),
+        Expr::If { cond, then, els } => {
+            expr_contains(cond, name) || expr_contains(then, name) || expr_contains(els, name)
+        }
+        Expr::Index(inner, _) => expr_contains(inner, name),
+        _ => false,
+    }
 }
 
 /// Static lookback of an expression: max `[n]` plus callee-declared
@@ -532,4 +926,9 @@ fn builtin_warmup(e: &Expr, input_default: &dyn Fn(&str) -> Option<f64>) -> i64 
             }
         }
     }
+}
+
+/// Crate-internal rewrite entry for the evaluator's strategy walk.
+pub(crate) fn rewrite_pub(e: &Expr, ns: &str, strat: &str) -> Result<Expr, CheckError> {
+    rewrite(e, ns, strat)
 }

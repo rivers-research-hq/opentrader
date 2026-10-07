@@ -58,7 +58,7 @@ impl AssertingHandler {
 }
 
 impl Handler for AssertingHandler {
-    fn signal_exits(&mut self, view: &DecisionView, _open: &[String]) -> Vec<(String, ExitReason)> {
+    fn signal_exits(&mut self, view: &DecisionView, _open: &[Position]) -> Vec<(String, ExitReason)> {
         // THE structural invariant: the latest visible ts is master[sig_t],
         // never master[fill_t].
         if view.max_visible_ts() != view.universe.master[view.sig_t] {
@@ -144,6 +144,8 @@ fn exit_priority_tp_beats_sl_and_trail() {
         bars: 10, // past max_hold too
         entry_ts: 0,
         last_close: 100.0,
+        stop_loss: None,
+        take_profit: None,
     };
     let mut series = Vec::new();
     // One bar that simultaneously hits TP (high >= 110), SL (low <= 95),
@@ -173,6 +175,8 @@ fn exit_priority_sl_beats_trail_and_maxhold() {
         bars: 9, // past max_hold
         entry_ts: 0,
         last_close: 100.0,
+        stop_loss: None,
+        take_profit: None,
     };
     let s = Series::from_bars(vec![Bar { ts: 1, open: 100.0, high: 101.0, low: 90.0, close: 95.0, volume: 1.0 }]);
     let (px, why) = evaluate_engine_exit(&cfg, &mut p, &s, 1, Some(95.0)).unwrap();
@@ -198,6 +202,8 @@ fn exit_priority_trail_beats_maxhold() {
         bars: 9,
         entry_ts: 0,
         last_close: 100.0,
+        stop_loss: None,
+        take_profit: None,
     };
     let s = Series::from_bars(vec![Bar { ts: 1, open: 108.0, high: 108.0, low: 107.0, close: 107.5, volume: 1.0 }]);
     // trail = 110*0.98 = 107.8; low 107.0 <= 107.8 → trail at 107.8, even
@@ -225,6 +231,8 @@ fn maxhold_fires_at_close_when_no_price_exit() {
         bars: 3,
         entry_ts: 0,
         last_close: 100.0,
+        stop_loss: None,
+        take_profit: None,
     };
     let s = Series::from_bars(vec![Bar { ts: 1, open: 100.0, high: 100.5, low: 99.5, close: 100.2, volume: 1.0 }]);
     let (px, why) = evaluate_engine_exit(&cfg, &mut p, &s, 1, Some(100.2)).unwrap();
@@ -244,9 +252,15 @@ proptest! {
         // delist trade's exit price == S01's last close.
         struct BuyS01;
         impl Handler for BuyS01 {
-            fn candidates(&mut self, view: &DecisionView, open: &[String]) -> Vec<Candidate> {
+            fn candidates(&mut self, view: &DecisionView, open: &[Position]) -> Vec<Candidate> {
                 if open.is_empty() && view.fill_close("S01").is_some() && view.sig_pos("S01").is_some() {
-                    return vec![Candidate { sym: "S01".into(), vol_reduce_applies: false }];
+                    return vec![Candidate {
+                        sym: "S01".into(),
+                        vol_reduce_applies: false,
+                        notional_override: None,
+                        stop_loss: None,
+                        take_profit: None,
+                    }];
                 }
                 Vec::new()
             }
@@ -291,7 +305,7 @@ fn date_guard_excludes_uncovered_symbols() {
 
     struct Record(BTreeSet<i64>);
     impl Handler for Record {
-        fn candidates(&mut self, view: &DecisionView, _open: &[String]) -> Vec<Candidate> {
+        fn candidates(&mut self, view: &DecisionView, _open: &[Position]) -> Vec<Candidate> {
             // S01 must not be scoreable before its series starts.
             if view.universe.master[view.sig_t] < 1040 {
                 assert!(view.sig_pos("S01").is_none(), "S01 leaked before coverage");

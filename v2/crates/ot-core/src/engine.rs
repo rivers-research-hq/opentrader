@@ -70,6 +70,10 @@ pub struct Position {
     /// Fallback equity mark when a bar is missing (V1 would KeyError; V2
     /// documents the robustness fix and marks at the last recorded close).
     pub last_close: f64,
+    /// Strategy-surface brackets (absolute prices) — take precedence over
+    /// the cfg-percentage ladder when set.
+    pub stop_loss: Option<f64>,
+    pub take_profit: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -105,6 +109,14 @@ pub struct Candidate {
     /// True when the handler's sizing gate (vol_level > vol_reduce_thr)
     /// applies at the signal bar → notional scaled by vol_reduce_frac.
     pub vol_reduce_applies: bool,
+    /// Explicit notional (strategy-surface entries: `size` units × fill
+    /// close) — overrides risk_pct sizing when Some.
+    pub notional_override: Option<f64>,
+    /// Per-position protective brackets riding the entry (strategy
+    /// surface): absolute prices, checked in the exit ladder with the V1
+    /// same-bar discipline. None → the cfg-percentage ladder applies.
+    pub stop_loss: Option<f64>,
+    pub take_profit: Option<f64>,
 }
 
 /// One decision at bar `t` (view = bars ≤ t-1): handler-level exits
@@ -149,8 +161,9 @@ pub trait Handler {
     /// (signal/rsi) for currently-held symbols, keyed by symbol. V1 checks
     /// `scores.get(s, 0.0) < sell_thresh` (default 0.0) and the rsi gates
     /// inside the exit loop, in insertion order — the engine consults this
-    /// map per position in exactly that order.
-    fn signal_exits(&mut self, _view: &DecisionView, _open_syms: &[String]) -> Vec<(String, ExitReason)> {
+    /// map per position in exactly that order. Handlers see full positions
+    /// (age, brackets) — the strategy surface's MaxHold reads `bars`.
+    fn signal_exits(&mut self, _view: &DecisionView, _open: &[Position]) -> Vec<(String, ExitReason)> {
         Vec::new()
     }
 
@@ -158,7 +171,7 @@ pub trait Handler {
     /// applied). V1 computes candidates from the SAME scores, excluding
     /// post-exit holdings — so a symbol exited this bar (either way) is
     /// re-eligible in the same bar. Pre-gated, pre-sorted, score-descending.
-    fn candidates(&mut self, _view: &DecisionView, _open_syms: &[String]) -> Vec<Candidate> {
+    fn candidates(&mut self, _view: &DecisionView, _open: &[Position]) -> Vec<Candidate> {
         Vec::new()
     }
 }
@@ -255,11 +268,25 @@ pub fn evaluate_engine_exit(
         Some(b) => b,
     };
     let entry = p.entry;
-    if bar.high >= entry * (1.0 + cfg.tp) {
-        return Some((entry * (1.0 + cfg.tp), ExitReason::Tp));
+    // Strategy brackets (absolute prices) take precedence; same TP→SL
+    // order as V1's percentage ladder (the locked same-bar discipline).
+    if let Some(tp) = p.take_profit {
+        if bar.high >= tp {
+            return Some((tp, ExitReason::Tp));
+        }
     }
-    if bar.low <= entry * (1.0 - cfg.sl) {
-        return Some((entry * (1.0 - cfg.sl), ExitReason::Sl));
+    if let Some(sl) = p.stop_loss {
+        if bar.low <= sl {
+            return Some((sl, ExitReason::Sl));
+        }
+    }
+    if p.take_profit.is_none() && p.stop_loss.is_none() {
+        if bar.high >= entry * (1.0 + cfg.tp) {
+            return Some((entry * (1.0 + cfg.tp), ExitReason::Tp));
+        }
+        if bar.low <= entry * (1.0 - cfg.sl) {
+            return Some((entry * (1.0 - cfg.sl), ExitReason::Sl));
+        }
     }
     if cfg.trailing_pct > 0.0 {
         p.peak = p.peak.max(bar.high);
@@ -312,9 +339,9 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
 
         // ── phase 1: handler signal exits (view = bars ≤ t-1; V1 computes
         // scores once, before the exit loop) ────────────────────────────
-        let open_syms: Vec<String> = positions.iter().map(|p| p.sym.clone()).collect();
+        let open_positions: Vec<Position> = positions.clone();
         let sig_exits: std::collections::BTreeMap<String, ExitReason> = handler
-            .signal_exits(&view, &open_syms)
+            .signal_exits(&view, &open_positions)
             .into_iter()
             .collect();
 
@@ -368,8 +395,8 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                 .sum::<f64>();
 
         // ── phase 2: candidates from the same scores, post-exit holdings ─
-        let open_syms: Vec<String> = positions.iter().map(|p| p.sym.clone()).collect();
-        let d_entries = handler.candidates(&view, &open_syms);
+        let open_positions: Vec<Position> = positions.clone();
+        let d_entries = handler.candidates(&view, &open_positions);
 
         // ── entries: engine sizing over pre-gated candidates ───────────
         for c in d_entries {
@@ -382,7 +409,11 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if close <= 0.0 {
                 continue;
             }
-            let mut notional = cfg.risk_pct * equity_now;
+            let mut notional = c
+                .notional_override
+                .unwrap_or(cfg.risk_pct * equity_now);
+            #[cfg(feature = "debug_strategy")]
+            eprintln!("entry attempt t={t} sym={} notional={notional} cash={cash} eq={equity_now}", c.sym);
             if cfg.vol_reduce_n > 0 && c.vol_reduce_applies {
                 notional *= cfg.vol_reduce_frac;
             }
@@ -392,13 +423,19 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if notional < cfg.min_notional {
                 continue;
             }
-            let exposure = positions
-                .iter()
-                .map(|p| p.qty * view.fill_close(&p.sym).unwrap_or(p.last_close))
-                .sum::<f64>()
-                / equity_now.max(1.0);
-            if exposure + notional / equity_now.max(1.0) > cfg.max_exposure {
-                continue;
+            // Exposure cap applies to portfolio-scaled sizing only; an
+            // explicit-size override (the strategy surface: units × price)
+            // is the strategy's own sizing decision — cash still bounds it
+            // below (notional + fee > cash scales down).
+            if c.notional_override.is_none() {
+                let exposure = positions
+                    .iter()
+                    .map(|p| p.qty * view.fill_close(&p.sym).unwrap_or(p.last_close))
+                    .sum::<f64>()
+                    / equity_now.max(1.0);
+                if exposure + notional / equity_now.max(1.0) > cfg.max_exposure {
+                    continue;
+                }
             }
             let mut fee = fee_amt(cfg, notional / close.max(1e-9), close);
             if notional + fee > cash {
@@ -421,6 +458,8 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                 bars: 0,
                 entry_ts: idx,
                 last_close: close,
+                stop_loss: c.stop_loss,
+                take_profit: c.take_profit,
             });
         }
 

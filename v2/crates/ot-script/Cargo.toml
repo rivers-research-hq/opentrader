@@ -5,6 +5,9 @@ edition.workspace = true
 license.workspace = true
 description = "v2script — the series-native DSL interpreter (locked #337, spec #346): chart studies, strategy backtests, scanner filters, MCP evaluation."
 
+[features]
+debug_strategy = ["ot-core/debug_strategy"]
+
 [dependencies]
 ot-core = { path = "../ot-core" }
 serde = { workspace = true }

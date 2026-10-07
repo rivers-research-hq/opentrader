@@ -150,6 +150,8 @@ pub enum Stmt {
         then: Vec<Stmt>,
         els: Vec<Stmt>,
     },
+    /// strategy Name { ... } — the order-aware surface (spec §7)
+    Strategy(StrategyBlock),
 }
 
 /// A compiled script: statements + the plan the host binds against.
@@ -164,4 +166,36 @@ pub enum Pane {
     Lower,
     Upper,
     OnPrice,
+}
+
+// ── strategy surface (spec §7) ────────────────────────────────────────────
+
+/// A `strategy Name { ... }` block — a study body plus `on` order
+/// statements. VIRTUAL orders only (spec §7.3 boundary): the evaluator
+/// returns a report; routing to a venue is a separate human-gated
+/// promotion. The language has no live-order verb.
+#[derive(Debug, Clone)]
+pub struct StrategyBlock {
+    pub name: String,
+    pub items: Vec<StrategyItem>,
+}
+
+#[derive(Debug, Clone)]
+pub enum StrategyItem {
+    Input { name: String, default_expr: Expr },
+    Def { name: String, expr: Expr },
+    Series { name: String, init: Expr, step: Expr },
+    /// `on <cond> -> Action;` — cond evaluated on closed bars (engine
+    /// contract: the decision view is the signal bar t-1).
+    On { cond: Expr, action: StrategyAction },
+}
+
+#[derive(Debug, Clone)]
+pub enum StrategyAction {
+    /// market entry (pending `limit =`/`stop =` entries are a later slice)
+    Entry { args: Vec<(Option<String>, Expr)> },
+    /// reduce/close by side or tag
+    Exit,
+    /// close everything
+    Flatten,
 }

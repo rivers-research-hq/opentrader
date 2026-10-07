@@ -26,8 +26,8 @@ pub mod lexer;
 pub mod parser;
 
 pub use ast::*;
-pub use check::{CheckError, CompilePlan, Pane};
-pub use eval::{EvalOutput, Frame, Plot, ScriptRequest, Warmup};
+pub use check::{CheckError, CompilePlan, CondSpec, OnAction, OnPlan, Pane, StrategyPlan};
+pub use eval::{EvalOutput, Frame, Plot, ScriptRequest, Warmup, run_strategy};
 
 /// Compile + evaluate convenience for the host seam (single symbol/frame
 /// this slice; the ScriptRequest shape per spec §6).
