@@ -24,10 +24,12 @@ pub mod check;
 pub mod eval;
 pub mod lexer;
 pub mod parser;
+pub mod scan;
 
 pub use ast::*;
 pub use check::{CheckError, CompilePlan, CondSpec, OnAction, OnPlan, Pane, StrategyPlan};
 pub use eval::{EvalOutput, Frame, Plot, ScriptRequest, Warmup, run_strategy};
+pub use scan::{ScanConfig, ScanHit, ScanRequest, ScanResult, run_scan};
 
 /// Compile + evaluate convenience for the host seam (single symbol/frame
 /// this slice; the ScriptRequest shape per spec §6).
