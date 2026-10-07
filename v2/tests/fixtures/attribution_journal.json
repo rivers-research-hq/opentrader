@@ -1,0 +1,190 @@
+{
+ "desc": "attribution journal (V1 shapes; V1 resolver computed the expect side)",
+ "today": "2026-10-07",
+ "transactions": [
+  {
+   "id": "1001",
+   "type": "MARKET_ORDER",
+   "instrument": "EUR_USD",
+   "tradeClientExtensions": {
+    "id": "mom-k5-EUR_USD",
+    "tag": "mom-k5",
+    "comment": "mom-k5"
+   }
+  },
+  {
+   "id": "1002",
+   "type": "ORDER_FILL",
+   "orderID": "1001",
+   "instrument": "EUR_USD",
+   "tradeOpened": {
+    "tradeID": "9001"
+   },
+   "pl": "0.0000",
+   "time": "2026-10-06T17:15:00.123456Z"
+  },
+  {
+   "id": "1003",
+   "type": "MARKET_ORDER",
+   "instrument": "GBP_JPY",
+   "tradeClientExtensions": {
+    "id": "h1-mom-GBP_JPY",
+    "tag": "h1-mom",
+    "comment": "h1-mom"
+   }
+  },
+  {
+   "id": "1004",
+   "type": "ORDER_FILL",
+   "orderID": "1003",
+   "instrument": "GBP_JPY",
+   "tradeOpened": {
+    "tradeID": "9002"
+   },
+   "pl": "0.0000",
+   "time": "2026-10-06T18:00:00.000000Z"
+  },
+  {
+   "id": "1005",
+   "type": "MARKET_ORDER",
+   "instrument": "USD_JPY",
+   "tradeClientExtensions": {
+    "id": "crash-USD_JPY",
+    "tag": "crash",
+    "comment": "crash"
+   }
+  },
+  {
+   "id": "1006",
+   "type": "ORDER_FILL",
+   "orderID": "1005",
+   "instrument": "USD_JPY",
+   "tradeOpened": {
+    "tradeID": "9003"
+   },
+   "pl": "0.0000",
+   "time": "2026-10-06T19:30:00.000000Z"
+  },
+  {
+   "id": "1007",
+   "type": "ORDER_FILL",
+   "instrument": "EUR_USD",
+   "tradesClosed": [
+    {
+     "tradeID": "9001",
+     "units": "-100"
+    }
+   ],
+   "pl": "-5.2500",
+   "time": "2026-10-06T20:00:00.000000Z"
+  },
+  {
+   "id": "1008",
+   "type": "ORDER_FILL",
+   "instrument": "GBP_JPY",
+   "tradeReduced": {
+    "tradeID": "9002",
+    "units": "-50"
+   },
+   "pl": "2.5000",
+   "time": "2026-10-06T21:00:00.000000Z"
+  },
+  {
+   "id": "1009",
+   "type": "ORDER_FILL",
+   "instrument": "USD_JPY",
+   "tradesClosed": [
+    {
+     "tradeID": "9003",
+     "units": "100"
+    }
+   ],
+   "pl": "12.7500",
+   "time": "2026-10-06T22:00:00.000000Z"
+  },
+  {
+   "id": "1010",
+   "type": "ORDER_FILL",
+   "instrument": "EUR_USD",
+   "units": "100",
+   "pl": "0.5000",
+   "time": "2026-08-30T10:00:00.000000Z"
+  },
+  {
+   "id": "1011",
+   "type": "ORDER_FILL",
+   "instrument": "EUR_USD",
+   "units": "100",
+   "pl": "-1.5000",
+   "time": "2026-10-07T09:00:00.000000Z"
+  },
+  {
+   "id": "1012",
+   "type": "ORDER_FILL",
+   "instrument": "EUR_USD",
+   "units": "100",
+   "clientExtensions": {
+    "id": "mom-k5-EUR_USD-r2",
+    "tag": "mom-k5",
+    "comment": "mom-k5"
+   },
+   "pl": "3.0000",
+   "time": "2026-10-07T09:05:00.000000Z"
+  },
+  {
+   "id": "1013",
+   "type": "MARKET_ORDER",
+   "instrument": "AUD_USD"
+  },
+  {
+   "id": "1014",
+   "type": "ORDER_FILL",
+   "instrument": "USD_CAD",
+   "tradesClosed": [
+    {
+     "tradeID": "9999"
+    }
+   ],
+   "pl": "0.2500",
+   "time": "2026-10-07T09:10:00.000000Z"
+  },
+  {
+   "id": "1015",
+   "type": "DAILY_FINANCING",
+   "pl": "-0.7500"
+  }
+ ],
+ "expect_tags": {
+  "9001": "mom-k5",
+  "9002": "h1-mom",
+  "9003": "crash"
+ },
+ "expect_order_tag": {
+  "1001": "mom-k5",
+  "1003": "h1-mom",
+  "1005": "crash"
+ },
+ "expect_resolve": {
+  "1002": "mom-k5",
+  "1004": "h1-mom",
+  "1006": "crash",
+  "1007": "mom-k5",
+  "1008": "h1-mom",
+  "1009": "crash",
+  "1010": null,
+  "1011": null,
+  "1012": "mom-k5",
+  "1014": null
+ },
+ "expect_realized_all": {
+  "mom-k5": -2.25,
+  "h1-mom": 2.5,
+  "crash": 12.75,
+  "legacy-smoke": 0.5,
+  "unattributed": -1.25
+ },
+ "expect_realized_today": {
+  "mom-k5": 3.0,
+  "unattributed": -1.25
+ }
+}

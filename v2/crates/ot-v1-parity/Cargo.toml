@@ -7,5 +7,6 @@ description = "Parity harness: ot-core's engine vs the recorded V1 run_backtest 
 
 [dependencies]
 ot-core = { path = "../ot-core" }
+ot-venues = { path = "../ot-venues" }
 serde = { workspace = true }
 serde_json = { workspace = true }

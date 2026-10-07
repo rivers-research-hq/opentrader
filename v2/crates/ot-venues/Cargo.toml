@@ -7,3 +7,5 @@ description = "Opentrader V2 venue-abstraction trait — one seam feeding the eg
 
 [dependencies]
 serde = { workspace = true }
+serde_json = { workspace = true }
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }

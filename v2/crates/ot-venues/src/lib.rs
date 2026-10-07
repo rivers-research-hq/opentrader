@@ -162,6 +162,10 @@ pub mod history {
     }
 }
 
+pub mod oanda;
+pub mod attribution;
+pub mod transport;
+
 #[cfg(test)]
 mod tests {
     use super::*;

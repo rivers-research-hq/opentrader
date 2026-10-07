@@ -110,7 +110,9 @@ fn v1_parity_fixtures_match() {
     let mut cases = 0;
     for entry in std::fs::read_dir(&dir).expect("fixtures dir") {
         let path = entry.unwrap().path();
-        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+        if path.extension().and_then(|e| e.to_str()) != Some("json")
+            || !path.file_name().map(|n| n.to_string_lossy().starts_with("fixture_")).unwrap_or(false)
+        {
             continue;
         }
         cases += 1;
