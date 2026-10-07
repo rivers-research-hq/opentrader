@@ -431,7 +431,9 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
                         lb.max(bw)
                     }
                 };
-                if warmup < 0 {
+                // honesty (spec §1.4): a `series` binding makes output depend
+                // on loaded-history length — flagged in the plan, never silent
+                if kind == BindingKind::Series {
                     ctx.plan.warmup_unbounded = true;
                 }
                 ctx.plan.bindings.push(BindingPlan {

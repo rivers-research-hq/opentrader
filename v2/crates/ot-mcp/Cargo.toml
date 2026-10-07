@@ -6,4 +6,8 @@ license.workspace = true
 description = "Opentrader V2 MCP server — tool surface behind the ot-venues seam (locked #336)."
 
 [dependencies]
+ot-core = { path = "../ot-core" }
+ot-script = { path = "../ot-script" }
 ot-venues = { path = "../ot-venues" }
+serde = { workspace = true }
+serde_json = { workspace = true }
