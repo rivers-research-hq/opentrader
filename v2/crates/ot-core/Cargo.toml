@@ -1,0 +1,13 @@
+[package]
+name = "ot-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Opentrader V2 engine truth: deterministic event-driven backtest/live core with the verbatim no-lookahead contract."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

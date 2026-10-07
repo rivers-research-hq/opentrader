@@ -1,0 +1,9 @@
+[package]
+name = "ot-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Opentrader V2 MCP server — tool surface behind the ot-venues seam (locked #336)."
+
+[dependencies]
+ot-venues = { path = "../ot-venues" }

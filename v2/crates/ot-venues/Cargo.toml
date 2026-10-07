@@ -1,0 +1,9 @@
+[package]
+name = "ot-venues"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Opentrader V2 venue-abstraction trait — one seam feeding the egui terminal and the MCP server."
+
+[dependencies]
+serde = { workspace = true }
