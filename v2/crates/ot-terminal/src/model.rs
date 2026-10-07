@@ -105,8 +105,12 @@ pub struct PaperBroker {
     pub cash: f64,
     pub fee_per_side: f64,
     positions: Vec<PaperPosition>,
-    /// resting market orders — filled on the next `on_bar`
-    pending: Vec<(String, PaperSide, f64)>, // symbol, side, qty
+    /// orders placed since the last `on_bar` — armed on it, filled on the
+    /// NEXT one (decision/fill separation: a placement never fills on the
+    /// bar that formed it)
+    fresh: Vec<(String, PaperSide, f64)>,
+    /// armed orders — fill on the next `on_bar`
+    armed: Vec<(String, PaperSide, f64)>,
 }
 
 impl PaperBroker {
@@ -115,33 +119,32 @@ impl PaperBroker {
             cash,
             fee_per_side,
             positions: Vec::new(),
-            pending: Vec::new(),
+            fresh: Vec::new(),
+            armed: Vec::new(),
         }
     }
 
-    /// Place a market order — fills on the NEXT bar (decision/fill
-    /// separation).
+    /// Place a market order — fills on the NEXT `on_bar` after the coming
+    /// one (decision/fill separation: a placement never fills on the bar
+    /// that formed it, nor on the very next call without a bar between).
     pub fn market(&mut self, symbol: &str, side: PaperSide, qty: f64) {
-        self.pending.push((symbol.to_string(), side, qty));
+        self.fresh.push((symbol.to_string(), side, qty));
     }
 
-    /// Advance the broker one bar: fill pendings at THIS bar's close
-    /// (they were placed on a previous bar — the separation held), mark
-    /// the book.
+    /// Advance the broker one bar: arm fresh orders, then fill the armed
+    /// queue at THIS bar's close (they were placed ≥2 bars ago — the
+    /// separation held).
     pub fn on_bar(&mut self, symbol: &str, bar: &Bar) {
-        let pendings: Vec<_> = self
-            .pending
-            .iter()
-            .enumerate()
-            .filter(|(i, _)| self.pending[*i].0 == symbol)
-            .map(|(i, _)| i)
-            .collect();
-        for _ in &pendings {
-            let (sym, side, qty) = self.pending.remove(0);
+        // fill armed orders FIRST (they were placed ≥2 calls ago), then arm
+        // the fresh ones (they fill on the NEXT call)
+        let mut i = 0;
+        while i < self.armed.len() {
+            let (sym, side, qty) = self.armed[i].clone();
             if sym != symbol {
-                self.pending.push((sym, side, qty));
+                i += 1;
                 continue;
             }
+            self.armed.remove(i);
             let fee = self.fee_per_side;
             match side {
                 PaperSide::Long => {
@@ -159,7 +162,8 @@ impl PaperBroker {
                     });
                 }
                 PaperSide::Short => {
-                    // alpha paper: short proceeds net of fee; liability marked
+                    // alpha paper: short proceeds net of the entry fee; the
+                    // liability is marked in equity
                     self.cash += qty * bar.close - fee;
                     self.positions.push(PaperPosition {
                         symbol: sym.clone(),
@@ -171,6 +175,8 @@ impl PaperBroker {
                 }
             }
         }
+        // arm: fresh orders become candidates for the next call
+        self.armed.append(&mut self.fresh);
     }
 
     pub fn positions(&self) -> &[PaperPosition] {
@@ -195,7 +201,10 @@ impl PaperBroker {
         Some(pnl)
     }
 
-    /// Marked equity: cash + unrealized (long mark +; short mark −).
+    /// Marked equity — W0's convention: longs mark at +qty·m (cash is net
+    /// of cost); shorts mark at −qty·m (cash includes the entry proceeds;
+    /// the mark is the buyback liability). Equity returns to cash₀ + pnl
+    /// exactly at close.
     pub fn equity(&self, mark: impl Fn(&str) -> Option<f64>) -> f64 {
         self.cash
             + self
@@ -205,17 +214,9 @@ impl PaperBroker {
                     let m = mark(&p.symbol).unwrap_or(p.entry);
                     p.qty
                         * match p.side {
-                            PaperSide::Long => m - p.entry,
-                            PaperSide::Short => p.entry - m,
+                            PaperSide::Long => m,
+                            PaperSide::Short => -m,
                         }
-                })
-                .sum::<f64>()
-            + self
-                .positions
-                .iter()
-                .map(|p| match p.side {
-                    PaperSide::Long => p.qty * p.entry,
-                    PaperSide::Short => -p.qty * p.entry,
                 })
                 .sum::<f64>()
     }
@@ -225,6 +226,7 @@ impl PaperBroker {
 
 /// Compile + evaluate a v2script study over a frame; returns the FIRST
 /// plot's values (the alpha's overlay line) and the compile error path.
+#[derive(Debug)]
 pub struct StudyOverlay {
     pub source: String,
     pub plan: ot_script::CompilePlan,
