@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/ot-core", "crates/ot-venues", "crates/ot-v1-parity", "crates/ot-mcp"]
+members = ["crates/ot-core", "crates/ot-venues", "crates/ot-v1-parity", "crates/ot-mcp", "crates/ot-script"]
 
 [workspace.package]
 version = "0.1.0"

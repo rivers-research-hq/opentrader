@@ -1,0 +1,11 @@
+[package]
+name = "ot-script"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "v2script — the series-native DSL interpreter (locked #337, spec #346): chart studies, strategy backtests, scanner filters, MCP evaluation."
+
+[dependencies]
+ot-core = { path = "../ot-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }

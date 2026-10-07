@@ -242,6 +242,8 @@ impl<'a> OandaAdapter<'a> {
     }
 
     /// Extract a representative price from a Price object (ask > mid > bid).
+    /// Used by the live streaming path (W1 tails).
+    #[allow(dead_code)]
     fn quote_price(p: &Value) -> f64 {
         for side in ["ask", "mid", "bid"] {
             if let Some(px) = p

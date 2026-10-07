@@ -341,6 +341,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ot-script"
+version = "0.1.0"
+dependencies = [
+ "ot-core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ot-v1-parity"
 version = "0.1.0"
 dependencies = [
