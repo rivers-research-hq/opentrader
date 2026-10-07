@@ -192,10 +192,13 @@ pub enum StrategyItem {
 
 #[derive(Debug, Clone)]
 pub enum StrategyAction {
-    /// market entry (pending `limit =`/`stop =` entries are a later slice)
+    /// market entry, or a pending limit/stop entry (`limit =` / `trigger =`
+    /// — `stop` stays the protective bracket name)
     Entry { args: Vec<(Option<String>, Expr)> },
     /// reduce/close by side or tag
     Exit,
-    /// close everything
+    /// close everything (and cancel pendings)
     Flatten,
+    /// update brackets on the held position (trailing stops ride this)
+    Modify { args: Vec<(Option<String>, Expr)> },
 }

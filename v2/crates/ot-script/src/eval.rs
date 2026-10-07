@@ -11,9 +11,10 @@
 //! state slot (determinism).
 
 use crate::ast::*;
-use crate::check::{BindingKind, CompilePlan, CondSpec};
-use crate::ast::{StrategyAction, StrategyItem};
+use crate::check::{BindingKind, CompilePlan, CondSpec, PendingSpec};
+use crate::ast::StrategyItem;
 use crate::check::{OnAction, OnPlan};
+use ot_core::engine::Side;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
@@ -567,6 +568,34 @@ fn eval_builtin(
             }
             m.eval(data, t - offset as usize)
         }
+        // Trailing peak/trough (spec §7.1: trailing stops ride Modify on
+        // these) — stateful per call site: the extreme so far × (1 ∓ pct).
+        // History-dependent by design (frame-start seeded).
+        "TrailingPeak" | "TrailingTrough" => {
+            let pct = arg_f(m, "percent")?;
+            let data = arg_node(&args, "data")?;
+            let x = m.eval(data, t)?.as_f64();
+            if x.is_nan() {
+                return Ok(Val::Num(nan));
+            }
+            let prev = match m.state.get(&id) {
+                Some(Column::Float(f)) if !f.is_empty() => f[f.len() - 1],
+                _ => f64::NAN,
+            };
+            let extreme = if prev.is_nan() {
+                x
+            } else if name == "TrailingPeak" {
+                prev.max(x)
+            } else {
+                prev.min(x)
+            };
+            push_state(m, id, extreme, f64::NAN);
+            Ok(Val::Num(if name == "TrailingPeak" {
+                extreme * (1.0 - pct)
+            } else {
+                extreme * (1.0 + pct)
+            }))
+        }
         // ── math family (pointwise) ────────────────────────────────────
         "Abs" => Ok(Val::Num(arg_f(m, "x")?.abs())),
         "Log" => Ok(Val::Num(arg_f(m, "x")?.ln())),
@@ -829,86 +858,19 @@ pub fn evaluate_full(
                 StrategyItem::Input { .. } => {}
             }
         }
-        // hidden Entry value bindings (size/stop/target): their exprs are
-        // re-derived from the parsed items — the plan carries only names.
-        // Match ons to Entry items by order of appearance.
-        let mut oi = 0usize;
-        for item in &sb.items {
-            let StrategyItem::On { cond, action } = item else { continue };
-            let _ = cond;
-            let Some(on_plan) = checked.strategies.first().and_then(|sp| sp.ons.get(oi)) else {
-                oi += 1;
+        // hidden action-value bindings (size/stop/target/limit/trigger/
+        // modify): the checker stashed their exprs on the plan keyed by
+        // column name — build their arenas here.
+        for (qn, hexpr) in &checked.hidden_exprs {
+            if !qn.starts_with(&ns) {
                 continue;
-            };
-            oi += 1;
-            let StrategyAction::Entry { args } = action else { continue };
-            let OnAction::Entry { size, stop, target } = &on_plan.action else { continue };
-            let resolve = |plan_name: &Option<String>, want: &str| -> Option<(String, Expr)> {
-                // find the arg matching the plan's binding suffix
-                let Some(pn) = plan_name else { return None };
-                for (n, a) in args {
-                    let is_match = match n {
-                        Some(nm) => nm == want,
-                        None => {
-                            // positional: Entry's declared order
-                            let _order = ["side", "size", "stop", "target"];
-                            args.iter()
-                                .filter(|(n2, _)| n2.is_none())
-                                .position(|(n2, _)| n2.is_none())
-                                .map(|_| true)
-                                .unwrap_or(false)
-                                && {
-                                    let positional_idx = args
-                                        .iter()
-                                        .take_while(|(n2, _)| n2.is_none())
-                                        .count();
-                                    let _ = positional_idx;
-                                    false
-                                }
-                        }
-                    };
-                    if is_match {
-                        return Some((pn.clone(), a.clone()));
-                    }
-                }
-                None
-            };
-            let _ = resolve;
-            // simpler: positional/named resolution mirroring check_action
-            let order = ["side", "size", "stop", "target"];
-            let mut named: Vec<(String, &Expr)> = Vec::new();
-            if args.iter().any(|(n, _)| n.is_some()) {
-                for (n, a) in args {
-                    if let Some(n) = n {
-                        named.push((n.clone(), a));
-                    }
-                }
-            } else {
-                for ((_, a), pname) in args.iter().zip(order) {
-                    named.push((pname.to_string(), a));
-                }
             }
-            for (k, a) in named {
-                let want_suffix = match k.as_str() {
-                    "size" => ".size",
-                    "stop" => ".stop",
-                    "target" => ".target",
-                    _ => continue,
-                };
-                let plan_name = match k.as_str() {
-                    "size" => size,
-                    "stop" => stop,
-                    "target" => target,
-                    _ => continue,
-                };
-                let Some(qn) = plan_name else { continue };
-                let _ = want_suffix;
-                let rexpr = crate::check::rewrite_pub(a, &ns, &sb.name).map_err(|e2| e2.to_string())?;
-                let mut nodes = Vec::new();
-                let root = build_arena(&rexpr, &mut nodes);
-                m.arenas.insert(qn.clone(), Arena { nodes, root });
-                m.stmt_exprs.insert(qn.clone(), (Some(root), None));
-            }
+            let rexpr = crate::check::rewrite_pub(hexpr, &ns, &sb.name)
+                .map_err(|e2| e2.to_string())?;
+            let mut nodes = Vec::new();
+            let root = build_arena(&rexpr, &mut nodes);
+            m.arenas.insert(qn.clone(), Arena { nodes, root });
+            m.stmt_exprs.insert(qn.clone(), (Some(root), None));
         }
     }
 
@@ -987,6 +949,17 @@ struct StrategyHandler {
     symbol: String,
     ons: Vec<OnPlan>,
     cols: StrategyCols,
+    /// one resting pending order (pyramiding off — one at a time)
+    pending: Option<PendingOrder>,
+}
+
+struct PendingOrder {
+    side: Side,
+    units: f64,
+    price: f64,
+    is_limit: bool, // true = limit (buy fills low ≤ price); false = trigger (high ≥ price)
+    stop: Option<f64>,
+    target: Option<f64>,
 }
 
 impl ot_core::engine::Handler for StrategyHandler {
@@ -1015,6 +988,10 @@ impl ot_core::engine::Handler for StrategyHandler {
                 (CondSpec::Column(qn), _) => self.cols.b(qn.as_str(), sig),
             };
             if fired {
+                // Flatten cancels pendings too (spec §7.1 semantics)
+                if matches!(on.action, OnAction::Flatten) {
+                    self.pending = None;
+                }
                 return open
                     .iter()
                     .map(|p| (p.sym.clone(), ot_core::engine::ExitReason::Signal))
@@ -1029,8 +1006,6 @@ impl ot_core::engine::Handler for StrategyHandler {
         view: &ot_core::engine::DecisionView,
         open: &[ot_core::engine::Position],
     ) -> Vec<ot_core::engine::Candidate> {
-        #[cfg(feature = "debug_strategy")]
-        eprintln!("cand@{} sig={} open={}", view.fill_t, view.sig_t, open.len());
         // pyramiding off (spec §7.1 default): single position
         if !open.is_empty() {
             return vec![];
@@ -1039,29 +1014,140 @@ impl ot_core::engine::Handler for StrategyHandler {
         let Some(close) = view.fill_close(&self.symbol) else {
             return vec![];
         };
+
+        // 0. Flatten while flat cancels a resting pending (the reachable
+        // cancellation path — pendings only exist when flat)
+        if self.pending.is_some() {
+            for on in &self.ons {
+                if !matches!(on.action, OnAction::Flatten) {
+                    continue;
+                }
+                if let CondSpec::Column(qn) = &on.cond {
+                    if self.cols.b(qn.as_str(), sig) {
+                        self.pending = None;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 1. pending order fill check (against THIS bar's high/low)
+        if let Some(p) = self.pending.take() {
+            if let Some(bar) = view.fill_bar(&self.symbol) {
+                let filled = if p.is_limit {
+                    bar.low <= p.price
+                } else {
+                    bar.high >= p.price
+                };
+                if filled {
+                    return vec![ot_core::engine::Candidate {
+                        sym: self.symbol.clone(),
+                        vol_reduce_applies: false,
+                        notional_override: Some(p.units * p.price),
+                        stop_loss: p.stop,
+                        take_profit: p.target,
+                        fill_price_override: Some(p.price),
+                        side: Some(p.side),
+                    }];
+                }
+                // not filled — keep resting
+                self.pending = Some(p);
+            } else {
+                self.pending = Some(p);
+            }
+        }
+
+        // 2. new entries (in declaration order)
         for on in &self.ons {
-            let OnAction::Entry { size, stop, target } = &on.action else {
+            let OnAction::Entry { size, stop, target, pending, side } = &on.action else {
+                continue;
+            };
+            let cond_fired = match &on.cond {
+                CondSpec::Column(qn) => self.cols.b(qn.as_str(), sig),
+                CondSpec::MaxHold(_) => false, // MaxHold is an exit-side form
+            };
+            if !cond_fired {
+                continue;
+            }
+            let Some(units) = size.as_ref().and_then(|q| self.cols.f(q.as_str(), sig)) else {
+                return vec![]; // size missing → no entry (not silently sized)
+            };
+            if units <= 0.0 {
+                return vec![];
+            }
+            let stop_px = stop.as_ref().and_then(|q| self.cols.f(q.as_str(), sig));
+            let target_px = target.as_ref().and_then(|q| self.cols.f(q.as_str(), sig));
+            match pending {
+                None => {
+                    // market entry at the current close
+                    return vec![ot_core::engine::Candidate {
+                        sym: self.symbol.clone(),
+                        vol_reduce_applies: false,
+                        notional_override: Some(units * close),
+                        stop_loss: stop_px,
+                        take_profit: target_px,
+                        fill_price_override: None,
+                        side: Some(*side),
+                    }];
+                }
+                Some(PendingSpec::Limit(qn)) => {
+                    let price = self.cols.f(qn.as_str(), sig).unwrap_or(0.0);
+                    if price <= 0.0 {
+                        return vec![];
+                    }
+                    self.pending = Some(PendingOrder {
+                        side: *side,
+                        units,
+                        price,
+                        is_limit: true,
+                        stop: stop_px,
+                        target: target_px,
+                    });
+                    return vec![]; // resting — fills on a later bar
+                }
+                Some(PendingSpec::Trigger(qn)) => {
+                    let price = self.cols.f(qn.as_str(), sig).unwrap_or(0.0);
+                    if price <= 0.0 {
+                        return vec![];
+                    }
+                    self.pending = Some(PendingOrder {
+                        side: *side,
+                        units,
+                        price,
+                        is_limit: false,
+                        stop: stop_px,
+                        target: target_px,
+                    });
+                    return vec![];
+                }
+            }
+        }
+        vec![]
+    }
+
+    fn modifications(
+        &mut self,
+        view: &ot_core::engine::DecisionView,
+        open: &[ot_core::engine::Position],
+    ) -> Vec<(String, Option<f64>, Option<f64>)> {
+        if open.is_empty() {
+            return vec![];
+        }
+        let sig = view.sig_t;
+        for on in &self.ons {
+            let OnAction::Modify { stop, target } = &on.action else {
                 continue;
             };
             let CondSpec::Column(qn) = &on.cond else { continue };
             if !self.cols.b(qn.as_str(), sig) {
                 continue;
             }
-            let Some(units) = size.as_ref().and_then(|q| self.cols.f(q, sig)) else {
-                return vec![]; // size missing → no entry (not silently sized)
-            };
-            if units <= 0.0 {
-                return vec![];
-            }
-            let stop_px = stop.as_ref().and_then(|q| self.cols.f(q, sig));
-            let target_px = target.as_ref().and_then(|q| self.cols.f(q, sig));
-            return vec![ot_core::engine::Candidate {
-                sym: self.symbol.clone(),
-                vol_reduce_applies: false,
-                notional_override: Some(units * close),
-                stop_loss: stop_px,
-                take_profit: target_px,
-            }];
+            let new_stop = stop.as_ref().and_then(|q| self.cols.f(q.as_str(), sig));
+            let new_target = target.as_ref().and_then(|q| self.cols.f(q.as_str(), sig));
+            return open
+                .iter()
+                .map(|p| (p.sym.clone(), new_stop, new_target))
+                .collect();
         }
         vec![]
     }
@@ -1104,6 +1190,7 @@ pub fn run_strategy(
         symbol: request.symbol.clone(),
         ons: strategy.ons.clone(),
         cols: StrategyCols { bools, floats },
+        pending: None,
     };
     // Runner clock: the strategy's own lookbacks govern (columns are
     // precomputed from bar 0) — the engine's rule-floor start gate must not

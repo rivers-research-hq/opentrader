@@ -270,6 +270,8 @@ impl Handler for RuleFloor {
                 notional_override: None,
                 stop_loss: None,
                 take_profit: None,
+                fill_price_override: None,
+                side: None,
             });
         }
         // V1: candidates.sort(key=lambda x: -x[1]) — Python's sort sends

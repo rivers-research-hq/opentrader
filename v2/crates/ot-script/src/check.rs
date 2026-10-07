@@ -6,6 +6,7 @@
 //!   * plot panes + inputs (the GUI/config schema, JSON-serializable)
 
 use crate::ast::*;
+use ot_core::engine::Side;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use crate::ast::Pane;
@@ -63,16 +64,32 @@ pub struct OnPlan {
 }
 
 #[derive(Debug, Clone)]
+pub enum PendingSpec {
+    /// resting limit order (buy fills when low ≤ price)
+    Limit(String),
+    /// resting stop-entry order (buy fills when high ≥ price)
+    Trigger(String),
+}
+
+#[derive(Debug, Clone)]
 pub enum OnAction {
-    /// market entry; explicit `size` (units) × fill close = notional;
-    /// optional absolute brackets ride the position (engine ladder).
+    /// market entry (pending: None) or a pending limit/trigger entry;
+    /// explicit `size` (units); optional absolute brackets ride the
+    /// position (engine ladder).
     Entry {
         size: Option<String>,
         stop: Option<String>,
         target: Option<String>,
+        pending: Option<PendingSpec>,
+        side: Side,
     },
     Exit,
     Flatten,
+    /// bracket updates (trailing stops ride this)
+    Modify {
+        stop: Option<String>,
+        target: Option<String>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -97,6 +114,9 @@ pub struct CompilePlan {
     pub eval_order: Vec<String>,
     /// strategy blocks (W2b: at most one per script)
     pub strategies: Vec<StrategyPlan>,
+    /// hidden action-value exprs keyed by column name (the evaluator
+    /// builds their arenas from these)
+    pub hidden_exprs: BTreeMap<String, Expr>,
 }
 
 #[derive(Debug, Clone)]
@@ -111,6 +131,10 @@ pub struct Ctx<'a> {
     pub bindings: BTreeMap<String, (BindingKind, Type, i64)>,
     pub plan: CompilePlan,
     pub in_progress: BTreeSet<String>,
+    /// hidden action-value exprs (size/stop/target/limit/trigger/modify)
+    /// keyed by their column name — the evaluator re-derives them from
+    /// source via this map carried on the plan
+    pub hidden_exprs: BTreeMap<String, Expr>,
 }
 
 pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
@@ -119,6 +143,7 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
         bindings: BTreeMap::new(),
         plan: CompilePlan::default(),
         in_progress: BTreeSet::new(),
+        hidden_exprs: BTreeMap::new(),
     };
     // the fundamentals family (spec §4.1) — host-supplied bar columns;
     // float, lookback 0 (per-bar reads), never shadowable by `def`.
@@ -440,12 +465,18 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
                         _ => {}
                     }
                 }
-                // size/stop/target value bindings (registered by check_action)
+                // hidden action-value bindings (size/stop/target/limit/
+                // trigger/modify) registered by check_action under this ns
+                // as `ns v<N>` — local suffix v<digits>
                 for (n, (kind, _, _)) in ctx.bindings.iter() {
-                    if n.starts_with(&ns) && *kind == BindingKind::Def
-                        && (n.contains(".size") || n.contains(".stop") || n.contains(".target"))
-                    {
-                        eval_order.push(n.clone());
+                    if n.starts_with(&ns) && *kind == BindingKind::Def {
+                        let local = &n[ns.len()..];
+                        if local.starts_with('v')
+                            && local.len() > 1
+                            && local[1..].chars().all(|ch| ch.is_ascii_digit())
+                        {
+                            eval_order.push(n.clone());
+                        }
                     }
                 }
             }
@@ -453,6 +484,7 @@ pub fn check(stmts: Vec<Stmt>) -> Result<CompilePlan, CheckError> {
         }
     }
     ctx.plan.eval_order = eval_order;
+    ctx.plan.hidden_exprs = ctx.hidden_exprs.clone();
     Ok(ctx.plan)
 }
 
@@ -468,7 +500,7 @@ fn check_action(
         StrategyAction::Flatten => OnAction::Flatten,
         StrategyAction::Entry { args } => {
             // resolve positional via Entry's declared order, then named
-            let order = ["side", "size", "stop", "target"];
+            let order = ["side", "size", "stop", "target", "limit", "trigger"];
             let mut named: Vec<(String, &Expr)> = Vec::new();
             let seen_named = args.iter().any(|(n, _)| n.is_some());
             let seen_positional = args.iter().any(|(n, _)| n.is_none());
@@ -491,76 +523,49 @@ fn check_action(
             let mut size = None;
             let mut stop = None;
             let mut target = None;
+            let mut pending = None;
+            let mut side = Side::Long;
             let mut side_seen = false;
             for (k, e) in named {
                 match k.as_str() {
                     "side" => {
-                        // W2b: LONG only; SHORT is a later slice (FX-first
-                        // long-only engine surface)
                         match e {
-                            Expr::Ident(s, _) if s == "LONG" => side_seen = true,
-                            Expr::Ident(s, _) if s == "SHORT" => {
-                                return cerr("Entry(side = SHORT) lands in a later W2 slice (long-only engine surface)");
+                            Expr::Ident(s, _) if s == "LONG" => {
+                                side = Side::Long;
+                                side_seen = true;
                             }
-                            _ => return cerr("Entry(side = LONG) — side must be the LONG constant in W2b"),
+                            Expr::Ident(s, _) if s == "SHORT" => {
+                                side = Side::Short;
+                                side_seen = true;
+                            }
+                            _ => return cerr("Entry(side = LONG | SHORT)"),
                         }
                     }
+                    "limit" => {
+                        let qn = hidden_value_binding(ctx, ns, "limit", e, "pending limit price must be float")?;
+                        pending = Some(PendingSpec::Limit(qn));
+                    }
+                    "trigger" => {
+                        let qn = hidden_value_binding(ctx, ns, "trigger", e, "pending trigger price must be float")?;
+                        pending = Some(PendingSpec::Trigger(qn));
+                    }
                     "size" => {
-                        let qn = format!("{ns}e{}.size", ctx.plan.bindings.len());
-                        let ty = type_of(ctx, e)?;
-                        if ty != Type::Float && ty != Type::Int {
-                            return cerr("Entry(size = <units>) must be numeric");
-                        }
-                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
-                        ctx.plan.bindings.push(BindingPlan {
-                            name: qn.clone(),
-                            kind: BindingKind::Def,
-                            ty: Type::Float,
-                            lookback: 0,
-                            warmup: 0,
-                            pane: None,
-                        });
+                        let qn = hidden_value_binding(ctx, ns, "size", e, "Entry(size = <units>) must be numeric")?;
                         size = Some((qn, e.clone()));
                     }
                     "stop" => {
-                        let qn = format!("{ns}e{}.stop", ctx.plan.bindings.len());
-                        let ty = type_of(ctx, e)?;
-                        if ty != Type::Float {
-                            return cerr("Entry(stop = <price>) must be float");
-                        }
-                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
-                        ctx.plan.bindings.push(BindingPlan {
-                            name: qn.clone(),
-                            kind: BindingKind::Def,
-                            ty: Type::Float,
-                            lookback: 0,
-                            warmup: 0,
-                            pane: None,
-                        });
+                        let qn = hidden_value_binding(ctx, ns, "stop", e, "Entry(stop = <price>) must be float")?;
                         stop = Some((qn, e.clone()));
                     }
                     "target" => {
-                        let qn = format!("{ns}e{}.target", ctx.plan.bindings.len());
-                        let ty = type_of(ctx, e)?;
-                        if ty != Type::Float {
-                            return cerr("Entry(target = <price>) must be float");
-                        }
-                        ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
-                        ctx.plan.bindings.push(BindingPlan {
-                            name: qn.clone(),
-                            kind: BindingKind::Def,
-                            ty: Type::Float,
-                            lookback: 0,
-                            warmup: 0,
-                            pane: None,
-                        });
+                        let qn = hidden_value_binding(ctx, ns, "target", e, "Entry(target = <price>) must be float")?;
                         target = Some((qn, e.clone()));
                     }
                     _ => unreachable!(),
                 }
             }
             if !side_seen {
-                return cerr("Entry requires `side = LONG` (W2b)");
+                return cerr("Entry requires `side = LONG | SHORT`");
             }
             // hidden value bindings need their exprs checked/lookbacked —
             // register their stmts so pass-2-style resolution works: we
@@ -575,9 +580,76 @@ fn check_action(
                 size: size.map(|(q, _)| q),
                 stop: stop.map(|(q, _)| q),
                 target: target.map(|(q, _)| q),
+                pending,
+                side,
             }
         }
+        StrategyAction::Modify { args } => {
+            let order = ["stop", "target"];
+            let mut named: Vec<(String, &Expr)> = Vec::new();
+            if args.iter().any(|(n, _)| n.is_some()) {
+                for (n, a) in args {
+                    if let Some(n) = n {
+                        if !order.contains(&n.as_str()) {
+                            return cerr(format!("Modify: unknown parameter `{n}` (expected one of {order:?})"));
+                        }
+                        named.push((n.clone(), a));
+                    }
+                }
+            } else {
+                for ((_, a), pname) in args.iter().zip(order) {
+                    named.push((pname.to_string(), a));
+                }
+            }
+            let mut mstop = None;
+            let mut mtarget = None;
+            for (k, e) in named {
+                let qn = hidden_value_binding(
+                    ctx,
+                    ns,
+                    &format!("mod_{k}"),
+                    e,
+                    "Modify values must be float",
+                )?;
+                match k.as_str() {
+                    "stop" => mstop = Some(qn),
+                    "target" => mtarget = Some(qn),
+                    _ => unreachable!(),
+                }
+            }
+            if mstop.is_none() && mtarget.is_none() {
+                return cerr("Modify requires `stop =` and/or `target =`");
+            }
+            OnAction::Modify { stop: mstop, target: mtarget }
+        }
     })
+}
+
+/// Hidden value binding for strategy action args (size/stop/target/…):
+/// type-checked float, column evaluated by the runner.
+fn hidden_value_binding(
+    ctx: &mut Ctx,
+    ns: &str,
+    _label: &str,
+    e: &Expr,
+    err: &str,
+) -> Result<String, CheckError> {
+    let qn = format!("{ns}v{}", ctx.plan.bindings.len());
+    let ty = type_of(ctx, e)?;
+    if ty != Type::Float {
+        return cerr(err.to_string());
+    }
+    ctx.bindings.insert(qn.clone(), (BindingKind::Def, Type::Float, 0));
+    ctx.plan.bindings.push(BindingPlan {
+        name: qn.clone(),
+        kind: BindingKind::Def,
+        ty: Type::Float,
+        lookback: 0,
+        warmup: 0,
+        pane: None,
+    });
+    ctx.hidden_exprs.insert(qn.clone(), e.clone());
+    Ok(qn)
 }
 
 /// Rewrite idents inside a strategy body to their namespaced bindings.

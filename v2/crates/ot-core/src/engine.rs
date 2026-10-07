@@ -58,15 +58,25 @@ pub struct BacktestResult {
 }
 
 /// Open position book entry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Side {
+    Long,
+    Short,
+}
+
 #[derive(Debug, Clone)]
 pub struct Position {
     pub sym: String,
+    pub side: Side,
+    /// units (always positive; `side` carries the direction)
     pub qty: f64,
     pub entry: f64,
     pub cost: f64,
     pub peak: f64,
     pub bars: i64,
     pub entry_ts: i64,
+    /// Entry-side fee — short PnL needs both legs exactly.
+    pub entry_fee: f64,
     /// Fallback equity mark when a bar is missing (V1 would KeyError; V2
     /// documents the robustness fix and marks at the last recorded close).
     pub last_close: f64,
@@ -117,6 +127,11 @@ pub struct Candidate {
     /// same-bar discipline. None → the cfg-percentage ladder applies.
     pub stop_loss: Option<f64>,
     pub take_profit: Option<f64>,
+    /// Pending-order fills fill AT the order price (limit/stop touch), not
+    /// the bar close. None → market entry at the current close.
+    pub fill_price_override: Option<f64>,
+    /// Entry direction (W2b slices defaulted Long).
+    pub side: Option<Side>,
 }
 
 /// One decision at bar `t` (view = bars ≤ t-1): handler-level exits
@@ -150,6 +165,11 @@ impl<'a> DecisionView<'a> {
             .get(self.universe.master[self.fill_t])
             .map(|b| b.close)
     }
+
+    /// The FILL bar itself (pending-order touch tests need high/low).
+    pub fn fill_bar(&self, sym: &str) -> Option<&crate::bar::Bar> {
+        self.universe.get(sym)?.get(self.universe.master[self.fill_t])
+    }
 }
 
 /// Strategy handler — the decision layer. Live and backtest use the same
@@ -172,6 +192,18 @@ pub trait Handler {
     /// post-exit holdings — so a symbol exited this bar (either way) is
     /// re-eligible in the same bar. Pre-gated, pre-sorted, score-descending.
     fn candidates(&mut self, _view: &DecisionView, _open: &[Position]) -> Vec<Candidate> {
+        Vec::new()
+    }
+
+    /// Phase 3 — position modifications (the strategy surface's `Modify`):
+    /// (sym, new_stop, new_target); None leaves the leg unchanged. Applied
+    /// after the exit loop — a stop set from bar t's decision view governs
+    /// bar t+1 (no-lookahead).
+    fn modifications(
+        &mut self,
+        _view: &DecisionView,
+        _open: &[Position],
+    ) -> Vec<(String, Option<f64>, Option<f64>)> {
         Vec::new()
     }
 }
@@ -270,29 +302,67 @@ pub fn evaluate_engine_exit(
     let entry = p.entry;
     // Strategy brackets (absolute prices) take precedence; same TP→SL
     // order as V1's percentage ladder (the locked same-bar discipline).
-    if let Some(tp) = p.take_profit {
-        if bar.high >= tp {
-            return Some((tp, ExitReason::Tp));
+    // Mirrored for shorts: a long's TP (high ≥ target) is a short's TP
+    // (low ≤ target); the ORDER (TP before SL) is side-invariant.
+    match p.side {
+        Side::Long => {
+            if let Some(tp) = p.take_profit {
+                if bar.high >= tp {
+                    return Some((tp, ExitReason::Tp));
+                }
+            }
+            if let Some(sl) = p.stop_loss {
+                if bar.low <= sl {
+                    return Some((sl, ExitReason::Sl));
+                }
+            }
+            if p.take_profit.is_none() && p.stop_loss.is_none() {
+                if bar.high >= entry * (1.0 + cfg.tp) {
+                    return Some((entry * (1.0 + cfg.tp), ExitReason::Tp));
+                }
+                if bar.low <= entry * (1.0 - cfg.sl) {
+                    return Some((entry * (1.0 - cfg.sl), ExitReason::Sl));
+                }
+            }
         }
-    }
-    if let Some(sl) = p.stop_loss {
-        if bar.low <= sl {
-            return Some((sl, ExitReason::Sl));
-        }
-    }
-    if p.take_profit.is_none() && p.stop_loss.is_none() {
-        if bar.high >= entry * (1.0 + cfg.tp) {
-            return Some((entry * (1.0 + cfg.tp), ExitReason::Tp));
-        }
-        if bar.low <= entry * (1.0 - cfg.sl) {
-            return Some((entry * (1.0 - cfg.sl), ExitReason::Sl));
+        Side::Short => {
+            if let Some(tp) = p.take_profit {
+                if bar.low <= tp {
+                    return Some((tp, ExitReason::Tp));
+                }
+            }
+            if let Some(sl) = p.stop_loss {
+                if bar.high >= sl {
+                    return Some((sl, ExitReason::Sl));
+                }
+            }
+            if p.take_profit.is_none() && p.stop_loss.is_none() {
+                if bar.low <= entry * (1.0 - cfg.tp) {
+                    return Some((entry * (1.0 - cfg.tp), ExitReason::Tp));
+                }
+                if bar.high >= entry * (1.0 + cfg.sl) {
+                    return Some((entry * (1.0 + cfg.sl), ExitReason::Sl));
+                }
+            }
         }
     }
     if cfg.trailing_pct > 0.0 {
-        p.peak = p.peak.max(bar.high);
-        let trail = p.peak * (1.0 - cfg.trailing_pct);
-        if bar.low <= trail {
-            return Some((trail, ExitReason::Trail));
+        match p.side {
+            Side::Long => {
+                p.peak = p.peak.max(bar.high);
+                let trail = p.peak * (1.0 - cfg.trailing_pct);
+                if bar.low <= trail {
+                    return Some((trail, ExitReason::Trail));
+                }
+            }
+            Side::Short => {
+                // mirror: trough of lows; trail above the trough
+                p.peak = p.peak.min(bar.low);
+                let trail = p.peak * (1.0 + cfg.trailing_pct);
+                if bar.high >= trail {
+                    return Some((trail, ExitReason::Trail));
+                }
+            }
         }
     }
     if p.bars >= cfg.max_hold {
@@ -363,10 +433,21 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if let Some((exit_price, reason)) = fired {
                 let p = &positions[i];
                 let fee = fee_amt(cfg, p.qty, exit_price);
-                let proceeds = p.qty * exit_price - fee;
+                let (cash_flow, pnl) = match p.side {
+                    Side::Long => {
+                        let proceeds = p.qty * exit_price - fee;
+                        (proceeds, proceeds - p.cost)
+                    }
+                    Side::Short => {
+                        // buy back: cash -= qty·exit + fee; the entry added
+                        // qty·entry − entry_fee — realized is exact both legs
+                        let buyback = p.qty * exit_price + fee;
+                        let pnl = p.qty * (p.entry - exit_price) - p.entry_fee - fee;
+                        (-buyback, pnl)
+                    }
+                };
                 fees_total += fee;
-                cash += proceeds;
-                let pnl = proceeds - p.cost;
+                cash += cash_flow;
                 trades.push(Trade {
                     sym: p.sym.clone(),
                     entry: p.entry,
@@ -387,11 +468,35 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             }
         }
 
-        // ── equity mark (V1: cash + Σ qty·close_t, after ALL exits) ────
+        // ── phase 3: handler modifications (stop/target updates; govern
+        // from the NEXT bar — no-lookahead)
+        {
+            let open_positions: Vec<Position> = positions.clone();
+            for (sym, new_stop, new_target) in handler.modifications(&view, &open_positions) {
+                if let Some(p) = positions.iter_mut().find(|p| p.sym == sym) {
+                    if let Some(s) = new_stop {
+                        p.stop_loss = Some(s);
+                    }
+                    if let Some(tg) = new_target {
+                        p.take_profit = Some(tg);
+                    }
+                }
+            }
+        }
+
+        // ── equity mark (after ALL exits): longs mark at qty·close (cash
+        // is net of cost); shorts mark at −qty·close (the entry proceeds
+        // are already in cash — the mark is the buyback liability)
         let equity_now = cash
             + positions
                 .iter()
-                .map(|p| p.qty * view.fill_close(&p.sym).unwrap_or(p.last_close))
+                .map(|p| {
+                    let mark = view.fill_close(&p.sym).unwrap_or(p.last_close);
+                    p.qty * match p.side {
+                        Side::Long => mark,
+                        Side::Short => -mark,
+                    }
+                })
                 .sum::<f64>();
 
         // ── phase 2: candidates from the same scores, post-exit holdings ─
@@ -407,6 +512,12 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                 continue;
             };
             if close <= 0.0 {
+                continue;
+            }
+            // pending-order fills (limit/stop touch) fill AT the order
+            // price, not the bar close
+            let entry_price = c.fill_price_override.unwrap_or(close);
+            if entry_price <= 0.0 {
                 continue;
             }
             let mut notional = c
@@ -430,31 +541,47 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if c.notional_override.is_none() {
                 let exposure = positions
                     .iter()
-                    .map(|p| p.qty * view.fill_close(&p.sym).unwrap_or(p.last_close))
+                    .map(|p| {
+                        let mark = view.fill_close(&p.sym).unwrap_or(p.last_close);
+                        p.qty * match p.side {
+                            Side::Long => mark,
+                            Side::Short => p.entry * 2.0 - mark, // notional-space symmetric
+                        }
+                    })
                     .sum::<f64>()
                     / equity_now.max(1.0);
                 if exposure + notional / equity_now.max(1.0) > cfg.max_exposure {
                     continue;
                 }
             }
-            let mut fee = fee_amt(cfg, notional / close.max(1e-9), close);
+            let mut fee = fee_amt(cfg, notional / entry_price.max(1e-9), entry_price);
             if notional + fee > cash {
                 notional = (cash - fee).max(0.0);
                 if notional < cfg.min_notional {
                     continue;
                 }
             }
-            let qty = notional / close;
-            fee = fee_amt(cfg, qty, close);
-            let cost = qty * close + fee;
-            cash -= cost;
+            let qty = notional / entry_price;
+            fee = fee_amt(cfg, qty, entry_price);
+            let (side, cost) = match c.side.unwrap_or(Side::Long) {
+                Side::Long => (Side::Long, qty * entry_price + fee),
+                Side::Short => (Side::Short, qty * entry_price + fee),
+            };
+            match side {
+                Side::Long => cash -= cost,
+                // short entry RECEIVES proceeds net of the entry fee; the
+                // buyback liability is marked in equity and settled at exit
+                Side::Short => cash += qty * entry_price - fee,
+            }
             fees_total += fee;
             positions.push(Position {
                 sym: c.sym,
+                side,
                 qty,
-                entry: close,
+                entry: entry_price,
                 cost,
-                peak: close,
+                entry_fee: fee,
+                peak: entry_price,
                 bars: 0,
                 entry_ts: idx,
                 last_close: close,

@@ -26,6 +26,7 @@ pub fn param_order(name: &str) -> &'static [&'static str] {
         "ATR" => &["length"],
         "TrueRange" => &[],
         "CrossesAbove" | "CrossesBelow" => &["a", "b"],
+        "TrailingPeak" | "TrailingTrough" => &["data", "percent"],
         "CompoundValue" => &["length", "visible", "historical"],
         "GetValue" => &["data", "offset"],
         "Abs" | "Log" | "Exp" | "Sqrt" => &["x"],
@@ -45,7 +46,7 @@ pub fn is_known_builtin(name: &str) -> bool {
         "Average" | "SMA" | "WMA" | "EMA" | "Wilders" | "Highest" | "Lowest" | "Sum"
             | "StDev" | "RSI" | "ATR" | "TrueRange" | "CrossesAbove" | "CrossesBelow"
             | "CompoundValue" | "GetValue" | "Abs" | "Log" | "Exp" | "Sqrt" | "Round"
-            | "Min" | "Max"
+            | "Min" | "Max" | "TrailingPeak" | "TrailingTrough"
     )
 }
 
@@ -147,6 +148,9 @@ pub fn declared_lookback(
             // lookback (spec §3).
             arg_val("max_offset").map(|v| v as i64).unwrap_or(0)
         }
+        // TrailingPeak/Trough: stateful from frame start — lookback 0;
+        // history-dependence surfaces via the strategy context
+        "TrailingPeak" | "TrailingTrough" => 0,
         // Math family — pointwise
         "Abs" | "Min" | "Max" | "Log" | "Exp" | "Sqrt" | "Round" => 0,
         other => {

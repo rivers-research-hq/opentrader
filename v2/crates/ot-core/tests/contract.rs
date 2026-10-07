@@ -137,12 +137,14 @@ fn exit_priority_tp_beats_sl_and_trail() {
     });
     let mut p = Position {
         sym: "X".into(),
+        side: ot_core::engine::Side::Long,
         qty: 1.0,
         entry: 100.0,
         cost: 100.35,
         peak: 100.0,
         bars: 10, // past max_hold too
         entry_ts: 0,
+        entry_fee: 0.35,
         last_close: 100.0,
         stop_loss: None,
         take_profit: None,
@@ -168,12 +170,14 @@ fn exit_priority_sl_beats_trail_and_maxhold() {
     });
     let mut p = Position {
         sym: "X".into(),
+        side: ot_core::engine::Side::Long,
         qty: 1.0,
         entry: 100.0,
         cost: 100.35,
         peak: 100.0,
         bars: 9, // past max_hold
         entry_ts: 0,
+        entry_fee: 0.35,
         last_close: 100.0,
         stop_loss: None,
         take_profit: None,
@@ -195,12 +199,14 @@ fn exit_priority_trail_beats_maxhold() {
     });
     let mut p = Position {
         sym: "X".into(),
+        side: ot_core::engine::Side::Long,
         qty: 1.0,
         entry: 100.0,
         cost: 100.35,
         peak: 110.0,
         bars: 9,
         entry_ts: 0,
+        entry_fee: 0.35,
         last_close: 100.0,
         stop_loss: None,
         take_profit: None,
@@ -224,12 +230,14 @@ fn maxhold_fires_at_close_when_no_price_exit() {
     });
     let mut p = Position {
         sym: "X".into(),
+        side: ot_core::engine::Side::Long,
         qty: 1.0,
         entry: 100.0,
         cost: 100.35,
         peak: 100.0,
         bars: 3,
         entry_ts: 0,
+        entry_fee: 0.35,
         last_close: 100.0,
         stop_loss: None,
         take_profit: None,
@@ -260,6 +268,8 @@ proptest! {
                         notional_override: None,
                         stop_loss: None,
                         take_profit: None,
+                        fill_price_override: None,
+                        side: None,
                     }];
                 }
                 Vec::new()

@@ -230,14 +230,19 @@ fn strategy_surface_has_no_venue_reach() {
 }
 
 #[test]
-fn short_side_is_an_explicit_error() {
-    let e = compile(
+fn short_side_is_supported_since_w2c() {
+    // W2b erroreded it; W2c delivered the side-aware engine — SHORT now
+    // compiles (the pnl symmetry is tested in strategy_w2c.rs)
+    let plan = compile(
         "strategy T {
             on close > 50 -> Entry(side = SHORT, size = 10);
         }",
     )
-    .unwrap_err();
-    assert!(e.contains("later W2 slice"), "{e}");
+    .expect("SHORT must compile");
+    assert!(matches!(
+        plan.strategies[0].ons[0].action,
+        ot_script::OnAction::Entry { side: ot_core::engine::Side::Short, .. }
+    ));
 }
 
 #[test]

@@ -210,6 +210,16 @@ impl<'a> P<'a> {
                         self.expect(K::Semicolon, "';'")?;
                         StrategyAction::Exit
                     }
+                    "Modify" => {
+                        let args = self.call_args()?;
+                        // semicolon consumed by the shared tail below
+                        items.push(StrategyItem::On {
+                            cond,
+                            action: StrategyAction::Modify { args },
+                        });
+                        self.expect(K::Semicolon, "';'")?;
+                        continue;
+                    }
                     "Flatten" => {
                         if self.eat(K::LParen) {
                             while !self.at(K::RParen) && !self.at(K::Eof) {
