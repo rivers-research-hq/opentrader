@@ -205,6 +205,7 @@ pub mod history {
 pub mod alpaca;
 pub mod oanda;
 pub mod attribution;
+pub mod lane_replay;
 pub mod transport;
 
 #[cfg(test)]
