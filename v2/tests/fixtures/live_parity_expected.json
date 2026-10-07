@@ -1,0 +1,20 @@
+{
+ "account_id": "101-001-40262644-001",
+ "desc": "venue-parity: V1's real resolver over the EXPORTED LIVE OANDA practice journal (read-only export, human-authorized). 6896 transactions. Exported balance 99533.0644 USD.",
+ "expect_order_tag_count": 1705,
+ "expect_realized_all": {
+  "c08-fade": 0.0,
+  "crash": -22.906100000000006,
+  "fxexp-g137": -41.23109999999997,
+  "fxexp-g138": -171.22840000000005,
+  "fxexp-g151": -65.91500000000002,
+  "fxexp-hpo_c_3070": 10.625300000000014,
+  "h1-mom": -59.05249999999999,
+  "h1-rev": -21.4861,
+  "h4-brk": 3.7003,
+  "legacy-smoke": -0.065,
+  "unattributed": -0.6813
+ },
+ "expect_tags_count": 1144,
+ "n_transactions": 6896
+}

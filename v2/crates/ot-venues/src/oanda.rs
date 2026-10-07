@@ -149,6 +149,35 @@ impl Keys {
             host: "https://api-fxpractice.oanda.com".into(),
         }
     }
+
+    /// Load the V1 gitignored practice credentials (the live-key wiring,
+    /// W1 tails): {token, account_id, host}. The file is read once; the
+    /// token is never printed, logged, or committed (the secrets law).
+    pub fn from_v1_config(path: &std::path::Path) -> Result<Self, String> {
+        let text = std::fs::read_to_string(path)
+            .map_err(|e| format!("oanda keys unreadable at {}: {e}", path.display()))?;
+        let v: Value = serde_json::from_str(&text)
+            .map_err(|e| format!("oanda keys corrupt: {e}"))?;
+        let token = v
+            .get("token")
+            .and_then(|t| t.as_str())
+            .filter(|t| !t.is_empty())
+            .ok_or_else(|| "oanda keys: missing/empty token".to_string())?;
+        let account_id = v
+            .get("account_id")
+            .and_then(|t| t.as_str())
+            .filter(|t| !t.is_empty())
+            .ok_or_else(|| "oanda keys: missing/empty account_id".to_string())?;
+        let host = v
+            .get("host")
+            .and_then(|t| t.as_str())
+            .unwrap_or("https://api-fxpractice.oanda.com");
+        Ok(Keys {
+            token: token.to_string(),
+            account_id: account_id.to_string(),
+            host: host.to_string(),
+        })
+    }
 }
 
 pub struct OandaAdapter<'a> {
@@ -177,7 +206,8 @@ impl<'a> OandaAdapter<'a> {
 
     /// One v20 REST call. HTTP errors → the V1 `_error`/`_status` shape;
     /// transport failures → `{}` (both are "venue said no").
-    fn request(&self, method: &str, path: &str, body: Option<Value>) -> Value {
+    /// Public for the read-only export bin (W1 tails) — GETs only there.
+    pub fn request(&self, method: &str, path: &str, body: Option<Value>) -> Value {
         let url = format!("{}{}", self.keys.host, path);
         let mut headers = vec![
             ("Authorization".to_string(), format!("Bearer {}", self.keys.token)),
@@ -626,6 +656,79 @@ impl<'a> OandaAdapter<'a> {
             }
             None => Ok((self.mirror_cash, self.mirror_cash, self.mirror_positions.clone())),
         }
+    }
+
+    /// Walk a transactions endpoint to completion — verbatim port of V1
+    /// `fx_runner._walk_transactions`. TWO shapes (the #251/#252 lesson: a
+    /// single sinceid call caps at 1000 txns and hides the rest of the
+    /// journal — the trained lanes' closes were invisible and their
+    /// realized rendered as a silent 0.0):
+    ///   * sinceid endpoint: caps at 1000 txns/call with NO `pages` field —
+    ///     advance the `id=` cursor until the batch is short;
+    ///   * date-based endpoint: paginates via a `pages` list.
+    pub fn walk_transactions(&self, path: &str) -> Vec<Value> {
+        let mut txs: Vec<Value> = Vec::new();
+        let mut push_batch = |d: &Value| {
+            if let Some(arr) = d.get("transactions").and_then(|v| v.as_array()) {
+                txs.extend(arr.iter().cloned());
+            }
+        };
+        let first = self.request("GET", path, None);
+        push_batch(&first);
+        for page in first
+            .get("pages")
+            .and_then(|v| v.as_array())
+            .into_iter()
+            .flatten()
+        {
+            if let Some(p) = page.as_str() {
+                let sub = format!("/v3/{}", p.split("/v3/").nth(1).unwrap_or(p));
+                push_batch(&self.request("GET", &sub, None));
+            }
+        }
+        if path.contains("sinceid") {
+            let base = path.split('?').next().unwrap_or(path).to_string();
+            let mut batch = first
+                .get("transactions")
+                .and_then(|v| v.as_array())
+                .cloned()
+                .unwrap_or_default();
+            let mut guard = 0;
+            while batch.len() == 1000 {
+                guard += 1;
+                if guard > 10_000 {
+                    break; // pagination runaway — refuse rather than loop forever
+                }
+                // OANDA ids arrive as STRINGS (V1's int() parsed them) — and
+            // can exceed i64 headroom; parse through i128
+                    let last = batch
+                    .iter()
+                    .filter_map(|t| {
+                        t.get("id").and_then(|v| {
+                            v.as_i64()
+                                .map(i128::from)
+                                .or_else(|| v.as_str().and_then(|s| s.parse().ok()))
+                        })
+                    })
+                    .max()
+                    .unwrap_or(0);
+                    if last <= 0 {
+                        break; // unparseable cursor — refuse to spin
+                    }
+                eprintln!("journal walk: cursor {last}, +{} so far", txs.len());
+                batch = self
+                    .request("GET", &format!("{base}?id={last}"), None)
+                    .get("transactions")
+                    .and_then(|v| v.as_array())
+                    .cloned()
+                    .unwrap_or_default();
+                txs.extend(batch.iter().cloned());
+                if batch.is_empty() {
+                    break;
+                }
+            }
+        }
+        txs
     }
 
     /// Open trades with their owner tags (no-overlap arbitration input).
