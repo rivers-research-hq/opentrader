@@ -21,6 +21,7 @@ pub mod engine;
 pub mod features;
 pub mod rulefloor;
 pub mod universe;
+pub mod whatif;
 
 pub use bar::{Bar, Series};
 pub use config::{clamp_config, Config, DEFAULT_CONFIG, FEE_PER_SIDE, START_EQUITY};
