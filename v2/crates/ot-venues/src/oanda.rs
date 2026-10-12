@@ -27,6 +27,7 @@
 //!      a silent default (a silent H1 default faked daily data).
 
 pub mod stream;
+pub mod book;
 
 use crate::transport::Transport;
 use serde_json::{json, Value};
