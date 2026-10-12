@@ -2,11 +2,21 @@
 //! Layout: chart panel (candles + study overlay + volume), watchlist
 //! sidebar, account/positions strip with market-order buttons.
 
-use crate::model::{BarsStore, PaperBroker, PaperSide, SimFeed, StudyOverlay};
+use crate::model::{BarsStore, PaperBroker, PaperSide, ScanTab, SimFeed, StudyOverlay};
 use eframe::egui;
 use egui_plot::{BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
 
+/// Terminal tabs (W4a, ticket #388): Chart is the alpha panel; Scan rides
+/// ot-script::scan (the W2f engine — no second scanner path).
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub enum Tab {
+    Chart,
+    Scan,
+}
+
 pub struct TerminalApp {
+    pub tab: Tab,
+    pub scan_tab: ScanTab,
     pub store: BarsStore,
     pub feeds: Vec<SimFeed>,
     pub broker: PaperBroker,
@@ -36,9 +46,15 @@ impl TerminalApp {
         }
         let broker = PaperBroker::new(100_000.0, 0.35);
         let selected = 0;
+        let tab = Tab::Chart;
+        let mut scan_tab = ScanTab::new();
+        scan_tab.source = "def up = close > close[1];".to_string();
+        scan_tab.filter = "up".to_string();
         let study_source = "def fast = Average(close, 9);\ndef slow = Average(close, 20);\nplot sig = fast - slow;".to_string();
         let study = StudyOverlay::compile(&study_source).ok();
         TerminalApp {
+            tab,
+            scan_tab,
             store,
             feeds,
             broker,
@@ -81,6 +97,10 @@ impl eframe::App for TerminalApp {
         egui::TopBottomPanel::top("top").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("Opentrader V2 — terminal alpha");
+                ui.separator();
+                ui.separator();
+                ui.selectable_value(&mut self.tab, Tab::Chart, "Chart");
+                ui.selectable_value(&mut self.tab, Tab::Scan, "Scan");
                 ui.separator();
                 ui.label(egui::RichText::new("SIM FEED").color(egui::Color32::ORANGE));
                 ui.toggle_value(&mut self.sim_running, "▶ / ⏸");
@@ -168,6 +188,89 @@ impl eframe::App for TerminalApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            match self.tab {
+                Tab::Chart => self.ui_chart(ui),
+                Tab::Scan => self.ui_scan(ui),
+            }
+        });
+
+        // keep ticking while running (alpha cadence: ~2 fps)
+        if self.sim_running {
+            ctx.request_repaint_after(std::time::Duration::from_millis(500));
+        }
+    }
+
+}
+
+impl TerminalApp {
+    /// The scan tab (W4a): editor + ranked results, riding ot-script::scan.
+    fn ui_scan(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.heading("Scanner (v2script)");
+            ui.separator();
+            if ui.button("run scan").clicked() {
+                let symbols: Vec<&str> = SYMBOLS.to_vec();
+                self.scan_tab.run(&self.store, &symbols);
+            }
+        });
+        ui.add(
+            egui::TextEdit::multiline(&mut self.scan_tab.source)
+                .code_editor()
+                .desired_rows(6)
+                .desired_width(f32::INFINITY),
+        );
+        ui.horizontal(|ui| {
+            ui.label("filter binding:");
+            ui.add(
+                egui::TextEdit::singleline(&mut self.scan_tab.filter)
+                    .hint_text("bool binding name")
+                    .desired_width(120.0),
+            );
+            ui.label("sort binding:");
+            ui.add(
+                egui::TextEdit::singleline(&mut self.scan_tab.sort)
+                    .hint_text("float binding (blank = symbol order)")
+                    .desired_width(160.0),
+            );
+            ui.label("limit:");
+            ui.add(
+                egui::DragValue::new(&mut self.scan_tab.limit)
+                    .range(1..=1000)
+                    .speed(1),
+            );
+        });
+        if let Some(err) = &self.scan_tab.error {
+            ui.colored_label(egui::Color32::RED, err);
+        }
+        if let Some(result) = &self.scan_tab.result {
+            ui.separator();
+            egui::Grid::new("scan_results")
+                .striped(true)
+                .show(ui, |ui| {
+                    ui.strong("Symbol");
+                    ui.strong("Filter");
+                    ui.strong("Sort");
+                    ui.strong("Last close");
+                    ui.end_row();
+                    for hit in &result.hits {
+                        ui.label(&hit.symbol);
+                        ui.label(format!("{}", hit.filter));
+                        ui.label(format!("{:.4}", hit.sort));
+                        ui.label(format!("{:.5}", hit.last_close));
+                        ui.end_row();
+                    }
+                });
+            ui.label(format!(
+                "scanned {} · ranked pool {} · skipped warmup {}",
+                result.scanned, result.ranked_pool, result.skipped_warmup
+            ));
+            for (sym, err) in &result.errors {
+                ui.colored_label(egui::Color32::RED, format!("{sym}: {err}"));
+            }
+        }
+    }
+
+    fn ui_chart(&mut self, ui: &mut egui::Ui) {
             let sym = self.selected_symbol();
             let Some(frame) = self.store.frame(sym).map(|f| f.to_vec()) else {
                 return;
@@ -237,11 +340,6 @@ impl eframe::App for TerminalApp {
                             .color(egui::Color32::from_rgb(80, 120, 200)),
                     );
                 });
-        });
 
-        // keep ticking while running (alpha cadence: ~2 fps)
-        if self.sim_running {
-            ctx.request_repaint_after(std::time::Duration::from_millis(500));
-        }
     }
 }

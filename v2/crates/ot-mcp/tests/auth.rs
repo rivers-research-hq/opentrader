@@ -99,6 +99,7 @@ fn corrupt_ledger_fails_loudly() {
 
 #[test]
 fn unauthenticated_initialize_is_refused() {
+    let _guard = env_lock();
     let path = temp_ledger("auth1");
     let _key = make_customer(&path, "acme", "alpha", None);
     std::env::remove_var("OT_MCP_API_KEY");
@@ -111,6 +112,7 @@ fn unauthenticated_initialize_is_refused() {
 
 #[test]
 fn invalid_key_is_refused() {
+    let _guard = env_lock();
     let path = temp_ledger("auth2");
     let _key = make_customer(&path, "acme", "alpha", None);
     std::env::remove_var("OT_MCP_API_KEY");
@@ -123,6 +125,7 @@ fn invalid_key_is_refused() {
 
 #[test]
 fn valid_key_authenticates_and_identity_surfaces() {
+    let _guard = env_lock();
     let path = temp_ledger("auth3");
     let key = make_customer(&path, "acme", "alpha", None);
     std::env::remove_var("OT_MCP_API_KEY");
@@ -143,6 +146,7 @@ fn valid_key_authenticates_and_identity_surfaces() {
 
 #[test]
 fn tools_call_before_auth_is_refused() {
+    let _guard = env_lock();
     let path = temp_ledger("auth4");
     let _key = make_customer(&path, "acme", "alpha", None);
     std::env::remove_var("OT_MCP_API_KEY");

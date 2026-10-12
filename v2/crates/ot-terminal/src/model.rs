@@ -260,3 +260,89 @@ impl StudyOverlay {
             .unwrap_or_default())
     }
 }
+
+// ── Scan tab (W4a, ticket #388): UI state riding ot-script::scan ──
+use ot_script::{ScanConfig, ScanRequest, ScanResult};
+
+#[derive(Debug, Clone)]
+pub struct ScanTab {
+    pub source: String,
+    pub filter: String,
+    pub sort: String,
+    pub limit: usize,
+    pub result: Option<ScanResult>,
+    pub error: Option<String>,
+}
+
+impl ScanTab {
+    pub fn new() -> Self {
+        Self {
+            source: String::new(),
+            filter: String::new(),
+            sort: String::new(),
+            limit: 50,
+            result: None,
+            error: None,
+        }
+    }
+
+    pub fn run(&mut self, store: &BarsStore, symbols: &[&str]) {
+        self.error = None;
+        self.result = None;
+
+        if self.source.is_empty() {
+            self.error = Some("Source code is empty".into());
+            return;
+        }
+
+        let plan = match ot_script::compile(&self.source) {
+            Ok(p) => p,
+            Err(e) => {
+                self.error = Some(format!("Compile error: {}", e));
+                return;
+            }
+        };
+
+        let universe: Vec<(String, Vec<ot_core::bar::Bar>)> = symbols
+            .iter()
+            .filter_map(|sym| {
+                store
+                    .frame(sym)
+                    .map(|bars| (sym.to_string(), bars.to_vec()))
+            })
+            .collect();
+
+        if universe.is_empty() {
+            self.error = Some("No bars available for the given symbols".into());
+            return;
+        }
+
+        let sort_val = if self.sort.is_empty() {
+            None
+        } else {
+            Some(self.sort.clone())
+        };
+
+        let req = ScanRequest {
+            source: self.source.clone(),
+            filter: self.filter.clone(),
+            sort: sort_val,
+            timeframe: "1d".into(),
+            limit: self.limit,
+        };
+
+        let cfg = ScanConfig {
+            max_symbols: symbols.len() + 1,
+            ..Default::default()
+        };
+
+        match ot_script::run_scan(&req, &plan, &universe, &cfg) {
+            Ok(res) => {
+                self.result = Some(res);
+            }
+            Err(e) => {
+                self.error = Some(format!("Run error: {}", e));
+            }
+        }
+    }
+}
