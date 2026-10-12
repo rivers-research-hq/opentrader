@@ -2,6 +2,7 @@
 //! Layout: chart panel (candles + study overlay + volume), watchlist
 //! sidebar, account/positions strip with market-order buttons.
 
+use crate::ladder::LadderState;
 use crate::model::{BarsStore, PaperBroker, PaperSide, ScanTab, SimFeed, StudyOverlay};
 use eframe::egui;
 use egui_plot::{BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
@@ -13,6 +14,7 @@ pub enum Tab {
 	Chart,
 	Scan,
 	Analyze,
+	Ladder,
 }
 
 struct AnalyzeOut {
@@ -66,6 +68,7 @@ pub struct TerminalApp {
     pub study_error: Option<String>,
     pub qty_input: f64,
     pub sim_running: bool,	pub analyze: AnalyzeState,
+	pub ladder: LadderState,
 }
 
 pub const SYMBOLS: [&str; 6] = ["EUR_USD", "GBP_USD", "USD_JPY", "AUD_USD", "USD_CAD", "SIM_SPX"];
@@ -105,6 +108,7 @@ impl TerminalApp {
             qty_input: 10.0,
             sim_running: true,
 			analyze: AnalyzeState::new(),
+			ladder: LadderState::new("EUR_USD"),
         }
     }
 
@@ -143,6 +147,7 @@ impl eframe::App for TerminalApp {
                 ui.selectable_value(&mut self.tab, Tab::Chart, "Chart");
                 ui.selectable_value(&mut self.tab, Tab::Scan, "Scan");
 				ui.selectable_value(&mut self.tab, Tab::Analyze, "Analyze");
+				ui.selectable_value(&mut self.tab, Tab::Ladder, "Ladder");
                 ui.separator();
                 ui.label(egui::RichText::new("SIM FEED").color(egui::Color32::ORANGE));
                 ui.toggle_value(&mut self.sim_running, "▶ / ⏸");
@@ -234,6 +239,7 @@ impl eframe::App for TerminalApp {
                 Tab::Chart => self.ui_chart(ui),
                 Tab::Scan => self.ui_scan(ui),
 				Tab::Analyze => self.ui_analyze(ui),
+				Tab::Ladder => self.ui_ladder(ui),
             }
         });
 
@@ -675,6 +681,192 @@ impl TerminalApp {
                         ui.end_row();
                     }
                 });
+        }
+    }
+
+/// Refreshes the ladder state from the current simulation data.
+    ///
+    /// In Phase 2, we do not have a live venue client. This method simulates
+    /// the "no data" state honestly by setting an error if no snapshot is
+    /// pre-loaded (which it won't be in this phase without manual injection).
+    ///
+    /// NOTE: In a full integration, this would poll `self.feeds` or `self.broker`.
+    pub fn ladder_refresh(&mut self) {
+        // Since we have no live venue client in Phase 2, we cannot fetch real data.
+        // We explicitly set an error to indicate this limitation, rather than
+        // fabricating fake data which would violate L1 (Parity).
+        //
+        // If you wish to test the UI, you can manually inject a snapshot into
+        // `self.ladder.snapshot` before calling this, but the default behavior
+        // is to report "no book loaded".
+        
+        if self.ladder.snapshot.is_none() {
+            self.ladder.set_error("no book loaded (venue polling is human-locked on #389)".into());
+        } else {
+            // If a snapshot was manually injected, we can re-process it.
+            // In a real app, we'd fetch new data. Here, we just keep the last one.
+            if let Some(snap) = self.ladder.snapshot.clone() {
+                self.ladder.set_snapshot(snap);
+            }
+        }
+    }
+
+    /// Renders the FX ladder using a custom painter.
+    ///
+    /// Draws a header row and one painted row per price level.
+    /// The painter contains NO reordering or arithmetic beyond proportional width.
+    pub fn ui_ladder(&mut self, ui: &mut egui::Ui) {
+        // Use a scrolling area for the ladder
+        ui.horizontal(|ui| {
+            ui.heading("Ladder");
+            if ui.small_button("Refresh").clicked() {
+                self.ladder_refresh();
+            }
+        });
+        
+        ui.separator();
+
+        let painter = ui.painter();
+        let available = ui.available_size();
+        let row_height = 20.0;
+        let header_height = 30.0;
+        
+        // Check if we have a model
+        let model = match &self.ladder.model {
+            Some(m) => m,
+            None => {
+                ui.label("No ladder data. Refresh or load a book.");
+                return;
+            }
+        };
+
+        // Header Row
+        let header_rect = ui.max_rect();
+        let header_y = header_rect.min.y;
+        let header_h = header_height;
+        
+        // Header Background
+        painter.rect_filled(
+            egui::Rect::from_min_size(egui::pos2(header_rect.min.x, header_y), egui::vec2(available.x, header_h)),
+            egui::CornerRadius::ZERO,
+            egui::Color32::from_rgb(40, 40, 40),
+        );
+        
+        // Header Text
+        let font_id = egui::FontId::monospace(12.0);
+        let mut x = header_rect.min.x + 10.0;
+        
+        // Instrument
+        painter.text(
+            egui::pos2(x, header_y + 5.0),
+            egui::Align2::LEFT_TOP,
+            &model.instrument,
+            font_id.clone(),
+            egui::Color32::WHITE,
+        );
+        x += 100.0;
+        
+        // Time
+        painter.text(
+            egui::pos2(x, header_y + 5.0),
+            egui::Align2::LEFT_TOP,
+            &model.time,
+            font_id.clone(),
+            egui::Color32::GRAY,
+        );
+        x += 150.0;
+        
+        // Tick
+        let tick_str = match model.tick {
+            Some(t) => format!("Tick: {:.4}", t),
+            None => "Tick: N/A".to_string(),
+        };
+        painter.text(
+            egui::pos2(x, header_y + 5.0),
+            egui::Align2::LEFT_TOP,
+            &tick_str,
+            font_id.clone(),
+            egui::Color32::GRAY,
+        );
+        x += 80.0;
+        
+        // Truncated
+        if model.truncated > 0 {
+            let trunc_str = format!("Trunc: {}", model.truncated);
+            painter.text(
+                egui::pos2(x, header_y + 5.0),
+                egui::Align2::LEFT_TOP,
+                &trunc_str,
+                font_id.clone(),
+                egui::Color32::YELLOW,
+            );
+            x += 80.0;
+        }
+        
+        // Error
+        if let Some(ref err) = self.ladder.error {
+            let err_str = format!("Error: {}", err);
+            painter.text(
+                egui::pos2(x, header_y + 5.0),
+                egui::Align2::LEFT_TOP,
+                &err_str,
+                font_id.clone(),
+                egui::Color32::RED,
+            );
+        }
+
+        // Data Rows
+        let start_y = header_y + header_h;
+        let max_volume = model.rows.iter().map(|r| r.volume).fold(0.0f64, f64::max).max(1.0); // Guard against div by zero
+        
+        for (i, row) in model.rows.iter().enumerate() {
+            let y = start_y + (i as f32 * row_height);
+            let row_rect = egui::Rect::from_min_size(
+                egui::pos2(header_rect.min.x, y),
+                egui::vec2(available.x, row_height),
+            );
+            
+            // Background for alternating rows
+            let bg_color = if i % 2 == 0 {
+                egui::Color32::from_rgb(30, 30, 30)
+            } else {
+                egui::Color32::from_rgb(25, 25, 25)
+            };
+            painter.rect_filled(row_rect, egui::CornerRadius::ZERO, bg_color);
+            
+            // Price Text (Left Aligned)
+            let price_str = format!("{:.4}", row.price);
+            painter.text(
+                egui::pos2(row_rect.min.x + 10.0, y + 2.0),
+                egui::Align2::LEFT_TOP,
+                &price_str,
+                font_id.clone(),
+                egui::Color32::WHITE,
+            );
+            
+            // Volume Bar (Depth)
+            // egui geometry is f32; venue volumes are f64. Convert once, here only.
+            let bar_width = ((row.volume / max_volume) as f32) * (available.x - 150.0).max(0.0);
+            let bar_rect = egui::Rect::from_min_size(
+                egui::pos2(row_rect.min.x + 10.0, y + 2.0),
+                egui::vec2(bar_width, row_height - 4.0),
+            );
+            
+            // Color based on volume intensity (simple gradient)
+            let intensity = (row.volume / max_volume) as u8;
+            let bar_color = egui::Color32::from_rgb(0, intensity, intensity / 2);
+            
+            painter.rect_filled(bar_rect, egui::CornerRadius::ZERO, bar_color);
+            
+            // Volume Text (Right Aligned)
+            let vol_str = format!("{:.0}", row.volume);
+            painter.text(
+                egui::pos2(row_rect.max.x - 10.0, y + 2.0),
+                egui::Align2::RIGHT_TOP,
+                &vol_str,
+                font_id.clone(),
+                egui::Color32::GRAY,
+            );
         }
     }
 }
