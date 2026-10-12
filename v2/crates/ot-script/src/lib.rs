@@ -22,6 +22,7 @@ pub mod ast;
 pub mod builtins;
 pub mod check;
 pub mod eval;
+pub mod jit;
 pub mod lexer;
 pub mod parser;
 pub mod scan;
