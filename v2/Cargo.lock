@@ -1713,6 +1713,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ot-updater"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "ot-v1-parity"
 version = "0.1.0"
 dependencies = [

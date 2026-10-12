@@ -1,0 +1,53 @@
+# W4e (ticket #392) — Linux release pipeline for Opentrader V2.
+# Builds the terminal binary, generates the versioned manifest (sha256+size),
+# signs artifacts when a signing key secret is present (key custody = human
+# decision per the ticket — the pipeline works unsigned in CI and takes the
+# signature automatically once OT_SIGNING_KEY is provisioned).
+name: release
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: build (release)
+        run: cargo build --release -p ot-terminal
+      - name: stage artifacts
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p stage
+          cp target/release/ot-terminal "stage/ot-terminal-${version}-linux-x86_64"
+          cp target/release/ot-terminal "stage/ot-terminal"
+      - name: generate manifest
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python3 v2/tools/release/make_manifest.py \
+            "stage/ot-terminal-${version}-linux-x86_64" \
+            --version "$version" --channel stable \
+            --min-version "${MIN_VERSION:-0.1.0}" \
+            --out "stage/manifest-${version}.json"
+      - name: sign (only when the signing key secret is provisioned)
+        env:
+          OT_SIGNING_KEY: ${{ secrets.OT_SIGNING_KEY }}
+        run: |
+          if [ -n "$OT_SIGNING_KEY" ]; then
+            echo "$OT_SIGNING_KEY" > /tmp/signing.pem
+            openssl dgst -sha256 -sign /tmp/signing.pem \
+              -out "stage/manifest-signature.sig" "stage/manifest-${version:-}.json" 2>/dev/null \
+              || openssl dgst -sha256 -sign /tmp/signing.pem \
+                   -out "stage/manifest-signature.sig" stage/manifest-*.json
+            rm /tmp/signing.pem
+          else
+            echo "OT_SIGNING_KEY not set — publishing UNSIGNED (dev posture; human lock on key custody is open)"
+          fi
+      - name: publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            stage/ot-terminal-*
+            stage/manifest-*.json
+            stage/manifest-signature.sig
