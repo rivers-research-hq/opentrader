@@ -10,9 +10,49 @@ use egui_plot::{BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
 /// ot-script::scan (the W2f engine — no second scanner path).
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Tab {
-    Chart,
-    Scan,
+	Chart,
+	Scan,
+	Analyze,
 }
+
+struct AnalyzeOut {
+    legs: Vec<ot_core::whatif::WhatifLeg>,
+    curve: Vec<f64>,
+    swept_sym: String,
+    lo: f64,
+    hi: f64,
+}
+
+struct AnalyzeState {
+    positions: Vec<ot_core::whatif::WhatifPosition>,
+    sweep_pct: f64,
+    steps: usize,
+    result: Option<AnalyzeOut>,
+    error: Option<String>,
+    add_sym: String,
+    add_side: PaperSide,
+    add_qty: f64,
+    add_entry: Option<f64>,
+    sweep_sym: String,
+}
+
+impl AnalyzeState {
+    fn new() -> Self {
+        Self {
+            positions: Vec::new(),
+            sweep_pct: 10.0,
+            steps: 21,
+            result: None,
+            error: None,
+            add_sym: SYMBOLS[0].to_string(),
+            add_side: PaperSide::Long,
+            add_qty: 10.0,
+            add_entry: None,
+            sweep_sym: SYMBOLS[0].to_string(),
+        }
+    }
+}
+
 
 pub struct TerminalApp {
     pub tab: Tab,
@@ -25,7 +65,7 @@ pub struct TerminalApp {
     pub study_source: String,
     pub study_error: Option<String>,
     pub qty_input: f64,
-    pub sim_running: bool,
+    pub sim_running: bool,	pub analyze: AnalyzeState,
 }
 
 pub const SYMBOLS: [&str; 6] = ["EUR_USD", "GBP_USD", "USD_JPY", "AUD_USD", "USD_CAD", "SIM_SPX"];
@@ -64,6 +104,7 @@ impl TerminalApp {
             study_error: None,
             qty_input: 10.0,
             sim_running: true,
+			analyze: AnalyzeState::new(),
         }
     }
 
@@ -101,6 +142,7 @@ impl eframe::App for TerminalApp {
                 ui.separator();
                 ui.selectable_value(&mut self.tab, Tab::Chart, "Chart");
                 ui.selectable_value(&mut self.tab, Tab::Scan, "Scan");
+				ui.selectable_value(&mut self.tab, Tab::Analyze, "Analyze");
                 ui.separator();
                 ui.label(egui::RichText::new("SIM FEED").color(egui::Color32::ORANGE));
                 ui.toggle_value(&mut self.sim_running, "▶ / ⏸");
@@ -191,6 +233,7 @@ impl eframe::App for TerminalApp {
             match self.tab {
                 Tab::Chart => self.ui_chart(ui),
                 Tab::Scan => self.ui_scan(ui),
+				Tab::Analyze => self.ui_analyze(ui),
             }
         });
 
@@ -341,5 +384,297 @@ impl TerminalApp {
                     );
                 });
 
+    }
+}
+
+impl TerminalApp {
+    pub fn run_analyze(&mut self) -> () {
+        let mut all_positions: Vec<ot_core::whatif::WhatifPosition> = self
+            .broker
+            .positions()
+            .iter()
+            .map(|p| {
+                let side = match p.side {
+                    PaperSide::Long => ot_core::engine::Side::Long,
+                    PaperSide::Short => ot_core::engine::Side::Short,
+                };
+                ot_core::whatif::WhatifPosition {
+                    sym: p.symbol.clone(),
+                    side,
+                    qty: p.qty,
+                    entry: p.entry,
+                    entry_fee: self.broker.fee_per_side,
+                }
+            })
+            .chain(self.analyze.positions.clone())
+            .collect();
+
+        if all_positions.is_empty() {
+            self.analyze.error = Some("add a position or place a paper trade first".into());
+            self.analyze.result = None;
+            return;
+        }
+
+        let swept_sym = self.analyze.sweep_sym.clone();
+        let base_price = self
+            .store
+            .last_close(&swept_sym)
+            .or_else(|| {
+                all_positions
+                    .iter()
+                    .find(|p| p.sym == swept_sym)
+                    .map(|p| p.entry)
+            });
+
+        let base_price = match base_price {
+            Some(p) => p,
+            None => {
+                self.analyze.error = Some(format!("no data for symbol {}", swept_sym));
+                self.analyze.result = None;
+                return;
+            }
+        };
+
+        let lo = base_price * (1.0 - self.analyze.sweep_pct / 100.0);
+        let hi = base_price * (1.0 + self.analyze.sweep_pct / 100.0);
+        let steps = self.analyze.steps.clamp(2, 201);
+                           // Since PaperBroker has fee_per_side, and whatif_sweep takes fee_pct, 
+                           // we need a reasonable default or derive it. 
+                           // or just 0.0. The prompt says "fee_pct: f64" in signature. 
+        
+        let fee_pct = 0.0; // broker charges a flat per-side fee
+        let legs = ot_core::whatif::whatif_sweep(
+            &all_positions,
+            &swept_sym,
+            lo,
+            hi,
+            steps,
+            fee_pct,
+            self.broker.fee_per_side,
+        );
+        let curve = ot_core::whatif::portfolio_curve(
+            &all_positions,
+            &swept_sym,
+            lo,
+            hi,
+            steps,
+            fee_pct,
+            self.broker.fee_per_side,
+        );
+
+        self.analyze.result = Some(AnalyzeOut {
+            legs,
+            curve,
+            swept_sym,
+            lo,
+            hi,
+        });
+        self.analyze.error = None;
+    }
+
+    pub fn ui_analyze(&mut self, ui: &mut egui::Ui) {
+        ui.heading("Analyze — what-if P&L");
+
+        // Section 1: Broker Positions
+        ui.collapsing("Broker Positions", |ui| {
+            let positions = self.broker.positions();
+            if positions.is_empty() {
+                ui.label("No broker positions.");
+            } else {
+                for p in positions {
+                    ui.label(format!(
+                        "{} {:?} {} @ {:.2}",
+                        p.symbol, p.side, p.qty, p.entry
+                    ));
+                }
+            }
+        });
+
+        // Section 2: Add Hypothetical
+        ui.collapsing("Add Hypothetical Position", |ui| {
+            egui::Grid::new("add_pos_grid").num_columns(2).striped(true).show(ui, |ui| {
+                ui.label("Symbol");
+                egui::ComboBox::from_id_salt("add_sym_cb")
+                    .selected_text(self.analyze.add_sym.clone())
+                    .show_ui(ui, |ui| {
+                        for sym in SYMBOLS {
+                            ui.selectable_value(
+                                &mut self.analyze.add_sym,
+                                sym.to_string(),
+                                sym,
+                            );
+                        }
+                    });
+                ui.end_row();
+
+                ui.label("Side");
+                ui.horizontal(|ui| {
+                    ui.selectable_value(
+                        &mut self.analyze.add_side,
+                        PaperSide::Long,
+                        "Long",
+                    );
+                    ui.selectable_value(
+                        &mut self.analyze.add_side,
+                        PaperSide::Short,
+                        "Short",
+                    );
+                });
+                ui.end_row();
+
+                ui.label("Qty");
+                ui.add(egui::DragValue::new(&mut self.analyze.add_qty).clamp_range(0.0..=1_000_000.0));
+                ui.end_row();
+
+                ui.label("Entry");
+                let mut use_last_close = self.analyze.add_entry.is_none();
+                ui.checkbox(&mut use_last_close, "Use Last Close");
+                if use_last_close {
+                    self.analyze.add_entry = None;
+                } else {
+                    if self.analyze.add_entry.is_none() {
+                        self.analyze.add_entry = self.store.last_close(&self.analyze.add_sym);
+                    }
+                }
+                ui.add_enabled_ui(!use_last_close, |ui| {
+                    ui.add(egui::DragValue::new(
+                        self.analyze.add_entry.get_or_insert(0.0),
+                    ));
+                });
+                ui.end_row();
+
+                ui.label("");
+                ui.horizontal(|ui| {
+                    if ui.button("Add").clicked() {
+                        let entry = match self.analyze.add_entry {
+                            Some(e) => e,
+                            None => self.store.last_close(&self.analyze.add_sym).unwrap_or(0.0),
+                        };
+                        let side = match self.analyze.add_side {
+                            PaperSide::Long => ot_core::engine::Side::Long,
+                            PaperSide::Short => ot_core::engine::Side::Short,
+                        };
+                        self.analyze.positions.push(ot_core::whatif::WhatifPosition {
+                            sym: self.analyze.add_sym.clone(),
+                            side,
+                            qty: self.analyze.add_qty,
+                            entry,
+                            entry_fee: 0.0,
+                        });
+                    }
+                });
+                ui.end_row();
+            });
+
+            // List added hypotheticals with remove
+            if !self.analyze.positions.is_empty() {
+                ui.separator();
+                ui.label("Hypothetical Positions:");
+                let to_remove: Vec<usize> = (0..self.analyze.positions.len())
+                    .filter(|i| {
+                        ui.horizontal(|ui| {
+                            ui.label(format!(
+                                "{} {} {} @ {:.2}",
+                                self.analyze.positions[*i].sym,
+                                if self.analyze.positions[*i].side == ot_core::engine::Side::Long {
+                                    "Long"
+                                } else {
+                                    "Short"
+                                },
+                                self.analyze.positions[*i].qty,
+                                self.analyze.positions[*i].entry
+                            ));
+                            ui.button("✕").clicked()
+                        })
+                        .inner
+                    })
+                    .collect();
+                for i in to_remove.into_iter().rev() {
+                    self.analyze.positions.remove(i);
+                }
+            }
+        });
+
+        // Section 3: Sweep Controls
+        ui.collapsing("Sweep Controls", |ui| {
+            egui::Grid::new("sweep_grid").num_columns(2).striped(true).show(ui, |ui| {
+                ui.label("Symbol");
+                egui::ComboBox::from_id_salt("sweep_sym_cb")
+                    .selected_text(self.analyze.sweep_sym.clone())
+                    .show_ui(ui, |ui| {
+                        for sym in SYMBOLS {
+                            ui.selectable_value(
+                                &mut self.analyze.sweep_sym,
+                                sym.to_string(),
+                                sym,
+                            );
+                        }
+                    });
+                ui.end_row();
+
+                ui.label("Sweep %");
+                ui.add(egui::DragValue::new(&mut self.analyze.sweep_pct).clamp_range(0.0..=100.0));
+                ui.end_row();
+
+                ui.label("Steps");
+                ui.add(egui::DragValue::new(&mut self.analyze.steps).clamp_range(2..=201));
+                ui.end_row();
+
+                ui.label("");
+                ui.horizontal(|ui| {
+                    if ui.button("Compute").clicked() {
+                        self.run_analyze();
+                    }
+                });
+                ui.end_row();
+            });
+        });
+
+        // Section 4: Results
+        if let Some(err) = &self.analyze.error {
+            ui.label(egui::RichText::new(err).color(egui::Color32::RED));
+        }
+
+        if let Some(r) = &self.analyze.result {
+            if !r.curve.is_empty() {
+                ui.label("Portfolio Curve:");
+                let plot = egui_plot::Plot::new("analyze_curve")
+                    .width(ui.available_width())
+                    .height(200.0);
+                plot.show(ui, |plot_ui| {
+                    let points: Vec<[f64; 2]> = r
+                        .curve
+                        .iter()
+                        .enumerate()
+                        .map(|(i, &v)| [i as f64, v])
+                        .collect();
+                    plot_ui.line(egui_plot::Line::new("analyze".to_string(), egui_plot::PlotPoints::from(points)));
+                });
+            }
+
+            ui.label("Sweep Legs:");
+            egui::Grid::new("legs_grid")
+                .num_columns(3)
+                .striped(true)
+                .show(ui, |ui| {
+                    ui.strong("Symbol");
+                    ui.strong("Price");
+                    ui.strong("P&L");
+                    ui.end_row();
+                    for leg in &r.legs {
+                        ui.label(&leg.sym);
+                        ui.label(format!("{:.2}", leg.price));
+                        let color = if leg.pnl < 0.0 {
+                            egui::Color32::RED
+                        } else {
+                            egui::Color32::GREEN
+                        };
+                        ui.label(
+                            egui::RichText::new(format!("{:.2}", leg.pnl)).color(color),
+                        );
+                        ui.end_row();
+                    }
+                });
+        }
     }
 }
