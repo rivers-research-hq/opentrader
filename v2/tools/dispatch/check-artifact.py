@@ -13,6 +13,33 @@ rc: 0 = clean, 1 = findings, 2 = usage error.
 """
 import json, re, sys, pathlib
 
+def extract_content(artifact) -> str:
+    """Pull the model's text out of any dispatch-artifact shape.
+
+    Supported: {"content": "..."} (normalized) and the raw OpenAI-shaped
+    response {"choices": [{"message": {"content": ...}}]} (what the dispatch
+    scripts actually save). Returns "" when nothing is extractable — the
+    caller treats that as a refusal, never as a pass.
+    """
+    if isinstance(artifact, str):
+        return artifact
+    if not isinstance(artifact, dict):
+        return ""
+    if isinstance(artifact.get("content"), str) and artifact["content"].strip():
+        return artifact["content"]
+    choices = artifact.get("choices")
+    if isinstance(choices, list) and choices:
+        msg = choices[0].get("message") if isinstance(choices[0], dict) else None
+        if isinstance(msg, dict):
+            parts = []
+            if isinstance(msg.get("content"), str):
+                parts.append(msg["content"])
+            if isinstance(msg.get("reasoning_content"), str):
+                parts.append(msg["reasoning_content"])
+            return "\n".join(parts)
+    return ""
+
+
 def main() -> int:
     if len(sys.argv) < 3:
         print(__doc__); return 2
@@ -22,8 +49,15 @@ def main() -> int:
     if "--deps" in sys.argv:
         # normalize crate names: ot-core == ot_core on the `use` side
         allowed_deps = {d.replace("-", "_") for d in sys.argv[sys.argv.index("--deps") + 1].split()}
-    content = artifact.get("content") or ""
+    content = extract_content(artifact)
     findings = []
+    if not content.strip():
+        # FAIL CLOSED. An unreadable artifact must never report "clean": the
+        # first version of this gate read only `artifact["content"]`, so every
+        # raw API dump (choices[0].message.content) was reported as passing
+        # without being read at all — a fail-open gate (the #320 class).
+        print("artifact UNREADABLE: no extractable content — refusing to pass")
+        return 1
 
     # 1. dependency scan: any `use <crate>` / `extern crate` outside the allowlist
     std_ok = {"std", "core", "alloc", "crate", "self", "super"}
@@ -32,6 +66,38 @@ def main() -> int:
         if krate in std_ok or krate in allowed_deps:
             continue
         findings.append(f"out-of-scope crate used: `{krate}` (allowed: {sorted(allowed_deps) or 'std only'})")
+
+    # 1b. inline path expressions: `nix::sys::...` with no `use` line is how the
+    # real out-of-scope-dep incident slipped through (only `use` was scanned).
+    KNOWN_PATH_ROOTS = std_ok | allowed_deps | {
+        "String", "Vec", "Option", "Result", "Some", "None", "Ok", "Err", "Path", "PathBuf",
+        "File", "OpenOptions", "fs", "io", "cmp", "collections", "fmt", "time", "process",
+        "thread", "sync", "os", "env", "hash", "convert", "iter", "str", "mem", "borrow",
+        "marker", "num", "slice", "vec", "boxed", "cell", "rc", "ffi", "panic", "error",
+    }
+    # noise words that appear before `::` but are never crates (methods, locals,
+    # mod-ish fragments): `path::`, `parse::` etc. came from expressions, not imports
+    NOISE = {"path", "parse", "kind", "from", "into", "new", "default", "index", "get", "to",
+             "as", "is", "eq", "cmp", "add", "sub", "mul", "div", "iter", "map", "filter"}
+    for m in re.finditer(r"\b([a-z_][a-z0-9_]*)::([A-Za-z_][A-Za-z0-9_]*)", content):
+        root = m.group(1)
+        if root in KNOWN_PATH_ROOTS or root in NOISE:
+            continue
+        findings.append(f"out-of-scope crate path: `{root}::` (allowed: {sorted(allowed_deps) or 'std only'})")
+
+    # 1c. internal `crate::X::` paths: X must be a real module of the crate.
+    # The `crate::core::bar::Bar` defect slipped through because `crate` is
+    # legitimately in std_ok — the wrong part was the module name after it
+    # (ot-script depends on ot-core as an external crate: ot_core::bar::Bar).
+    # Pass --modules "a b c" (the crate's own top-level modules) to enable it.
+    if "--modules" in sys.argv:
+        modules = set(sys.argv[sys.argv.index("--modules") + 1].split())
+        for m in re.finditer(r"\bcrate::([a-z_][a-z0-9_]*)", content):
+            if m.group(1) not in modules:
+                findings.append(
+                    f"unknown internal module: `crate::{m.group(1)}` "
+                    f"(crate modules: {sorted(modules)})"
+                )
 
     # 2. output contract: block markers vs full-file emission
     wants_blocks = "EMIT: blocks" in card or "=== BLOCK" in card
