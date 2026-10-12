@@ -58,13 +58,13 @@ pub struct BacktestResult {
 }
 
 /// Open position book entry.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Side {
     Long,
     Short,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Position {
     pub sym: String,
     pub side: Side,
@@ -372,34 +372,58 @@ pub fn evaluate_engine_exit(
     None
 }
 
-/// Deterministic replay: the backtest/live-parity driver.
-pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> BacktestResult {
+/// Engine state captured mid-replay — serializable, restorable.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Checkpoint {
+    pub bar_index: usize,
+    pub cash: f64,
+    pub fees_total: f64,
+    pub positions: Vec<Position>,
+}
+
+/// Internal replay state — the mutable engine book.
+struct ReplayState {
+    cash: f64,
+    fees_total: f64,
+    positions: Vec<Position>,
+    bar_index: usize,
+}
+
+/// The shared per-bar replay inner loop — the ONLY implementation.
+/// Processes bars [state.bar_index, end) and returns the results plus the
+/// final state. When `checkpoint_at` is Some(bar), captures the engine
+/// state before processing that bar.
+fn replay_inner(
+    universe: &Universe,
+    cfg: &Config,
+    handler: &mut dyn Handler,
+    mut state: ReplayState,
+    end: usize,
+    checkpoint_at: Option<usize>,
+) -> (BacktestResult, ReplayState, Option<Checkpoint>) {
     let master = &universe.master;
-
-    let start = cfg
-        .mom_lb
-        .max(cfg.rev_lb)
-        .max(cfg.rsi_period)
-        .max(cfg.breakout_lb)
-        .max(cfg.z_period) as usize;
-    if master.len() <= start + 6 {
-        return BacktestResult {
-            metrics: metrics(&[], &[], 0.0),
-            trades: vec![],
-            equity_ts: vec![],
-            equity: vec![],
-        };
-    }
-    let start = start + 1; // first signal bar fully warmed up
-
-    let mut cash = cfg.start_equity;
-    let mut positions: Vec<Position> = Vec::new();
     let mut trades: Vec<Trade> = Vec::new();
-    let mut fees_total = 0.0;
     let mut equity_ts: Vec<i64> = Vec::new();
     let mut equity: Vec<f64> = Vec::new();
+    let mut checkpoint: Option<Checkpoint> = None;
 
-    for t in start..master.len() {
+    for t in state.bar_index..end {
+        if t == 0 {
+            continue; // need t-1 for the signal view
+        }
+
+        // capture the checkpoint BEFORE processing this bar
+        if let Some(cp_at) = checkpoint_at {
+            if t == cp_at {
+                checkpoint = Some(Checkpoint {
+                    bar_index: t,
+                    cash: state.cash,
+                    fees_total: state.fees_total,
+                    positions: state.positions.clone(),
+                });
+            }
+        }
+
         let idx = master[t];
         let view = DecisionView {
             universe,
@@ -407,9 +431,8 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             fill_t: t,
         };
 
-        // ── phase 1: handler signal exits (view = bars ≤ t-1; V1 computes
-        // scores once, before the exit loop) ────────────────────────────
-        let open_positions: Vec<Position> = positions.clone();
+        // ── phase 1: handler signal exits ───────────────────────────────
+        let open_positions: Vec<Position> = state.positions.clone();
         let sig_exits: std::collections::BTreeMap<String, ExitReason> = handler
             .signal_exits(&view, &open_positions)
             .into_iter()
@@ -417,21 +440,18 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
 
         // ── exits (V1 ladder, in insertion order, interleaved) ──────────
         let mut i = 0;
-        while i < positions.len() {
-            positions[i].bars += 1;
-            let series = universe.get(&positions[i].sym).expect("held symbol exists");
-            let close_t = view.fill_close(&positions[i].sym);
-            let mut fired = evaluate_engine_exit(cfg, &mut positions[i], series, idx, close_t);
+        while i < state.positions.len() {
+            state.positions[i].bars += 1;
+            let series = universe.get(&state.positions[i].sym).expect("held symbol exists");
+            let close_t = view.fill_close(&state.positions[i].sym);
+            let mut fired = evaluate_engine_exit(cfg, &mut state.positions[i], series, idx, close_t);
             if fired.is_none() {
-                // Handler half, consulted per-symbol in the same loop
-                // iteration (V1's in-loop signal/rsi checks).
-                if let Some(reason) = sig_exits.get(&positions[i].sym) {
-                    // V1: exit_price = close_t.get(s, entry)
-                    fired = Some((close_t.unwrap_or(positions[i].entry), *reason));
+                if let Some(reason) = sig_exits.get(&state.positions[i].sym) {
+                    fired = Some((close_t.unwrap_or(state.positions[i].entry), *reason));
                 }
             }
             if let Some((exit_price, reason)) = fired {
-                let p = &positions[i];
+                let p = &state.positions[i];
                 let fee = fee_amt(cfg, p.qty, exit_price);
                 let (cash_flow, pnl) = match p.side {
                     Side::Long => {
@@ -439,15 +459,13 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                         (proceeds, proceeds - p.cost)
                     }
                     Side::Short => {
-                        // buy back: cash -= qty·exit + fee; the entry added
-                        // qty·entry − entry_fee — realized is exact both legs
                         let buyback = p.qty * exit_price + fee;
                         let pnl = p.qty * (p.entry - exit_price) - p.entry_fee - fee;
                         (-buyback, pnl)
                     }
                 };
-                fees_total += fee;
-                cash += cash_flow;
+                state.fees_total += fee;
+                state.cash += cash_flow;
                 trades.push(Trade {
                     sym: p.sym.clone(),
                     entry: p.entry,
@@ -459,21 +477,21 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                     entry_ts: p.entry_ts,
                     exit_ts: idx,
                 });
-                positions.remove(i);
+                state.positions.remove(i);
             } else {
                 if let Some(c) = close_t {
-                    positions[i].last_close = c;
+                    state.positions[i].last_close = c;
                 }
                 i += 1;
             }
         }
 
         // ── phase 3: handler modifications (stop/target updates; govern
-        // from the NEXT bar — no-lookahead)
+        // from the NEXT bar — no-lookahead) ──────────────────────────────
         {
-            let open_positions: Vec<Position> = positions.clone();
+            let open_positions: Vec<Position> = state.positions.clone();
             for (sym, new_stop, new_target) in handler.modifications(&view, &open_positions) {
-                if let Some(p) = positions.iter_mut().find(|p| p.sym == sym) {
+                if let Some(p) = state.positions.iter_mut().find(|p| p.sym == sym) {
                     if let Some(s) = new_stop {
                         p.stop_loss = Some(s);
                     }
@@ -484,11 +502,10 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             }
         }
 
-        // ── equity mark (after ALL exits): longs mark at qty·close (cash
-        // is net of cost); shorts mark at −qty·close (the entry proceeds
-        // are already in cash — the mark is the buyback liability)
-        let equity_now = cash
-            + positions
+        // ── equity mark ────────────────────────────────────────────────
+        let equity_now = state.cash
+            + state
+                .positions
                 .iter()
                 .map(|p| {
                     let mark = view.fill_close(&p.sym).unwrap_or(p.last_close);
@@ -499,13 +516,13 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                 })
                 .sum::<f64>();
 
-        // ── phase 2: candidates from the same scores, post-exit holdings ─
-        let open_positions: Vec<Position> = positions.clone();
+        // ── phase 2: candidates ─────────────────────────────────────────
+        let open_positions: Vec<Position> = state.positions.clone();
         let d_entries = handler.candidates(&view, &open_positions);
 
-        // ── entries: engine sizing over pre-gated candidates ───────────
+        // ── entries ────────────────────────────────────────────────────
         for c in d_entries {
-            if positions.len() >= cfg.max_positions {
+            if state.positions.len() >= cfg.max_positions {
                 break;
             }
             let Some(close) = view.fill_close(&c.sym) else {
@@ -514,8 +531,6 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if close <= 0.0 {
                 continue;
             }
-            // pending-order fills (limit/stop touch) fill AT the order
-            // price, not the bar close
             let entry_price = c.fill_price_override.unwrap_or(close);
             if entry_price <= 0.0 {
                 continue;
@@ -523,8 +538,6 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             let mut notional = c
                 .notional_override
                 .unwrap_or(cfg.risk_pct * equity_now);
-            #[cfg(feature = "debug_strategy")]
-            eprintln!("entry attempt t={t} sym={} notional={notional} cash={cash} eq={equity_now}", c.sym);
             if cfg.vol_reduce_n > 0 && c.vol_reduce_applies {
                 notional *= cfg.vol_reduce_frac;
             }
@@ -534,18 +547,15 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             if notional < cfg.min_notional {
                 continue;
             }
-            // Exposure cap applies to portfolio-scaled sizing only; an
-            // explicit-size override (the strategy surface: units × price)
-            // is the strategy's own sizing decision — cash still bounds it
-            // below (notional + fee > cash scales down).
             if c.notional_override.is_none() {
-                let exposure = positions
+                let exposure = state
+                    .positions
                     .iter()
                     .map(|p| {
                         let mark = view.fill_close(&p.sym).unwrap_or(p.last_close);
                         p.qty * match p.side {
                             Side::Long => mark,
-                            Side::Short => p.entry * 2.0 - mark, // notional-space symmetric
+                            Side::Short => p.entry * 2.0 - mark,
                         }
                     })
                     .sum::<f64>()
@@ -555,26 +565,22 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
                 }
             }
             let mut fee = fee_amt(cfg, notional / entry_price.max(1e-9), entry_price);
-            if notional + fee > cash {
-                notional = (cash - fee).max(0.0);
+            if notional + fee > state.cash {
+                notional = (state.cash - fee).max(0.0);
                 if notional < cfg.min_notional {
                     continue;
                 }
             }
             let qty = notional / entry_price;
             fee = fee_amt(cfg, qty, entry_price);
-            let (side, cost) = match c.side.unwrap_or(Side::Long) {
-                Side::Long => (Side::Long, qty * entry_price + fee),
-                Side::Short => (Side::Short, qty * entry_price + fee),
-            };
+            let cost = qty * entry_price + fee;
+            let side = c.side.unwrap_or(Side::Long);
             match side {
-                Side::Long => cash -= cost,
-                // short entry RECEIVES proceeds net of the entry fee; the
-                // buyback liability is marked in equity and settled at exit
-                Side::Short => cash += qty * entry_price - fee,
+                Side::Long => state.cash -= cost,
+                Side::Short => state.cash += qty * entry_price - fee,
             }
-            fees_total += fee;
-            positions.push(Position {
+            state.fees_total += fee;
+            state.positions.push(Position {
                 sym: c.sym,
                 side,
                 qty,
@@ -590,18 +596,74 @@ pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> B
             });
         }
 
-        // Equity is recorded AFTER entries (V1 appends at loop end) — but
-        // V1 computes the marked equity BEFORE entries and records that
-        // same value; mirror exactly.
+        state.bar_index = t + 1;
         equity_ts.push(idx);
         equity.push(equity_now);
     }
 
-    let m = metrics(&equity, &trades, fees_total);
-    BacktestResult {
-        metrics: m,
-        trades,
-        equity_ts,
-        equity,
+    state.bar_index = end;
+    let m = metrics(&equity, &trades, state.fees_total);
+    (BacktestResult { metrics: m, trades, equity_ts, equity }, state, checkpoint)
+}
+
+/// First replayed bar = max warm-up lookback + 1 (first signal bar fully
+/// warmed). Public because equity arrays are indexed from this bar —
+/// anything slicing a replay's output stream needs it (checkpoint tails).
+pub fn compute_start(cfg: &Config, master_len: usize) -> usize {
+    let start = cfg
+        .mom_lb
+        .max(cfg.rev_lb)
+        .max(cfg.rsi_period)
+        .max(cfg.breakout_lb)
+        .max(cfg.z_period) as usize;
+    if master_len <= start + 6 {
+        master_len
+    } else {
+        start + 1
     }
+}
+
+/// Deterministic replay: the backtest/live-parity driver.
+pub fn replay(universe: &Universe, cfg: &Config, handler: &mut dyn Handler) -> BacktestResult {
+    let state = ReplayState {
+        cash: cfg.start_equity,
+        fees_total: 0.0,
+        positions: vec![],
+        bar_index: compute_start(cfg, universe.master.len()),
+    };
+    replay_inner(universe, cfg, handler, state, universe.master.len(), None).0
+}
+
+/// Replay with an optional checkpoint capture at bar N.
+pub fn replay_with_checkpoint(
+    universe: &Universe,
+    cfg: &Config,
+    handler: &mut dyn Handler,
+    checkpoint_at: Option<usize>,
+) -> (BacktestResult, Option<Checkpoint>) {
+    let state = ReplayState {
+        cash: cfg.start_equity,
+        fees_total: 0.0,
+        positions: vec![],
+        bar_index: compute_start(cfg, universe.master.len()),
+    };
+    let (result, _, cp) = replay_inner(universe, cfg, handler, state, universe.master.len(), checkpoint_at);
+    (result, cp)
+}
+
+/// Resume from a checkpoint: continue from the checkpoint's bar index
+/// with the checkpoint's state.
+pub fn resume_from_checkpoint(
+    checkpoint: &Checkpoint,
+    universe: &Universe,
+    cfg: &Config,
+    handler: &mut dyn Handler,
+) -> BacktestResult {
+    let state = ReplayState {
+        cash: checkpoint.cash,
+        fees_total: checkpoint.fees_total,
+        positions: checkpoint.positions.clone(),
+        bar_index: checkpoint.bar_index,
+    };
+    replay_inner(universe, cfg, handler, state, universe.master.len(), None).0
 }
