@@ -100,8 +100,19 @@ pub fn interpreter() -> InterpreterBackend {
 pub fn backend_by_name(name: &str) -> Option<Box<dyn ScanBackend>> {
     match name {
         "interpreter" | "interp" => Some(Box::new(interpreter())),
-        // Explicitly return None for known JIT names to prevent silent fallback.
-        "cranelift" | "jit" | "jit-cranelift" => None,
+        // Phase 2: the cranelift backend exists, so resolve it WHEN THE
+        // FEATURE IS ON. With the feature off it is still None — never a
+        // silent fallback to the interpreter, which would fake parity.
+        "cranelift" | "jit" | "jit-cranelift" => {
+            #[cfg(feature = "cranelift")]
+            {
+                Some(Box::new(crate::jit_cranelift::backend()))
+            }
+            #[cfg(not(feature = "cranelift"))]
+            {
+                None
+            }
+        }
         // Unknown names also return None.
         _ => None,
     }

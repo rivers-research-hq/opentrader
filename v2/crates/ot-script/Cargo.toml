@@ -7,8 +7,14 @@ description = "v2script — the series-native DSL interpreter (locked #337, spec
 
 [features]
 debug_strategy = ["ot-core/debug_strategy"]
+cranelift = ["dep:cranelift-jit", "dep:cranelift-module", "dep:cranelift-codegen", "dep:cranelift-frontend", "dep:cranelift-native"]
 
 [dependencies]
 ot-core = { path = "../ot-core" }
 serde = { workspace = true }
 serde_json = { workspace = true }
+cranelift-jit = { version = "0.136", optional = true }
+cranelift-module = { version = "0.136", optional = true }
+cranelift-codegen = { version = "0.136", optional = true }
+cranelift-frontend = { version = "0.136", optional = true }
+cranelift-native = { version = "0.136", optional = true }
