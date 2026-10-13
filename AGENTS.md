@@ -132,9 +132,12 @@ has been costing us model capability ever since.
   Dream-RSI lane's Qwen3.8-27B (`:5810`, `opentrader-dream-serve.service`).
   Model file: `/var/tmp/llama-models/Qwen3.8-27B-UD-Q3_K_XL.gguf` (13.4GB).
 - **RTX 3070 (8GB)** — the always-on compute GPU, via `.venv-cuda`
-  (torch 2.11.0+cu128). It also hosts warden-4b + qwen3-embed (~5.1GB of 8GB):
-  pause those for a big job and RESTORE them after (`systemctl --user
-  stop/start opentrader-llama-gpu1 qwen3-embed`).
+  (torch 2.11.0+cu128). **It is currently free**: the old residents
+  (`opentrader-llama-gpu1`, `qwen3-embed`, warden) are all **masked** and
+  inactive as of 2026-10-13 — `systemctl --user start` on them FAILS (masked
+  units are symlinked to /dev/null). The llama/smart-router models now run on
+  the GRE. So the 3070 needs no pausing before a big job; if a job needs the
+  whole 8GB, just confirm nothing is resident with `gpu-run --list`.
 - **Declare your device — never inherit it.** The real lesson of the 2026-09-13
   incident was a job silently landing on the GRE through the wrong venv, not the
   GRE being forbidden: the default `.venv` torch is a ROCm build whose `cuda`
