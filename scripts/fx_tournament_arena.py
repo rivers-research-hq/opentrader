@@ -51,12 +51,26 @@ def log(msg: str):
 
 
 def _pick_device() -> str:
-    """Run gpu_pick to determine compute target."""
+    """Run gpu_pick for a compute target, but NEVER a device owned by a tenant.
+
+    The gpu_arbiter is the authority: a device with a tenant (gre -> ornith) may not run
+    jobs. fx-arena grabbed the GRE directly and crashed Ornith twice (2026-10-02/03); now
+    it can never pick it.
+    """
     r = subprocess.run([sys.executable, str(GPU_PICK)], capture_output=True, text=True)
     out = r.stdout.strip()
-    if "gre" in out.split(":")[0]:
-        return "gre"
-    return "3070"
+    want = "gre" if "gre" in out.split(":")[0] else "3070"
+    try:
+        sys.path.insert(0, str(PROJECT / "scripts"))
+        import gpu_arbiter
+        tenant = gpu_arbiter.arbiter.tenant(want)
+    except Exception as e:
+        log(f"[arena] gpu_arbiter unavailable ({e})")
+        tenant = "opentrader-ornith.service" if want == "gre" else None
+    if tenant:
+        log(f"[arena] refusing {want}: owned by tenant {tenant}; using 3070 instead")
+        return "3070"
+    return want
 
 
 def _current_incumbent() -> str | None:
