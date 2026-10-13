@@ -214,11 +214,22 @@ fn backend_by_name_resolves_only_implemented_backends() {
     assert!(interp_alias_backend.is_some(), "interp should resolve");
     assert_eq!(interp_alias_backend.unwrap().name(), "interpreter");
 
-    // Should NOT resolve (no silent fallback)
-    assert!(backend_by_name("cranelift").is_none(), "cranelift should not resolve");
-    assert!(backend_by_name("jit").is_none(), "jit should not resolve");
-    assert!(backend_by_name("jit-cranelift").is_none(), "jit-cranelift should not resolve");
-    assert!(backend_by_name("totally-unknown").is_none(), "totally-unknown should not resolve");
+    // The cranelift names resolve ONLY when the feature is on. With the
+    // feature off they must be None — never a silent fallback, which would
+    // fake the parity result. Unknown names are always None.
+    let expected = cfg!(feature = "cranelift");
+    assert_eq!(
+        backend_by_name("cranelift").is_some(),
+        expected,
+        "cranelift resolution must follow the feature"
+    );
+    assert_eq!(backend_by_name("jit").is_some(), expected, "jit must follow the feature");
+    assert_eq!(
+        backend_by_name("jit-cranelift").is_some(),
+        expected,
+        "jit-cranelift must follow the feature"
+    );
+    assert!(backend_by_name("totally-unknown").is_none(), "unknown must never resolve");
 }
 
 /// Test: Scan is deterministic across runs and backends.
