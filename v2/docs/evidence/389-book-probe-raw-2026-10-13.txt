@@ -1,0 +1,7 @@
+base=https://api-fxpractice.oanda.com account=set token=set bucket=1M
+EUR_USD orderBook  HTTP 200  217ms  buckets=6716  keys=['longCountPercent', 'price', 'shortCountPercent'] types=['str']
+EUR_USD positionBook HTTP 200 130ms buckets=596
+USD_JPY orderBook  HTTP 200  206ms  buckets=2439  keys=['longCountPercent', 'price', 'shortCountPercent'] types=['str']
+USD_JPY positionBook HTTP 200 173ms buckets=1229
+cadence: 0/3 polls at 2.0s showed a changed book (EUR_USD/1M)
+orderBook/stream -> HTTP 404 (404 = no streaming depth; polling is the only mechanism)
