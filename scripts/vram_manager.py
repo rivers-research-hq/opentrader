@@ -9,8 +9,9 @@ Writes state via atomic writes (tmp + rename).
 
 Usage:
   python3 scripts/vram_manager.py status              # state file + live VRAM
-  python3 scripts/vram_manager.py reserve <unit> <TTL> --reason <why>
-  python3 scripts/vram_manager.py release <unit>
+  python3 scripts/vram_manager.py models              # model catalog (model → unit)
+  python3 scripts/vram_manager.py reserve <unit|model> <TTL> --reason <why>
+  python3 scripts/vram_manager.py release <unit|model>
   python3 scripts/vram_manager.py set-policy <demand|resident>
   python3 scripts/vram_manager.py reconcile           # state vs systemctl/VRAM
   python3 scripts/vram_manager.py enforce             # idle-unload pass
@@ -84,6 +85,58 @@ MODEL_MAP = {
     "warden-gre": "granite-4.2-8b-Q4_K_M.gguf",
 }
 
+# ── Model catalog: model id/alias → unit key ───────────────────────
+# The catalog is how any front door (gpu-sync, harness, MCP) asks for a model
+# by name instead of hard-coding a port/unit. Resolution also reads each
+# unit's live ``model`` field from vram_state.json, so registering a model is
+# just: add the unit + its ``model`` string. Static aliases below backfill
+# friendly names. This replaces the retired llama-swap swapper's job while
+# staying inside the one arbitration path (slot lock + gaming + queue).
+MODEL_ALIASES = {
+    "warden-4b": "warden-4b",
+    "qwen3.8-4b": "warden-4b",
+    "qwen3-embed": "qwen3-embed",
+    "qwen3-embedding-0.6b": "qwen3-embed",
+    "dream-serve": "dream-serve",
+    "qwen3.8-27b": "dream-serve",
+    "warden-gre": "warden-gre",
+    "granite-4.2-8b": "warden-gre",
+    "moe-ornith": "moe-ornith",
+    "ornith-1.5-35b-a3b-ud": "moe-ornith",
+}
+
+
+def _norm_model(name: str) -> str:
+    """Normalize a model id/alias: strip path, quantization suffix, ``:tag``."""
+    n = (name or "").strip().lower()
+    n = n.rsplit("/", 1)[-1]
+    n = n.split(":", 1)[0]
+    if n.endswith(".gguf"):
+        n = n[:-5]
+    return n
+
+
+def model_catalog(state: dict[str, Any] | None = None) -> dict[str, str]:
+    """Normalized model id/alias → unit key (static aliases + live units)."""
+    cat: dict[str, str] = {}
+    for alias, unit in MODEL_ALIASES.items():
+        cat[_norm_model(alias)] = unit
+    state = state if state is not None else _read_state()
+    for unit, info in (state.get("units") or {}).items():
+        cat[_norm_model(unit)] = unit
+        model = info.get("model") or ""
+        if model:
+            cat[_norm_model(model)] = unit
+    return cat
+
+
+def resolve_model(name: str, state: dict[str, Any] | None = None) -> str | None:
+    """Return the unit key for a model id/alias/unit name, or None."""
+    norm = _norm_model(name)
+    if not norm:
+        return None
+    return model_catalog(state).get(norm)
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -152,14 +205,29 @@ def _is_gaming() -> bool:
                 return True
         except (json.JSONDecodeError, OSError):
             pass
-    # Check arbiter mode file
-    arbiter_mode = GAMING_DIR.parent.parent / "ai" / "state" / "game-arbiter" / "mode"
-    if arbiter_mode.exists():
+    # Check arbiter mode file. The arbiter lives in the ops home ($HOME/ai), NOT
+    # in this repo: the previous repo-relative derivation looked for
+    # <repo>/ai/state/game-arbiter/mode, which never exists, so this signal was
+    # silently dead (found 2026-09-28 — the arbiter was correctly blind to an AMD
+    # game and this check could not have caught it either).
+    for arbiter_mode in (Path.home() / "ai" / "state" / "game-arbiter" / "mode",
+                         GAMING_DIR.parent.parent / "ai" / "state" / "game-arbiter" / "mode"):
         try:
-            mode = arbiter_mode.read_text().strip()
-            if mode == "gaming":
+            if arbiter_mode.read_text().strip() == "gaming":
                 return True
         except OSError:
+            continue
+    # Ask the shared detector directly, so gaming supremacy holds even if the
+    # arbiter is down or has not flipped its mode file yet. Exit 0 = gaming.
+    if GPU_PICK.exists():
+        try:
+            r = subprocess.run(
+                [sys.executable, str(GPU_PICK), "--gaming-check"],
+                capture_output=True, text=True, timeout=15,
+            )
+            if r.returncode == 0:
+                return True
+        except Exception:
             pass
     return False
 
@@ -222,6 +290,29 @@ def _release_flock(fd: int) -> None:
         pass
 
 
+def _device_slot_held(device: str) -> bool:
+    """True if a GPU job currently holds this device's gpu_pick slot flock.
+
+    The slot lock is the single source of truth for device ownership. A job
+    holding it has *deliberately* paused the resident models to free VRAM, so
+    loading them back mid-job causes CUDA OOM — on 2026-09-28 `vram-prewarm`
+    (same 15-min cadence as the GPU worker) did exactly that to
+    `fx-expert-g679`, 36 s into its run. A flock is used rather than a marker
+    file because the OS releases it when the holder dies, so it cannot go
+    stale and permanently wedge the queue.
+
+    See docs/agents/gpu-stack-inventory-2026-09-28.md §4b.
+    """
+    lock = REPO / "data" / "gpu" / (
+        "slot_gre.lock" if str(device).lower() == "gre" else "slot_3070.lock"
+    )
+    fd = _acquire_flock(lock)
+    if fd is None:
+        return True
+    _release_flock(fd)
+    return False
+
+
 def status() -> dict[str, Any]:
     """Report current state: state file + live VRAM + systemd."""
     state = _read_state()
@@ -254,6 +345,27 @@ def status() -> dict[str, Any]:
         "last_reconciled": state.get("last_reconciled", "never"),
         "checked_at": now,
     }
+
+
+def models() -> dict[str, Any]:
+    """List the model catalog: units, their model aliases, device, and state."""
+    state = _read_state()
+    cat = model_catalog(state)
+    by_unit: dict[str, list[str]] = {}
+    for alias, unit in cat.items():
+        by_unit.setdefault(unit, []).append(alias)
+    entries = []
+    for unit, aliases in sorted(by_unit.items()):
+        info = state["units"].get(unit, {})
+        entries.append({
+            "unit": unit,
+            "models": sorted(set(aliases)),
+            "device": info.get("device"),
+            "port": info.get("port"),
+            "state": info.get("state"),
+            "service": info.get("owner"),
+        })
+    return {"count": len(entries), "units": entries}
 
 
 def _get_vram() -> dict[str, Any]:
@@ -312,11 +424,68 @@ def _vram_free_mb(device: str) -> float:
 
 
 def reserve(unit: str, ttl_seconds: int, reason: str = "") -> dict[str, Any]:
-    """Reserve a unit — keep loaded for TTL seconds."""
+    """Reserve a unit — keep loaded for TTL seconds.
+
+    ``unit`` accepts a unit key, a model id, or an alias (see ``model_catalog``);
+    e.g. ``reserve ornith-1.5-35b-a3b-ud 600``.
+    """
     state = _read_state()
     now = _now()
     if unit not in state["units"]:
-        return {"ok": False, "error": f"unknown unit: {unit}"}
+        resolved = resolve_model(unit, state)
+        if resolved:
+            unit = resolved
+        else:
+            return {
+                "ok": False,
+                "error": f"unknown unit/model: {unit}",
+                "units": sorted(state["units"].keys()),
+                "models": sorted(model_catalog(state).keys()),
+            }
+
+    # GAMING SUPREMACY (2026-09-28): never load a resident into a live gaming
+    # session — the GRE must be free while the human plays. Recorded as deferred
+    # so the intent survives and the first enforce pass after the session
+    # honours it (same shape as the #299 slot deferral below). Observed failure:
+    # vram-prewarm-dream's Persistent catch-up ran at boot 19:11:46 mid-game and
+    # started a 12.8 GB Qwen3.8-27B onto the GRE; the box ran out of RAM and the
+    # kernel OOM-killed the unit at 19:17:55, and the game's frames went with it.
+    if _is_gaming():
+        state["reservations"][unit] = {
+            "until": (datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)).isoformat(),
+            "reason": reason,
+            "reserved_at": now,
+            "ttl_seconds": ttl_seconds,
+            "deferred": True,
+            "deferred_reason": "gaming session active — residents must stay unloaded",
+        }
+        _write_state(state)
+        return {"ok": False, "deferred": True,
+                "error": f"gaming session active — {unit} deferred until it ends",
+                "reservation": state["reservations"][unit]}
+
+    # A GPU job owning the device slot has paused the residents on purpose;
+    # loading them back mid-job starves it of VRAM. Checked before any state is
+    # written, so a refusal has no side effects.
+    _dev = state["units"][unit].get("device", "3070")
+    if _device_slot_held(_dev):
+        # Do NOT drop the request. A job owns the device now, but the caller's
+        # intent is still valid — record it as deferred so the next enforce pass
+        # honours it once the slot frees. Before this, the request vanished and
+        # back-to-back jobs could starve a unit indefinitely (#299; observed
+        # 2026-09-28 when warden-4b stayed down through two refused prewarms).
+        state["reservations"][unit] = {
+            "until": (datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)).isoformat(),
+            "reason": reason,
+            "reserved_at": now,
+            "ttl_seconds": ttl_seconds,
+            "deferred": True,
+            "deferred_reason": f"device {_dev} slot held by a GPU job",
+        }
+        _write_state(state)
+        return {"ok": False, "deferred": True,
+                "error": f"device {_dev} slot held by a GPU job — {unit} deferred, will retry",
+                "reservation": state["reservations"][unit]}
 
     state["reservations"][unit] = {
         "until": (datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)).isoformat(),
@@ -350,6 +519,10 @@ def reserve(unit: str, ttl_seconds: int, reason: str = "") -> dict[str, Any]:
 def release(unit: str) -> dict[str, Any]:
     """Release a reservation — may trigger unload if idle."""
     state = _read_state()
+    if unit not in state["reservations"]:
+        resolved = resolve_model(unit, state)
+        if resolved:
+            unit = resolved
     if unit not in state["reservations"]:
         return {"ok": False, "error": f"no reservation for {unit}"}
     del state["reservations"][unit]
@@ -406,6 +579,31 @@ def reconcile() -> dict[str, Any]:
     return {"ok": True, "drift": drift, "reconciled_at": now}
 
 
+def _promote_deferred(state: dict, gaming: bool = False) -> list[dict]:
+    """Reservations refused earlier that can now be honoured (#299).
+
+    The slot guard correctly refuses to load a unit while a GPU job owns the
+    device, but a refused request used to disappear — so with back-to-back jobs
+    `vram-prewarm` could lose every cycle and warden-4b stayed down until it was
+    restored by hand. Retried here, on the first pass after the slot frees.
+
+    `gaming=True` holds every deferred retry back: a reservation deferred by
+    gaming supremacy must not be reloaded until the session ends (2026-09-28).
+    """
+    ready = []
+    for unit, res in (state.get("reservations") or {}).items():
+        if not res.get("deferred"):
+            continue
+        dev = (state["units"].get(unit) or {}).get("device", "3070")
+        if _device_slot_held(dev):
+            continue  # still owned by a job; leave it deferred
+        if gaming:
+            continue  # gaming supremacy — retry once the session ends
+        ready.append({"unit": unit, "ttl": res.get("ttl_seconds", 300),
+                      "reason": res.get("reason", "deferred retry")})
+    return ready
+
+
 def enforce() -> dict[str, Any]:
     """Idle-unload pass: unload units with no demand for >10 min.
     Exceptions: while gaming (arbiter), active reservations, active training jobs.
@@ -415,6 +613,20 @@ def enforce() -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     gaming = _is_gaming()
     actions = []
+
+    # Honour reservations refused while a job owned the device (#299). Done first so a
+    # unit freed between passes comes back promptly rather than waiting for prewarm.
+    deferred_ready = _promote_deferred(state, gaming)
+    for d in deferred_ready:
+        r = reserve(d["unit"], d["ttl"], f"deferred retry: {d['reason']}")
+        actions.append({"unit": d["unit"],
+                        "action": "deferred-retry-ok" if r.get("ok") else "deferred-retry-held",
+                        "reason": r.get("error", "")})
+    if deferred_ready:
+        # reserve() re-reads and rewrites state; refresh before the unload pass so it
+        # does not act on a stale view of which units are loaded.
+        state = _read_state()
+        now = datetime.now(timezone.utc)
 
     def _serving_activity(info: dict) -> tuple[bool, int]:
         """(in_flight, tokens_delta) — live serving signals for a llama.cpp
@@ -536,6 +748,7 @@ def enforce() -> dict[str, Any]:
             actions.append({"unit": unit, "action": "failed", "service": svc, "reason": "stop_failed"})
 
     state["last_reconciled"] = _now()
+    state["gaming"] = gaming  # was only ever set at init — keep the file truthful
     _write_state(state)
 
     return {"ok": True, "actions": actions, "gaming": gaming}
@@ -543,7 +756,7 @@ def enforce() -> dict[str, Any]:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print("Usage: vram_manager.py <status|reserve|release|set-policy|reconcile|enforce>")
+        print("Usage: vram_manager.py <status|models|reserve|release|set-policy|reconcile|enforce>")
         return 1
 
     cmd = sys.argv[1]
@@ -564,6 +777,9 @@ def main() -> int:
             reason = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else ""
         result = reserve(unit, ttl, reason)
         print(json.dumps(result, indent=1))
+
+    elif cmd == "models":
+        print(json.dumps(models(), indent=1))
 
     elif cmd == "release":
         if len(sys.argv) < 3:
